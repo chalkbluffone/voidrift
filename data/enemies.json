@@ -1,0 +1,174 @@
+{
+  "$schema": "voidrift-enemies-schema",
+  "_comment": "Enemy definitions. Spawn weights determine frequency in waves.",
+  
+  "drone": {
+    "id": "drone",
+    "name": "Drone",
+    "description": "Basic enemy that chases the player",
+    "scene": "res://scenes/enemies/drone.tscn",
+    "base_stats": {
+      "hp": 10,
+      "damage": 5,
+      "speed": 100,
+      "xp_value": 1,
+      "credits_value": 1
+    },
+    "behavior": "chase",
+    "spawn_weight": 100,
+    "min_difficulty": 0,
+    "tags": ["basic"]
+  },
+  
+  "swarmer": {
+    "id": "swarmer",
+    "name": "Swarmer",
+    "description": "Fast but fragile enemy that swarms in groups",
+    "scene": "res://scenes/enemies/swarmer.tscn",
+    "base_stats": {
+      "hp": 5,
+      "damage": 3,
+      "speed": 150,
+      "xp_value": 1,
+      "credits_value": 0
+    },
+    "behavior": "chase",
+    "spawn_weight": 80,
+    "spawn_group": {
+      "min": 3,
+      "max": 6
+    },
+    "min_difficulty": 0,
+    "tags": ["swarm", "fast"]
+  },
+  
+  "gunship": {
+    "id": "gunship",
+    "name": "Gunship",
+    "description": "Ranged enemy that shoots at the player",
+    "scene": "res://scenes/enemies/gunship.tscn",
+    "base_stats": {
+      "hp": 25,
+      "damage": 8,
+      "speed": 60,
+      "xp_value": 3,
+      "credits_value": 2,
+      "attack_range": 300,
+      "attack_speed": 1.0
+    },
+    "behavior": "ranged",
+    "spawn_weight": 40,
+    "min_difficulty": 5,
+    "tags": ["ranged"]
+  },
+  
+  "tank": {
+    "id": "tank",
+    "name": "Heavy Tank",
+    "description": "Slow but durable enemy with high damage",
+    "scene": "res://scenes/enemies/tank.tscn",
+    "base_stats": {
+      "hp": 80,
+      "damage": 15,
+      "speed": 40,
+      "xp_value": 5,
+      "credits_value": 3,
+      "armor": 10
+    },
+    "behavior": "chase",
+    "spawn_weight": 25,
+    "min_difficulty": 10,
+    "tags": ["heavy", "armored"]
+  },
+  
+  "bomber": {
+    "id": "bomber",
+    "name": "Bomber",
+    "description": "Explodes on contact, dealing area damage",
+    "scene": "res://scenes/enemies/bomber.tscn",
+    "base_stats": {
+      "hp": 15,
+      "damage": 25,
+      "speed": 120,
+      "xp_value": 2,
+      "credits_value": 2,
+      "explosion_radius": 50
+    },
+    "behavior": "suicide",
+    "spawn_weight": 30,
+    "min_difficulty": 8,
+    "tags": ["explosive", "suicide"]
+  },
+  
+  "elite_drone": {
+    "id": "elite_drone",
+    "name": "Elite Drone",
+    "description": "Stronger version of the basic drone",
+    "scene": "res://scenes/enemies/elite_drone.tscn",
+    "base_stats": {
+      "hp": 50,
+      "damage": 12,
+      "speed": 110,
+      "xp_value": 8,
+      "credits_value": 5
+    },
+    "behavior": "chase",
+    "spawn_weight": 15,
+    "min_difficulty": 15,
+    "is_elite": true,
+    "tags": ["elite"]
+  },
+  
+  "miniboss_sentinel": {
+    "id": "miniboss_sentinel",
+    "name": "Sentinel",
+    "description": "Powerful guardian that spawns mid-run",
+    "scene": "res://scenes/enemies/miniboss_sentinel.tscn",
+    "base_stats": {
+      "hp": 500,
+      "damage": 20,
+      "speed": 70,
+      "xp_value": 50,
+      "credits_value": 25,
+      "armor": 5
+    },
+    "behavior": "miniboss",
+    "spawn_weight": 0,
+    "is_miniboss": true,
+    "spawn_times": [780, 540, 180],
+    "tags": ["miniboss"]
+  },
+  
+  "boss_dreadnought": {
+    "id": "boss_dreadnought",
+    "name": "Dreadnought",
+    "description": "Final boss of the sector",
+    "scene": "res://scenes/enemies/boss_dreadnought.tscn",
+    "base_stats": {
+      "hp": 2000,
+      "damage": 30,
+      "speed": 50,
+      "xp_value": 200,
+      "credits_value": 100,
+      "armor": 15
+    },
+    "behavior": "boss",
+    "spawn_weight": 0,
+    "is_boss": true,
+    "phases": [
+      {
+        "hp_threshold": 1.0,
+        "attack_pattern": "basic"
+      },
+      {
+        "hp_threshold": 0.5,
+        "attack_pattern": "enraged"
+      },
+      {
+        "hp_threshold": 0.25,
+        "attack_pattern": "desperate"
+      }
+    ],
+    "tags": ["boss", "final"]
+  }
+}

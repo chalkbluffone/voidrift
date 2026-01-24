@@ -1,0 +1,81 @@
+[gd_scene load_steps=11 format=3 uid="uid://bvjgoos8oxons"]
+
+[ext_resource type="Script" uid="uid://cev0tcmrresu0" path="res://scripts/systems/world.gd" id="1_71j4m"]
+[ext_resource type="PackedScene" uid="uid://b5txwryijy5id" path="res://scenes/gameplay/ship.tscn" id="1_rwgxs"]
+[ext_resource type="Texture2D" uid="uid://bfbdw3w7mpnbq" path="res://assets/backgrounds/Green Nebula/Green_Nebula_05-1024x1024.png" id="2_4mrxx"]
+[ext_resource type="Script" uid="uid://cveoc5hgemnu4" path="res://scripts/systems/obstacle_manager.gd" id="2_4wyf3"]
+[ext_resource type="Material" uid="uid://bc1yjbx4pki81" path="res://materials/stars_near.tres" id="2_i7141"]
+[ext_resource type="Material" uid="uid://byvccfmo8fywt" path="res://materials/stars_far.tres" id="2_qfnet"]
+[ext_resource type="PackedScene" uid="uid://c4eccvhn11enc" path="res://scenes/gameplay/obstacles/minable_asteroid.tscn" id="3_4wyf3"]
+[ext_resource type="Script" path="res://scripts/systems/enemy_spawner.gd" id="8_spawner"]
+[ext_resource type="PackedScene" uid="uid://dhud0000000001" path="res://scenes/ui/hud.tscn" id="9_hud"]
+[ext_resource type="PackedScene" uid="uid://dlevelup000001" path="res://scenes/ui/level_up.tscn" id="10_levelup"]
+
+[node name="World" type="Node2D"]
+script = ExtResource("1_71j4m")
+stars_far_rect_path = NodePath("Starfield/StarsFar/StarsFarRect")
+stars_near_rect_path = NodePath("Starfield/StarsNear/StarsNearRect")
+
+[node name="Starfield" type="Node2D" parent="."]
+z_index = -100
+
+[node name="Nebula" type="Parallax2D" parent="Starfield"]
+scroll_scale = Vector2(0.05, 0.05)
+repeat_size = Vector2(1024, 1024)
+
+[node name="NebulaSprite" type="Sprite2D" parent="Starfield/Nebula"]
+texture_repeat = 2
+texture = ExtResource("2_4mrxx")
+region_enabled = true
+region_rect = Rect2(0, 0, 8192, 8192)
+
+[node name="StarsFar" type="Parallax2D" parent="Starfield"]
+scroll_scale = Vector2(0.12, 0.12)
+repeat_size = Vector2(4096, 4096)
+autoscroll = Vector2(1, 0.5)
+repeat_times = 3
+
+[node name="StarsFarRect" type="ColorRect" parent="Starfield/StarsFar"]
+material = ExtResource("2_qfnet")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 4096.0
+offset_bottom = 4096.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+
+[node name="StarsNear" type="Parallax2D" parent="Starfield"]
+scroll_scale = Vector2(0.35, 0.35)
+repeat_size = Vector2(4096, 4096)
+autoscroll = Vector2(1, 0.5)
+repeat_times = 3
+
+[node name="StarsNearRect" type="ColorRect" parent="Starfield/StarsNear"]
+material = ExtResource("2_i7141")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 4096.0
+offset_bottom = 4096.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+
+[node name="Ship" parent="." instance=ExtResource("1_rwgxs")]
+
+[node name="Asteroids" type="Node2D" parent="."]
+
+[node name="ObstacleManager" type="Node" parent="."]
+script = ExtResource("2_4wyf3")
+asteroid_scene = ExtResource("3_4wyf3")
+ship_path = NodePath("../Ship")
+asteroid_container_path = NodePath("../Asteroids")
+
+[node name="EnemySpawner" type="Node2D" parent="."]
+script = ExtResource("8_spawner")
+
+[node name="HUD" parent="." instance=ExtResource("9_hud")]
+
+[node name="LevelUp" parent="." instance=ExtResource("10_levelup")]

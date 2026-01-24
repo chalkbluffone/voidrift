@@ -1,0 +1,809 @@
+# Voidrift - Copilot Instructions
+
+## Game Overview
+
+Voidrift is a **top-down 2D sci-fi roguelike survival game** inspired by Megabonk. Players pilot a ship through space, auto-attacking waves of enemies while collecting XP, leveling up, and choosing upgrades during timed survival runs.
+
+**Genre**: Action Roguelike / Bullet Survivor  
+**Engine**: Godot 4.5  
+**Platform**: Steam (Windows primary, potential Linux/Steam Deck)
+
+---
+
+## Core Mechanics
+
+### Movement & Controls
+
+- **Twin-stick controls**: Left stick/WASD moves ship (ship faces movement direction)
+- **Camera orbit**: Right stick/mouse horizontal rotates camera around ship
+- **Ship always at screen center**, world rotates around player's view
+
+### Combat
+
+- **Auto-attack**: Weapons fire automatically at nearby enemies
+- **No manual aiming**: Focus is on positioning and build choices
+- **Multiple weapons**: Can equip/upgrade multiple weapons simultaneously
+
+### Phase Shift (Dash Ability)
+
+Replaces Megabonk's jump mechanic. Ship briefly phases into another dimension:
+
+| Aspect          | Design                                                                                          |
+| --------------- | ----------------------------------------------------------------------------------------------- |
+| **Visual**      | Ship becomes translucent/ghostly with particle trail                                            |
+| **Mechanic**    | Short burst in movement direction, ~0.3s i-frames, passes through enemies AND obstacles         |
+| **Resource**    | Phase Energy bar (3-4 charges, recharges over time)                                             |
+| **Upgrades**    | Ship upgrades can modify: charge count, recharge rate, phase duration, Phase Damage, Phase Pull |
+| **Risk/Reward** | Phasing into obstacle when energy depletes = briefly stuck, taking damage                       |
+
+**Character variants** may have different Phase Shift behaviors (Blink, Afterburner, Gravity Sling, etc.)
+
+### Progression (In-Run)
+
+- **XP Collection**: Enemies drop XP shards, collect to fill XP bar
+- **Level Up**: Choose 1 of 3 random upgrades (weapons or ship upgrades)
+- **Rarity System**: Common → Uncommon → Rare → Epic → Legendary
+- **Refresh/Skip/Banish**: Reroll options, skip level, permanently remove from pool
+
+### Run Structure
+
+- **Timed survival**: Default 12 minutes per run
+- **Minibosses**: Spawn at intervals (e.g., 13 min left, 9 min left, 3 min left)
+- **Final Boss**: Player must activate beacon to spawn
+- **Final Swarm**: If timer expires without defeating final boss, endless escalating enemies
+
+---
+
+## Sci-Fi Theme Mapping (from Megabonk)
+
+| Megabonk       | Voidrift                   | Description                                     |
+| -------------- | -------------------------- | ----------------------------------------------- |
+| Tomes          | Ship Upgrades / Modules    | Passive stat bonuses (max level 99)             |
+| Charge Shrines | Space Gas Stations         | Stand in zone to charge, receive stat bonus     |
+| Shady Guy      | Space Vendor / Trader Ship | Purchase 1 of 3 items for Credits               |
+| Chests         | Cargo Pods                 | Found around map, contain items                 |
+| Vases/Pots     | Minable Asteroids          | Press button to mine, drops Credits/XP/Stardust |
+| Gold (in-run)  | Credits                    | Currency spent during run                       |
+| Silver (meta)  | Stardust                   | Permanent currency for unlocks                  |
+| Trees/Towers   | Large Asteroids / Wrecks   | Static collision obstacles                      |
+| Forest/Desert  | Nebula sectors             | Themed arena variants                           |
+
+---
+
+## Stats System
+
+### Ship Stats (Defensive)
+
+| Stat      | Description                                             |
+| --------- | ------------------------------------------------------- |
+| Max HP    | Maximum health pool                                     |
+| HP Regen  | Health regenerated per minute                           |
+| Shield    | Regenerating barrier, absorbs damage before HP          |
+| Armor     | % damage reduction (diminishing returns)                |
+| Evasion   | % chance to avoid damage entirely (diminishing returns) |
+| Lifesteal | % chance to heal 1 HP on hit                            |
+| Thorns    | Damage reflected to attackers                           |
+
+### Weapon Stats (Offensive)
+
+| Stat               | Description                                             |
+| ------------------ | ------------------------------------------------------- |
+| Damage             | Multiplier on base damage (e.g., 2x = 200%)             |
+| Crit Chance        | % chance for critical hit (>100% = chance for Overcrit) |
+| Crit Damage        | Multiplier on crits (e.g., 2x)                          |
+| Attack Speed       | % of base attack speed                                  |
+| Projectile Count   | Number of projectiles per attack                        |
+| Projectile Speed   | Travel speed multiplier                                 |
+| Projectile Bounces | Times projectile bounces between enemies                |
+| Size               | Projectile/AOE size multiplier                          |
+| Duration           | How long effects/projectiles last                       |
+| Knockback          | Push force on hit                                       |
+
+### Misc Stats
+
+| Stat                | Description                         |
+| ------------------- | ----------------------------------- |
+| Movement Speed      | Ship speed multiplier               |
+| Pickup Range        | XP/item collection radius           |
+| XP Gain             | XP multiplier (capped at 10x)       |
+| Credits Gain        | In-run currency multiplier          |
+| Stardust Gain       | Meta currency multiplier            |
+| Luck                | Affects rarity of drops/upgrades    |
+| Difficulty          | Enemy quantity, HP, damage, speed   |
+| Elite Spawn Rate    | Elite enemy frequency               |
+| Powerup Multiplier  | Magnitude and duration of powerups  |
+| Powerup Drop Chance | Enemy drop rate for powerups/chests |
+
+---
+
+## Character Differentiation
+
+Each character (ship) has three unique aspects:
+
+1. **Starting Weapon** — Unique weapon only they begin with
+2. **Passive Ability** — Permanent buff/mechanic unique to them
+3. **Phase Shift Variant** — Modified dash behavior
+
+### Example Characters (Future)
+
+- **Scout**: Fast, Plasma Cannon, +20% speed/+10% evasion, Blink (instant teleport)
+- **Tank**: Slow, Shield Bash, +50% HP/-20% speed, Ramming Shift (damage on contact)
+- **Glass Cannon**: Fragile, Railgun, +30% damage/-30% HP, Overcharge (leaves damage trail)
+
+---
+
+## Architecture
+
+## GDScript Style Rules
+
+### Explicit typing (required)
+
+- Always explicitly type GDScript variables, function parameters, and return types.
+- Avoid untyped `var foo = ...` and avoid `:=` type inference unless the type is already explicit.
+- Prefer typed containers: `Array[Dictionary]`, `Array[String]`, `Dictionary`, etc.
+
+Examples:
+
+- `var candidates: Array[Dictionary] = []`
+- `var weapon_id: String = String(weapon_id_any)`
+- `func _pick_weighted_index(items: Array[Dictionary]) -> int:`
+- `var chosen: Dictionary = candidates[idx]`
+
+If a value is Variant/untyped (e.g. from JSON), cast it immediately with `String(...)`, `int(...)`, `float(...)`, and use `get()` instead of dot-access.
+
+### Data-Driven Design
+
+All game content defined in **JSON files** under `data/`:
+
+- `weapons.json` — Weapon definitions, stats, upgrade paths
+- `characters.json` — Character stats, abilities, starting loadouts
+- `ship_upgrades.json` — Passive upgrade definitions (like Megabonk's tomes)
+- `items.json` — Pickup items and their effects
+- `enemies.json` — Enemy types, stats, behaviors
+
+**Mod Support**: Mods load from `user://mods/` and merge with base data.
+
+### Autoloads (globals/)
+
+| Autoload      | Purpose                                                    |
+| ------------- | ---------------------------------------------------------- |
+| `GameSeed`    | Deterministic randomness for procedural generation         |
+| `GameManager` | Game state, scene transitions, save/load, meta-progression |
+| `DataLoader`  | Loads and merges JSON data files, mod support              |
+
+### Scene Structure
+
+```
+scenes/
+├── main.tscn                    # Entry point, scene manager
+├── gameplay/
+│   ├── world.tscn               # Main gameplay arena
+│   ├── ship.tscn                # Player ship
+│   └── obstacles/
+│       └── minable_asteroid.tscn
+├── ui/
+│   ├── main_menu.tscn
+│   ├── hud.tscn
+│   ├── pause_menu.tscn
+│   ├── level_up.tscn
+│   └── game_over.tscn
+└── enemies/
+    └── (enemy scenes)
+```
+
+### Script Structure
+
+```
+scripts/
+├── core/                        # Shared components
+│   ├── stats_component.gd
+│   └── damage_system.gd
+├── player/
+│   ├── ship.gd
+│   ├── ship_controller.gd
+│   └── phase_shift.gd
+├── systems/
+│   ├── world.gd
+│   ├── run_manager.gd
+│   ├── wave_spawner.gd
+│   ├── weapon_manager.gd
+│   ├── obstacle_manager.gd
+│   └── xp_system.gd
+└── enemies/
+    ├── minable_asteroid.gd
+    └── (enemy scripts)
+```
+
+---
+
+## Collision Layers Reference
+
+| Layer | Name        | Used By                   |
+| ----- | ----------- | ------------------------- |
+| 1     | Player      | Ship (CharacterBody2D)    |
+| 4     | Projectiles | Player projectiles        |
+| 8     | Enemies     | All enemy types           |
+| 16    | Pickups     | XP pickups, items         |
+| 32    | PickupRange | Ship's PickupRange Area2D |
+
+### Collision Masks
+
+| Node        | Layer | Mask      | Detects                   |
+| ----------- | ----- | --------- | ------------------------- |
+| Ship        | 1     | 8         | Enemies                   |
+| Projectile  | 4     | 8         | Enemies                   |
+| BaseEnemy   | 8     | 1         | Player                    |
+| XPPickup    | 16    | 33 (1+32) | Player body + PickupRange |
+| PickupRange | 32    | 16        | Pickups                   |
+
+---
+
+## Key Script Locations
+
+| Script                | Path                                 | Purpose                              |
+| --------------------- | ------------------------------------ | ------------------------------------ |
+| `ship.gd`             | `scripts/player/ship.gd`             | Player movement, Phase Shift, stats  |
+| `weapon_component.gd` | `scripts/combat/weapon_component.gd` | Auto-fire weapons, spawn projectiles |
+| `projectile.gd`       | `scripts/combat/projectile.gd`       | Projectile movement, hit detection   |
+| `stats_component.gd`  | `scripts/core/stats_component.gd`    | HP, stats, damage handling           |
+| `base_enemy.gd`       | `scripts/enemies/base_enemy.gd`      | Enemy chase, damage, death           |
+| `enemy_spawner.gd`    | `scripts/systems/enemy_spawner.gd`   | Spawn enemies, XP drops              |
+| `xp_pickup.gd`        | `scripts/pickups/xp_pickup.gd`       | Magnetic attraction, collection      |
+| `game_manager.gd`     | `globals/game_manager.gd`            | Game state, XP, level-up             |
+| `data_loader.gd`      | `globals/data_loader.gd`             | Load JSON data, mod support          |
+| `file_logger.gd`      | `globals/file_logger.gd`             | Debug logging to file                |
+
+---
+
+## Scene Node Hierarchy
+
+### Ship (`scenes/gameplay/ship.tscn`)
+
+```
+Ship (CharacterBody2D) [layer=1, mask=8, group="player"]
+├── StatsComponent (Node)
+├── WeaponComponent (Node2D)
+├── Sprite2D (AnimatedSprite2D)
+├── CollisionShape2D (radius=15)
+├── PickupRange (Area2D) [layer=32, mask=16]
+│   └── PickupRangeShape (CollisionShape2D, radius=80)
+└── Camera2D
+```
+
+### BaseEnemy (`scenes/enemies/base_enemy.tscn`)
+
+```
+BaseEnemy (CharacterBody2D) [layer=8, mask=1, group="enemies"]
+├── Sprite2D
+└── CollisionShape2D
+```
+
+### XPPickup (`scenes/pickups/xp_pickup.tscn`)
+
+```
+XPPickup (Area2D) [layer=16, mask=33]
+├── CollisionShape2D
+└── ColorRect (visual)
+```
+
+---
+
+## Signal Flow
+
+### Enemy Death → XP Collection → Level Up
+
+```
+Enemy dies
+    ↓
+enemy.died signal emitted
+    ↓
+EnemySpawner._on_enemy_died() → calls _spawn_xp()
+    ↓
+XPPickup instantiated at death position
+    ↓
+Player enters PickupRange
+    ↓
+XPPickup._on_area_entered() → attract_to(player)
+    ↓
+XP magnetically moves to player
+    ↓
+XPPickup collides with player body
+    ↓
+XPPickup._collect() → GameManager.add_xp()
+    ↓
+GameManager checks if xp >= xp_required
+    ↓
+GameManager._level_up() → generate options, emit signal
+```
+
+---
+
+## Common Gotchas & Solutions
+
+### Area2D-to-Area2D Detection Not Working
+
+**Problem**: `area_entered` signal never fires between two Area2D nodes.
+
+**Solution**: Both Area2Ds need:
+
+- `monitoring = true`
+- `monitorable = true`
+- Correct collision layers/masks (one's layer must match other's mask)
+
+### DataLoader Returns Array, Not Dictionary
+
+**Problem**: `DataLoader.get_all_weapons()` returns Array, not Dictionary.
+
+**Solution**: Iterate directly over array:
+
+```gdscript
+# WRONG
+var weapons: Dictionary = DataLoader.get_all_weapons()
+for weapon_id in weapons:
+    var weapon = weapons[weapon_id]
+
+# RIGHT
+var weapons: Array = DataLoader.get_all_weapons()
+for weapon in weapons:
+    var weapon_id = weapon.get("id", "")
+```
+
+### "Can't change state while flushing queries" Error
+
+**Problem**: Adding/removing nodes during physics callbacks (signals from collisions).
+
+**Solution**: Use `call_deferred`:
+
+```gdscript
+# WRONG
+get_tree().current_scene.add_child(node)
+
+# RIGHT
+get_tree().current_scene.call_deferred("add_child", node)
+```
+
+### Weapon Stats Not Loading
+
+**Problem**: Weapons use nested `base_stats` dict in JSON.
+
+**Solution**: Access nested dictionary:
+
+```gdscript
+# WRONG
+var damage = weapon_data.get("damage", 10)
+
+# RIGHT
+var base_stats = weapon_data.get("base_stats", {})
+var damage = base_stats.get("damage", 10)
+```
+
+### Autoload Not Found at Runtime
+
+**Problem**: `get_node("/root/GameManager")` returns null.
+
+**Solution**:
+
+1. Ensure autoload is registered in Project Settings
+2. Use `@onready` to defer until tree is ready:
+
+```gdscript
+@onready var GameManager: Node = get_node("/root/GameManager")
+```
+
+### Projectile/Node Not Visible
+
+**Problem**: Node spawns but isn't visible.
+
+**Checklist**:
+
+1. Is `visible = true`?
+2. Is texture assigned and valid?
+3. Is z_index correct (not behind other nodes)?
+4. Is scale non-zero?
+5. Is modulate alpha > 0?
+
+---
+
+## Coding Conventions
+
+### GDScript Style
+
+```gdscript
+# Use static typing everywhere - ALWAYS use explicit types, NEVER use := for type inference
+var speed: float = 100.0
+var enemies: Array[Enemy] = []
+var direction: Vector2 = Vector2.ZERO
+
+# WRONG - Do not use type inference
+var speed := 100.0
+var direction := get_direction()
+
+# RIGHT - Always specify the type explicitly
+var speed: float = 100.0
+var direction: Vector2 = get_direction()
+
+# Use @export for inspector-editable values
+@export var max_hp: int = 100
+@export var weapon_scene: PackedScene
+
+# Use @onready for node references
+@onready var sprite: Sprite2D = $Sprite2D
+@onready var collision: CollisionShape2D = $CollisionShape2D
+
+# Signals for decoupled communication
+signal died
+signal damage_taken(amount: int)
+```
+
+**IMPORTANT**: Never use `:=` for type inference. Always declare variables with explicit types using `: Type =`. This prevents type inference errors and makes code more readable.
+
+### Naming Conventions
+
+| Type      | Convention                 | Example                                |
+| --------- | -------------------------- | -------------------------------------- |
+| Classes   | PascalCase                 | `PlayerShip`, `WeaponManager`          |
+| Functions | snake_case                 | `take_damage()`, `spawn_enemy()`       |
+| Variables | snake_case                 | `max_hp`, `current_weapon`             |
+| Constants | SCREAMING_SNAKE            | `MAX_WEAPONS`, `DEFAULT_SPEED`         |
+| Signals   | past_tense for events      | `died`, `level_up_completed`           |
+| Signals   | present_tense for requests | `damage_requested`                     |
+| Files     | snake_case                 | `ship_controller.gd`, `main_menu.tscn` |
+| Nodes     | PascalCase                 | `PlayerShip`, `WeaponManager`          |
+
+### Signal Usage
+
+- Use signals for **decoupled communication** between systems
+- Prefer signals over direct node references when possible
+- Document signal parameters in comments
+
+```gdscript
+## Emitted when the player takes damage
+## @param amount: The amount of damage taken
+## @param source: The node that dealt the damage
+signal damage_taken(amount: int, source: Node)
+```
+
+---
+
+## JSON Data Schemas
+
+### weapons.json
+
+```json
+{
+  "plasma_cannon": {
+    "id": "plasma_cannon",
+    "name": "Plasma Cannon",
+    "description": "Fires plasma bolts that explode on impact",
+    "rarity": "common",
+    "base_stats": {
+      "damage": 10,
+      "attack_speed": 1.0,
+      "projectile_count": 1,
+      "projectile_speed": 500,
+      "size": 1.0,
+      "knockback": 0.5
+    },
+    "projectile_scene": "res://scenes/projectiles/plasma_bolt.tscn",
+    "upgrade_stats": ["damage", "attack_speed", "projectile_count", "size"],
+    "max_level": 40,
+    "tags": ["projectile", "explosive"]
+  }
+}
+```
+
+### characters.json
+
+```json
+{
+  "scout": {
+    "id": "scout",
+    "name": "Scout",
+    "description": "Fast and agile reconnaissance vessel",
+    "sprite": "res://assets/ships/scout.png",
+    "base_stats": {
+      "max_hp": 80,
+      "hp_regen": 1,
+      "movement_speed": 1.2,
+      "armor": 0,
+      "evasion": 10,
+      "pickup_range": 1.0
+    },
+    "starting_weapon": "plasma_cannon",
+    "passive": {
+      "id": "afterburner",
+      "name": "Afterburner",
+      "description": "+20% movement speed, +10% evasion",
+      "effects": {
+        "movement_speed": 0.2,
+        "evasion": 10
+      }
+    },
+    "phase_shift_variant": {
+      "id": "blink",
+      "name": "Blink",
+      "description": "Instant teleport, no trail, shorter range",
+      "distance": 150,
+      "duration": 0,
+      "leaves_trail": false
+    },
+    "unlock_condition": "default"
+  }
+}
+```
+
+### ship_upgrades.json (Tomes equivalent)
+
+```json
+{
+  "damage_module": {
+    "id": "damage_module",
+    "name": "Damage Module",
+    "description": "Increases weapon damage",
+    "icon": "res://assets/icons/damage_module.png",
+    "stat": "damage",
+    "per_level": 0.08,
+    "max_level": 99,
+    "rarity_weights": { "common": 60, "uncommon": 25, "rare": 10, "epic": 4, "legendary": 1 }
+  }
+}
+```
+
+### items.json
+
+```json
+{
+  "shield_booster": {
+    "id": "shield_booster",
+    "name": "Shield Booster",
+    "description": "+25 Shield",
+    "icon": "res://assets/icons/shield_booster.png",
+    "rarity": "common",
+    "effects": {
+      "shield": 25
+    },
+    "unlock_condition": "default",
+    "stacks": true,
+    "max_stacks": 5
+  }
+}
+```
+
+### enemies.json
+
+```json
+{
+  "drone": {
+    "id": "drone",
+    "name": "Drone",
+    "scene": "res://scenes/enemies/drone.tscn",
+    "base_stats": {
+      "hp": 10,
+      "damage": 5,
+      "speed": 100,
+      "xp_value": 1
+    },
+    "behavior": "chase",
+    "spawn_weight": 100,
+    "min_difficulty": 0
+  }
+}
+```
+
+---
+
+## Implementation Priority
+
+### Phase 1: Core Foundation
+
+1. [ ] `DataLoader` autoload - JSON loading and mod merging
+2. [ ] `StatsComponent` - Stat tracking with modifiers
+3. [ ] `GameManager` autoload - State management, scene transitions
+4. [ ] Basic enemy with chase behavior
+5. [ ] Damage system (deal/receive damage)
+
+### Phase 2: Combat Loop
+
+6. [ ] Weapon system - Auto-firing weapons from data
+7. [ ] XP system - Collection, level up trigger
+8. [ ] Level-up UI - Choose 1 of 3 upgrades
+9. [ ] Ship upgrades (tomes) implementation
+10. [ ] Phase Shift ability
+
+### Phase 3: Run Structure
+
+11. [ ] Run timer and wave manager
+12. [ ] Enemy wave spawning (progressive difficulty)
+13. [ ] Miniboss spawning at intervals
+14. [ ] Final boss beacon mechanic
+15. [ ] Final Swarm mode
+
+### Phase 4: Content & Polish
+
+16. [ ] Space Gas Stations (charge shrines)
+17. [ ] Cargo Pods (chests), Space Vendors
+18. [ ] Minable asteroids with loot
+19. [ ] Multiple weapons and items
+20. [ ] Multiple characters
+
+### Phase 5: Meta & Steam
+
+21. [ ] Meta-progression (Stardust unlocks)
+22. [ ] Save/load system
+23. [ ] Main menu, settings
+24. [ ] Steam integration
+25. [ ] Mod workshop support
+
+---
+
+## Map Generation
+
+### Arena Structure
+
+- **Fixed size arena** (configurable, e.g., 4096x4096 pixels)
+- **Procedurally placed obstacles** at run start using `GameSeed`
+- **Boundary enforcement** - invisible walls or damage zone at edges
+
+### Obstacle Types
+
+| Type              | Behavior                           | Placement                   |
+| ----------------- | ---------------------------------- | --------------------------- |
+| Large Asteroids   | Static collision, indestructible   | Map generator at run start  |
+| Wrecked Ships     | Static collision, may contain loot | Map generator at run start  |
+| Minable Asteroids | Interactive, respawns, drops loot  | Obstacle manager during run |
+| Space Debris      | Small static collision             | Map generator scatter       |
+
+---
+
+## Audio Guidelines (Future)
+
+- **Music**: Synthwave/electronic sci-fi ambient during gameplay
+- **SFX**: Punchy weapon sounds, satisfying hit feedback
+- **Adaptive**: Music intensity scales with enemy density/boss fights
+- **Spatial**: Enemy sounds positioned in 2D space
+
+---
+
+## Testing Checklist
+
+When implementing new features, verify:
+
+- [ ] Works with `GameSeed` (deterministic if applicable)
+- [ ] Stats properly apply modifiers
+- [ ] JSON data loads correctly
+- [ ] No memory leaks (nodes freed properly)
+- [ ] Signals connected/disconnected appropriately
+- [ ] Works at different zoom levels
+- [ ] Performance acceptable with many enemies
+
+---
+
+## Debugging Technique: FileLogger
+
+When debugging issues in Godot, **always use the FileLogger system** to write debug output to a file that can be read directly from the workspace.
+
+### How It Works
+
+The `FileLogger` autoload (`globals/file_logger.gd`) writes all log output to `debug_log.txt` at the project root (`c:\git\voidrift\debug_log.txt`). The file is **deleted on each game startup** so it only contains logs from the current session.
+
+### Usage
+
+```gdscript
+# Add FileLogger reference in any script
+@onready var FileLogger: Node = get_node("/root/FileLogger")
+
+# Log methods available:
+FileLogger.log_info("SourceName", "Information message")
+FileLogger.log_debug("SourceName", "Debug details")
+FileLogger.log_warn("SourceName", "Warning message")
+FileLogger.log_error("SourceName", "Error message")
+FileLogger.log_data("SourceName", "label", some_dictionary)  # Logs as formatted JSON
+```
+
+### Debugging Workflow
+
+1. **Add FileLogger reference** to the script being debugged
+2. **Add log statements** at key points (initialization, function entry, state changes, signal handlers)
+3. **Run the game** and reproduce the issue
+4. **Read `debug_log.txt`** from the workspace to see what happened
+5. **Analyze the logs** to identify where the issue occurs
+
+### Example Debug Session
+
+```gdscript
+func _ready() -> void:
+    FileLogger.log_info("MyScript", "Initializing...")
+    FileLogger.log_debug("MyScript", "collision_layer: %d, collision_mask: %d" % [collision_layer, collision_mask])
+
+func _on_area_entered(area: Area2D) -> void:
+    FileLogger.log_debug("MyScript", "Area entered: %s" % area.name)
+```
+
+### Why This Technique?
+
+- **Copilot can read the log file** directly from the workspace without needing screenshots
+- **Persistent output** - logs survive even if Godot crashes
+- **Timestamped** - easy to correlate events
+- **Structured** - source names make filtering easy
+- **No console spam** - logs go to file, keeping Godot console cleaner
+
+### Log File Location
+
+The log file is always at: `res://debug_log.txt` (project root)
+
+Absolute path: `c:\git\voidrift\debug_log.txt`
+
+---
+
+## Development Progress
+
+**IMPORTANT**: Update this section when the user says "lock it in".
+
+### ✅ Completed Features
+
+- **Core Systems**: DataLoader, StatsComponent, GameManager autoloads
+- **Player Ship**: Movement (WASD), Phase Shift with i-frames and energy charges
+- **Weapons**: WeaponComponent with auto-fire, projectiles spawning and hitting enemies
+- **Enemies**: BaseEnemy with chase behavior, contact damage, death handling
+  - Red tint to differentiate from player
+  - Contact damage uses `move_and_slide()` collision detection (continuous, not signal-based)
+  - No knockback by default (can be added via weapons/items)
+- **XP System**: XP pickups drop on enemy death, magnetic attraction to player within PickupRange
+- **Credit System**: Gold credit pickups drop randomly (50% chance), magnetic attraction, collected to spend on rerolls
+- **Enemy Spawner**: Spawns enemies around player, scales with time
+- **FileLogger**: Debug logging system writes to `debug_log.txt` at project root
+- **HUD**:
+  - HP bar (top left), Level text (top center), Timer + FPS + Credits (top right)
+  - XP bar full-width at bottom of screen
+  - Synthwave color theme: Hot pink HP, neon purple XP, cyan countdown timer, yellow level text, gold credits
+  - Level-up animation: Elastic bounce with pink flash
+  - Timer flashes red when under 60 seconds
+  - Credits display with pulse animation on pickup
+- **Player Damage Feedback**:
+  - White → Red flash + blinking during i-frames
+  - Knockback away from damage source
+  - 0.5s i-frames after taking damage
+- **Timer**: Configurable countdown (default 10 minutes) via `GameManager.run_duration`
+- **Level-up UI**:
+  - 3 upgrade option cards with synthwave styling (320x420 each)
+  - Shows ship upgrades (cyan border) and new weapons (red border)
+  - Displays upgrade name, description, and stat bonus
+  - Refresh button (costs 25 credits) to reroll options
+  - Skip button to skip level-up
+  - Keyboard shortcuts: 1/2/3 to select, R to refresh, ESC/S to skip
+  - Cards animate in with scale+fade effect
+  - Large readable fonts (72px title, 28px card names, 20px descriptions)
+- **Configuration & Balancing**:
+  - `GameConfig` autoload created for centralized tuning (globals/game_config.gd)
+  - **Player Movement**: Base speed 150 (down from 250), added banking sway (15.0 speed) for smoother feel. Pivot offset adjusted (-6px).
+  - **Enemy Scaling**: Base speed 100, scales +2.5 per player level. This ensures enemies are slower early on but catch up.
+  - **Spawning**: "Slow burn" start (0.5 spawn rate) ramping up (+0.2/min). Makes early game less chaotic.
+  - **Pickup Radius**: Reduced magnet range to 40px (50% reduction) requiring closer proximity to loot.
+
+### 🔄 In Progress
+
+- None
+
+### 📋 TODO (Priority Order)
+
+1. **Camera orbit** - Right stick/mouse rotates camera around ship
+2. **More enemy variety** - Different enemy types with behaviors
+3. **Ship upgrades working** - Apply stat bonuses when upgrades selected
+4. **Sound effects** - Shooting, enemy death, XP pickup, level up
+5. **Visual polish** - Screen shake, particles, damage numbers
+
+### 🐛 Known Issues
+
+- Godot shows "invalid UID" warnings on load (cosmetic, doesn't affect gameplay)
+
+---
+
+## Useful Resources
+
+- [Megabonk Wiki](https://megabonk.wiki/wiki/Main_Page) - Reference for mechanics
+- [Godot 4 Docs](https://docs.godotengine.org/en/stable/)
+- [GDQuest](https://www.gdquest.com/) - Godot tutorials
+
+---
+
+_Last updated: January 24, 2026_

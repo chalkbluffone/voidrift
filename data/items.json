@@ -1,0 +1,260 @@
+{
+  "$schema": "voidrift-items-schema",
+  "_comment": "Items that can be found in cargo pods, purchased from vendors, or dropped.",
+  
+  "shield_battery": {
+    "id": "shield_battery",
+    "name": "Shield Battery",
+    "description": "+25 Shield",
+    "icon": "res://assets/icons/items/shield_battery.png",
+    "rarity": "common",
+    "effects": {
+      "shield": 25
+    },
+    "unlock_condition": "default",
+    "stacks": true,
+    "max_stacks": -1
+  },
+  
+  "nano_repair_kit": {
+    "id": "nano_repair_kit",
+    "name": "Nano Repair Kit",
+    "description": "+45 HP Regen per minute",
+    "icon": "res://assets/icons/items/nano_repair_kit.png",
+    "rarity": "common",
+    "effects": {
+      "hp_regen": 45
+    },
+    "unlock_condition": "default",
+    "stacks": true,
+    "max_stacks": -1
+  },
+  
+  "hull_reinforcement": {
+    "id": "hull_reinforcement",
+    "name": "Hull Reinforcement",
+    "description": "+25 Max HP",
+    "icon": "res://assets/icons/items/hull_reinforcement.png",
+    "rarity": "common",
+    "effects": {
+      "max_hp": 25
+    },
+    "unlock_condition": "default",
+    "stacks": true,
+    "max_stacks": -1
+  },
+  
+  "turbo_injector": {
+    "id": "turbo_injector",
+    "name": "Turbo Injector",
+    "description": "+15% Movement Speed",
+    "icon": "res://assets/icons/items/turbo_injector.png",
+    "rarity": "common",
+    "effects": {
+      "movement_speed": 15
+    },
+    "unlock_condition": "default",
+    "stacks": true,
+    "max_stacks": -1
+  },
+  
+  "overcharge_cell": {
+    "id": "overcharge_cell",
+    "name": "Overcharge Cell",
+    "description": "+10% Damage",
+    "icon": "res://assets/icons/items/overcharge_cell.png",
+    "rarity": "common",
+    "effects": {
+      "damage": 10
+    },
+    "unlock_condition": "default",
+    "stacks": true,
+    "max_stacks": -1
+  },
+  
+  "quantum_clover": {
+    "id": "quantum_clover",
+    "name": "Quantum Clover",
+    "description": "+7.5% Luck",
+    "icon": "res://assets/icons/items/quantum_clover.png",
+    "rarity": "common",
+    "effects": {
+      "luck": 7.5
+    },
+    "unlock_condition": "default",
+    "stacks": true,
+    "max_stacks": -1
+  },
+  
+  "credit_magnet": {
+    "id": "credit_magnet",
+    "name": "Credit Magnet",
+    "description": "+15% Credits from kills",
+    "icon": "res://assets/icons/items/credit_magnet.png",
+    "rarity": "common",
+    "effects": {
+      "credits_gain": 15
+    },
+    "unlock_condition": "default",
+    "stacks": true,
+    "max_stacks": -1
+  },
+  
+  "xp_amplifier": {
+    "id": "xp_amplifier",
+    "name": "XP Amplifier",
+    "description": "+8% XP Gain",
+    "icon": "res://assets/icons/items/xp_amplifier.png",
+    "rarity": "common",
+    "effects": {
+      "xp_gain": 8
+    },
+    "unlock_condition": "default",
+    "stacks": true,
+    "max_stacks": -1
+  },
+  
+  "phase_stabilizer": {
+    "id": "phase_stabilizer",
+    "name": "Phase Stabilizer",
+    "description": "+15% Evasion",
+    "icon": "res://assets/icons/items/phase_stabilizer.png",
+    "rarity": "common",
+    "effects": {
+      "evasion": 15
+    },
+    "unlock_condition": "default",
+    "stacks": true,
+    "max_stacks": -1
+  },
+  
+  "rapid_cycler": {
+    "id": "rapid_cycler",
+    "name": "Rapid Cycler",
+    "description": "+8% Attack Speed",
+    "icon": "res://assets/icons/items/rapid_cycler.png",
+    "rarity": "uncommon",
+    "effects": {
+      "attack_speed": 8
+    },
+    "unlock_condition": {
+      "type": "upgrade_tome",
+      "tome": "cooldown_matrix",
+      "level": 5
+    },
+    "stacks": true,
+    "max_stacks": -1
+  },
+  
+  "precision_scope": {
+    "id": "precision_scope",
+    "name": "Precision Scope",
+    "description": "+10% Crit Chance",
+    "icon": "res://assets/icons/items/precision_scope.png",
+    "rarity": "uncommon",
+    "effects": {
+      "crit_chance": 10
+    },
+    "unlock_condition": {
+      "type": "crit_count",
+      "count": 100
+    },
+    "stacks": true,
+    "max_stacks": -1
+  },
+  
+  "multi_launcher": {
+    "id": "multi_launcher",
+    "name": "Multi-Launcher",
+    "description": "+1 Projectile Count for all weapons",
+    "icon": "res://assets/icons/items/multi_launcher.png",
+    "rarity": "rare",
+    "effects": {
+      "projectile_count": 1
+    },
+    "unlock_condition": "default",
+    "stacks": true,
+    "max_stacks": 3
+  },
+  
+  "vampire_core": {
+    "id": "vampire_core",
+    "name": "Vampire Core",
+    "description": "+10% Lifesteal",
+    "icon": "res://assets/icons/items/vampire_core.png",
+    "rarity": "rare",
+    "effects": {
+      "lifesteal": 10
+    },
+    "unlock_condition": {
+      "type": "kill_count",
+      "count": 12500
+    },
+    "stacks": true,
+    "max_stacks": -1
+  },
+  
+  "elite_hunter": {
+    "id": "elite_hunter",
+    "name": "Elite Hunter",
+    "description": "+15% damage to Elites and Bosses",
+    "icon": "res://assets/icons/items/elite_hunter.png",
+    "rarity": "rare",
+    "effects": {
+      "damage_to_elites": 15
+    },
+    "unlock_condition": {
+      "type": "defeat_boss",
+      "time_limit": 30
+    },
+    "stacks": true,
+    "max_stacks": -1
+  },
+  
+  "time_dilator": {
+    "id": "time_dilator",
+    "name": "Time Dilator",
+    "description": "On fatal damage, freeze time for 10 seconds. Consumed on use.",
+    "icon": "res://assets/icons/items/time_dilator.png",
+    "rarity": "legendary",
+    "effects": {
+      "special": "death_save",
+      "freeze_duration": 10
+    },
+    "unlock_condition": "default",
+    "stacks": false,
+    "consumable": true
+  },
+  
+  "mega_bonk": {
+    "id": "mega_bonk",
+    "name": "Mega Bonk",
+    "description": "2% chance on hit to BONK an enemy, dealing 20x damage",
+    "icon": "res://assets/icons/items/mega_bonk.png",
+    "rarity": "legendary",
+    "effects": {
+      "special": "mega_bonk",
+      "chance": 2,
+      "damage_multiplier": 20
+    },
+    "unlock_condition": "default",
+    "stacks": true,
+    "max_stacks": 3
+  },
+  
+  "gravity_well": {
+    "id": "gravity_well",
+    "name": "Gravity Well",
+    "description": "Periodically pulls in all XP shards",
+    "icon": "res://assets/icons/items/gravity_well.png",
+    "rarity": "epic",
+    "effects": {
+      "special": "xp_pull",
+      "interval": 10
+    },
+    "unlock_condition": {
+      "type": "complete_all_gas_stations"
+    },
+    "stacks": false
+  }
+}

@@ -1,0 +1,34 @@
+[gd_scene load_steps=5 format=3 uid="uid://c8kqm2xp5tyhd"]
+
+[ext_resource type="Script" uid="uid://kx626j8cc68g" path="res://scripts/enemies/base_enemy.gd" id="1_enemy"]
+[ext_resource type="Texture2D" uid="uid://cjer77ln1h41n" path="res://Shoot`em Up/SpaceShips_Player-0001.png" id="2_sprite"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_enemy"]
+atlas = ExtResource("2_sprite")
+region = Rect2(0, 0, 64, 64)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_enemy"]
+radius = 22.0
+
+[node name="BaseEnemy" type="CharacterBody2D" groups=["enemies"]]
+collision_layer = 8
+collision_mask = 5
+script = ExtResource("1_enemy")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(12, 0)
+rotation = 1.5707964
+texture = SubResource("AtlasTexture_enemy")
+modulate = Color(1, 0.4, 0.4, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_enemy")
+
+[node name="HitboxArea" type="Area2D" parent="."]
+monitoring = true
+monitorable = true
+collision_layer = 8
+collision_mask = 1
+
+[node name="HitboxShape" type="CollisionShape2D" parent="HitboxArea"]
+shape = SubResource("CircleShape2D_enemy")

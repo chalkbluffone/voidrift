@@ -1,0 +1,66 @@
+[gd_scene load_steps=9 format=3 uid="uid://b5txwryijy5id"]
+
+[ext_resource type="Script" uid="uid://bpcsgwtlx8nu" path="res://scripts/player/ship.gd" id="1_2gnfn"]
+[ext_resource type="Texture2D" uid="uid://cjer77ln1h41n" path="res://Shoot`em Up/SpaceShips_Player-0001.png" id="1_q631a"]
+[ext_resource type="Script" uid="uid://6pnyvyve8x66" path="res://scripts/core/stats_component.gd" id="3_stats"]
+[ext_resource type="Script" uid="uid://dbrhbyytdqfjs" path="res://scripts/combat/weapon_component.gd" id="4_weapon"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2gnfn"]
+atlas = ExtResource("1_q631a")
+region = Rect2(64, 64, 64, 64)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_4tobq"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2gnfn")
+}],
+"loop": true,
+"name": &"new_animation",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_tfsc7"]
+radius = 24.083189
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_pickup"]
+radius = 40.0
+
+[node name="Ship" type="CharacterBody2D" groups=["player"]]
+collision_mask = 8
+script = ExtResource("1_2gnfn")
+
+[node name="StatsComponent" type="Node" parent="."]
+script = ExtResource("3_stats")
+
+[node name="WeaponComponent" type="Node2D" parent="."]
+position = Vector2(-6, 0)
+script = ExtResource("4_weapon")
+
+[node name="Sprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(-6, 0)
+rotation = 1.5707964
+sprite_frames = SubResource("SpriteFrames_4tobq")
+animation = &"new_animation"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(-6, 0)
+shape = SubResource("CircleShape2D_tfsc7")
+
+[node name="PickupRange" type="Area2D" parent="."]
+collision_layer = 32
+collision_mask = 16
+
+[node name="PickupRangeShape" type="CollisionShape2D" parent="PickupRange"]
+shape = SubResource("CircleShape2D_pickup")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(2.5, 2.5)
+process_callback = 0
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0
+rotation_smoothing_enabled = true
+drag_left_margin = 0.25
+drag_top_margin = 0.25
+drag_right_margin = 0.25
+drag_bottom_margin = 0.25

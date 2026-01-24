@@ -1,0 +1,142 @@
+[gd_scene load_steps=2 format=3 uid="uid://dlevelup000001"]
+
+[ext_resource type="Script" path="res://scripts/ui/level_up.gd" id="1_levelup"]
+
+[node name="LevelUp" type="CanvasLayer"]
+layer = 50
+process_mode = 3
+script = ExtResource("1_levelup")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.7)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -550.0
+offset_top = -350.0
+offset_right = 550.0
+offset_bottom = 350.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+
+[node name="LevelUpLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "LEVEL UP!"
+horizontal_alignment = 1
+
+[node name="ChooseLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "Choose an upgrade:"
+horizontal_alignment = 1
+
+[node name="ChoicesContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+alignment = 1
+theme_override_constants/separation = 30
+
+[node name="Choice1" type="PanelContainer" parent="VBoxContainer/ChoicesContainer"]
+custom_minimum_size = Vector2(320, 420)
+layout_mode = 2
+
+[node name="VBox1" type="VBoxContainer" parent="VBoxContainer/ChoicesContainer/Choice1"]
+layout_mode = 2
+
+[node name="Icon1" type="TextureRect" parent="VBoxContainer/ChoicesContainer/Choice1/VBox1"]
+custom_minimum_size = Vector2(96, 96)
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="Name1" type="Label" parent="VBoxContainer/ChoicesContainer/Choice1/VBox1"]
+layout_mode = 2
+text = "Weapon Name"
+horizontal_alignment = 1
+
+[node name="Desc1" type="Label" parent="VBoxContainer/ChoicesContainer/Choice1/VBox1"]
+layout_mode = 2
+text = "Description here"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Select1" type="Button" parent="VBoxContainer/ChoicesContainer/Choice1/VBox1"]
+layout_mode = 2
+size_flags_vertical = 8
+text = "Select"
+
+[node name="Choice2" type="PanelContainer" parent="VBoxContainer/ChoicesContainer"]
+custom_minimum_size = Vector2(320, 420)
+layout_mode = 2
+
+[node name="VBox2" type="VBoxContainer" parent="VBoxContainer/ChoicesContainer/Choice2"]
+layout_mode = 2
+
+[node name="Icon2" type="TextureRect" parent="VBoxContainer/ChoicesContainer/Choice2/VBox2"]
+custom_minimum_size = Vector2(96, 96)
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="Name2" type="Label" parent="VBoxContainer/ChoicesContainer/Choice2/VBox2"]
+layout_mode = 2
+text = "Weapon Name"
+horizontal_alignment = 1
+
+[node name="Desc2" type="Label" parent="VBoxContainer/ChoicesContainer/Choice2/VBox2"]
+layout_mode = 2
+text = "Description here"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Select2" type="Button" parent="VBoxContainer/ChoicesContainer/Choice2/VBox2"]
+layout_mode = 2
+size_flags_vertical = 8
+text = "Select"
+
+[node name="Choice3" type="PanelContainer" parent="VBoxContainer/ChoicesContainer"]
+custom_minimum_size = Vector2(320, 420)
+layout_mode = 2
+
+[node name="VBox3" type="VBoxContainer" parent="VBoxContainer/ChoicesContainer/Choice3"]
+layout_mode = 2
+
+[node name="Icon3" type="TextureRect" parent="VBoxContainer/ChoicesContainer/Choice3/VBox3"]
+custom_minimum_size = Vector2(96, 96)
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="Name3" type="Label" parent="VBoxContainer/ChoicesContainer/Choice3/VBox3"]
+layout_mode = 2
+text = "Weapon Name"
+horizontal_alignment = 1
+
+[node name="Desc3" type="Label" parent="VBoxContainer/ChoicesContainer/Choice3/VBox3"]
+layout_mode = 2
+text = "Description here"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Select3" type="Button" parent="VBoxContainer/ChoicesContainer/Choice3/VBox3"]
+layout_mode = 2
+size_flags_vertical = 8
+text = "Select"
+
+[node name="ActionsContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="RefreshButton" type="Button" parent="VBoxContainer/ActionsContainer"]
+layout_mode = 2
+text = "Refresh"
+
+[node name="SkipButton" type="Button" parent="VBoxContainer/ActionsContainer"]
+layout_mode = 2
+text = "Skip"

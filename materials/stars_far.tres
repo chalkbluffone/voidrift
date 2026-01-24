@@ -1,0 +1,13 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://byvccfmo8fywt"]
+
+[ext_resource type="Shader" uid="uid://cphlh5tpokcj8" path="res://shaders/starfield.gdshader" id="1_nj6gt"]
+
+[resource]
+shader = ExtResource("1_nj6gt")
+shader_parameter/density = 0.02
+shader_parameter/star_size = 0.05
+shader_parameter/brightness = 0.9
+shader_parameter/twinkle = 0.1
+shader_parameter/layer_scale = 220.0
+shader_parameter/seed = 1
+shader_parameter/tint = Color(0.3529412, 0.6392157, 1, 1)

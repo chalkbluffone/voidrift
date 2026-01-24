@@ -1,0 +1,123 @@
+{
+  "$schema": "voidrift-weapons-schema",
+  "_comment": "Weapon definitions for Voidrift. All weapons auto-fire at nearby enemies.",
+  
+  "plasma_cannon": {
+    "id": "plasma_cannon",
+    "name": "Plasma Cannon",
+    "description": "Fires plasma bolts that explode on impact",
+    "rarity": "common",
+    "base_stats": {
+      "damage": 10,
+      "attack_speed": 1.0,
+      "projectile_count": 1,
+      "projectile_speed": 500,
+      "size": 1.0,
+      "knockback": 0.5,
+      "crit_chance": 5,
+      "crit_damage": 1.5
+    },
+    "projectile_scene": "res://scenes/projectiles/plasma_bolt.tscn",
+    "upgrade_stats": ["damage", "attack_speed", "projectile_count", "size"],
+    "max_level": 40,
+    "tags": ["projectile", "explosive"],
+    "unlock_condition": "default"
+  },
+  
+  "laser_array": {
+    "id": "laser_array",
+    "name": "Laser Array",
+    "description": "Fires rapid laser beams in a spread pattern",
+    "rarity": "common",
+    "base_stats": {
+      "damage": 5,
+      "attack_speed": 2.0,
+      "projectile_count": 3,
+      "projectile_speed": 800,
+      "size": 0.5,
+      "knockback": 0.1,
+      "crit_chance": 10,
+      "crit_damage": 1.5
+    },
+    "projectile_scene": "res://scenes/projectiles/laser_beam.tscn",
+    "upgrade_stats": ["damage", "attack_speed", "projectile_count", "crit_chance"],
+    "max_level": 40,
+    "tags": ["projectile", "rapid"],
+    "unlock_condition": "default"
+  },
+  
+  "ion_orbit": {
+    "id": "ion_orbit",
+    "name": "Ion Orbit",
+    "description": "Summons ion spheres that orbit around your ship",
+    "rarity": "common",
+    "base_stats": {
+      "damage": 8,
+      "attack_speed": 0.5,
+      "projectile_count": 2,
+      "projectile_speed": 200,
+      "size": 1.2,
+      "knockback": 0.8,
+      "crit_chance": 5,
+      "crit_damage": 1.5,
+      "duration": 5.0
+    },
+    "projectile_scene": "res://scenes/projectiles/ion_sphere.tscn",
+    "upgrade_stats": ["damage", "projectile_count", "size", "duration"],
+    "max_level": 40,
+    "tags": ["orbital", "aoe"],
+    "unlock_condition": "default"
+  },
+  
+  "missile_pod": {
+    "id": "missile_pod",
+    "name": "Missile Pod",
+    "description": "Launches homing missiles at distant enemies",
+    "rarity": "uncommon",
+    "base_stats": {
+      "damage": 25,
+      "attack_speed": 0.4,
+      "projectile_count": 1,
+      "projectile_speed": 300,
+      "size": 1.0,
+      "knockback": 1.5,
+      "crit_chance": 5,
+      "crit_damage": 2.0
+    },
+    "projectile_scene": "res://scenes/projectiles/missile.tscn",
+    "upgrade_stats": ["damage", "attack_speed", "projectile_count"],
+    "max_level": 40,
+    "tags": ["projectile", "homing", "explosive"],
+    "unlock_condition": {
+      "type": "kills",
+      "weapon": "plasma_cannon",
+      "count": 2000
+    }
+  },
+  
+  "plasma_field": {
+    "id": "plasma_field",
+    "name": "Plasma Field",
+    "description": "Generates a damaging aura around your ship",
+    "rarity": "uncommon",
+    "base_stats": {
+      "damage": 3,
+      "attack_speed": 4.0,
+      "projectile_count": 1,
+      "projectile_speed": 0,
+      "size": 1.5,
+      "knockback": 0.2,
+      "crit_chance": 5,
+      "crit_damage": 1.5
+    },
+    "projectile_scene": null,
+    "upgrade_stats": ["damage", "attack_speed", "size"],
+    "max_level": 40,
+    "tags": ["aura", "aoe"],
+    "unlock_condition": {
+      "type": "survive",
+      "minutes": 2,
+      "no_damage": true
+    }
+  }
+}
