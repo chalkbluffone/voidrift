@@ -9,6 +9,7 @@ signal phase_energy_changed(current: int, maximum: int)
 
 # --- Preloads ---
 const StatsComponentScript := preload("res://scripts/core/stats_component.gd")
+const RadiantArcSpawnerScript := preload("res://effects/radiant_arc/radiant_arc_spawner.gd")
 
 # --- Components ---
 @onready var stats: Node = $StatsComponent
@@ -41,12 +42,29 @@ var _base_speed: float = 100.0  # Will be set from GameConfig in _ready
 var _last_move_direction: Vector2 = Vector2.RIGHT
 var _knockback_velocity: Vector2 = Vector2.ZERO
 var _last_input_device: String = "keyboard" # "keyboard" or "joypad"
+var _arc_spawner: RadiantArcSpawner
 const KNOCKBACK_FRICTION := 10.0
 const DAMAGE_IFRAMES := 0.5  # Brief i-frames after taking damage
+
+# Auto-fire radiant arc
+var _arc_fire_timer: float = 0.0
+const ARC_FIRE_INTERVAL: float = 1.0  # Fire once per second
+var _arc_debug_ui: CanvasLayer = null
+var _arc_settings: Dictionary = {}
 
 
 func _ready() -> void:
 	FileLogger.log_info("Ship", "Initializing player ship...")
+	
+	# Initialize radiant arc spawner
+	_arc_spawner = RadiantArcSpawnerScript.new(self)
+	
+	# Initialize debug UI for arc settings
+	var debug_ui_script = load("res://effects/radiant_arc/radiant_arc_debug_ui.gd")
+	_arc_debug_ui = debug_ui_script.new()
+	add_child(_arc_debug_ui)
+	_arc_debug_ui.settings_changed.connect(_on_arc_settings_changed)
+	_arc_settings = _arc_debug_ui.get_settings()
 	
 	# Set base speed from config
 	var config: Node = get_node("/root/GameConfig")
@@ -114,7 +132,15 @@ func _physics_process(delta: float) -> void:
 	_process_phase_shift(delta)
 	_process_phase_recharge(delta)
 	_process_iframes(delta)
+	_process_arc_auto_fire(delta)
 	_process_movement(delta)
+
+
+func _process_arc_auto_fire(delta: float) -> void:
+	_arc_fire_timer += delta
+	if _arc_fire_timer >= ARC_FIRE_INTERVAL:
+		_arc_fire_timer = 0.0
+		_spawn_radiant_arc()
 
 
 func _process_movement(delta: float) -> void:
@@ -345,3 +371,20 @@ func get_stat(stat_name: String) -> float:
 
 func is_invincible() -> bool:
 	return _is_invincible or _is_phasing
+
+
+# --- Radiant Arc ---
+
+func _on_arc_settings_changed(new_settings: Dictionary) -> void:
+	_arc_settings = new_settings
+
+
+func _spawn_radiant_arc() -> void:
+	"""Spawn the radiant arc slash effect."""
+	var params = _arc_settings.duplicate()
+	params["seed_offset"] = randf()
+	_arc_spawner.spawn(
+		global_position,
+		Vector2.RIGHT.rotated(rotation),
+		params
+	)
