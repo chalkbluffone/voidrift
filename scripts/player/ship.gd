@@ -386,5 +386,6 @@ func _spawn_radiant_arc() -> void:
 	_arc_spawner.spawn(
 		global_position,
 		Vector2.RIGHT.rotated(rotation),
-		params
+		params,
+		self  # Pass self so arc follows our movement direction
 	)

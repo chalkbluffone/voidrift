@@ -206,6 +206,7 @@ func _reset_run_data() -> void:
 		"xp": 0.0,
 		"xp_required": XP_BASE,
 		"time_elapsed": 0.0,
+		"time_remaining": run_duration,
 		"credits": 0,
 		"weapons": [],
 		"ship_upgrades": [],

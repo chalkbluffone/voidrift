@@ -1,47 +1,6 @@
 === Voidrift Debug Log ===
-Started: 2026-01-30T00:04:55
+Started: 2026-02-01T16:15:49
 Log path: C:/git/voidrift/debug_log.txt
 ========================================
 
-[00:04:55] [INFO][WeaponComponent] Initializing...
-[00:04:55] [INFO][WeaponComponent] Found StatsComponent
-[00:04:55] [INFO][Ship] Initializing player ship...
-[00:04:55] [INFO][HUD] Initializing HUD...
-[00:04:55] [DEBUG][HUD] Scaled to 0.60 (viewport height: 648)
-[00:04:55] [DEBUG][HUD] Scaled to 1.84 (viewport height: 1983)
-[00:04:55] [INFO][Ship] Running deferred init...
-[00:04:55] [INFO][Ship] No character data, setting up default weapons
-[00:04:55] [INFO][WeaponComponent] Equipped weapon: plasma_cannon
-[00:04:55] [DATA][WeaponComponent] Weapon base_stats: {
-  "attack_speed": 1.0,
-  "crit_chance": 5.0,
-  "crit_damage": 1.5,
-  "damage": 10.0,
-  "knockback": 0.5,
-  "projectile_count": 1.0,
-  "projectile_speed": 500.0,
-  "size": 1.0
-}
-[00:04:55] [INFO][HUD] Found player: Ship
-[00:04:55] [DEBUG][Projectile] Ready at (-6.0, 0.0) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[00:04:55] [DEBUG][WeaponComponent] Spawned projectile at (-6.0, 0.0) dir: (1.0, 0.0) dmg: 10.0 spd: 500.0
-[00:04:55] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
-[00:04:56] [DEBUG][Projectile] Ready at (-6.0, 0.0) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[00:04:56] [DEBUG][WeaponComponent] Spawned projectile at (-6.0, 0.0) dir: (0.972823, 0.23155) dmg: 10.0 spd: 500.0
-[00:04:57] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
-[00:04:57] [DEBUG][Projectile] Ready at (-6.0, 0.0) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[00:04:57] [DEBUG][WeaponComponent] Spawned projectile at (-6.0, 0.0) dir: (0.973348, 0.229334) dmg: 10.0 spd: 500.0
-[00:04:57] [INFO][EnemySpawner] Enemy died at (163.8016, 39.77742)
-[00:04:57] [INFO][EnemySpawner] Enemy died at (163.8016, 39.77742)
-[00:04:57] [DEBUG][XPPickup] Spawned at (172.4789, 43.56792), collision_layer: 16, collision_mask: 33
-[00:04:57] [DEBUG][XPPickup] Spawned at (160.6564, 29.92078), collision_layer: 16, collision_mask: 33
-[00:04:58] [DEBUG][Projectile] Ready at (-6.0, 0.0) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[00:04:58] [DEBUG][WeaponComponent] Spawned projectile at (-6.0, 0.0) dir: (-0.92493, -0.380137) dmg: 10.0 spd: 500.0
-[00:04:59] [INFO][EnemySpawner] Enemy died at (-294.0423, -118.7862)
-[00:04:59] [DEBUG][XPPickup] Spawned at (-285.5471, -109.4314), collision_layer: 16, collision_mask: 33
-[00:04:59] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
-[00:04:59] [DEBUG][Projectile] Ready at (-6.0, 0.0) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[00:04:59] [DEBUG][WeaponComponent] Spawned projectile at (-6.0, 0.0) dir: (1.0, 0.0) dmg: 10.0 spd: 500.0
-[00:05:00] [DEBUG][Projectile] Ready at (-6.0, 0.0) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[00:05:00] [DEBUG][WeaponComponent] Spawned projectile at (-6.0, 0.0) dir: (0.754434, -0.656376) dmg: 10.0 spd: 500.0
-[00:05:01] [INFO][FileLogger] Session ended
+[16:28:34] [INFO][FileLogger] Session ended

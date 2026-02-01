@@ -35,7 +35,8 @@ func spawn_from_config(
 func spawn(
 	spawn_pos: Vector2,
 	direction: Vector2,
-	params: Dictionary = {}
+	params: Dictionary = {},
+	follow_source: Node2D = null
 ) -> RadiantArc:
 	"""
 	Spawn a RadiantArc effect with inline parameters.
@@ -44,6 +45,7 @@ func spawn(
 		spawn_pos: World position to spawn at
 		direction: Direction vector (will be normalized)
 		params: Dictionary of parameter overrides
+		follow_source: Optional Node2D to track movement direction (e.g., player ship)
 	
 	Returns:
 		The spawned RadiantArc instance
@@ -55,5 +57,8 @@ func spawn(
 		arc.setup(params)
 	
 	arc.spawn_from(spawn_pos, direction.normalized())
+	
+	if follow_source:
+		arc.set_follow_source(follow_source)
 	
 	return arc

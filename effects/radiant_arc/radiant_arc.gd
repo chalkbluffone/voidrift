@@ -1,6 +1,17 @@
 extends Node2D
 class_name RadiantArc
 
+
+## Simple debug circle drawer
+class DebugCircle extends Node2D:
+	var radius: float = 10.0
+	var color: Color = Color(0, 1, 0, 0.5)
+	
+	func _draw() -> void:
+		draw_arc(Vector2.ZERO, radius, 0, TAU, 32, color, 2.0)
+		draw_circle(Vector2.ZERO, radius, Color(color.r, color.g, color.b, color.a * 0.3))
+
+
 # Exported parameters for full configurability
 @export var arc_angle_deg: float = 90.0
 @export var radius: float = 42.0
@@ -25,8 +36,24 @@ class_name RadiantArc
 
 # Control parameters
 @export var rotation_offset_deg: float = 0.0
-@export var follow_mode: int = 0  # 0=fixed, 1=aim_dir, 2=movement_vec
 @export var seed_offset: float = 0.0
+@export var damage: float = 25.0  # Damage dealt to enemies
+
+# Movement tracking - arc follows source's movement direction
+var _follow_source: Node2D = null  # Reference to player/ship to track movement
+var _source_last_pos: Vector2 = Vector2.ZERO
+
+# Damage tracking
+var _hit_targets: Array = []  # Track what we've already hit
+var _hitbox: Area2D = null
+var _hitbox_collisions: Array[CollisionShape2D] = []  # Multiple collision shapes along arc
+var _hitbox_count: int = 0  # Calculated dynamically based on arc size
+var _blade_collision: CollisionShape2D = null  # Single capsule for the sweeping blade
+
+# Debug visualization
+var _debug_draw: bool = false
+var _debug_circles: Array[Node2D] = []  # Debug circles for each hitbox
+var _blade_debug: Node2D = null  # Debug for blade capsule
 
 # Internal state
 var _elapsed: float = 0.0
@@ -72,7 +99,303 @@ func _ready() -> void:
 	_start_pos = global_position
 	_start_rotation = rotation
 	_generate_arc_mesh()
+	# Defer hitbox creation to ensure physics system is ready
+	call_deferred("_create_hitbox")
 	_update_shader_uniforms()
+
+
+func _create_hitbox() -> void:
+	"""Create an Area2D hitbox with multiple collision shapes along the arc and a sweeping blade."""
+	_hitbox = Area2D.new()
+	_hitbox.collision_layer = 4  # Player weapons layer
+	_hitbox.collision_mask = 8   # Enemies layer
+	_hitbox.monitoring = true
+	_hitbox.monitorable = true
+	add_child(_hitbox)
+	
+	# Calculate arc length at the middle of the thickness
+	var arc_rad = deg_to_rad(arc_angle_deg)
+	var mid_radius = (radius + thickness * 0.5) * length_scale
+	var arc_length = arc_rad * mid_radius
+	
+	# Collision radius based on average thickness (accounting for taper)
+	# Use a smaller radius for better coverage
+	var collision_radius = thickness * 0.4 * length_scale
+	
+	# Calculate how many bubbles we need for full coverage along the arc
+	# Overlap factor of 1.5 means bubbles overlap by 50% of their diameter
+	var spacing = collision_radius * 1.5
+	_hitbox_count = max(3, int(ceil(arc_length / spacing)) + 1)
+	
+	_hitbox_collisions.clear()
+	
+	for i in range(_hitbox_count):
+		var collision = CollisionShape2D.new()
+		var circle = CircleShape2D.new()
+		circle.radius = collision_radius
+		collision.shape = circle
+		collision.disabled = true  # Start disabled
+		_hitbox.add_child(collision)
+		_hitbox_collisions.append(collision)
+	
+	# Create blade collision - a single capsule that sweeps from arc center to outer edge
+	# This catches enemies inside the arc radius
+	var blade_thickness = thickness * 0.25 * length_scale  # Thin blade radius
+	var blade_length = (radius + thickness) * length_scale  # From arc center to outer edge
+	_blade_collision = CollisionShape2D.new()
+	var capsule = CapsuleShape2D.new()
+	capsule.radius = blade_thickness
+	capsule.height = blade_length + blade_thickness * 2  # Total height of capsule
+	_blade_collision.shape = capsule
+	_blade_collision.disabled = true  # Start disabled
+	_hitbox.add_child(_blade_collision)
+	
+	# Connect signal for hit detection
+	_hitbox.area_entered.connect(_on_hitbox_area_entered)
+
+
+func _update_hitbox_position(sweep_progress: float) -> void:
+	"""Update all hitbox positions along the arc, enabling only the visible ones."""
+	if _hitbox_collisions.is_empty():
+		return
+	
+	var arc_rad = deg_to_rad(arc_angle_deg)
+	
+	# Match shader's sweep behavior: sweep_edge = sweep_progress * 1.8
+	# This extends the range so the sweep can fully exit the arc
+	var sweep_edge = sweep_progress * 1.8
+	var tail_length = 0.5  # Match shader's tail_length
+	
+	# Create debug circles lazily if needed
+	if _debug_draw and _debug_circles.size() < _hitbox_count:
+		var base_rad = thickness * 0.4 * length_scale
+		for i in range(_debug_circles.size(), _hitbox_count):
+			var debug = _create_debug_circle(Vector2.ZERO, base_rad)
+			debug.visible = false
+			_debug_circles.append(debug)
+	
+	# Distribute collision shapes evenly along the arc
+	for i in range(_hitbox_count):
+		var collision = _hitbox_collisions[i]
+		
+		# Each hitbox covers a portion of the arc
+		# t represents the position along the arc (0 to 1)
+		var t = float(i) / float(_hitbox_count - 1) if _hitbox_count > 1 else 0.5
+		
+		# Calculate angle position on the arc
+		var angle = -arc_rad * 0.5 + arc_rad * t
+		
+		# Position at the middle of the arc thickness, accounting for taper
+		var taper_profile = sin(t * PI)
+		var adjusted_taper = pow(taper_profile, 1.0 - taper * 0.8)
+		var current_thickness = thickness * adjusted_taper
+		var current_mid_r = radius + current_thickness * 0.5
+		
+		var dir = Vector2(cos(angle), sin(angle))
+		var pos = dir * current_mid_r * length_scale + Vector2(distance, 0.0)
+		collision.position = pos
+		
+		# Adjust collision radius based on taper at this position
+		if collision.shape is CircleShape2D:
+			collision.shape.radius = max(current_thickness * 0.4 * length_scale, 2.0)
+		
+		# Match shader visibility: visible when between (sweep_edge - tail_length) and sweep_edge
+		# dist_from_edge = sweep_edge - t
+		# visible when dist_from_edge is between 0 and tail_length
+		var dist_from_edge = sweep_edge - t
+		var part_visible = (dist_from_edge >= 0.0) and (dist_from_edge <= tail_length) and (sweep_progress > 0.0)
+		collision.disabled = not part_visible
+		
+		# Update debug circles if enabled
+		if _debug_draw and i < _debug_circles.size():
+			var debug = _debug_circles[i]
+			debug.position = pos
+			debug.visible = part_visible
+			# Update debug circle radius to match collision
+			if debug.get_child_count() > 0:
+				var circle_vis = debug.get_child(0) as DebugCircle
+				if circle_vis:
+					circle_vis.radius = collision.shape.radius
+					circle_vis.queue_redraw()
+	
+	# Update blade collisions - position along radial line at the leading edge
+	_update_blade_position(sweep_progress, sweep_edge, arc_rad)
+
+
+func _update_blade_position(sweep_progress: float, sweep_edge: float, arc_rad: float) -> void:
+	"""Update the blade capsule - a radial line that sweeps with the leading edge."""
+	if not _blade_collision:
+		return
+	
+	# Calculate the angle of the leading edge
+	# sweep_edge goes from 0 to ~1.8, but the actual arc is 0 to 1
+	var leading_t = clamp(sweep_edge, 0.0, 1.0)
+	var leading_angle = -arc_rad * 0.5 + arc_rad * leading_t
+	
+	# Blade is only visible during the active sweep (not during tail fade-out)
+	var blade_visible = (sweep_progress > 0.0) and (sweep_edge <= 1.0)
+	
+	# The blade extends from arc center to the outer edge
+	# Arc center is at (distance, 0) in local coordinates
+	var arc_center = Vector2(distance, 0.0)
+	var blade_length = (radius + thickness) * length_scale
+	var half_blade = blade_length * 0.5
+	
+	# Direction from arc center outward at leading angle
+	var dir = Vector2(cos(leading_angle), sin(leading_angle))
+	# Position blade center at arc_center + half the blade length in the radial direction
+	var pos = arc_center + dir * half_blade
+	
+	_blade_collision.position = pos
+	# Rotate so the capsule points along the radial direction
+	# Capsule's default orientation is vertical (Y-axis), so add PI/2 to point along the angle
+	_blade_collision.rotation = leading_angle + PI / 2
+	_blade_collision.disabled = not blade_visible
+	
+	# Create/update debug visualization for blade
+	if _debug_draw:
+		if not _blade_debug:
+			_blade_debug = _create_blade_debug()
+		_blade_debug.position = pos
+		_blade_debug.rotation = leading_angle + PI / 2
+		_blade_debug.visible = blade_visible
+		# Force redraw
+		if _blade_debug.get_child_count() > 0:
+			_blade_debug.get_child(0).queue_redraw()
+	elif _blade_debug:
+		_blade_debug.visible = false
+
+
+## Debug capsule drawer for blade
+class DebugCapsule extends Node2D:
+	var capsule_radius: float = 5.0
+	var capsule_height: float = 20.0
+	var color: Color = Color(1, 1, 0, 0.5)
+	
+	func _draw() -> void:
+		# Capsule height is total height including the rounded ends
+		var half_length = max(0.0, capsule_height * 0.5 - capsule_radius)
+		
+		# Draw outline
+		if half_length > 0:
+			# Draw the two end semicircles
+			draw_arc(Vector2(0, -half_length), capsule_radius, PI, TAU, 16, color, 2.0)
+			draw_arc(Vector2(0, half_length), capsule_radius, 0, PI, 16, color, 2.0)
+			# Draw the connecting lines
+			draw_line(Vector2(-capsule_radius, -half_length), Vector2(-capsule_radius, half_length), color, 2.0)
+			draw_line(Vector2(capsule_radius, -half_length), Vector2(capsule_radius, half_length), color, 2.0)
+		else:
+			# It's basically a circle
+			draw_arc(Vector2.ZERO, capsule_radius, 0, TAU, 32, color, 2.0)
+		
+		# Fill with semi-transparent
+		var fill_color = Color(color.r, color.g, color.b, color.a * 0.3)
+		if half_length > 0:
+			draw_circle(Vector2(0, -half_length), capsule_radius, fill_color)
+			draw_circle(Vector2(0, half_length), capsule_radius, fill_color)
+			draw_rect(Rect2(-capsule_radius, -half_length, capsule_radius * 2, half_length * 2), fill_color)
+		else:
+			draw_circle(Vector2.ZERO, capsule_radius, fill_color)
+
+
+func _create_blade_debug() -> Node2D:
+	"""Create a visible capsule for debugging the blade hitbox."""
+	var debug_node = Node2D.new()
+	add_child(debug_node)
+	
+	var capsule_visual = DebugCapsule.new()
+	if _blade_collision and _blade_collision.shape is CapsuleShape2D:
+		var shape = _blade_collision.shape as CapsuleShape2D
+		capsule_visual.capsule_radius = shape.radius
+		capsule_visual.capsule_height = shape.height
+	else:
+		# Fallback values if shape not ready
+		var blade_thickness = thickness * 0.25 * length_scale
+		var blade_length = (radius + thickness) * length_scale
+		capsule_visual.capsule_radius = blade_thickness
+		capsule_visual.capsule_height = blade_length + blade_thickness * 2
+	debug_node.add_child(capsule_visual)
+	
+	return debug_node
+
+
+func _create_debug_circle(pos: Vector2, rad: float) -> Node2D:
+	"""Create a visible circle for debugging hitbox positions."""
+	var debug_node = Node2D.new()
+	debug_node.position = pos
+	add_child(debug_node)
+	
+	# Use a simple draw call
+	var circle_visual = DebugCircle.new()
+	circle_visual.radius = rad
+	circle_visual.color = Color(0, 1, 0, 0.5)  # Semi-transparent green
+	debug_node.add_child(circle_visual)
+	
+	return debug_node
+
+
+func set_debug_draw(enabled: bool) -> void:
+	"""Enable or disable debug hitbox visualization."""
+	_debug_draw = enabled
+	if not enabled:
+		# Hide all debug circles
+		for debug in _debug_circles:
+			debug.visible = false
+		if _blade_debug:
+			_blade_debug.visible = false
+
+
+func _generate_hitbox_polygon() -> PackedVector2Array:
+	"""Generate a polygon that approximates the arc shape for collision."""
+	var points = PackedVector2Array()
+	var arc_rad = deg_to_rad(arc_angle_deg)
+	var segments = 8  # Fewer segments for collision, we don't need high precision
+	
+	var inner_radius = radius
+	
+	# Outer edge (going one direction)
+	for i in range(segments + 1):
+		var t = float(i) / float(segments)
+		var angle = -arc_rad * 0.5 + arc_rad * t
+		
+		# Apply same taper as visual mesh
+		var taper_profile = sin(t * PI)
+		var adjusted_taper = pow(taper_profile, 1.0 - taper * 0.8)
+		var current_outer_r = inner_radius + thickness * adjusted_taper
+		
+		var dir = Vector2(cos(angle), sin(angle))
+		var p = dir * current_outer_r * length_scale + Vector2(distance, 0.0)
+		points.push_back(p)
+	
+	# Inner edge (going back)
+	for i in range(segments, -1, -1):
+		var t = float(i) / float(segments)
+		var angle = -arc_rad * 0.5 + arc_rad * t
+		var dir = Vector2(cos(angle), sin(angle))
+		var p = dir * inner_radius * length_scale + Vector2(distance, 0.0)
+		points.push_back(p)
+	
+	return points
+
+
+func _on_hitbox_area_entered(area: Area2D) -> void:
+	"""Handle collision with enemies/targets."""
+	# Skip if already hit this target
+	if area in _hit_targets:
+		return
+	
+	_hit_targets.append(area)
+	
+	# Deal damage if the target can take it
+	if area.has_method("take_damage"):
+		area.take_damage(damage, self)
+	elif area.get_parent() and area.get_parent().has_method("take_damage"):
+		area.get_parent().take_damage(damage, self)
+
+
+func get_damage() -> float:
+	"""Return the damage value for this arc."""
+	return damage
 
 
 func _process(delta: float) -> void:
@@ -87,8 +410,21 @@ func _process(delta: float) -> void:
 		queue_free()
 		return
 	
-	# Update position if moving forward
-	if speed > 0.0:
+	# Follow source's movement direction
+	if _follow_source and is_instance_valid(_follow_source):
+		var current_pos = _follow_source.global_position
+		var move_delta = current_pos - _source_last_pos
+		
+		# Only update rotation if there's actual movement
+		if move_delta.length_squared() > 0.01:
+			var move_dir = move_delta.normalized()
+			rotation = move_dir.angle() + deg_to_rad(rotation_offset_deg)
+		
+		# Arc stays attached to source position
+		global_position = current_pos + Vector2.RIGHT.rotated(rotation) * distance
+		_source_last_pos = current_pos
+	elif speed > 0.0:
+		# Fallback: Update position if moving forward (no source tracking)
 		var direction = Vector2.RIGHT.rotated(rotation)
 		global_position = _start_pos + direction * speed * _elapsed
 	
@@ -114,14 +450,15 @@ func _generate_arc_mesh() -> void:
 		var t = float(i) / float(segments) # 0.0 to 1.0 along arc
 		var angle = -arc_rad * 0.5 + arc_rad * t
 		
-		# Taper logic
-		var actual_thickness = thickness
-		if taper > 0.8:
-			# Comma shape (thick start, thin end)
-			actual_thickness = thickness * (1.1 - pow(t, 2.0))
-		else:
-			# Crescent shape (sine wave profile)
-			actual_thickness = thickness * (0.3 + 0.7 * sin(t * PI))
+		# Taper logic - always taper to points at both ends
+		# Use sine wave profile that starts and ends at zero
+		var taper_profile = sin(t * PI)  # 0 at start, 1 at middle, 0 at end
+		
+		# Apply taper parameter to control how much of the middle is at full width
+		# taper = 0: very thin, pointy arc
+		# taper = 1: mostly full width except at very tips
+		var adjusted_taper = pow(taper_profile, 1.0 - taper * 0.8)
+		var actual_thickness = thickness * adjusted_taper
 		
 		actual_thickness = max(0.0, actual_thickness)
 		
@@ -179,6 +516,9 @@ func _update_shader_uniforms() -> void:
 	var sweep_duration = base_sweep_duration / max(sweep_speed, 0.1)
 	var sweep_progress = clamp(_elapsed / sweep_duration, 0.0, 1.0)
 	
+	# Update hitbox position to follow the sweep
+	_update_hitbox_position(sweep_progress)
+	
 	_shader_material.set_shader_parameter("color_a", color_a)
 	_shader_material.set_shader_parameter("color_b", color_b)
 	_shader_material.set_shader_parameter("color_c", color_c)
@@ -201,8 +541,7 @@ func setup(params: Dictionary) -> RadiantArc:
 	- arc_angle_deg, radius, thickness, taper, length_scale
 	- distance, speed, duration, fade_in, fade_out
 	- color_a, color_b, color_c, glow_strength, core_strength
-	- noise_strength, uv_scroll_speed, rotation_offset_deg
-	- follow_mode, seed_offset
+	- noise_strength, uv_scroll_speed, rotation_offset_deg, seed_offset
 	"""
 	for key in params:
 		if key in self:
@@ -228,4 +567,12 @@ func spawn_from(spawn_pos: Vector2, direction: Vector2) -> RadiantArc:
 	set_direction(direction)
 	_start_pos = global_position
 	_start_rotation = rotation
+	return self
+
+
+func set_follow_source(source: Node2D) -> RadiantArc:
+	"""Set a source node to follow. Arc will track this node's movement direction."""
+	_follow_source = source
+	if source:
+		_source_last_pos = source.global_position
 	return self

@@ -26,8 +26,10 @@ class_name RadiantArcConfig
 
 # Orientation
 @export var rotation_offset_deg: float = 0.0
-@export var follow_mode: int = 0  # 0=fixed, 1=aim_dir, 2=movement_vec
 @export var seed_offset: float = 0.0
+
+# Combat
+@export var damage: float = 25.0
 
 
 func to_dict() -> Dictionary:
@@ -51,8 +53,8 @@ func to_dict() -> Dictionary:
 		"noise_strength": noise_strength,
 		"uv_scroll_speed": uv_scroll_speed,
 		"rotation_offset_deg": rotation_offset_deg,
-		"follow_mode": follow_mode,
 		"seed_offset": seed_offset,
+		"damage": damage,
 	}
 
 

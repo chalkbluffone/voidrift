@@ -1,0 +1,93 @@
+extends Area2D
+class_name TestTarget
+
+## A simple target dummy for the weapon test lab.
+## Can take damage, shows visual feedback, and moves toward ship.
+
+@export var max_hp: float = 100.0
+@export var move_speed: float = 50.0
+
+var current_hp: float = 100.0
+var target_node: Node2D = null  # The ship to move toward
+var _target_radius: float = 20.0  # Ship collision radius
+
+@onready var visual: ColorRect = $Visual
+@onready var hp_label: Label = $HPLabel
+
+
+func _ready() -> void:
+	current_hp = max_hp
+	_update_visual()
+	
+	# Connect area signals for detecting radiant arc damage
+	area_entered.connect(_on_area_entered)
+
+
+func _process(delta: float) -> void:
+	if target_node and move_speed > 0:
+		var direction = (target_node.global_position - global_position).normalized()
+		global_position += direction * move_speed * delta
+		
+		# Check if we reached the ship
+		var distance_to_target = global_position.distance_to(target_node.global_position)
+		if distance_to_target < _target_radius + 20.0:  # 20 is our radius
+			_on_reached_ship()
+
+
+func _on_area_entered(area: Area2D) -> void:
+	# Check if hit by radiant arc or other weapon
+	if area.has_method("get_damage"):
+		var dmg = area.get_damage()
+		take_damage(dmg, area)
+	elif area.get_parent() and area.get_parent().has_method("get_damage"):
+		var dmg = area.get_parent().get_damage()
+		take_damage(dmg, area.get_parent())
+
+
+func _on_reached_ship() -> void:
+	# Target reached the ship - destroy self
+	queue_free()
+
+
+func set_target(node: Node2D) -> void:
+	target_node = node
+
+
+func take_damage(amount: float, _source = null) -> void:
+	current_hp -= amount
+	_flash_hit()
+	_update_visual()
+	
+	if current_hp <= 0:
+		_on_death()
+
+
+func _flash_hit() -> void:
+	if visual:
+		visual.color = Color.WHITE
+		get_tree().create_timer(0.05).timeout.connect(_restore_color)
+
+
+func _restore_color() -> void:
+	if is_instance_valid(visual):
+		var hp_ratio = clamp(current_hp / max_hp, 0.0, 1.0)
+		visual.color = Color(1.0, hp_ratio * 0.3, hp_ratio * 0.3, 0.8)
+
+
+func _update_visual() -> void:
+	if hp_label:
+		hp_label.text = str(int(max(0, current_hp)))
+	
+	if visual:
+		var hp_ratio = clamp(current_hp / max_hp, 0.0, 1.0)
+		visual.color = Color(1.0, hp_ratio * 0.3, hp_ratio * 0.3, 0.8)
+
+
+func _on_death() -> void:
+	# Simple death effect - just remove
+	queue_free()
+
+
+func reset() -> void:
+	current_hp = max_hp
+	_update_visual()

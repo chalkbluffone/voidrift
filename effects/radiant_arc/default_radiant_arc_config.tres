@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="RadiantArcConfig"]
 
-arc_angle_deg = 100.0
+arc_angle_deg = 300.0
 radius = 40.0
 thickness = 20.0
 taper = 0.75
@@ -18,5 +18,5 @@ core_strength = 0.8
 noise_strength = 0.4
 uv_scroll_speed = 2.0
 rotation_offset_deg = 0.0
-follow_mode = 0
 seed_offset = 0.0
+damage = 25.0
