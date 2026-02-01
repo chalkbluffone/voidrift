@@ -9,6 +9,9 @@ signal hp_changed(current: float, maximum: float)
 signal shield_changed(current: float, maximum: float)
 signal died
 
+# Autoload references
+var DataLoader: Node
+
 # --- Stat Names (constants for type safety) ---
 const STAT_MAX_HP := "max_hp"
 const STAT_HP_REGEN := "hp_regen"
@@ -112,6 +115,9 @@ var _regen_accumulator: float = 0.0
 
 
 func _ready() -> void:
+	# Get autoload references
+	DataLoader = get_node_or_null("/root/DataLoader")
+	
 	# Initialize with defaults
 	for stat_name in DEFAULT_BASE_STATS:
 		base_stats[stat_name] = DEFAULT_BASE_STATS[stat_name]
@@ -124,6 +130,10 @@ func _ready() -> void:
 
 func apply_ship_upgrade(upgrade_id: String) -> void:
 	"""Apply a single stack of a ship upgrade."""
+	if not DataLoader:
+		push_error("StatsComponent: DataLoader not available")
+		return
+	
 	var upgrade_data: Dictionary = DataLoader.get_ship_upgrade(upgrade_id)
 	if upgrade_data.is_empty():
 		return

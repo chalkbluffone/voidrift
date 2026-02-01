@@ -49,8 +49,21 @@ const DAMAGE_IFRAMES := 0.5  # Brief i-frames after taking damage
 # Auto-fire radiant arc
 var _arc_fire_timer: float = 0.0
 const ARC_FIRE_INTERVAL: float = 1.0  # Fire once per second
-var _arc_debug_ui: CanvasLayer = null
-var _arc_settings: Dictionary = {}
+
+# Default radiant arc settings (previously from debug UI)
+var _arc_settings: Dictionary = {
+	"arc_angle_deg": 90.0,
+	"radius": 42.0,
+	"thickness": 18.0,
+	"taper": 0.5,
+	"length_scale": 0.75,
+	"distance": 25.0,
+	"duration": 0.8,
+	"sweep_speed": 1.2,
+	"glow_strength": 3.0,
+	"fade_in": 0.08,
+	"fade_out": 0.15,
+}
 
 
 func _ready() -> void:
@@ -58,13 +71,6 @@ func _ready() -> void:
 	
 	# Initialize radiant arc spawner
 	_arc_spawner = RadiantArcSpawnerScript.new(self)
-	
-	# Initialize debug UI for arc settings
-	var debug_ui_script = load("res://effects/radiant_arc/radiant_arc_debug_ui.gd")
-	_arc_debug_ui = debug_ui_script.new()
-	add_child(_arc_debug_ui)
-	_arc_debug_ui.settings_changed.connect(_on_arc_settings_changed)
-	_arc_settings = _arc_debug_ui.get_settings()
 	
 	# Set base speed from config
 	var config: Node = get_node("/root/GameConfig")
@@ -374,10 +380,6 @@ func is_invincible() -> bool:
 
 
 # --- Radiant Arc ---
-
-func _on_arc_settings_changed(new_settings: Dictionary) -> void:
-	_arc_settings = new_settings
-
 
 func _spawn_radiant_arc() -> void:
 	"""Spawn the radiant arc slash effect."""
