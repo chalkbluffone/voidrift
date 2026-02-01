@@ -247,9 +247,26 @@ func _get_default_config(weapon_id: String) -> Dictionary:
 				"core_strength": 1.2,
 				"noise_strength": 0.3,
 				"uv_scroll_speed": 3.0,
+				"chromatic_aberration": 0.5,
+				"pulse_strength": 0.4,
+				"pulse_speed": 8.0,
+				"electric_strength": 0.5,
+				"electric_frequency": 20.0,
+				"electric_speed": 15.0,
+				"gradient_offset": 0.0,
 				"rotation_offset_deg": 0.0,
 				"seed_offset": 0.0,
 				"damage": 25.0,
+				"particles_enabled": true,
+				"particles_amount": 30,
+				"particles_size": 5.0,
+				"particles_speed": 100.0,
+				"particles_lifetime": 0.4,
+				"particles_spread": 0.5,
+				"particles_drag": 1.2,
+				"particles_outward": 0.6,
+				"particles_radius": 0.8,
+				"particles_color": Color(1.0, 1.0, 1.0, 0.8),
 			}
 		"plasma_cannon", "laser_array", "missile_pod":
 			return {
@@ -410,6 +427,13 @@ func load_saved_config(weapon_id: String) -> bool:
 			c.get("b", 1.0),
 			c.get("a", 1.0)
 		)
+	
+	# Merge with defaults - this ensures new parameters added to the game 
+	# get their default values even when loading old saves
+	var default_config = _get_default_config(weapon_id)
+	for key in default_config:
+		if not loaded_config.has(key):
+			loaded_config[key] = default_config[key]
 	
 	_current_config = loaded_config
 	

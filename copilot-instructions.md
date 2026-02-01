@@ -735,6 +735,21 @@ Absolute path: `c:\git\voidrift\debug_log.txt`
 
 ---
 
+## Development Guidelines
+
+### Weapon Test Lab Maintenance
+
+**IMPORTANT**: When making any changes to a weapon or its parameters:
+
+1. Always update the weapon's default config in `weapon_test_lab.gd` (`_get_default_config()`)
+2. Always add slider ranges for new parameters in `weapon_test_ui.gd` (`_get_slider_range()`)
+3. Ensure the parameter names match exactly between the weapon script's `@export` variables and the test lab config keys
+4. Test all new parameters in the weapon test lab before considering the feature complete
+
+This ensures the test lab remains a reliable tool for tuning and testing all weapon behaviors.
+
+---
+
 ## Development Progress
 
 **IMPORTANT**: Update this section when the user says "lock it in".

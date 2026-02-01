@@ -24,12 +24,32 @@ class_name RadiantArcConfig
 @export var noise_strength: float = 0.3
 @export var uv_scroll_speed: float = 2.0
 
+# Visual Effects
+@export var chromatic_aberration: float = 0.0  # 0 = off, 0.5 = subtle, 1.0+ = intense
+@export var pulse_strength: float = 0.0  # 0 = off, 0.5 = subtle, 1.0 = intense
+@export var pulse_speed: float = 8.0  # Pulses per second
+@export var electric_strength: float = 0.0  # 0 = off, 0.5 = subtle, 1.0 = intense
+@export var electric_frequency: float = 20.0  # Higher = finer detail
+@export var electric_speed: float = 15.0  # Animation speed
+
 # Orientation
 @export var rotation_offset_deg: float = 0.0
 @export var seed_offset: float = 0.0
 
 # Combat
 @export var damage: float = 25.0
+
+# Particles
+@export var particles_enabled: bool = true
+@export var particles_amount: int = 20
+@export var particles_size: float = 3.0  # Pixel size
+@export var particles_speed: float = 30.0
+@export var particles_lifetime: float = 0.4
+@export var particles_spread: float = 0.3  # Angle spread of sparks (0-1)
+@export var particles_drag: float = 1.0  # How quickly sparks slow down (0-2)
+@export var particles_outward: float = 0.7  # How much sparks shoot outward vs backward (0-1)
+@export var particles_radius: float = 1.0  # Where sparks spawn: 0 = inner, 1 = outer edge
+@export var particles_color: Color = Color(1.0, 1.0, 1.0, 0.8)  # Tint (uses arc colors if white)
 
 
 func to_dict() -> Dictionary:
@@ -52,9 +72,25 @@ func to_dict() -> Dictionary:
 		"core_strength": core_strength,
 		"noise_strength": noise_strength,
 		"uv_scroll_speed": uv_scroll_speed,
+		"chromatic_aberration": chromatic_aberration,
+		"pulse_strength": pulse_strength,
+		"pulse_speed": pulse_speed,
+		"electric_strength": electric_strength,
+		"electric_frequency": electric_frequency,
+		"electric_speed": electric_speed,
 		"rotation_offset_deg": rotation_offset_deg,
 		"seed_offset": seed_offset,
 		"damage": damage,
+		"particles_enabled": particles_enabled,
+		"particles_amount": particles_amount,
+		"particles_size": particles_size,
+		"particles_speed": particles_speed,
+		"particles_lifetime": particles_lifetime,
+		"particles_spread": particles_spread,
+		"particles_drag": particles_drag,
+		"particles_outward": particles_outward,
+		"particles_radius": particles_radius,
+		"particles_color": particles_color,
 	}
 
 

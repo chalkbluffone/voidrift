@@ -468,6 +468,20 @@ func _get_slider_ranges(key: String, current_value: Variant) -> Array:
 			return [0.0, 2.0, 0.05]
 		"uv_scroll_speed":
 			return [0.0, 10.0, 0.1]
+		"chromatic_aberration":
+			return [0.0, 2.0, 0.05]
+		"pulse_strength":
+			return [0.0, 1.0, 0.05]
+		"pulse_speed":
+			return [1.0, 30.0, 1.0]
+		"electric_strength":
+			return [0.0, 1.5, 0.05]
+		"electric_frequency":
+			return [5.0, 50.0, 1.0]
+		"electric_speed":
+			return [1.0, 30.0, 1.0]
+		"gradient_offset":
+			return [-1.0, 1.0, 0.05]
 		"rotation_offset_deg":
 			return [-180.0, 180.0, 5.0]
 		"seed_offset":
@@ -488,6 +502,23 @@ func _get_slider_ranges(key: String, current_value: Variant) -> Array:
 			return [0.1, 10.0, 0.1]
 		"orbit_speed":
 			return [50.0, 500.0, 10.0]
+		# Particle settings
+		"particles_amount":
+			return [1, 100, 1]
+		"particles_size":
+			return [1.0, 20.0, 0.5]
+		"particles_speed":
+			return [10.0, 300.0, 5.0]
+		"particles_lifetime":
+			return [0.1, 2.0, 0.05]
+		"particles_spread":
+			return [0.0, 1.0, 0.05]
+		"particles_drag":
+			return [0.0, 2.0, 0.1]
+		"particles_outward":
+			return [0.0, 1.0, 0.05]
+		"particles_radius":
+			return [0.0, 1.0, 0.05]
 		_:
 			# Default ranges based on current value
 			if current_value is int:

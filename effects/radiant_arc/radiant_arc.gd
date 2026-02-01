@@ -34,10 +34,31 @@ class DebugCircle extends Node2D:
 @export var noise_strength: float = 0.3
 @export var uv_scroll_speed: float = 3.0
 
+# Visual Effects
+@export var chromatic_aberration: float = 0.0  # 0 = off, 0.5 = subtle, 1.0+ = intense
+@export var pulse_strength: float = 0.0  # 0 = off, 0.5 = subtle, 1.0 = intense
+@export var pulse_speed: float = 8.0  # Pulses per second
+@export var electric_strength: float = 0.0  # 0 = off, 0.5 = subtle, 1.0 = intense
+@export var electric_frequency: float = 20.0  # Higher = finer detail
+@export var electric_speed: float = 15.0  # Animation speed
+@export var gradient_offset: float = 0.0  # Rotates gradient around arc (-1 to 1)
+
 # Control parameters
 @export var rotation_offset_deg: float = 0.0
 @export var seed_offset: float = 0.0
 @export var damage: float = 25.0  # Damage dealt to enemies
+
+# Particle parameters
+@export var particles_enabled: bool = true
+@export var particles_amount: int = 20
+@export var particles_size: float = 3.0
+@export var particles_speed: float = 30.0
+@export var particles_lifetime: float = 0.4
+@export var particles_spread: float = 0.3
+@export var particles_drag: float = 1.0  # How quickly sparks slow down (0-2)
+@export var particles_outward: float = 0.7  # How much sparks shoot outward vs backward (0-1)
+@export var particles_radius: float = 1.0  # Where sparks spawn: 0 = inner edge, 0.5 = middle, 1 = outer edge
+@export var particles_color: Color = Color(1.0, 1.0, 1.0, 0.8)
 
 # Movement tracking - arc follows source's movement direction
 var _follow_source: Node2D = null  # Reference to player/ship to track movement
@@ -54,6 +75,9 @@ var _blade_collision: CollisionShape2D = null  # Single capsule for the sweeping
 var _debug_draw: bool = false
 var _debug_circles: Array[Node2D] = []  # Debug circles for each hitbox
 var _blade_debug: Node2D = null  # Debug for blade capsule
+
+# Particles - using CPUParticles2D for more natural randomness
+var _particles: CPUParticles2D = null
 
 # Internal state
 var _elapsed: float = 0.0
@@ -101,6 +125,9 @@ func _ready() -> void:
 	_generate_arc_mesh()
 	# Defer hitbox creation to ensure physics system is ready
 	call_deferred("_create_hitbox")
+	# Create particles
+	if particles_enabled:
+		_create_particles()
 	_update_shader_uniforms()
 
 
@@ -152,6 +179,149 @@ func _create_hitbox() -> void:
 	
 	# Connect signal for hit detection
 	_hitbox.area_entered.connect(_on_hitbox_area_entered)
+
+
+
+func _create_particles() -> void:
+	"""Create a CPU particle system that emits along the visible arc."""
+	_particles = CPUParticles2D.new()
+	_particles.amount = particles_amount
+	_particles.lifetime = particles_lifetime
+	_particles.one_shot = false
+	_particles.explosiveness = 0.0
+	_particles.randomness = 1.0
+	_particles.emitting = false  # We control when to emit
+	
+	# Use DIRECTED_POINTS so each emission point can have its own direction (outward from arc)
+	_particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_DIRECTED_POINTS
+	# Start with dummy points, will be updated in _update_particles
+	_particles.emission_points = PackedVector2Array([Vector2(100, 0)])  # Far away default
+	_particles.emission_normals = PackedVector2Array([Vector2(1, 0)])
+	
+	# Spread around the normal direction
+	_particles.spread = 20.0 + particles_spread * 70.0
+	
+	# Velocity
+	_particles.initial_velocity_min = particles_speed * 0.5
+	_particles.initial_velocity_max = particles_speed * 2.0
+	
+	# Drag
+	var drag_multiplier = clamp(particles_drag, 0.0, 2.0)
+	_particles.damping_min = 30.0 * drag_multiplier
+	_particles.damping_max = 120.0 * drag_multiplier
+	
+	# Scale with variation
+	_particles.scale_amount_min = particles_size * 0.3
+	_particles.scale_amount_max = particles_size * 1.2
+	
+	# Scale curve - shrink over lifetime
+	var scale_curve = Curve.new()
+	scale_curve.add_point(Vector2(0.0, 1.0))
+	scale_curve.add_point(Vector2(0.4, 0.6))
+	scale_curve.add_point(Vector2(1.0, 0.0))
+	_particles.scale_amount_curve = scale_curve
+	
+	# Angular velocity for tumbling
+	_particles.angular_velocity_min = -180.0
+	_particles.angular_velocity_max = 180.0
+	
+	# No gravity
+	_particles.gravity = Vector2.ZERO
+	
+	# Color gradient
+	var color_ramp = Gradient.new()
+	var use_arc_colors = particles_color == Color(1.0, 1.0, 1.0, 0.8) or particles_color.is_equal_approx(Color.WHITE)
+	if use_arc_colors:
+		color_ramp.set_color(0, Color(1.0, 1.0, 0.9, 1.0))
+		color_ramp.add_point(0.15, Color(color_a.r, color_a.g, color_a.b, 1.0))
+		color_ramp.add_point(0.5, Color(color_b.r, color_b.g, color_b.b, 0.7))
+		color_ramp.set_color(1, Color(color_c.r * 0.5, color_c.g * 0.5, color_c.b * 0.5, 0.0))
+	else:
+		var bright = Color(min(particles_color.r + 0.4, 1.0), min(particles_color.g + 0.4, 1.0), min(particles_color.b + 0.3, 1.0), 1.0)
+		color_ramp.set_color(0, bright)
+		color_ramp.add_point(0.2, particles_color)
+		color_ramp.set_color(1, Color(particles_color.r * 0.3, particles_color.g * 0.3, particles_color.b * 0.3, 0.0))
+	_particles.color_ramp = color_ramp
+	
+	# Simple square texture
+	var pixel_img = Image.create(4, 4, false, Image.FORMAT_RGBA8)
+	pixel_img.fill(Color.WHITE)
+	_particles.texture = ImageTexture.create_from_image(pixel_img)
+	
+	add_child(_particles)
+
+
+func _update_particles(sweep_progress: float, alpha: float) -> void:
+	"""Update particle emission points along the visible arc region."""
+	if not _particles:
+		return
+	
+	var arc_rad = deg_to_rad(arc_angle_deg)
+	var sweep_edge = sweep_progress * 1.8
+	var tail_length = 0.5
+	
+	# Only emit during active sweep
+	var should_emit = sweep_edge > 0.0 and sweep_edge <= 1.3
+	_particles.emitting = should_emit
+	_particles.modulate.a = alpha
+	
+	if not should_emit:
+		# Move emission point far away when not emitting to prevent stray particles
+		_particles.emission_points = PackedVector2Array([Vector2(9999, 9999)])
+		_particles.emission_normals = PackedVector2Array([Vector2(1, 0)])
+		return
+	
+	# Generate random emission points along the VISIBLE portion of the arc
+	var emission_points = PackedVector2Array()
+	var emission_normals = PackedVector2Array()
+	@warning_ignore("integer_division")
+	var num_points: int = maxi(8, particles_amount / 2)
+	
+	for i in range(num_points):
+		# Random position along the arc (0 to 1)
+		var t = randf()
+		
+		# Check if this position is currently visible (same logic as collision bubbles)
+		var dist_from_edge = sweep_edge - t
+		var point_visible = dist_from_edge >= 0.0 and dist_from_edge <= tail_length
+		
+		if not point_visible:
+			continue
+		
+		# Calculate angle and position on the arc
+		var angle = -arc_rad * 0.5 + arc_rad * t
+		
+		# Random radius between inner and outer edge based on particles_radius
+		var base_r = radius + thickness * clamp(particles_radius, 0.0, 1.0)
+		var r_variation = thickness * 0.3 * (randf() * 2.0 - 1.0)
+		var spawn_r = (base_r + r_variation) * length_scale
+		spawn_r = clamp(spawn_r, radius * length_scale, (radius + thickness) * length_scale)
+		
+		# Direction vector (radially outward from arc center)
+		var dir = Vector2(cos(angle), sin(angle))
+		var pos = dir * spawn_r + Vector2(distance, 0.0)
+		
+		emission_points.append(pos)
+		
+		# Normal = direction particles should fly
+		# Mix of outward (radial) and backward (opposite to sweep direction)
+		# Tangent direction (perpendicular to radial, in sweep direction) is (-sin, cos)
+		var tangent = Vector2(-sin(angle), cos(angle))
+		var outward_ratio = clamp(particles_outward, 0.0, 1.0)
+		var normal = (dir * outward_ratio - tangent * (1.0 - outward_ratio)).normalized()
+		emission_normals.append(normal)
+	
+	# Need at least one point - put it on the visible arc
+	if emission_points.is_empty():
+		var t = clamp(sweep_edge - tail_length * 0.5, 0.0, 1.0)
+		var angle = -arc_rad * 0.5 + arc_rad * t
+		var dir = Vector2(cos(angle), sin(angle))
+		var spawn_r = (radius + thickness * particles_radius) * length_scale
+		emission_points.append(dir * spawn_r + Vector2(distance, 0.0))
+		emission_normals.append(dir)
+	
+	_particles.emission_points = emission_points
+	_particles.emission_normals = emission_normals
 
 
 func _update_hitbox_position(sweep_progress: float) -> void:
@@ -519,6 +689,9 @@ func _update_shader_uniforms() -> void:
 	# Update hitbox position to follow the sweep
 	_update_hitbox_position(sweep_progress)
 	
+	# Update particles - constrain emission to the current sweep angle
+	_update_particles(sweep_progress, alpha)
+	
 	_shader_material.set_shader_parameter("color_a", color_a)
 	_shader_material.set_shader_parameter("color_b", color_b)
 	_shader_material.set_shader_parameter("color_c", color_c)
@@ -530,6 +703,13 @@ func _update_shader_uniforms() -> void:
 	_shader_material.set_shader_parameter("alpha", alpha)
 	_shader_material.set_shader_parameter("sweep_progress", sweep_progress)
 	_shader_material.set_shader_parameter("seed_offset", seed_offset)
+	_shader_material.set_shader_parameter("chromatic_aberration", chromatic_aberration)
+	_shader_material.set_shader_parameter("pulse_strength", pulse_strength)
+	_shader_material.set_shader_parameter("pulse_speed", pulse_speed)
+	_shader_material.set_shader_parameter("electric_strength", electric_strength)
+	_shader_material.set_shader_parameter("electric_frequency", electric_frequency)
+	_shader_material.set_shader_parameter("electric_speed", electric_speed)
+	_shader_material.set_shader_parameter("gradient_offset", gradient_offset)
 
 
 func setup(params: Dictionary) -> RadiantArc:
@@ -542,6 +722,7 @@ func setup(params: Dictionary) -> RadiantArc:
 	- distance, speed, duration, fade_in, fade_out
 	- color_a, color_b, color_c, glow_strength, core_strength
 	- noise_strength, uv_scroll_speed, rotation_offset_deg, seed_offset
+	- particles_enabled, particles_amount, particles_size, etc.
 	"""
 	for key in params:
 		if key in self:
@@ -550,8 +731,22 @@ func setup(params: Dictionary) -> RadiantArc:
 	if is_node_ready():
 		_generate_arc_mesh()
 		_update_shader_uniforms()
+		# Recreate particles with new settings
+		_recreate_particles()
 	
 	return self
+
+
+func _recreate_particles() -> void:
+	"""Recreate the particle system with current settings."""
+	# Remove old particles
+	if _particles:
+		_particles.queue_free()
+		_particles = null
+	
+	# Create new particles if enabled
+	if particles_enabled:
+		_create_particles()
 
 
 func set_direction(direction: Vector2) -> RadiantArc:
