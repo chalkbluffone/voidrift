@@ -155,7 +155,7 @@ func _parse_color(hex_string: String, fallback: Color) -> Color:
 		return Color(hex)
 	elif hex.length() == 8:
 		# RGBA format
-		return Color(hex.substr(0, 6)).from_string(hex_string, fallback)
+		return Color.from_string(hex_string, fallback)
 	return fallback
 
 func _ready() -> void:

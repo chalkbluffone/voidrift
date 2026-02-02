@@ -5,6 +5,7 @@ extends Control
 
 const MAIN_MENU_SCENE := "res://scenes/ui/main_menu.tscn"
 
+@onready var _settings: Node = get_node("/root/SettingsManager")
 @onready var master_slider: HSlider = $Panel/VBoxContainer/MasterVolume/Slider
 @onready var sfx_slider: HSlider = $Panel/VBoxContainer/SFXVolume/Slider
 @onready var music_slider: HSlider = $Panel/VBoxContainer/MusicVolume/Slider
@@ -20,11 +21,11 @@ func _ready() -> void:
 
 
 func _sync_ui_from_settings() -> void:
-	master_slider.value = SettingsManager.master_volume
-	sfx_slider.value = SettingsManager.sfx_volume
-	music_slider.value = SettingsManager.music_volume
-	fullscreen_check.button_pressed = SettingsManager.fullscreen
-	vsync_check.button_pressed = SettingsManager.vsync
+	master_slider.value = _settings.master_volume
+	sfx_slider.value = _settings.sfx_volume
+	music_slider.value = _settings.music_volume
+	fullscreen_check.button_pressed = _settings.fullscreen
+	vsync_check.button_pressed = _settings.vsync
 
 
 func _connect_signals() -> void:
@@ -37,23 +38,23 @@ func _connect_signals() -> void:
 
 
 func _on_master_volume_changed(value: float) -> void:
-	SettingsManager.set_master_volume(value)
+	_settings.set_master_volume(value)
 
 
 func _on_sfx_volume_changed(value: float) -> void:
-	SettingsManager.set_sfx_volume(value)
+	_settings.set_sfx_volume(value)
 
 
 func _on_music_volume_changed(value: float) -> void:
-	SettingsManager.set_music_volume(value)
+	_settings.set_music_volume(value)
 
 
 func _on_fullscreen_toggled(pressed: bool) -> void:
-	SettingsManager.set_fullscreen(pressed)
+	_settings.set_fullscreen(pressed)
 
 
 func _on_vsync_toggled(pressed: bool) -> void:
-	SettingsManager.set_vsync(pressed)
+	_settings.set_vsync(pressed)
 
 
 func _on_back_pressed() -> void:

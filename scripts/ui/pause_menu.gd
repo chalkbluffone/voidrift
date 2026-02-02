@@ -9,6 +9,7 @@ signal resumed
 const MAIN_MENU_SCENE := "res://scenes/ui/main_menu.tscn"
 const GAME_SCENE := "res://scenes/gameplay/world.tscn"
 
+@onready var _settings: Node = get_node("/root/SettingsManager")
 @onready var resume_button: Button = $Panel/VBoxContainer/ResumeButton
 @onready var restart_button: Button = $Panel/VBoxContainer/RestartButton
 @onready var options_button: Button = $Panel/VBoxContainer/OptionsButton
@@ -119,37 +120,37 @@ func _sync_ui_from_settings() -> void:
 	var vsync_check = options_container.get_node_or_null("Panel/VBoxContainer/VSync/CheckButton")
 	
 	if master_slider:
-		master_slider.value = SettingsManager.master_volume
+		master_slider.value = _settings.master_volume
 	if sfx_slider:
-		sfx_slider.value = SettingsManager.sfx_volume
+		sfx_slider.value = _settings.sfx_volume
 	if music_slider:
-		music_slider.value = SettingsManager.music_volume
+		music_slider.value = _settings.music_volume
 	if fullscreen_check:
-		fullscreen_check.button_pressed = SettingsManager.fullscreen
+		fullscreen_check.button_pressed = _settings.fullscreen
 	if vsync_check:
-		vsync_check.button_pressed = SettingsManager.vsync
+		vsync_check.button_pressed = _settings.vsync
 
 
 # --- Options handlers ---
 
 func _on_master_volume_changed(value: float) -> void:
-	SettingsManager.set_master_volume(value)
+	_settings.set_master_volume(value)
 
 
 func _on_sfx_volume_changed(value: float) -> void:
-	SettingsManager.set_sfx_volume(value)
+	_settings.set_sfx_volume(value)
 
 
 func _on_music_volume_changed(value: float) -> void:
-	SettingsManager.set_music_volume(value)
+	_settings.set_music_volume(value)
 
 
 func _on_fullscreen_toggled(pressed: bool) -> void:
-	SettingsManager.set_fullscreen(pressed)
+	_settings.set_fullscreen(pressed)
 
 
 func _on_vsync_toggled(pressed: bool) -> void:
-	SettingsManager.set_vsync(pressed)
+	_settings.set_vsync(pressed)
 
 
 func _connect_options_signals() -> void:

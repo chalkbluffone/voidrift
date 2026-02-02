@@ -347,7 +347,7 @@ func _on_load_config_pressed() -> void:
 	reload_from_weapons_json()
 
 
-func _on_export_resource_pressed(filename: String) -> void:
+func _on_export_resource_pressed(_filename: String) -> void:
 	push_warning("Resource export deprecated - use Save to save directly to weapons.json")
 
 
