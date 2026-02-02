@@ -26,6 +26,7 @@ GameSeed="*res://globals/game_seed.gd"
 DataLoader="*res://globals/data_loader.gd"
 GameManager="*res://globals/game_manager.gd"
 FileLogger="*res://globals/file_logger.gd"
+SettingsManager="*res://globals/settings_manager.gd"
 
 [display]
 

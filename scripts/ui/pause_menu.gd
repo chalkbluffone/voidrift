@@ -2,6 +2,7 @@ extends CanvasLayer
 
 ## Pause Menu - Shows when ESC is pressed during gameplay.
 ## Pauses the game and provides navigation options.
+## Uses SettingsManager autoload for centralized settings management.
 
 signal resumed
 
@@ -89,6 +90,7 @@ func _show_options() -> void:
 	_options_visible = true
 	panel.visible = false
 	options_container.visible = true
+	_sync_ui_from_settings()
 	
 	# Focus back button in options
 	var back_btn = options_container.get_node_or_null("Panel/VBoxContainer/BackButton")
@@ -107,87 +109,47 @@ func _on_options_back_pressed() -> void:
 	_close_options()
 
 
+# --- Options UI Sync ---
+
+func _sync_ui_from_settings() -> void:
+	var master_slider = options_container.get_node_or_null("Panel/VBoxContainer/MasterVolume/Slider")
+	var sfx_slider = options_container.get_node_or_null("Panel/VBoxContainer/SFXVolume/Slider")
+	var music_slider = options_container.get_node_or_null("Panel/VBoxContainer/MusicVolume/Slider")
+	var fullscreen_check = options_container.get_node_or_null("Panel/VBoxContainer/Fullscreen/CheckButton")
+	var vsync_check = options_container.get_node_or_null("Panel/VBoxContainer/VSync/CheckButton")
+	
+	if master_slider:
+		master_slider.value = SettingsManager.master_volume
+	if sfx_slider:
+		sfx_slider.value = SettingsManager.sfx_volume
+	if music_slider:
+		music_slider.value = SettingsManager.music_volume
+	if fullscreen_check:
+		fullscreen_check.button_pressed = SettingsManager.fullscreen
+	if vsync_check:
+		vsync_check.button_pressed = SettingsManager.vsync
+
+
 # --- Options handlers ---
 
 func _on_master_volume_changed(value: float) -> void:
-	AudioServer.set_bus_volume_db(AudioServer.get_bus_index("Master"), linear_to_db(value))
-	_save_settings()
+	SettingsManager.set_master_volume(value)
 
 
 func _on_sfx_volume_changed(value: float) -> void:
-	var bus_idx = AudioServer.get_bus_index("SFX")
-	if bus_idx >= 0:
-		AudioServer.set_bus_volume_db(bus_idx, linear_to_db(value))
-	_save_settings()
+	SettingsManager.set_sfx_volume(value)
 
 
 func _on_music_volume_changed(value: float) -> void:
-	var bus_idx = AudioServer.get_bus_index("Music")
-	if bus_idx >= 0:
-		AudioServer.set_bus_volume_db(bus_idx, linear_to_db(value))
-	_save_settings()
+	SettingsManager.set_music_volume(value)
 
 
 func _on_fullscreen_toggled(pressed: bool) -> void:
-	if pressed:
-		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
-	else:
-		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
-	_save_settings()
+	SettingsManager.set_fullscreen(pressed)
 
 
 func _on_vsync_toggled(pressed: bool) -> void:
-	if pressed:
-		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED)
-	else:
-		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
-	_save_settings()
-
-
-const SAVE_PATH := "user://settings.cfg"
-
-func _save_settings() -> void:
-	var master_slider = options_container.get_node_or_null("Panel/VBoxContainer/MasterVolume/Slider")
-	var sfx_slider = options_container.get_node_or_null("Panel/VBoxContainer/SFXVolume/Slider")
-	var music_slider = options_container.get_node_or_null("Panel/VBoxContainer/MusicVolume/Slider")
-	var fullscreen_check = options_container.get_node_or_null("Panel/VBoxContainer/Fullscreen/CheckButton")
-	var vsync_check = options_container.get_node_or_null("Panel/VBoxContainer/VSync/CheckButton")
-	
-	var config = ConfigFile.new()
-	if master_slider:
-		config.set_value("audio", "master", master_slider.value)
-	if sfx_slider:
-		config.set_value("audio", "sfx", sfx_slider.value)
-	if music_slider:
-		config.set_value("audio", "music", music_slider.value)
-	if fullscreen_check:
-		config.set_value("display", "fullscreen", fullscreen_check.button_pressed)
-	if vsync_check:
-		config.set_value("display", "vsync", vsync_check.button_pressed)
-	config.save(SAVE_PATH)
-
-
-func _load_settings() -> void:
-	var config = ConfigFile.new()
-	if config.load(SAVE_PATH) != OK:
-		return
-	
-	var master_slider = options_container.get_node_or_null("Panel/VBoxContainer/MasterVolume/Slider")
-	var sfx_slider = options_container.get_node_or_null("Panel/VBoxContainer/SFXVolume/Slider")
-	var music_slider = options_container.get_node_or_null("Panel/VBoxContainer/MusicVolume/Slider")
-	var fullscreen_check = options_container.get_node_or_null("Panel/VBoxContainer/Fullscreen/CheckButton")
-	var vsync_check = options_container.get_node_or_null("Panel/VBoxContainer/VSync/CheckButton")
-	
-	if master_slider:
-		master_slider.value = config.get_value("audio", "master", 1.0)
-	if sfx_slider:
-		sfx_slider.value = config.get_value("audio", "sfx", 1.0)
-	if music_slider:
-		music_slider.value = config.get_value("audio", "music", 1.0)
-	if fullscreen_check:
-		fullscreen_check.button_pressed = config.get_value("display", "fullscreen", false)
-	if vsync_check:
-		vsync_check.button_pressed = config.get_value("display", "vsync", true)
+	SettingsManager.set_vsync(pressed)
 
 
 func _connect_options_signals() -> void:
@@ -219,4 +181,3 @@ func _notification(what: int) -> void:
 
 func _deferred_setup() -> void:
 	_connect_options_signals()
-	_load_settings()
