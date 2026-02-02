@@ -11,6 +11,9 @@ signal weapon_removed(weapon_id: String)
 # Projectile scene (will need to be created)
 const PROJECTILE_SCENE := preload("res://scenes/gameplay/projectile.tscn")
 
+# Melee weapon spawners
+const RadiantArcSpawnerScript := preload("res://effects/radiant_arc/radiant_arc_spawner.gd")
+
 # Reference to player stats
 const StatsComponentScript := preload("res://scripts/core/stats_component.gd")
 var stats_component: Node = null
@@ -19,6 +22,9 @@ var stats_component: Node = null
 @onready var DataLoader: Node = get_node("/root/DataLoader")
 @onready var GameManager: Node = get_node("/root/GameManager")
 @onready var FileLogger: Node = get_node("/root/FileLogger")
+
+# Melee weapon spawner instances
+var _radiant_arc_spawner: RadiantArcSpawner
 
 # Equipped weapons: {weapon_id: {data: Dictionary, timer: float, level: int}}
 var _equipped_weapons: Dictionary = {}
@@ -38,6 +44,11 @@ func _ready() -> void:
 	if parent.has_node("StatsComponent"):
 		stats_component = parent.get_node("StatsComponent")
 		FileLogger.log_info("WeaponComponent", "Found StatsComponent")
+	
+	# Initialize melee weapon spawners - use scene root as parent so effects aren't
+	# affected by ship rotation (they manage their own global_rotation/position)
+	var effects_parent := get_tree().current_scene
+	_radiant_arc_spawner = RadiantArcSpawnerScript.new(effects_parent)
 
 
 func _process(delta: float) -> void:
@@ -58,7 +69,9 @@ func _process_weapons() -> void:
 			_fire_weapon(weapon_id, weapon_state)
 			
 			# Reset timer based on cooldown and attack speed
-			var cooldown: float = float(weapon_state.data.get("cooldown", 0.0))
+			# Check both top-level and nested stats.cooldown for compatibility
+			var stats_dict: Dictionary = weapon_state.data.get("stats", {})
+			var cooldown: float = float(weapon_state.data.get("cooldown", stats_dict.get("cooldown", 0.0)))
 			if cooldown <= 0.0:
 				# Prefer base_stats.attack_speed (shots per second) from weapons.json
 				var base_stats: Dictionary = weapon_state.data.get("base_stats", {})
@@ -85,6 +98,8 @@ func _fire_weapon(weapon_id: String, weapon_state: Dictionary) -> void:
 			_fire_area_weapon(weapon_id, data, weapon_state.level)
 		"beam":
 			_fire_beam_weapon(weapon_id, data, weapon_state.level)
+		"melee":
+			_fire_melee_weapon(weapon_id, data, weapon_state.level)
 
 
 func _fire_projectile_weapon(weapon_id: String, data: Dictionary, _level: int) -> void:
@@ -156,6 +171,118 @@ func _fire_beam_weapon(_weapon_id: String, _data: Dictionary, _level: int) -> vo
 	# Beam weapons fire continuous damage rays
 	# Handled by BeamWeaponComponent (future implementation)
 	pass
+
+
+func _fire_melee_weapon(weapon_id: String, data: Dictionary, _level: int) -> void:
+	# Melee weapons spawn close-range effects around the player
+	FileLogger.log_info("WeaponComponent", "Firing melee weapon: %s" % weapon_id)
+	var parent := get_parent()
+	if not parent:
+		FileLogger.log_warn("WeaponComponent", "No parent for melee weapon")
+		return
+	
+	# Build flat config from nested weapon data (same format as weapon test lab)
+	var config: Dictionary = _flatten_weapon_data(data)
+	
+	_fire_melee_with_config(weapon_id, config, parent)
+
+
+func _fire_melee_with_config(weapon_id: String, config: Dictionary, source: Node2D) -> void:
+	"""Fire a melee weapon with explicit flat config. Used by both auto-fire and test lab."""
+	var spawn_pos: Vector2 = source.global_position
+	var direction: Vector2 = Vector2.RIGHT.rotated(source.rotation)
+	
+	match weapon_id:
+		"radiant_arc":
+			if _radiant_arc_spawner:
+				var arc = _radiant_arc_spawner.spawn(spawn_pos, direction, config, source)
+				if arc:
+					weapon_fired.emit(weapon_id, [arc])
+		_:
+			push_warning("WeaponComponent: Unknown melee weapon: " + weapon_id)
+
+
+func fire_weapon_with_config(weapon_id: String, config: Dictionary, source: Node2D) -> void:
+	"""Public API for firing a weapon with explicit config (for test lab).
+	   Config should be in flat format (same as weapon_test_lab uses)."""
+	# Determine weapon type from equipped data or config
+	var weapon_type: String = "melee"  # Default for radiant_arc
+	if _equipped_weapons.has(weapon_id):
+		weapon_type = _equipped_weapons[weapon_id].data.get("type", "melee")
+	
+	match weapon_type:
+		"melee":
+			_fire_melee_with_config(weapon_id, config, source)
+		_:
+			push_warning("WeaponComponent: fire_weapon_with_config not implemented for type: " + weapon_type)
+
+
+func _flatten_weapon_data(data: Dictionary) -> Dictionary:
+	"""Flatten nested weapon JSON data into a flat config dictionary for spawners.
+	   Matches the format used by weapon_test_lab for consistency."""
+	var flat: Dictionary = {}
+	
+	# Stats
+	var stats = data.get("stats", {})
+	flat["damage"] = stats.get("damage", 10.0)
+	flat["duration"] = stats.get("duration", 1.0)
+	
+	# Shape
+	var shape = data.get("shape", {})
+	flat["arc_angle_deg"] = shape.get("arc_angle_deg", 90.0)
+	flat["radius"] = shape.get("radius", 42.0)
+	flat["thickness"] = shape.get("thickness", 18.0)
+	flat["taper"] = shape.get("taper", 0.5)
+	flat["length_scale"] = shape.get("length_scale", 0.75)
+	flat["distance"] = shape.get("distance", 25.0)
+	
+	# Motion
+	var motion = data.get("motion", {})
+	flat["speed"] = motion.get("speed", 0.0)
+	flat["sweep_speed"] = motion.get("sweep_speed", 1.2)
+	flat["fade_in"] = motion.get("fade_in", 0.08)
+	flat["fade_out"] = motion.get("fade_out", 0.15)
+	flat["rotation_offset_deg"] = motion.get("rotation_offset_deg", 0.0)
+	flat["seed_offset"] = motion.get("seed_offset", 0.0)
+	
+	# Visual - convert hex strings to Color objects
+	var visual = data.get("visual", {})
+	flat["color_a"] = _hex_to_color(visual.get("color_a", "#00ffff"))
+	flat["color_b"] = _hex_to_color(visual.get("color_b", "#ff00ff"))
+	flat["color_c"] = _hex_to_color(visual.get("color_c", "#0080ff"))
+	flat["glow_strength"] = visual.get("glow_strength", 3.0)
+	flat["core_strength"] = visual.get("core_strength", 1.2)
+	flat["noise_strength"] = visual.get("noise_strength", 0.3)
+	flat["uv_scroll_speed"] = visual.get("uv_scroll_speed", 3.0)
+	flat["chromatic_aberration"] = visual.get("chromatic_aberration", 0.0)
+	flat["pulse_strength"] = visual.get("pulse_strength", 0.0)
+	flat["pulse_speed"] = visual.get("pulse_speed", 8.0)
+	flat["electric_strength"] = visual.get("electric_strength", 0.0)
+	flat["electric_frequency"] = visual.get("electric_frequency", 20.0)
+	flat["electric_speed"] = visual.get("electric_speed", 15.0)
+	flat["gradient_offset"] = visual.get("gradient_offset", 0.0)
+	
+	# Particles - convert hex string to Color
+	var particles = data.get("particles", {})
+	flat["particles_enabled"] = particles.get("enabled", true)
+	flat["particles_amount"] = particles.get("amount", 20)
+	flat["particles_size"] = particles.get("size", 3.0)
+	flat["particles_speed"] = particles.get("speed", 30.0)
+	flat["particles_lifetime"] = particles.get("lifetime", 0.4)
+	flat["particles_spread"] = particles.get("spread", 0.3)
+	flat["particles_drag"] = particles.get("drag", 1.0)
+	flat["particles_outward"] = particles.get("outward", 0.7)
+	flat["particles_radius"] = particles.get("radius", 1.0)
+	flat["particles_color"] = _hex_to_color(particles.get("color", "#ffffffcc"))
+	
+	return flat
+
+
+func _hex_to_color(hex: String) -> Color:
+	"""Convert hex color string to Color object."""
+	if hex.is_empty():
+		return Color.WHITE
+	return Color.from_string(hex, Color.WHITE)
 
 
 func _spawn_projectile(_weapon_id: String, direction: Vector2, damage: float, speed: float, piercing: int, size_mult: float, weapon_crit_chance: float = 0.0, weapon_crit_damage: float = 0.0) -> Node2D:
@@ -263,6 +390,9 @@ func equip_weapon(weapon_id: String) -> bool:
 		push_error("WeaponComponent: Unknown weapon ID: " + weapon_id)
 		return false
 	
+	var weapon_type: String = weapon_data.get("type", "projectile")
+	FileLogger.log_info("WeaponComponent", "Equipping weapon: %s (type: %s)" % [weapon_id, weapon_type])
+	
 	_equipped_weapons[weapon_id] = {
 		"data": weapon_data,
 		"timer": 0.0,  # Fire immediately
@@ -271,7 +401,7 @@ func equip_weapon(weapon_id: String) -> bool:
 	_weapon_level_bonuses[weapon_id] = {"flat": {}, "mult": {}}
 	
 	FileLogger.log_info("WeaponComponent", "Equipped weapon: %s" % weapon_id)
-	FileLogger.log_data("WeaponComponent", "Weapon base_stats", weapon_data.get("base_stats", {}))
+	FileLogger.log_data("WeaponComponent", "Weapon data", weapon_data)
 	weapon_equipped.emit(weapon_id)
 	return true
 
@@ -366,6 +496,8 @@ func get_equipped_weapon_summaries() -> Array:
 
 func sync_from_run_data() -> void:
 	"""Sync equipped weapons from GameManager run data."""
+	FileLogger.log_info("WeaponComponent", "sync_from_run_data called, weapons: %s" % str(GameManager.run_data.weapons))
 	for weapon_id in GameManager.run_data.weapons:
 		if not has_weapon(weapon_id):
+			FileLogger.log_info("WeaponComponent", "Equipping weapon from run_data: %s" % weapon_id)
 			equip_weapon(weapon_id)

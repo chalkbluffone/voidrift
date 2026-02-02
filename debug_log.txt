@@ -1,35 +1,122 @@
 === Voidrift Debug Log ===
-Started: 2026-02-01T20:00:02
+Started: 2026-02-01T20:47:51
 Log path: C:/git/voidrift/debug_log.txt
 ========================================
 
-[20:00:03] [INFO][WeaponComponent] Initializing...
-[20:00:03] [INFO][WeaponComponent] Found StatsComponent
-[20:00:03] [INFO][Ship] Initializing player ship...
-[20:00:03] [INFO][HUD] Initializing HUD...
-[20:00:03] [DEBUG][HUD] Scaled to 1.84 (viewport height: 1982)
-[20:00:03] [INFO][Ship] Running deferred init...
-[20:00:03] [INFO][Ship] No character data, setting up default weapons
-[20:00:03] [INFO][HUD] Found player: Ship
-[20:00:03] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
-[20:00:05] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
-[20:00:07] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
-[20:00:07] [INFO][EnemySpawner] Enemy died at (79.49165, 105.1081)
-[20:00:07] [DEBUG][XPPickup] Spawned at (76.45434, 108.3426)
-[20:00:07] [DEBUG][CreditPickup] Spawned at (65.44663, 94.14285) with 1 credits
-[20:00:09] [INFO][CreditPickup] Collected 1 credits!
-[20:00:09] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
-[20:00:10] [INFO][BaseEnemy] Contact damage via collision: 10
-[20:00:11] [INFO][BaseEnemy] Contact damage via collision: 10
-[20:00:11] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
-[20:00:11] [INFO][EnemySpawner] Enemy died at (132.3639, 110.6665)
-[20:00:11] [INFO][BaseEnemy] Contact damage via collision: 10
-[20:00:11] [DEBUG][XPPickup] Spawned at (128.1364, 102.5407)
-[20:00:11] [DEBUG][CreditPickup] Spawned at (139.5195, 113.9693) with 1 credits
-[20:00:12] [INFO][CreditPickup] Collected 1 credits!
-[20:00:12] [INFO][BaseEnemy] Contact damage via collision: 10
-[20:00:12] [INFO][BaseEnemy] Contact damage via collision: 10
-[20:00:13] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
-[20:00:13] [INFO][BaseEnemy] Contact damage via collision: 10
-[20:00:13] [INFO][BaseEnemy] Contact damage via collision: 10
-[20:00:13] [INFO][FileLogger] Session ended
+[20:47:52] [INFO][WeaponComponent] Initializing...
+[20:47:52] [INFO][WeaponComponent] Found StatsComponent
+[20:47:52] [INFO][Ship] Initializing player ship... (test_mode=false)
+[20:47:52] [INFO][HUD] Initializing HUD...
+[20:47:52] [DEBUG][HUD] Scaled to 1.84 (viewport height: 1982)
+[20:47:52] [INFO][Ship] Running deferred init...
+[20:47:52] [INFO][Ship] No character data, setting up default weapons
+[20:47:52] [INFO][WeaponComponent] Equipping weapon: radiant_arc (type: melee)
+[20:47:52] [INFO][WeaponComponent] Equipped weapon: radiant_arc
+[20:47:52] [DATA][WeaponComponent] Weapon data: {
+  "display_name": "Radiant Arc",
+  "motion": {
+    "fade_in": 0.18,
+    "fade_out": 0.15,
+    "rotation_offset_deg": 0.0,
+    "seed_offset": 81.0,
+    "speed": 0.0,
+    "sweep_speed": 1.0
+  },
+  "particles": {
+    "amount": 60.0,
+    "color": "#cccccccc",
+    "drag": 2.0,
+    "enabled": true,
+    "lifetime": 0.4,
+    "outward": 0.5,
+    "radius": 0.5,
+    "size": 1.0,
+    "speed": 135.0,
+    "spread": 0.5
+  },
+  "scene": "res://effects/radiant_arc/RadiantArc.tscn",
+  "shape": {
+    "arc_angle_deg": 310.0,
+    "distance": 25.0,
+    "length_scale": 1.0,
+    "radius": 156.0,
+    "taper": 0.0,
+    "thickness": 65.0
+  },
+  "spawner": "res://effects/radiant_arc/radiant_arc_spawner.gd",
+  "stats": {
+    "cooldown": 1.0,
+    "damage": 10.0,
+    "duration": 1.0
+  },
+  "type": "melee",
+  "visual": {
+    "chromatic_aberration": 1.45,
+    "color_a": "#00ffff",
+    "color_b": "#ff00ff",
+    "color_c": "#8000ff",
+    "core_strength": 0.0,
+    "electric_frequency": 32.0,
+    "electric_speed": 23.0,
+    "electric_strength": 0.85,
+    "glow_strength": 10.0,
+    "gradient_offset": 0.0,
+    "noise_strength": 1.7,
+    "pulse_speed": 26.0,
+    "pulse_strength": 0.7,
+    "uv_scroll_speed": 0.0
+  }
+}
+[20:47:52] [INFO][HUD] Found player: Ship
+[20:47:52] [INFO][WeaponComponent] Firing melee weapon: radiant_arc
+[20:47:52] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
+[20:47:53] [INFO][WeaponComponent] Firing melee weapon: radiant_arc
+[20:47:54] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
+[20:47:54] [INFO][WeaponComponent] Firing melee weapon: radiant_arc
+[20:47:55] [INFO][WeaponComponent] Firing melee weapon: radiant_arc
+[20:47:56] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
+[20:47:56] [INFO][WeaponComponent] Firing melee weapon: radiant_arc
+[20:47:57] [INFO][WeaponComponent] Firing melee weapon: radiant_arc
+[20:47:58] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
+[20:47:58] [INFO][WeaponComponent] Firing melee weapon: radiant_arc
+[20:47:59] [INFO][WeaponComponent] Firing melee weapon: radiant_arc
+[20:47:59] [INFO][EnemySpawner] Enemy died at (393.3098, -236.745)
+[20:47:59] [DEBUG][XPPickup] Spawned at (402.6459, -234.3765)
+[20:48:00] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
+[20:48:00] [INFO][WeaponComponent] Firing melee weapon: radiant_arc
+[20:48:01] [INFO][WeaponComponent] Firing melee weapon: radiant_arc
+[20:48:01] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
+[20:48:02] [INFO][WeaponComponent] Firing melee weapon: radiant_arc
+[20:48:03] [INFO][EnemySpawner] Enemy died at (394.8571, 89.69482)
+[20:48:03] [DEBUG][XPPickup] Spawned at (401.4045, 90.83296)
+[20:48:03] [DEBUG][CreditPickup] Spawned at (388.0751, 77.65325) with 1 credits
+[20:48:03] [INFO][WeaponComponent] Firing melee weapon: radiant_arc
+[20:48:03] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
+[20:48:03] [INFO][EnemySpawner] Enemy died at (346.7527, 136.7042)
+[20:48:03] [DEBUG][XPPickup] Spawned at (341.2824, 140.1002)
+[20:48:03] [DEBUG][CreditPickup] Spawned at (360.5714, 148.7336) with 1 credits
+[20:48:03] [INFO][EnemySpawner] Enemy died at (318.0846, 186.6186)
+[20:48:03] [DEBUG][XPPickup] Spawned at (315.1624, 183.7446)
+[20:48:03] [DEBUG][CreditPickup] Spawned at (308.5558, 190.3235) with 1 credits
+[20:48:04] [INFO][CreditPickup] Collected 1 credits!
+[20:48:04] [INFO][WeaponComponent] Firing melee weapon: radiant_arc
+[20:48:05] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
+[20:48:05] [INFO][WeaponComponent] Firing melee weapon: radiant_arc
+[20:48:05] [INFO][EnemySpawner] Enemy died at (229.754, 172.4417)
+[20:48:05] [DEBUG][XPPickup] Spawned at (222.3486, 168.5043)
+[20:48:06] [INFO][CreditPickup] Collected 1 credits!
+[20:48:06] [INFO][WeaponComponent] Firing melee weapon: radiant_arc
+[20:48:07] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
+[20:48:07] [INFO][WeaponComponent] Firing melee weapon: radiant_arc
+[20:48:08] [INFO][WeaponComponent] Firing melee weapon: radiant_arc
+[20:48:08] [INFO][BaseEnemy] Contact damage via collision: 10
+[20:48:08] [INFO][EnemySpawner] Enemy died at (235.2443, 279.3692)
+[20:48:08] [DEBUG][XPPickup] Spawned at (244.7571, 275.3404)
+[20:48:08] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
+[20:48:09] [INFO][WeaponComponent] Firing melee weapon: radiant_arc
+[20:48:09] [INFO][BaseEnemy] Contact damage via collision: 10
+[20:48:10] [INFO][BaseEnemy] Contact damage via collision: 10
+[20:48:10] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
+[20:48:10] [INFO][WeaponComponent] Firing melee weapon: radiant_arc
+[20:48:10] [INFO][BaseEnemy] Contact damage via collision: 10
+[20:48:10] [INFO][FileLogger] Session ended

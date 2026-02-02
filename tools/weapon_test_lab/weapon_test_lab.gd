@@ -2,26 +2,28 @@ extends Node2D
 class_name WeaponTestLab
 
 ## Weapon Test Lab - Development tool for testing and tuning weapons.
+## Uses the REAL Ship scene for accurate testing.
 ## Loads weapon data from weapons.json and can save changes back.
 
 signal weapon_changed(weapon_id: String)
 signal config_saved(weapon_id: String)
 
 # --- Preloads ---
-const RadiantArcSpawnerScript := preload("res://effects/radiant_arc/radiant_arc_spawner.gd")
+const ShipScene := preload("res://scenes/gameplay/ship.tscn")
 const TestTargetScene := preload("res://tools/weapon_test_lab/test_target.tscn")
 
 # --- Node references ---
 @onready var camera: Camera2D = $Camera2D
-@onready var test_ship: Node2D = $TestShip
 @onready var target_container: Node2D = $TargetContainer
 @onready var ui_panel: CanvasLayer = $WeaponTestUI
 @onready var DataLoader: Node = get_node("/root/DataLoader")
 
+# Ship instance (real Ship scene)
+var test_ship: Node2D = null
+
 # --- State ---
 var _current_weapon_id: String = ""
 var _current_config: Dictionary = {}  # Flat config for UI
-var _arc_spawner: RadiantArcSpawner
 var _auto_fire_enabled: bool = true
 var _fire_timer: float = 0.0
 var _fire_rate: float = 1.0
@@ -42,7 +44,16 @@ var _last_move_direction: Vector2 = Vector2.RIGHT
 
 
 func _ready() -> void:
-	_arc_spawner = RadiantArcSpawnerScript.new(self)
+	# Instantiate the real Ship scene in test mode
+	test_ship = ShipScene.instantiate()
+	test_ship.test_mode = true  # Disable GameManager integration
+	test_ship.position = Vector2.ZERO
+	add_child(test_ship)
+	
+	# Disable the ship's camera (we use our own)
+	var ship_camera = test_ship.get_node_or_null("Camera2D")
+	if ship_camera:
+		ship_camera.enabled = false
 	
 	# Build weapon list from DataLoader
 	var weapon_list: Array[Dictionary] = []
@@ -122,6 +133,11 @@ func _process_auto_spawn(delta: float) -> void:
 func select_weapon(weapon_id: String) -> void:
 	_current_weapon_id = weapon_id
 	_current_config = _flatten_weapon_config(DataLoader.get_weapon(weapon_id))
+	
+	# Equip the weapon on the ship
+	if test_ship:
+		test_ship.equip_weapon_for_test(weapon_id)
+	
 	weapon_changed.emit(weapon_id)
 	
 	if ui_panel:
@@ -132,20 +148,8 @@ func fire_weapon() -> void:
 	if not test_ship:
 		return
 	
-	var direction = Vector2.RIGHT.rotated(test_ship.rotation)
-	var spawn_pos = test_ship.global_position
-	
-	match _current_weapon_id:
-		"radiant_arc":
-			_fire_radiant_arc(spawn_pos, direction)
-		_:
-			push_warning("WeaponTestLab: Unknown weapon type: " + _current_weapon_id)
-
-
-func _fire_radiant_arc(spawn_pos: Vector2, direction: Vector2) -> void:
-	var arc = _arc_spawner.spawn(spawn_pos, direction, _current_config, test_ship)
-	if _show_hitboxes and arc:
-		arc.set_debug_draw(true)
+	# Use the ship's weapon component to fire (same code path as the real game)
+	test_ship.fire_weapon_manual(_current_weapon_id, _current_config)
 
 
 func spawn_target_at_random() -> void:

@@ -23,7 +23,7 @@
 	  "stardust_gain": 1.0,
 	  "luck": 0
 	},
-	"starting_weapon": "plasma_cannon",
+	"starting_weapon": "radiant_arc",
 	"passive": {
 	  "id": "standard_issue",
 	  "name": "Standard Issue",

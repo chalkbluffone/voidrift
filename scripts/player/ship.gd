@@ -2,6 +2,7 @@ extends CharacterBody2D
 
 ## Player ship controller with StatsComponent, Phase Shift, and i-frames.
 ## Tank controls: W thrusts forward, A/D turns, S moves down.
+## Can be used in test mode (weapon test lab) by setting test_mode = true before _ready.
 
 signal phase_shift_started
 signal phase_shift_ended
@@ -9,15 +10,18 @@ signal phase_energy_changed(current: int, maximum: int)
 
 # --- Preloads ---
 const StatsComponentScript := preload("res://scripts/core/stats_component.gd")
-const RadiantArcSpawnerScript := preload("res://effects/radiant_arc/radiant_arc_spawner.gd")
 
 # --- Components ---
 @onready var stats: Node = $StatsComponent
 @onready var weapons: Node = $WeaponComponent
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 @onready var sprite: AnimatedSprite2D = $Sprite2D
-@onready var GameManager: Node = get_node("/root/GameManager")
-@onready var FileLogger: Node = get_node("/root/FileLogger")
+@onready var GameManager: Node = get_node_or_null("/root/GameManager")
+@onready var FileLogger: Node = get_node_or_null("/root/FileLogger")
+
+# --- Test Mode ---
+## When true, skips GameManager registration and auto-weapon equip
+@export var test_mode: bool = false
 
 # --- Phase Shift ---
 const PHASE_SHIFT_DURATION := 0.3  # How long the dash lasts
@@ -42,63 +46,46 @@ var _base_speed: float = 100.0  # Will be set from GameConfig in _ready
 var _last_move_direction: Vector2 = Vector2.RIGHT
 var _knockback_velocity: Vector2 = Vector2.ZERO
 var _last_input_device: String = "keyboard" # "keyboard" or "joypad"
-var _arc_spawner: RadiantArcSpawner
 const KNOCKBACK_FRICTION := 10.0
 const DAMAGE_IFRAMES := 0.5  # Brief i-frames after taking damage
 
-# Auto-fire radiant arc
-var _arc_fire_timer: float = 0.0
-const ARC_FIRE_INTERVAL: float = 1.0  # Fire once per second
-
-# Default radiant arc settings (previously from debug UI)
-var _arc_settings: Dictionary = {
-	"arc_angle_deg": 90.0,
-	"radius": 42.0,
-	"thickness": 18.0,
-	"taper": 0.5,
-	"length_scale": 0.75,
-	"distance": 25.0,
-	"duration": 0.8,
-	"sweep_speed": 1.2,
-	"glow_strength": 3.0,
-	"fade_in": 0.08,
-	"fade_out": 0.15,
-}
-
 
 func _ready() -> void:
-	FileLogger.log_info("Ship", "Initializing player ship...")
-	
-	# Initialize radiant arc spawner
-	_arc_spawner = RadiantArcSpawnerScript.new(self)
+	if FileLogger:
+		FileLogger.log_info("Ship", "Initializing player ship... (test_mode=%s)" % test_mode)
 	
 	# Set base speed from config
-	var config: Node = get_node("/root/GameConfig")
-	_base_speed = config.PLAYER_BASE_SPEED
+	var config: Node = get_node_or_null("/root/GameConfig")
+	if config:
+		_base_speed = config.PLAYER_BASE_SPEED
 	
-	# Set pickup range from config
-	var pickup_range: Area2D = get_node_or_null("PickupRange")
-	if pickup_range:
-		var shape: CollisionShape2D = pickup_range.get_node_or_null("PickupRangeShape")
-		if shape and shape.shape is CircleShape2D:
-			(shape.shape as CircleShape2D).radius = config.PICKUP_MAGNET_RADIUS
+	# Set pickup range from config (skip in test mode)
+	if not test_mode:
+		var pickup_range: Area2D = get_node_or_null("PickupRange")
+		if pickup_range and config:
+			var shape: CollisionShape2D = pickup_range.get_node_or_null("PickupRangeShape")
+			if shape and shape.shape is CircleShape2D:
+				(shape.shape as CircleShape2D).radius = config.PICKUP_MAGNET_RADIUS
 	
-	# Register with GameManager
-	GameManager.register_player(self)
-	
-	# Listen for level ups
-	if not GameManager.level_up_completed.is_connected(_on_level_up_completed):
-		GameManager.level_up_completed.connect(_on_level_up_completed)
+	# Register with GameManager (skip in test mode)
+	if not test_mode and GameManager:
+		GameManager.register_player(self)
+		
+		# Listen for level ups
+		if not GameManager.level_up_completed.is_connected(_on_level_up_completed):
+			GameManager.level_up_completed.connect(_on_level_up_completed)
 	
 	# Connect stats signals
-	stats.hp_changed.connect(_on_hp_changed)
-	stats.died.connect(_on_died)
+	if stats:
+		stats.hp_changed.connect(_on_hp_changed)
+		stats.died.connect(_on_died)
 	
 	phase_energy = max_phase_energy
 	phase_energy_changed.emit(phase_energy, max_phase_energy)
 	
-	# Defer weapon setup to ensure all @onready vars are initialized
-	call_deferred("_deferred_init")
+	# Defer weapon setup to ensure all @onready vars are initialized (skip in test mode)
+	if not test_mode:
+		call_deferred("_deferred_init")
 
 
 func _initialize_from_character(character_data: Dictionary) -> void:
@@ -130,23 +117,15 @@ func _deferred_init() -> void:
 
 
 func _setup_default_weapons() -> void:
-	# Default weapon for testing
-	weapons.equip_weapon("plasma_cannon")
+	# Default weapon for testing (when running world scene directly)
+	weapons.equip_weapon("radiant_arc")
 
 
 func _physics_process(delta: float) -> void:
 	_process_phase_shift(delta)
 	_process_phase_recharge(delta)
 	_process_iframes(delta)
-	_process_arc_auto_fire(delta)
 	_process_movement(delta)
-
-
-func _process_arc_auto_fire(delta: float) -> void:
-	_arc_fire_timer += delta
-	if _arc_fire_timer >= ARC_FIRE_INTERVAL:
-		_arc_fire_timer = 0.0
-		_spawn_radiant_arc()
 
 
 func _process_movement(delta: float) -> void:
@@ -379,15 +358,20 @@ func is_invincible() -> bool:
 	return _is_invincible or _is_phasing
 
 
-# --- Radiant Arc ---
+# --- Test Mode API ---
 
-func _spawn_radiant_arc() -> void:
-	"""Spawn the radiant arc slash effect."""
-	var params = _arc_settings.duplicate()
-	params["seed_offset"] = randf()
-	_arc_spawner.spawn(
-		global_position,
-		Vector2.RIGHT.rotated(rotation),
-		params,
-		self  # Pass self so arc follows our movement direction
-	)
+func get_weapon_component() -> Node:
+	"""Get the WeaponComponent for external control (e.g., test lab)."""
+	return weapons
+
+
+func fire_weapon_manual(weapon_id: String, config: Dictionary) -> void:
+	"""Fire a weapon with explicit config (for test lab)."""
+	if weapons and weapons.has_method("fire_weapon_with_config"):
+		weapons.fire_weapon_with_config(weapon_id, config, self)
+
+
+func equip_weapon_for_test(weapon_id: String) -> void:
+	"""Equip a weapon in test mode."""
+	if weapons and weapons.has_method("equip_weapon"):
+		weapons.equip_weapon(weapon_id)

@@ -20,9 +20,10 @@ Voidrift is a **top-down 2D sci-fi roguelike survival game** inspired by Megabon
 
 ### Combat
 
-- **Auto-attack**: Weapons fire automatically at nearby enemies
+- **Auto-attack**: ALL weapons fire automatically - there is NO manual firing
 - **No manual aiming**: Focus is on positioning and build choices
 - **Multiple weapons**: Can equip/upgrade multiple weapons simultaneously
+- **Weapon types**: projectile, orbit, area, beam, melee - all auto-fire based on cooldown
 
 ### Phase Shift (Dash Ability)
 

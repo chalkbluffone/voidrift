@@ -60,9 +60,8 @@ class DebugCircle extends Node2D:
 @export var particles_radius: float = 1.0  # Where sparks spawn: 0 = inner edge, 0.5 = middle, 1 = outer edge
 @export var particles_color: Color = Color(1.0, 1.0, 1.0, 0.8)
 
-# Movement tracking - arc follows source's movement direction
-var _follow_source: Node2D = null  # Reference to player/ship to track movement
-var _source_last_pos: Vector2 = Vector2.ZERO
+# Movement tracking - arc follows source's facing direction
+var _follow_source: Node2D = null  # Reference to player/ship to track facing
 
 # Damage tracking
 var _hit_targets: Array = []  # Track what we've already hit
@@ -651,19 +650,12 @@ func _process(delta: float) -> void:
 		queue_free()
 		return
 	
-	# Follow source's movement direction
+	# Follow source's facing direction (rotation)
 	if _follow_source and is_instance_valid(_follow_source):
-		var current_pos = _follow_source.global_position
-		var move_delta = current_pos - _source_last_pos
-		
-		# Only update rotation if there's actual movement
-		if move_delta.length_squared() > 0.01:
-			var move_dir = move_delta.normalized()
-			rotation = move_dir.angle() + deg_to_rad(rotation_offset_deg)
-		
-		# Arc stays attached to source position
-		global_position = current_pos + Vector2.RIGHT.rotated(rotation) * distance
-		_source_last_pos = current_pos
+		# Ship.rotation represents the movement direction (0 = right, PI/2 = down, etc.)
+		# Arc is spawned at scene root so rotation = global_rotation
+		rotation = _follow_source.rotation + deg_to_rad(rotation_offset_deg)
+		global_position = _follow_source.global_position
 	elif speed > 0.0:
 		# Fallback: Update position if moving forward (no source tracking)
 		var direction = Vector2.RIGHT.rotated(rotation)
@@ -828,8 +820,9 @@ func set_direction(direction: Vector2) -> RadiantArc:
 
 
 func spawn_from(spawn_pos: Vector2, direction: Vector2) -> RadiantArc:
-	"""Position and orient the effect from a spawn point."""
-	global_position = spawn_pos + direction * distance
+	"""Position and orient the effect from a spawn point.
+	   Note: The distance offset is baked into the mesh, so we just set position to spawn_pos."""
+	global_position = spawn_pos
 	set_direction(direction)
 	_start_pos = global_position
 	_start_rotation = rotation
@@ -837,8 +830,6 @@ func spawn_from(spawn_pos: Vector2, direction: Vector2) -> RadiantArc:
 
 
 func set_follow_source(source: Node2D) -> RadiantArc:
-	"""Set a source node to follow. Arc will track this node's movement direction."""
+	"""Set a source node to follow. Arc will track this node's facing direction (rotation)."""
 	_follow_source = source
-	if source:
-		_source_last_pos = source.global_position
 	return self
