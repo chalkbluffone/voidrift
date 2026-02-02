@@ -2,15 +2,13 @@ extends Node2D
 class_name WeaponTestLab
 
 ## Weapon Test Lab - Development tool for testing and tuning weapons.
-## This scene provides a sandbox environment to test weapon behaviors,
-## adjust parameters in real-time, and save configurations.
+## Loads weapon data from weapons.json and can save changes back.
 
 signal weapon_changed(weapon_id: String)
-signal config_saved(weapon_id: String, config: Dictionary)
+signal config_saved(weapon_id: String)
 
 # --- Preloads ---
 const RadiantArcSpawnerScript := preload("res://effects/radiant_arc/radiant_arc_spawner.gd")
-const WeaponComponentScript := preload("res://scripts/combat/weapon_component.gd")
 const TestTargetScene := preload("res://tools/weapon_test_lab/test_target.tscn")
 
 # --- Node references ---
@@ -18,20 +16,21 @@ const TestTargetScene := preload("res://tools/weapon_test_lab/test_target.tscn")
 @onready var test_ship: Node2D = $TestShip
 @onready var target_container: Node2D = $TargetContainer
 @onready var ui_panel: CanvasLayer = $WeaponTestUI
+@onready var DataLoader: Node = get_node("/root/DataLoader")
 
 # --- State ---
 var _current_weapon_id: String = ""
-var _current_config: Dictionary = {}
+var _current_config: Dictionary = {}  # Flat config for UI
 var _arc_spawner: RadiantArcSpawner
 var _auto_fire_enabled: bool = true
 var _fire_timer: float = 0.0
-var _fire_rate: float = 1.0  # Fires per second
+var _fire_rate: float = 1.0
 var _target_spawn_timer: float = 0.0
 var _auto_spawn_targets: bool = false
 
 # Target settings
 var _target_speed: float = 50.0
-var _target_spawn_rate: float = 2.0  # Seconds between spawns
+var _target_spawn_rate: float = 2.0
 var _target_hp: float = 100.0
 
 # Debug settings
@@ -41,46 +40,19 @@ var _show_hitboxes: bool = false
 var _ship_speed: float = 300.0
 var _last_move_direction: Vector2 = Vector2.RIGHT
 
-# Available weapon types to test
-var _available_weapons: Array[Dictionary] = [
-	{
-		"id": "radiant_arc",
-		"name": "Radiant Arc",
-		"type": "melee",
-		"config_resource": "res://effects/radiant_arc/radiant_arc_config.gd"
-	},
-	{
-		"id": "plasma_cannon",
-		"name": "Plasma Cannon",
-		"type": "projectile",
-		"data_source": "weapons.json"
-	},
-	{
-		"id": "laser_array",
-		"name": "Laser Array",
-		"type": "projectile",
-		"data_source": "weapons.json"
-	},
-	{
-		"id": "ion_orbit",
-		"name": "Ion Orbit",
-		"type": "orbit",
-		"data_source": "weapons.json"
-	},
-	{
-		"id": "missile_pod",
-		"name": "Missile Pod",
-		"type": "projectile",
-		"data_source": "weapons.json"
-	},
-]
-
 
 func _ready() -> void:
 	_arc_spawner = RadiantArcSpawnerScript.new(self)
 	
-	# Initialize with radiant arc by default
-	select_weapon("radiant_arc")
+	# Build weapon list from DataLoader
+	var weapon_list: Array[Dictionary] = []
+	for weapon_id in DataLoader.get_weapon_ids():
+		var weapon_data = DataLoader.get_weapon(weapon_id)
+		weapon_list.append({
+			"id": weapon_id,
+			"name": weapon_data.get("display_name", weapon_id),
+			"type": weapon_data.get("type", "unknown")
+		})
 	
 	# Connect UI signals
 	if ui_panel:
@@ -92,11 +64,14 @@ func _ready() -> void:
 		ui_panel.clear_targets_pressed.connect(_on_clear_targets_pressed)
 		ui_panel.save_config_pressed.connect(_on_save_config_pressed)
 		ui_panel.load_config_pressed.connect(_on_load_config_pressed)
-		ui_panel.export_resource_pressed.connect(_on_export_resource_pressed)
 		ui_panel.target_settings_changed.connect(_on_target_settings_changed)
 		ui_panel.auto_spawn_toggled.connect(_on_auto_spawn_toggled)
 		ui_panel.show_hitboxes_toggled.connect(_on_show_hitboxes_toggled)
-		ui_panel.initialize(_available_weapons)
+		ui_panel.initialize(weapon_list)
+	
+	# Initialize with first weapon
+	if weapon_list.size() > 0:
+		select_weapon(weapon_list[0].id)
 
 
 func _process(delta: float) -> void:
@@ -146,7 +121,7 @@ func _process_auto_spawn(delta: float) -> void:
 
 func select_weapon(weapon_id: String) -> void:
 	_current_weapon_id = weapon_id
-	_current_config = _get_default_config(weapon_id)
+	_current_config = _flatten_weapon_config(DataLoader.get_weapon(weapon_id))
 	weapon_changed.emit(weapon_id)
 	
 	if ui_panel:
@@ -164,43 +139,13 @@ func fire_weapon() -> void:
 		"radiant_arc":
 			_fire_radiant_arc(spawn_pos, direction)
 		_:
-			_fire_projectile_weapon(spawn_pos, direction)
+			push_warning("WeaponTestLab: Unknown weapon type: " + _current_weapon_id)
 
 
 func _fire_radiant_arc(spawn_pos: Vector2, direction: Vector2) -> void:
 	var arc = _arc_spawner.spawn(spawn_pos, direction, _current_config, test_ship)
 	if _show_hitboxes and arc:
 		arc.set_debug_draw(true)
-
-
-func _fire_projectile_weapon(spawn_pos: Vector2, direction: Vector2) -> void:
-	# Use the projectile scene directly for testing
-	var projectile_scene = load("res://scenes/gameplay/projectile.tscn")
-	if not projectile_scene:
-		push_warning("WeaponTestLab: Could not load projectile scene")
-		return
-	
-	var base_damage: float = _current_config.get("damage", 10.0)
-	var base_speed: float = _current_config.get("projectile_speed", 400.0)
-	var projectile_count: int = _current_config.get("projectile_count", 1)
-	var spread: float = _current_config.get("spread", 15.0)
-	var piercing: int = _current_config.get("piercing", 0)
-	var size_mult: float = _current_config.get("size", 1.0)
-	
-	for i in range(projectile_count):
-		var angle_offset := 0.0
-		if projectile_count > 1:
-			var spread_range: float = deg_to_rad(spread)
-			angle_offset = lerp(-spread_range / 2, spread_range / 2, float(i) / (projectile_count - 1))
-		
-		var proj_dir = direction.rotated(angle_offset)
-		var projectile = projectile_scene.instantiate()
-		
-		if projectile.has_method("initialize"):
-			projectile.initialize(base_damage, proj_dir, base_speed, piercing, size_mult, null, {}, 0.0, 0.0)
-		
-		projectile.global_position = spawn_pos
-		add_child(projectile)
 
 
 func spawn_target_at_random() -> void:
@@ -226,68 +171,141 @@ func clear_all_targets() -> void:
 		child.queue_free()
 
 
-func _get_default_config(weapon_id: String) -> Dictionary:
-	match weapon_id:
-		"radiant_arc":
-			return {
-				"arc_angle_deg": 90.0,
-				"radius": 42.0,
-				"thickness": 18.0,
-				"taper": 0.5,
-				"length_scale": 0.75,
-				"distance": 25.0,
-				"speed": 0.0,
-				"duration": 0.8,
-				"fade_in": 0.08,
-				"fade_out": 0.15,
-				"color_a": Color(0.0, 1.0, 1.0, 1.0),
-				"color_b": Color(1.0, 0.0, 1.0, 1.0),
-				"color_c": Color(0.0, 0.5, 1.0, 1.0),
-				"glow_strength": 3.0,
-				"core_strength": 1.2,
-				"noise_strength": 0.3,
-				"uv_scroll_speed": 3.0,
-				"chromatic_aberration": 0.5,
-				"pulse_strength": 0.4,
-				"pulse_speed": 8.0,
-				"electric_strength": 0.5,
-				"electric_frequency": 20.0,
-				"electric_speed": 15.0,
-				"gradient_offset": 0.0,
-				"rotation_offset_deg": 0.0,
-				"seed_offset": 0.0,
-				"damage": 25.0,
-				"particles_enabled": true,
-				"particles_amount": 30,
-				"particles_size": 5.0,
-				"particles_speed": 100.0,
-				"particles_lifetime": 0.4,
-				"particles_spread": 0.5,
-				"particles_drag": 1.2,
-				"particles_outward": 0.6,
-				"particles_radius": 0.8,
-				"particles_color": Color(1.0, 1.0, 1.0, 0.8),
-			}
-		"plasma_cannon", "laser_array", "missile_pod":
-			return {
-				"damage": 10.0,
-				"projectile_speed": 500.0,
-				"projectile_count": 1,
-				"spread": 15.0,
-				"piercing": 0,
-				"size": 1.0,
-				"attack_speed": 1.0,
-			}
-		"ion_orbit":
-			return {
-				"damage": 8.0,
-				"projectile_count": 2,
-				"size": 1.2,
-				"duration": 5.0,
-				"orbit_speed": 200.0,
-			}
-		_:
-			return {}
+## Flatten nested JSON weapon data into a flat dict for UI sliders.
+func _flatten_weapon_config(weapon_data: Dictionary) -> Dictionary:
+	var flat: Dictionary = {}
+	
+	# Stats
+	var stats = weapon_data.get("stats", {})
+	flat["damage"] = stats.get("damage", 10.0)
+	flat["duration"] = stats.get("duration", 1.0)
+	
+	# Shape
+	var shape = weapon_data.get("shape", {})
+	flat["arc_angle_deg"] = shape.get("arc_angle_deg", 90.0)
+	flat["radius"] = shape.get("radius", 42.0)
+	flat["thickness"] = shape.get("thickness", 18.0)
+	flat["taper"] = shape.get("taper", 0.5)
+	flat["length_scale"] = shape.get("length_scale", 0.75)
+	flat["distance"] = shape.get("distance", 25.0)
+	
+	# Motion
+	var motion = weapon_data.get("motion", {})
+	flat["speed"] = motion.get("speed", 0.0)
+	flat["sweep_speed"] = motion.get("sweep_speed", 1.2)
+	flat["fade_in"] = motion.get("fade_in", 0.08)
+	flat["fade_out"] = motion.get("fade_out", 0.15)
+	flat["rotation_offset_deg"] = motion.get("rotation_offset_deg", 0.0)
+	flat["seed_offset"] = motion.get("seed_offset", 0.0)
+	
+	# Visual
+	var visual = weapon_data.get("visual", {})
+	flat["color_a"] = _hex_to_color(visual.get("color_a", "#00ffff"))
+	flat["color_b"] = _hex_to_color(visual.get("color_b", "#ff00ff"))
+	flat["color_c"] = _hex_to_color(visual.get("color_c", "#0080ff"))
+	flat["glow_strength"] = visual.get("glow_strength", 3.0)
+	flat["core_strength"] = visual.get("core_strength", 1.2)
+	flat["noise_strength"] = visual.get("noise_strength", 0.3)
+	flat["uv_scroll_speed"] = visual.get("uv_scroll_speed", 3.0)
+	flat["chromatic_aberration"] = visual.get("chromatic_aberration", 0.0)
+	flat["pulse_strength"] = visual.get("pulse_strength", 0.0)
+	flat["pulse_speed"] = visual.get("pulse_speed", 8.0)
+	flat["electric_strength"] = visual.get("electric_strength", 0.0)
+	flat["electric_frequency"] = visual.get("electric_frequency", 20.0)
+	flat["electric_speed"] = visual.get("electric_speed", 15.0)
+	flat["gradient_offset"] = visual.get("gradient_offset", 0.0)
+	
+	# Particles
+	var particles = weapon_data.get("particles", {})
+	flat["particles_enabled"] = particles.get("enabled", true)
+	flat["particles_amount"] = particles.get("amount", 20)
+	flat["particles_size"] = particles.get("size", 3.0)
+	flat["particles_speed"] = particles.get("speed", 30.0)
+	flat["particles_lifetime"] = particles.get("lifetime", 0.4)
+	flat["particles_spread"] = particles.get("spread", 0.3)
+	flat["particles_drag"] = particles.get("drag", 1.0)
+	flat["particles_outward"] = particles.get("outward", 0.7)
+	flat["particles_radius"] = particles.get("radius", 1.0)
+	flat["particles_color"] = _hex_to_color(particles.get("color", "#ffffffcc"))
+	
+	return flat
+
+
+## Convert flat UI config back to nested JSON structure.
+func _unflatten_weapon_config(flat: Dictionary, original: Dictionary) -> Dictionary:
+	var result = original.duplicate(true)
+	
+	# Stats
+	if not result.has("stats"):
+		result["stats"] = {}
+	result["stats"]["damage"] = flat.get("damage", 10.0)
+	result["stats"]["duration"] = flat.get("duration", 1.0)
+	
+	# Shape
+	if not result.has("shape"):
+		result["shape"] = {}
+	result["shape"]["arc_angle_deg"] = flat.get("arc_angle_deg", 90.0)
+	result["shape"]["radius"] = flat.get("radius", 42.0)
+	result["shape"]["thickness"] = flat.get("thickness", 18.0)
+	result["shape"]["taper"] = flat.get("taper", 0.5)
+	result["shape"]["length_scale"] = flat.get("length_scale", 0.75)
+	result["shape"]["distance"] = flat.get("distance", 25.0)
+	
+	# Motion
+	if not result.has("motion"):
+		result["motion"] = {}
+	result["motion"]["speed"] = flat.get("speed", 0.0)
+	result["motion"]["sweep_speed"] = flat.get("sweep_speed", 1.2)
+	result["motion"]["fade_in"] = flat.get("fade_in", 0.08)
+	result["motion"]["fade_out"] = flat.get("fade_out", 0.15)
+	result["motion"]["rotation_offset_deg"] = flat.get("rotation_offset_deg", 0.0)
+	result["motion"]["seed_offset"] = flat.get("seed_offset", 0.0)
+	
+	# Visual
+	if not result.has("visual"):
+		result["visual"] = {}
+	result["visual"]["color_a"] = _color_to_hex(flat.get("color_a", Color.CYAN))
+	result["visual"]["color_b"] = _color_to_hex(flat.get("color_b", Color.MAGENTA))
+	result["visual"]["color_c"] = _color_to_hex(flat.get("color_c", Color(0, 0.5, 1)))
+	result["visual"]["glow_strength"] = flat.get("glow_strength", 3.0)
+	result["visual"]["core_strength"] = flat.get("core_strength", 1.2)
+	result["visual"]["noise_strength"] = flat.get("noise_strength", 0.3)
+	result["visual"]["uv_scroll_speed"] = flat.get("uv_scroll_speed", 3.0)
+	result["visual"]["chromatic_aberration"] = flat.get("chromatic_aberration", 0.0)
+	result["visual"]["pulse_strength"] = flat.get("pulse_strength", 0.0)
+	result["visual"]["pulse_speed"] = flat.get("pulse_speed", 8.0)
+	result["visual"]["electric_strength"] = flat.get("electric_strength", 0.0)
+	result["visual"]["electric_frequency"] = flat.get("electric_frequency", 20.0)
+	result["visual"]["electric_speed"] = flat.get("electric_speed", 15.0)
+	result["visual"]["gradient_offset"] = flat.get("gradient_offset", 0.0)
+	
+	# Particles
+	if not result.has("particles"):
+		result["particles"] = {}
+	result["particles"]["enabled"] = flat.get("particles_enabled", true)
+	result["particles"]["amount"] = int(flat.get("particles_amount", 20))
+	result["particles"]["size"] = flat.get("particles_size", 3.0)
+	result["particles"]["speed"] = flat.get("particles_speed", 30.0)
+	result["particles"]["lifetime"] = flat.get("particles_lifetime", 0.4)
+	result["particles"]["spread"] = flat.get("particles_spread", 0.3)
+	result["particles"]["drag"] = flat.get("particles_drag", 1.0)
+	result["particles"]["outward"] = flat.get("particles_outward", 0.7)
+	result["particles"]["radius"] = flat.get("particles_radius", 1.0)
+	result["particles"]["color"] = _color_to_hex(flat.get("particles_color", Color(1, 1, 1, 0.8)))
+	
+	return result
+
+
+func _hex_to_color(hex: String) -> Color:
+	if hex.is_empty():
+		return Color.WHITE
+	return Color.from_string(hex, Color.WHITE)
+
+
+func _color_to_hex(color: Color) -> String:
+	if color.a < 1.0:
+		return "#" + color.to_html(true)  # Include alpha
+	return "#" + color.to_html(false)  # No alpha
 
 
 # --- Signal handlers ---
@@ -318,18 +336,15 @@ func _on_clear_targets_pressed() -> void:
 
 
 func _on_save_config_pressed() -> void:
-	save_current_config()
+	save_to_weapons_json()
 
 
 func _on_load_config_pressed() -> void:
-	load_saved_config(_current_weapon_id)
+	reload_from_weapons_json()
 
 
 func _on_export_resource_pressed(filename: String) -> void:
-	if _current_weapon_id == "radiant_arc":
-		save_radiant_arc_resource(filename)
-	else:
-		push_warning("Resource export only supported for radiant_arc currently")
+	push_warning("Resource export deprecated - use Save to save directly to weapons.json")
 
 
 func set_fire_rate(rate: float) -> void:
@@ -354,98 +369,28 @@ func _on_show_hitboxes_toggled(enabled: bool) -> void:
 	_show_hitboxes = enabled
 
 
-# --- Save/Load ---
+# --- Save/Load to weapons.json ---
 
-const SAVE_PATH_PREFIX = "user://weapon_configs/"
-
-func save_current_config() -> void:
+func save_to_weapons_json() -> void:
+	"""Save current config back to weapons.json via DataLoader."""
 	if _current_weapon_id.is_empty():
 		return
 	
-	# Ensure directory exists
-	if not DirAccess.dir_exists_absolute(SAVE_PATH_PREFIX):
-		DirAccess.make_dir_recursive_absolute(SAVE_PATH_PREFIX)
+	var original_data = DataLoader.get_weapon(_current_weapon_id)
+	var updated_data = _unflatten_weapon_config(_current_config, original_data)
 	
-	var save_path = SAVE_PATH_PREFIX + _current_weapon_id + ".cfg"
-	var config = ConfigFile.new()
-	
-	for key in _current_config:
-		var value = _current_config[key]
-		# Handle Color specially
-		if value is Color:
-			config.set_value("config", key + "_r", value.r)
-			config.set_value("config", key + "_g", value.g)
-			config.set_value("config", key + "_b", value.b)
-			config.set_value("config", key + "_a", value.a)
-		else:
-			config.set_value("config", key, value)
-	
-	var err = config.save(save_path)
-	if err == OK:
-		print("[WeaponTestLab] Saved config to: ", save_path)
-		config_saved.emit(_current_weapon_id, _current_config)
+	if DataLoader.save_weapon(_current_weapon_id, updated_data):
+		print("[WeaponTestLab] Saved %s to weapons.json" % _current_weapon_id)
+		config_saved.emit(_current_weapon_id)
 	else:
-		push_error("[WeaponTestLab] Failed to save config: ", err)
+		push_error("[WeaponTestLab] Failed to save %s" % _current_weapon_id)
 
 
-func load_saved_config(weapon_id: String) -> bool:
-	var save_path = SAVE_PATH_PREFIX + weapon_id + ".cfg"
-	
-	if not FileAccess.file_exists(save_path):
-		print("[WeaponTestLab] No saved config found for: ", weapon_id)
-		return false
-	
-	var config = ConfigFile.new()
-	var err = config.load(save_path)
-	
-	if err != OK:
-		push_error("[WeaponTestLab] Failed to load config: ", err)
-		return false
-	
-	# Load all keys
-	var loaded_config: Dictionary = {}
-	var color_keys: Dictionary = {}  # Track color components
-	
-	for key in config.get_section_keys("config"):
-		var value = config.get_value("config", key)
-		
-		# Check if this is a color component
-		if key.ends_with("_r") or key.ends_with("_g") or key.ends_with("_b") or key.ends_with("_a"):
-			var base_key = key.substr(0, key.length() - 2)
-			if not color_keys.has(base_key):
-				color_keys[base_key] = {}
-			color_keys[base_key][key.substr(key.length() - 1)] = value
-		else:
-			loaded_config[key] = value
-	
-	# Reconstruct colors
-	for base_key in color_keys:
-		var c = color_keys[base_key]
-		loaded_config[base_key] = Color(
-			c.get("r", 1.0),
-			c.get("g", 1.0),
-			c.get("b", 1.0),
-			c.get("a", 1.0)
-		)
-	
-	# Merge with defaults - this ensures new parameters added to the game 
-	# get their default values even when loading old saves
-	var default_config = _get_default_config(weapon_id)
-	for key in default_config:
-		if not loaded_config.has(key):
-			loaded_config[key] = default_config[key]
-	
-	_current_config = loaded_config
-	
-	if ui_panel:
-		ui_panel.update_config_ui(weapon_id, _current_config)
-	
-	print("[WeaponTestLab] Loaded config from: ", save_path)
-	return true
-
-
-func get_available_weapons() -> Array[Dictionary]:
-	return _available_weapons
+func reload_from_weapons_json() -> void:
+	"""Reload current weapon config from weapons.json."""
+	DataLoader.reload_data()
+	select_weapon(_current_weapon_id)
+	print("[WeaponTestLab] Reloaded %s from weapons.json" % _current_weapon_id)
 
 
 func get_current_config() -> Dictionary:
@@ -454,53 +399,3 @@ func get_current_config() -> Dictionary:
 
 func get_current_weapon_id() -> String:
 	return _current_weapon_id
-
-
-func export_radiant_arc_config_resource() -> RadiantArcConfig:
-	"""Export current radiant arc settings as a RadiantArcConfig resource."""
-	if _current_weapon_id != "radiant_arc":
-		push_warning("Current weapon is not radiant_arc")
-		return null
-	
-	var config = RadiantArcConfig.new()
-	
-	# Copy all settings
-	config.arc_angle_deg = _current_config.get("arc_angle_deg", 90.0)
-	config.radius = _current_config.get("radius", 42.0)
-	config.thickness = _current_config.get("thickness", 18.0)
-	config.taper = _current_config.get("taper", 0.5)
-	config.length_scale = _current_config.get("length_scale", 0.75)
-	config.distance = _current_config.get("distance", 25.0)
-	config.speed = _current_config.get("speed", 0.0)
-	config.duration = _current_config.get("duration", 0.8)
-	config.fade_in = _current_config.get("fade_in", 0.08)
-	config.fade_out = _current_config.get("fade_out", 0.15)
-	config.color_a = _current_config.get("color_a", Color.CYAN)
-	config.color_b = _current_config.get("color_b", Color.MAGENTA)
-	config.color_c = _current_config.get("color_c", Color(0.0, 0.5, 1.0))
-	config.glow_strength = _current_config.get("glow_strength", 3.0)
-	config.core_strength = _current_config.get("core_strength", 1.2)
-	config.noise_strength = _current_config.get("noise_strength", 0.3)
-	config.uv_scroll_speed = _current_config.get("uv_scroll_speed", 3.0)
-	config.rotation_offset_deg = _current_config.get("rotation_offset_deg", 0.0)
-	config.seed_offset = _current_config.get("seed_offset", 0.0)
-	config.damage = _current_config.get("damage", 25.0)
-	
-	return config
-
-
-func save_radiant_arc_resource(filename: String) -> bool:
-	"""Save current radiant arc config as a .tres resource file."""
-	var config = export_radiant_arc_config_resource()
-	if config == null:
-		return false
-	
-	var save_path = "res://effects/radiant_arc/" + filename + ".tres"
-	var err = ResourceSaver.save(config, save_path)
-	
-	if err == OK:
-		print("[WeaponTestLab] Saved RadiantArcConfig to: ", save_path)
-		return true
-	else:
-		push_error("[WeaponTestLab] Failed to save resource: ", err)
-		return false

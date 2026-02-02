@@ -12,7 +12,6 @@ signal spawn_targets_pressed()
 signal clear_targets_pressed()
 signal save_config_pressed()
 signal load_config_pressed()
-signal export_resource_pressed(filename: String)
 signal target_settings_changed(speed: float, spawn_rate: float, hp: float)
 signal auto_spawn_toggled(enabled: bool)
 signal show_hitboxes_toggled(enabled: bool)
@@ -278,36 +277,18 @@ func _build_ui() -> void:
 	main_vbox.add_child(save_hbox)
 	
 	var save_btn = Button.new()
-	save_btn.text = "💾 Save"
+	save_btn.text = "💾 Save to JSON"
+	save_btn.tooltip_text = "Save changes to data/weapons.json"
 	save_btn.focus_mode = Control.FOCUS_CLICK
 	save_btn.pressed.connect(func(): save_config_pressed.emit())
 	save_hbox.add_child(save_btn)
 	
 	var load_btn = Button.new()
-	load_btn.text = "📂 Load"
+	load_btn.text = "📂 Reload JSON"
+	load_btn.tooltip_text = "Reload from data/weapons.json (discard changes)"
 	load_btn.focus_mode = Control.FOCUS_CLICK
 	load_btn.pressed.connect(func(): load_config_pressed.emit())
 	save_hbox.add_child(load_btn)
-	
-	# Export resource button (for radiant arc)
-	var export_hbox = HBoxContainer.new()
-	main_vbox.add_child(export_hbox)
-	
-	var export_name = LineEdit.new()
-	export_name.placeholder_text = "resource_name"
-	export_name.custom_minimum_size = Vector2(150, 0)
-	export_name.focus_mode = Control.FOCUS_CLICK
-	export_hbox.add_child(export_name)
-	
-	var export_btn = Button.new()
-	export_btn.text = "📦 Export .tres"
-	export_btn.tooltip_text = "Export as RadiantArcConfig resource"
-	export_btn.focus_mode = Control.FOCUS_CLICK
-	export_btn.pressed.connect(func(): 
-		var resource_name = export_name.text if export_name.text != "" else "custom_arc_config"
-		export_resource_pressed.emit(resource_name)
-	)
-	export_hbox.add_child(export_btn)
 	
 	# --- Instructions ---
 	_add_separator(main_vbox)

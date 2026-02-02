@@ -156,3 +156,26 @@ func get_unlocked_characters() -> Array:
 
 func reload_data() -> void:
 	_load_all_data()
+
+
+# --- Save API (for tools like Weapon Test Lab) ---
+
+func save_weapon(weapon_id: String, weapon_data: Dictionary) -> bool:
+	"""Save a weapon's data back to weapons.json. Used by Weapon Test Lab."""
+	weapons[weapon_id] = weapon_data
+	return _save_json_file(BASE_DATA_PATH + "weapons.json", weapons)
+
+
+func _save_json_file(path: String, data: Dictionary) -> bool:
+	"""Save a dictionary to a JSON file with pretty formatting."""
+	var json_string := JSON.stringify(data, "  ")
+	
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	if file == null:
+		push_error("[DataLoader] Failed to open for writing: " + path)
+		return false
+	
+	file.store_string(json_string)
+	file.close()
+	print("[DataLoader] Saved: " + path)
+	return true

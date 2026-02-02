@@ -1,168 +1,35 @@
 === Voidrift Debug Log ===
-Started: 2026-02-01T19:02:54
+Started: 2026-02-01T20:00:02
 Log path: C:/git/voidrift/debug_log.txt
 ========================================
 
-[19:02:56] [INFO][WeaponComponent] Initializing...
-[19:02:56] [INFO][WeaponComponent] Found StatsComponent
-[19:02:56] [INFO][Ship] Initializing player ship...
-[19:02:56] [INFO][HUD] Initializing HUD...
-[19:02:56] [DEBUG][HUD] Scaled to 1.84 (viewport height: 1982)
-[19:02:56] [INFO][Ship] Running deferred init...
-[19:02:56] [INFO][Ship] No character data, setting up default weapons
-[19:02:56] [INFO][WeaponComponent] Equipped weapon: plasma_cannon
-[19:02:56] [DATA][WeaponComponent] Weapon base_stats: {
-  "attack_speed": 1.0,
-  "crit_chance": 5.0,
-  "crit_damage": 1.5,
-  "damage": 10.0,
-  "knockback": 0.5,
-  "projectile_count": 1.0,
-  "projectile_speed": 500.0,
-  "size": 1.0
-}
-[19:02:56] [INFO][HUD] Found player: Ship
-[19:02:56] [DEBUG][Projectile] Ready at (-6.0, 0.0) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[19:02:56] [DEBUG][WeaponComponent] Spawned projectile at (-6.0, 0.0) dir: (1.0, 0.0) dmg: 10.0 spd: 500.0
-[19:02:56] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
-[19:02:57] [DEBUG][Projectile] Ready at (-6.0, 0.0) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[19:02:57] [DEBUG][WeaponComponent] Spawned projectile at (-6.0, 0.0) dir: (0.670947, 0.741505) dmg: 10.0 spd: 500.0
-[19:02:58] [DEBUG][Projectile] Ready at (30.8178, -6.858828) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[19:02:58] [DEBUG][WeaponComponent] Spawned projectile at (30.8178, -6.858828) dir: (0.562213, 0.826992) dmg: 10.0 spd: 500.0
-[19:02:58] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
-[19:02:59] [DEBUG][Projectile] Ready at (144.3346, -65.38869) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[19:02:59] [DEBUG][WeaponComponent] Spawned projectile at (144.3346, -65.38869) dir: (-0.235601, 0.97185) dmg: 10.0 spd: 500.0
-[19:02:59] [INFO][EnemySpawner] Enemy died at (123.7502, 30.15533)
-[19:02:59] [INFO][EnemySpawner] Enemy died at (123.7502, 30.15533)
-[19:02:59] [DEBUG][XPPickup] Spawned at (117.2201, 35.65155)
-[19:02:59] [DEBUG][XPPickup] Spawned at (131.0277, 30.97768)
-[19:03:00] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
-[19:03:00] [DEBUG][Projectile] Ready at (235.7655, 28.94358) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[19:03:00] [DEBUG][WeaponComponent] Spawned projectile at (235.7655, 28.94358) dir: (-0.286067, -0.95821) dmg: 10.0 spd: 500.0
-[19:03:01] [DEBUG][Projectile] Ready at (91.31191, 34.91029) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[19:03:01] [DEBUG][WeaponComponent] Spawned projectile at (91.31191, 34.91029) dir: (-0.924489, 0.381208) dmg: 10.0 spd: 500.0
-[19:03:01] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
-[19:03:02] [DEBUG][Projectile] Ready at (6.87294, -48.27742) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[19:03:02] [DEBUG][WeaponComponent] Spawned projectile at (6.87294, -48.27742) dir: (-0.493956, 0.869487) dmg: 10.0 spd: 500.0
-[19:03:02] [INFO][EnemySpawner] Enemy died at (-49.45923, 45.30952)
-[19:03:02] [DEBUG][XPPickup] Spawned at (-44.92024, 48.36662)
-[19:03:03] [DEBUG][Projectile] Ready at (-89.95752, -72.3775) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[19:03:03] [DEBUG][WeaponComponent] Spawned projectile at (-89.95752, -72.3775) dir: (0.897198, -0.441628) dmg: 10.0 spd: 500.0
-[19:03:03] [INFO][EnemySpawner] Enemy died at (-16.22154, -106.9499)
-[19:03:03] [INFO][EnemySpawner] Enemy died at (-16.22154, -106.9499)
-[19:03:03] [DEBUG][XPPickup] Spawned at (-25.65448, -98.55994)
-[19:03:03] [DEBUG][XPPickup] Spawned at (-20.66867, -99.08566)
-[19:03:03] [DEBUG][CreditPickup] Spawned at (-23.99971, -112.5635) with 1 credits
-[19:03:03] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
-[19:03:04] [DEBUG][Projectile] Ready at (-44.91847, 44.9253) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[19:03:04] [DEBUG][WeaponComponent] Spawned projectile at (-44.91847, 44.9253) dir: (0.962318, 0.271926) dmg: 10.0 spd: 500.0
-[19:03:05] [INFO][CreditPickup] Collected 1 credits!
-[19:03:05] [DEBUG][Projectile] Ready at (-44.53422, -85.59034) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[19:03:05] [DEBUG][WeaponComponent] Spawned projectile at (-44.53422, -85.59034) dir: (0.733462, 0.67973) dmg: 10.0 spd: 500.0
-[19:03:05] [INFO][EnemySpawner] Enemy died at (97.39785, 38.80796)
-[19:03:05] [INFO][EnemySpawner] Enemy died at (97.39785, 38.80796)
-[19:03:05] [DEBUG][XPPickup] Spawned at (95.89703, 34.2877)
-[19:03:05] [DEBUG][XPPickup] Spawned at (92.52285, 36.34166)
-[19:03:05] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
-[19:03:06] [DEBUG][Projectile] Ready at (74.69833, -132.9061) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[19:03:06] [DEBUG][WeaponComponent] Spawned projectile at (74.69833, -132.9061) dir: (-0.037961, 0.999279) dmg: 10.0 spd: 500.0
-[19:03:07] [INFO][EnemySpawner] Enemy died at (88.41001, 60.24419)
-[19:03:07] [DEBUG][XPPickup] Spawned at (81.97118, 53.34425)
-[19:03:07] [DEBUG][Projectile] Ready at (120.7455, -3.321485) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[19:03:07] [DEBUG][WeaponComponent] Spawned projectile at (120.7455, -3.321485) dir: (-0.6965, 0.717557) dmg: 10.0 spd: 500.0
-[19:03:07] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
-[19:03:08] [DEBUG][Projectile] Ready at (-3.332951, 32.79967) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[19:03:08] [DEBUG][WeaponComponent] Spawned projectile at (-3.332951, 32.79967) dir: (-0.2366, 0.971607) dmg: 10.0 spd: 500.0
-[19:03:08] [INFO][EnemySpawner] Enemy died at (-25.45086, 112.9302)
-[19:03:08] [DEBUG][XPPickup] Spawned at (-17.18723, 116.3493)
-[19:03:08] [DEBUG][CreditPickup] Spawned at (-22.17749, 116.9175) with 1 credits
-[19:03:09] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
-[19:03:09] [DEBUG][Projectile] Ready at (-89.35938, 77.40884) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[19:03:09] [DEBUG][WeaponComponent] Spawned projectile at (-89.35938, 77.40884) dir: (0.343634, 0.939104) dmg: 10.0 spd: 500.0
-[19:03:09] [INFO][CreditPickup] Collected 1 credits!
-[19:03:10] [DEBUG][Projectile] Ready at (16.26363, 180.4159) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[19:03:10] [DEBUG][WeaponComponent] Spawned projectile at (16.26363, 180.4159) dir: (0.018178, 0.999835) dmg: 10.0 spd: 500.0
-[19:03:10] [INFO][EnemySpawner] Enemy died at (22.53923, 308.7455)
-[19:03:10] [INFO][EnemySpawner] Enemy died at (22.53923, 308.7455)
-[19:03:10] [DEBUG][XPPickup] Spawned at (13.53065, 309.2834)
-[19:03:10] [DEBUG][CreditPickup] Spawned at (26.5713, 309.1832) with 1 credits
-[19:03:10] [DEBUG][XPPickup] Spawned at (23.4605, 302.7446)
-[19:03:10] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
-[19:03:11] [DEBUG][Projectile] Ready at (124.86, 140.8409) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[19:03:11] [DEBUG][WeaponComponent] Spawned projectile at (124.86, 140.8409) dir: (-0.086863, -0.99622) dmg: 10.0 spd: 500.0
-[19:03:12] [DEBUG][Projectile] Ready at (93.21829, 269.7076) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[19:03:12] [DEBUG][WeaponComponent] Spawned projectile at (93.21829, 269.7076) dir: (0.07575, -0.997127) dmg: 10.0 spd: 500.0
-[19:03:12] [INFO][EnemySpawner] Enemy died at (107.6115, 80.24804)
-[19:03:12] [DEBUG][XPPickup] Spawned at (106.3735, 88.57732)
-[19:03:12] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
-[19:03:13] [INFO][CreditPickup] Collected 1 credits!
-[19:03:13] [INFO][GameManager] LEVEL UP! Now level 2
-[19:03:13] [INFO][LevelUpUI] Level up triggered! Level: 2, Options: 3
-[19:03:15] [INFO][LevelUpUI] Selected option 2: stardust_collector
-[19:03:15] [INFO][Ship] Applying upgrade: stardust_collector
-[19:03:15] [DEBUG][Projectile] Ready at (74.48394, 287.3594) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[19:03:15] [DEBUG][WeaponComponent] Spawned projectile at (74.48394, 287.3594) dir: (0.998657, -0.051817) dmg: 10.0 spd: 500.0
-[19:03:16] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
-[19:03:16] [DEBUG][Projectile] Ready at (95.69921, 285.9105) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[19:03:16] [DEBUG][WeaponComponent] Spawned projectile at (95.69921, 285.9105) dir: (0.999015, -0.044369) dmg: 10.0 spd: 500.0
-[19:03:16] [INFO][EnemySpawner] Enemy died at (289.0718, 277.8381)
-[19:03:16] [INFO][EnemySpawner] Enemy died at (289.0718, 277.8381)
-[19:03:16] [DEBUG][XPPickup] Spawned at (285.3243, 273.588)
-[19:03:16] [DEBUG][XPPickup] Spawned at (298.7268, 276.4872)
-[19:03:16] [DEBUG][CreditPickup] Spawned at (276.369, 291.9915) with 1 credits
-[19:03:17] [DEBUG][Projectile] Ready at (54.83167, 283.1358) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[19:03:17] [DEBUG][WeaponComponent] Spawned projectile at (54.83167, 283.1358) dir: (0.9964, -0.084782) dmg: 10.0 spd: 500.0
-[19:03:17] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
-[19:03:18] [DEBUG][Projectile] Ready at (49.42208, 134.0633) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[19:03:18] [DEBUG][WeaponComponent] Spawned projectile at (49.42208, 134.0633) dir: (0.88327, 0.468865) dmg: 10.0 spd: 500.0
-[19:03:18] [INFO][EnemySpawner] Enemy died at (212.7204, 218.4035)
-[19:03:18] [INFO][EnemySpawner] Enemy died at (212.7204, 218.4035)
-[19:03:18] [DEBUG][XPPickup] Spawned at (214.145, 225.63)
-[19:03:18] [DEBUG][XPPickup] Spawned at (219.7942, 209.5945)
-[19:03:18] [DEBUG][CreditPickup] Spawned at (221.2811, 207.8236) with 1 credits
-[19:03:19] [DEBUG][Projectile] Ready at (49.41247, 84.06333) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[19:03:19] [DEBUG][WeaponComponent] Spawned projectile at (49.41247, 84.06333) dir: (-0.336458, -0.941699) dmg: 10.0 spd: 500.0
-[19:03:19] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
-[19:03:20] [DEBUG][Projectile] Ready at (58.31287, 77.86461) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[19:03:20] [DEBUG][WeaponComponent] Spawned projectile at (58.31287, 77.86461) dir: (-0.37827, -0.925695) dmg: 10.0 spd: 500.0
-[19:03:20] [INFO][EnemySpawner] Enemy died at (4.425043, -59.04204)
-[19:03:20] [DEBUG][XPPickup] Spawned at (11.08924, -56.84467)
-[19:03:21] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
-[19:03:21] [DEBUG][Projectile] Ready at (97.19695, 86.88328) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[19:03:21] [DEBUG][WeaponComponent] Spawned projectile at (97.19695, 86.88328) dir: (-0.487925, 0.872886) dmg: 10.0 spd: 500.0
-[19:03:22] [INFO][CreditPickup] Collected 1 credits!
-[19:03:22] [DEBUG][Projectile] Ready at (204.641, 190.7999) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[19:03:22] [DEBUG][WeaponComponent] Spawned projectile at (204.641, 190.7999) dir: (-0.998736, -0.050273) dmg: 10.0 spd: 500.0
-[19:03:22] [INFO][EnemySpawner] Enemy died at (120.7455, 188.0722)
-[19:03:22] [INFO][EnemySpawner] Enemy died at (120.7455, 188.0722)
-[19:03:22] [DEBUG][XPPickup] Spawned at (124.0436, 187.3706)
-[19:03:22] [DEBUG][XPPickup] Spawned at (130.0536, 197.5718)
-[19:03:22] [DEBUG][CreditPickup] Spawned at (130.5566, 202.7848) with 1 credits
-[19:03:22] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
-[19:03:22] [INFO][CreditPickup] Collected 1 credits!
-[19:03:23] [DEBUG][Projectile] Ready at (310.7099, 296.8623) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[19:03:23] [DEBUG][WeaponComponent] Spawned projectile at (310.7099, 296.8623) dir: (0.018751, -0.999824) dmg: 10.0 spd: 500.0
-[19:03:24] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
-[19:03:24] [DEBUG][Projectile] Ready at (188.2784, 272.3708) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[19:03:24] [DEBUG][WeaponComponent] Spawned projectile at (188.2784, 272.3708) dir: (0.684674, -0.728849) dmg: 10.0 spd: 500.0
-[19:03:24] [INFO][BaseEnemy] Contact damage via collision: 11
-[19:03:24] [INFO][CreditPickup] Collected 1 credits!
-[19:03:25] [DEBUG][Projectile] Ready at (68.55242, 168.1552) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[19:03:25] [DEBUG][WeaponComponent] Spawned projectile at (68.55242, 168.1552) dir: (0.842178, 0.5392) dmg: 10.0 spd: 500.0
-[19:03:25] [INFO][EnemySpawner] Enemy died at (125.352, 204.0842)
-[19:03:25] [INFO][EnemySpawner] Enemy died at (125.352, 204.0842)
-[19:03:25] [DEBUG][XPPickup] Spawned at (124.2535, 210.4239)
-[19:03:25] [DEBUG][XPPickup] Spawned at (132.5395, 213.2253)
-[19:03:25] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
-[19:03:26] [DEBUG][Projectile] Ready at (28.64076, 32.58392) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[19:03:26] [DEBUG][WeaponComponent] Spawned projectile at (28.64076, 32.58392) dir: (0.578263, -0.815851) dmg: 10.0 spd: 500.0
-[19:03:26] [INFO][BaseEnemy] Contact damage via collision: 11
-[19:03:27] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
-[19:03:27] [INFO][EnemySpawner] Enemy died at (3.734196, -35.05106)
-[19:03:27] [DEBUG][XPPickup] Spawned at (5.413299, -25.79327)
-[19:03:27] [DEBUG][CreditPickup] Spawned at (7.236041, -43.44215) with 1 credits
-[19:03:27] [DEBUG][Projectile] Ready at (-62.07529, -59.16079) scale: (1.0, 1.0) visible: true sprite_tex: size=(32.0, 32.0) z_index: 0
-[19:03:27] [DEBUG][WeaponComponent] Spawned projectile at (-62.07529, -59.16079) dir: (0.661622, 0.749837) dmg: 10.0 spd: 500.0
-[19:03:27] [INFO][EnemySpawner] Enemy died at (17.00397, 31.05312)
-[19:03:27] [DEBUG][XPPickup] Spawned at (20.68717, 38.58646)
-[19:03:29] [INFO][FileLogger] Session ended
+[20:00:03] [INFO][WeaponComponent] Initializing...
+[20:00:03] [INFO][WeaponComponent] Found StatsComponent
+[20:00:03] [INFO][Ship] Initializing player ship...
+[20:00:03] [INFO][HUD] Initializing HUD...
+[20:00:03] [DEBUG][HUD] Scaled to 1.84 (viewport height: 1982)
+[20:00:03] [INFO][Ship] Running deferred init...
+[20:00:03] [INFO][Ship] No character data, setting up default weapons
+[20:00:03] [INFO][HUD] Found player: Ship
+[20:00:03] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
+[20:00:05] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
+[20:00:07] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
+[20:00:07] [INFO][EnemySpawner] Enemy died at (79.49165, 105.1081)
+[20:00:07] [DEBUG][XPPickup] Spawned at (76.45434, 108.3426)
+[20:00:07] [DEBUG][CreditPickup] Spawned at (65.44663, 94.14285) with 1 credits
+[20:00:09] [INFO][CreditPickup] Collected 1 credits!
+[20:00:09] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
+[20:00:10] [INFO][BaseEnemy] Contact damage via collision: 10
+[20:00:11] [INFO][BaseEnemy] Contact damage via collision: 10
+[20:00:11] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
+[20:00:11] [INFO][EnemySpawner] Enemy died at (132.3639, 110.6665)
+[20:00:11] [INFO][BaseEnemy] Contact damage via collision: 10
+[20:00:11] [DEBUG][XPPickup] Spawned at (128.1364, 102.5407)
+[20:00:11] [DEBUG][CreditPickup] Spawned at (139.5195, 113.9693) with 1 credits
+[20:00:12] [INFO][CreditPickup] Collected 1 credits!
+[20:00:12] [INFO][BaseEnemy] Contact damage via collision: 10
+[20:00:12] [INFO][BaseEnemy] Contact damage via collision: 10
+[20:00:13] [DEBUG][BaseEnemy] HitboxArea ready: layer=8 mask=1
+[20:00:13] [INFO][BaseEnemy] Contact damage via collision: 10
+[20:00:13] [INFO][BaseEnemy] Contact damage via collision: 10
+[20:00:13] [INFO][FileLogger] Session ended

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dyvwaeyjj8l0f"
-path="res://.godot/imported/Background_Nebula-0002.png-10c7a7d5f170b9949a12e14a7cc23cd0.ctex"
+uid="uid://iyj27xnfpdf1"
+path="res://.godot/imported/Background_Space-0001.png-a5fede6f7eb996409c67210c902a788b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Shoot`em Up/Background_Nebula-0002.png"
-dest_files=["res://.godot/imported/Background_Nebula-0002.png-10c7a7d5f170b9949a12e14a7cc23cd0.ctex"]
+source_file="res://assets/backgrounds/Background_Space-0001.png"
+dest_files=["res://.godot/imported/Background_Space-0001.png-a5fede6f7eb996409c67210c902a788b.ctex"]
 
 [params]
 

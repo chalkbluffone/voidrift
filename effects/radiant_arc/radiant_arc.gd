@@ -88,6 +88,77 @@ var _start_pos: Vector2
 var _start_rotation: float
 var _aim_direction: Vector2 = Vector2.RIGHT
 
+
+## Load weapon parameters from a dictionary (typically from weapons.json).
+## This flattens the nested JSON structure into our export vars.
+func load_from_data(data: Dictionary) -> void:
+	# Stats
+	var stats = data.get("stats", {})
+	damage = stats.get("damage", damage)
+	duration = stats.get("duration", duration)
+	
+	# Shape
+	var shape = data.get("shape", {})
+	arc_angle_deg = shape.get("arc_angle_deg", arc_angle_deg)
+	radius = shape.get("radius", radius)
+	thickness = shape.get("thickness", thickness)
+	taper = shape.get("taper", taper)
+	length_scale = shape.get("length_scale", length_scale)
+	distance = shape.get("distance", distance)
+	
+	# Motion
+	var motion = data.get("motion", {})
+	speed = motion.get("speed", speed)
+	sweep_speed = motion.get("sweep_speed", sweep_speed)
+	fade_in = motion.get("fade_in", fade_in)
+	fade_out = motion.get("fade_out", fade_out)
+	rotation_offset_deg = motion.get("rotation_offset_deg", rotation_offset_deg)
+	seed_offset = motion.get("seed_offset", seed_offset)
+	
+	# Visual
+	var visual = data.get("visual", {})
+	color_a = _parse_color(visual.get("color_a", ""), color_a)
+	color_b = _parse_color(visual.get("color_b", ""), color_b)
+	color_c = _parse_color(visual.get("color_c", ""), color_c)
+	glow_strength = visual.get("glow_strength", glow_strength)
+	core_strength = visual.get("core_strength", core_strength)
+	noise_strength = visual.get("noise_strength", noise_strength)
+	uv_scroll_speed = visual.get("uv_scroll_speed", uv_scroll_speed)
+	chromatic_aberration = visual.get("chromatic_aberration", chromatic_aberration)
+	pulse_strength = visual.get("pulse_strength", pulse_strength)
+	pulse_speed = visual.get("pulse_speed", pulse_speed)
+	electric_strength = visual.get("electric_strength", electric_strength)
+	electric_frequency = visual.get("electric_frequency", electric_frequency)
+	electric_speed = visual.get("electric_speed", electric_speed)
+	gradient_offset = visual.get("gradient_offset", gradient_offset)
+	
+	# Particles
+	var particles = data.get("particles", {})
+	particles_enabled = particles.get("enabled", particles_enabled)
+	particles_amount = particles.get("amount", particles_amount)
+	particles_size = particles.get("size", particles_size)
+	particles_speed = particles.get("speed", particles_speed)
+	particles_lifetime = particles.get("lifetime", particles_lifetime)
+	particles_spread = particles.get("spread", particles_spread)
+	particles_drag = particles.get("drag", particles_drag)
+	particles_outward = particles.get("outward", particles_outward)
+	particles_radius = particles.get("radius", particles_radius)
+	particles_color = _parse_color(particles.get("color", ""), particles_color)
+
+
+## Parse a hex color string like "#00ffff" or "#00ffffcc" into a Color.
+func _parse_color(hex_string: String, fallback: Color) -> Color:
+	if hex_string.is_empty():
+		return fallback
+	# Remove # if present
+	var hex = hex_string.trim_prefix("#")
+	if hex.length() == 6:
+		return Color(hex)
+	elif hex.length() == 8:
+		# RGBA format
+		return Color(hex.substr(0, 6)).from_string(hex_string, fallback)
+	return fallback
+
 func _ready() -> void:
 	# Find or create MeshInstance2D child
 	var children = get_children()

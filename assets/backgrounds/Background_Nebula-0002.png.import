@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://rpgmobem1dvk"
-path="res://.godot/imported/Background_SmallStars-0001.png-22fb629d0855c849925ffbe31190acbc.ctex"
+uid="uid://dyvwaeyjj8l0f"
+path="res://.godot/imported/Background_Nebula-0002.png-2e64dbe6d7279480e2a9ef269c81709c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Shoot`em Up/Background_SmallStars-0001.png"
-dest_files=["res://.godot/imported/Background_SmallStars-0001.png-22fb629d0855c849925ffbe31190acbc.ctex"]
+source_file="res://assets/backgrounds/Background_Nebula-0002.png"
+dest_files=["res://.godot/imported/Background_Nebula-0002.png-2e64dbe6d7279480e2a9ef269c81709c.ctex"]
 
 [params]
 

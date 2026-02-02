@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b3hn6w7x2tj66"
-path="res://.godot/imported/Background_Full-0001.png-be6b8e8782b3454042660f6fbf111c26.ctex"
+uid="uid://bk3rxwkt5nsj6"
+path="res://.godot/imported/Background_Stars-0001.png-31bded032aec68f6ccd523efc55034d5.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Shoot`em Up/Background_Full-0001.png"
-dest_files=["res://.godot/imported/Background_Full-0001.png-be6b8e8782b3454042660f6fbf111c26.ctex"]
+source_file="res://assets/backgrounds/Background_Stars-0001.png"
+dest_files=["res://.godot/imported/Background_Stars-0001.png-31bded032aec68f6ccd523efc55034d5.ctex"]
 
 [params]
 
