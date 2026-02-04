@@ -1,57 +1,86 @@
 {
+  "ion_wake": {
+    "display_name": "Ion Wake",
+    "motion": {
+      "fade_in": 0.33,
+      "fade_out": 0.45
+    },
+    "scene": "res://effects/ion_wake/IonWake.tscn",
+    "shape": {
+      "expansion_speed": 138.9,
+      "inner_radius": 36.1,
+      "outer_radius": 365.1,
+      "ring_thickness": 38.9
+    },
+    "spawner": "res://effects/ion_wake/ion_wake_spawner.gd",
+    "stats": {
+      "cooldown": 2.5,
+      "damage": 13.0,
+      "duration": 1.0
+    },
+    "type": "melee",
+    "visual": {
+      "color_edge": "#e6f5ff",
+      "color_inner": "#66ccff",
+      "color_outer": "#1a4d99",
+      "edge_glow": 4.2,
+      "edge_sharpness": 5.2,
+      "glow_strength": 8.6
+    }
+  },
   "radiant_arc": {
-	"display_name": "Radiant Arc",
-	"motion": {
-	  "fade_in": 0.18,
-	  "fade_out": 0.15,
-	  "rotation_offset_deg": 0.0,
-	  "seed_offset": 81.0,
-	  "speed": 0.0,
-	  "sweep_speed": 1.0
-	},
-	"particles": {
-	  "amount": 60,
-	  "color": "#cccccccc",
-	  "drag": 2.0,
-	  "enabled": true,
-	  "lifetime": 0.4,
-	  "outward": 0.5,
-	  "radius": 0.5,
-	  "size": 1.0,
-	  "speed": 135.0,
-	  "spread": 0.5
-	},
-	"scene": "res://effects/radiant_arc/RadiantArc.tscn",
-	"shape": {
-	  "arc_angle_deg": 310.0,
-	  "distance": 25.0,
-	  "length_scale": 1.0,
-	  "radius": 156.0,
-	  "taper": 0.0,
-	  "thickness": 65.0
-	},
-	"spawner": "res://effects/radiant_arc/radiant_arc_spawner.gd",
-	"stats": {
-	  "cooldown": 1.0,
-	  "damage": 10.0,
-	  "duration": 1.0
-	},
-	"type": "melee",
-	"visual": {
-	  "chromatic_aberration": 1.45,
-	  "color_a": "#ff0000",
-	  "color_b": "#e5ff00",
-	  "color_c": "#ff0000",
-	  "core_strength": 0.0,
-	  "electric_frequency": 32.0,
-	  "electric_speed": 23.0,
-	  "electric_strength": 0.85,
-	  "glow_strength": 10.0,
-	  "gradient_offset": 0.0,
-	  "noise_strength": 1.7,
-	  "pulse_speed": 26.0,
-	  "pulse_strength": 0.7,
-	  "uv_scroll_speed": 0.0
-	}
+    "display_name": "Radiant Arc",
+    "motion": {
+      "fade_in": 0.18,
+      "fade_out": 0.15,
+      "rotation_offset_deg": 0.0,
+      "seed_offset": 81.0,
+      "speed": 0.0,
+      "sweep_speed": 1.0
+    },
+    "particles": {
+      "amount": 60.0,
+      "color": "#cccccccc",
+      "drag": 2.0,
+      "enabled": true,
+      "lifetime": 0.4,
+      "outward": 0.5,
+      "radius": 0.5,
+      "size": 1.0,
+      "speed": 135.0,
+      "spread": 0.5
+    },
+    "scene": "res://effects/radiant_arc/RadiantArc.tscn",
+    "shape": {
+      "arc_angle_deg": 310.0,
+      "distance": 25.0,
+      "length_scale": 1.0,
+      "radius": 156.0,
+      "taper": 0.0,
+      "thickness": 65.0
+    },
+    "spawner": "res://effects/radiant_arc/radiant_arc_spawner.gd",
+    "stats": {
+      "cooldown": 1.0,
+      "damage": 10.0,
+      "duration": 1.0
+    },
+    "type": "melee",
+    "visual": {
+      "chromatic_aberration": 1.45,
+      "color_a": "#ff0000",
+      "color_b": "#e5ff00",
+      "color_c": "#ff0000",
+      "core_strength": 0.0,
+      "electric_frequency": 32.0,
+      "electric_speed": 23.0,
+      "electric_strength": 0.85,
+      "glow_strength": 10.0,
+      "gradient_offset": 0.0,
+      "noise_strength": 1.7,
+      "pulse_speed": 26.0,
+      "pulse_strength": 0.7,
+      "uv_scroll_speed": 0.0
+    }
   }
 }

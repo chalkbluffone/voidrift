@@ -83,6 +83,10 @@ func _ready() -> void:
 	phase_energy = max_phase_energy
 	phase_energy_changed.emit(phase_energy, max_phase_energy)
 	
+	# In test mode, disable auto-fire so test lab controls firing manually
+	if test_mode and weapons:
+		weapons.auto_fire_enabled = false
+	
 	# Defer weapon setup to ensure all @onready vars are initialized (skip in test mode)
 	if not test_mode:
 		call_deferred("_deferred_init")
@@ -372,6 +376,9 @@ func fire_weapon_manual(weapon_id: String, config: Dictionary) -> void:
 
 
 func equip_weapon_for_test(weapon_id: String) -> void:
-	"""Equip a weapon in test mode."""
-	if weapons and weapons.has_method("equip_weapon"):
-		weapons.equip_weapon(weapon_id)
+	"""Equip a weapon in test mode (exclusive - clears other weapons first)."""
+	if weapons:
+		if weapons.has_method("clear_all_weapons"):
+			weapons.clear_all_weapons()
+		if weapons.has_method("equip_weapon"):
+			weapons.equip_weapon(weapon_id)

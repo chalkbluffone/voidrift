@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://dm7kw2vp6h8qy"]
+
+[ext_resource type="Script" uid="uid://c3x5mqvr1dsyy" path="res://effects/ion_wake/ion_wake.gd" id="1_ion_wake"]
+
+[node name="IonWake" type="Node2D"]
+script = ExtResource("1_ion_wake")
+inner_radius = 20.0
+outer_radius = 200.0
+ring_thickness = 30.0
+expansion_speed = 300.0
+duration = 0.8

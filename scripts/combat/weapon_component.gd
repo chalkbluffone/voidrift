@@ -13,6 +13,7 @@ const PROJECTILE_SCENE := preload("res://scenes/gameplay/projectile.tscn")
 
 # Melee weapon spawners
 const RadiantArcSpawnerScript := preload("res://effects/radiant_arc/radiant_arc_spawner.gd")
+const IonWakeSpawnerScript := preload("res://effects/ion_wake/ion_wake_spawner.gd")
 
 # Reference to player stats
 const StatsComponentScript := preload("res://scripts/core/stats_component.gd")
@@ -24,10 +25,14 @@ var stats_component: Node = null
 @onready var FileLogger: Node = get_node("/root/FileLogger")
 
 # Melee weapon spawner instances
-var _radiant_arc_spawner: RadiantArcSpawner
+var _radiant_arc_spawner  # RadiantArcSpawner
+var _ion_wake_spawner  # IonWakeSpawner
 
 # Equipped weapons: {weapon_id: {data: Dictionary, timer: float, level: int}}
 var _equipped_weapons: Dictionary = {}
+
+# When false, weapons won't auto-fire (for test lab manual control)
+var auto_fire_enabled: bool = true
 
 # Weapon-local bonuses applied by weapon level-ups.
 # {_weapon_id: {"flat": {stat: float}, "mult": {stat: float}}}
@@ -49,11 +54,13 @@ func _ready() -> void:
 	# affected by ship rotation (they manage their own global_rotation/position)
 	var effects_parent := get_tree().current_scene
 	_radiant_arc_spawner = RadiantArcSpawnerScript.new(effects_parent)
+	_ion_wake_spawner = IonWakeSpawnerScript.new(effects_parent)
 
 
 func _process(delta: float) -> void:
 	_update_timers(delta)
-	_process_weapons()
+	if auto_fire_enabled:
+		_process_weapons()
 
 
 func _update_timers(delta: float) -> void:
@@ -198,6 +205,11 @@ func _fire_melee_with_config(weapon_id: String, config: Dictionary, source: Node
 				var arc = _radiant_arc_spawner.spawn(spawn_pos, direction, config, source)
 				if arc:
 					weapon_fired.emit(weapon_id, [arc])
+		"ion_wake":
+			if _ion_wake_spawner:
+				var wake = _ion_wake_spawner.spawn(spawn_pos, config, source)
+				if wake:
+					weapon_fired.emit(weapon_id, [wake])
 		_:
 			push_warning("WeaponComponent: Unknown melee weapon: " + weapon_id)
 
@@ -222,58 +234,81 @@ func _flatten_weapon_data(data: Dictionary) -> Dictionary:
 	   Matches the format used by weapon_test_lab for consistency."""
 	var flat: Dictionary = {}
 	
-	# Stats
+	# Detect weapon type by checking for weapon-specific shape params
+	var shape = data.get("shape", {})
+	var is_ion_wake = shape.has("inner_radius") or shape.has("expansion_speed")
+	
+	# Stats (common)
 	var stats = data.get("stats", {})
 	flat["damage"] = stats.get("damage", 10.0)
 	flat["duration"] = stats.get("duration", 1.0)
 	
-	# Shape
-	var shape = data.get("shape", {})
-	flat["arc_angle_deg"] = shape.get("arc_angle_deg", 90.0)
-	flat["radius"] = shape.get("radius", 42.0)
-	flat["thickness"] = shape.get("thickness", 18.0)
-	flat["taper"] = shape.get("taper", 0.5)
-	flat["length_scale"] = shape.get("length_scale", 0.75)
-	flat["distance"] = shape.get("distance", 25.0)
-	
-	# Motion
+	# Motion (common)
 	var motion = data.get("motion", {})
-	flat["speed"] = motion.get("speed", 0.0)
-	flat["sweep_speed"] = motion.get("sweep_speed", 1.2)
 	flat["fade_in"] = motion.get("fade_in", 0.08)
 	flat["fade_out"] = motion.get("fade_out", 0.15)
-	flat["rotation_offset_deg"] = motion.get("rotation_offset_deg", 0.0)
-	flat["seed_offset"] = motion.get("seed_offset", 0.0)
 	
-	# Visual - convert hex strings to Color objects
-	var visual = data.get("visual", {})
-	flat["color_a"] = _hex_to_color(visual.get("color_a", "#00ffff"))
-	flat["color_b"] = _hex_to_color(visual.get("color_b", "#ff00ff"))
-	flat["color_c"] = _hex_to_color(visual.get("color_c", "#0080ff"))
-	flat["glow_strength"] = visual.get("glow_strength", 3.0)
-	flat["core_strength"] = visual.get("core_strength", 1.2)
-	flat["noise_strength"] = visual.get("noise_strength", 0.3)
-	flat["uv_scroll_speed"] = visual.get("uv_scroll_speed", 3.0)
-	flat["chromatic_aberration"] = visual.get("chromatic_aberration", 0.0)
-	flat["pulse_strength"] = visual.get("pulse_strength", 0.0)
-	flat["pulse_speed"] = visual.get("pulse_speed", 8.0)
-	flat["electric_strength"] = visual.get("electric_strength", 0.0)
-	flat["electric_frequency"] = visual.get("electric_frequency", 20.0)
-	flat["electric_speed"] = visual.get("electric_speed", 15.0)
-	flat["gradient_offset"] = visual.get("gradient_offset", 0.0)
-	
-	# Particles - convert hex string to Color
-	var particles = data.get("particles", {})
-	flat["particles_enabled"] = particles.get("enabled", true)
-	flat["particles_amount"] = particles.get("amount", 20)
-	flat["particles_size"] = particles.get("size", 3.0)
-	flat["particles_speed"] = particles.get("speed", 30.0)
-	flat["particles_lifetime"] = particles.get("lifetime", 0.4)
-	flat["particles_spread"] = particles.get("spread", 0.3)
-	flat["particles_drag"] = particles.get("drag", 1.0)
-	flat["particles_outward"] = particles.get("outward", 0.7)
-	flat["particles_radius"] = particles.get("radius", 1.0)
-	flat["particles_color"] = _hex_to_color(particles.get("color", "#ffffffcc"))
+	if is_ion_wake:
+		# === ION WAKE PARAMETERS ===
+		# Shape
+		flat["inner_radius"] = shape.get("inner_radius", 20.0)
+		flat["outer_radius"] = shape.get("outer_radius", 200.0)
+		flat["ring_thickness"] = shape.get("ring_thickness", 30.0)
+		flat["expansion_speed"] = shape.get("expansion_speed", 300.0)
+		
+		# Visual
+		var visual = data.get("visual", {})
+		flat["color_inner"] = _hex_to_color(visual.get("color_inner", "#66ccff"))
+		flat["color_outer"] = _hex_to_color(visual.get("color_outer", "#1a4d99"))
+		flat["color_edge"] = _hex_to_color(visual.get("color_edge", "#e6f5ff"))
+		flat["glow_strength"] = visual.get("glow_strength", 2.0)
+		flat["edge_sharpness"] = visual.get("edge_sharpness", 2.0)
+		flat["edge_glow"] = visual.get("edge_glow", 1.0)
+	else:
+		# === RADIANT ARC PARAMETERS ===
+		# Shape
+		flat["arc_angle_deg"] = shape.get("arc_angle_deg", 90.0)
+		flat["radius"] = shape.get("radius", 42.0)
+		flat["thickness"] = shape.get("thickness", 18.0)
+		flat["taper"] = shape.get("taper", 0.5)
+		flat["length_scale"] = shape.get("length_scale", 0.75)
+		flat["distance"] = shape.get("distance", 25.0)
+		
+		# Motion
+		flat["speed"] = motion.get("speed", 0.0)
+		flat["sweep_speed"] = motion.get("sweep_speed", 1.2)
+		flat["rotation_offset_deg"] = motion.get("rotation_offset_deg", 0.0)
+		flat["seed_offset"] = motion.get("seed_offset", 0.0)
+		
+		# Visual
+		var visual = data.get("visual", {})
+		flat["color_a"] = _hex_to_color(visual.get("color_a", "#00ffff"))
+		flat["color_b"] = _hex_to_color(visual.get("color_b", "#ff00ff"))
+		flat["color_c"] = _hex_to_color(visual.get("color_c", "#0080ff"))
+		flat["glow_strength"] = visual.get("glow_strength", 3.0)
+		flat["core_strength"] = visual.get("core_strength", 1.2)
+		flat["noise_strength"] = visual.get("noise_strength", 0.3)
+		flat["uv_scroll_speed"] = visual.get("uv_scroll_speed", 3.0)
+		flat["chromatic_aberration"] = visual.get("chromatic_aberration", 0.0)
+		flat["pulse_strength"] = visual.get("pulse_strength", 0.0)
+		flat["pulse_speed"] = visual.get("pulse_speed", 8.0)
+		flat["electric_strength"] = visual.get("electric_strength", 0.0)
+		flat["electric_frequency"] = visual.get("electric_frequency", 20.0)
+		flat["electric_speed"] = visual.get("electric_speed", 15.0)
+		flat["gradient_offset"] = visual.get("gradient_offset", 0.0)
+		
+		# Particles
+		var particles = data.get("particles", {})
+		flat["particles_enabled"] = particles.get("enabled", true)
+		flat["particles_amount"] = particles.get("amount", 20)
+		flat["particles_size"] = particles.get("size", 3.0)
+		flat["particles_speed"] = particles.get("speed", 30.0)
+		flat["particles_lifetime"] = particles.get("lifetime", 0.4)
+		flat["particles_spread"] = particles.get("spread", 0.3)
+		flat["particles_drag"] = particles.get("drag", 1.0)
+		flat["particles_outward"] = particles.get("outward", 0.7)
+		flat["particles_radius"] = particles.get("radius", 1.0)
+		flat["particles_color"] = _hex_to_color(particles.get("color", "#ffffffcc"))
 	
 	return flat
 
@@ -415,6 +450,13 @@ func remove_weapon(weapon_id: String) -> bool:
 	_weapon_level_bonuses.erase(weapon_id)
 	weapon_removed.emit(weapon_id)
 	return true
+
+
+func clear_all_weapons() -> void:
+	"""Remove all equipped weapons. Used by test lab for exclusive weapon testing."""
+	var weapon_ids = _equipped_weapons.keys().duplicate()
+	for weapon_id in weapon_ids:
+		remove_weapon(weapon_id)
 
 
 func apply_level_up_effects(weapon_id: String, effects_any: Array) -> void:
