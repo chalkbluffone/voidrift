@@ -582,8 +582,8 @@ class HitboxDebugOverlay extends Node2D:
 		elif shape is CapsuleShape2D:
 			var r: float = shape.radius
 			var h: float = shape.height * 0.5 - r
-			draw_arc(Vector2(0, -h), r, 0, PI, 24, color, 1.5)
-			draw_arc(Vector2(0, h), r, PI, TAU, 24, color, 1.5)
+			draw_arc(Vector2(0, -h), r, PI, TAU, 24, color, 1.5)
+			draw_arc(Vector2(0, h), r, 0, PI, 24, color, 1.5)
 			draw_line(Vector2(-r, -h), Vector2(-r, h), color, 1.5)
 			draw_line(Vector2(r, -h), Vector2(r, h), color, 1.5)
 		else:
