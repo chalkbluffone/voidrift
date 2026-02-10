@@ -11,10 +11,6 @@ signal weapon_removed(weapon_id: String)
 # Projectile scene (will need to be created)
 const PROJECTILE_SCENE := preload("res://scenes/gameplay/projectile.tscn")
 
-# Melee weapon spawners
-const RadiantArcSpawnerScript := preload("res://effects/radiant_arc/radiant_arc_spawner.gd")
-const IonWakeSpawnerScript := preload("res://effects/ion_wake/ion_wake_spawner.gd")
-
 # Reference to player stats
 const StatsComponentScript := preload("res://scripts/core/stats_component.gd")
 var stats_component: Node = null
@@ -24,9 +20,10 @@ var stats_component: Node = null
 @onready var GameManager: Node = get_node("/root/GameManager")
 @onready var FileLogger: Node = get_node("/root/FileLogger")
 
-# Melee weapon spawner instances
-var _radiant_arc_spawner  # RadiantArcSpawner
-var _ion_wake_spawner  # IonWakeSpawner
+# Dynamic spawner cache: {weapon_id: spawner_instance}
+var _spawner_cache: Dictionary = {}
+# Loaded spawner scripts cache: {script_path: GDScript}
+var _spawner_script_cache: Dictionary = {}
 
 # Equipped weapons: {weapon_id: {data: Dictionary, timer: float, level: int}}
 var _equipped_weapons: Dictionary = {}
@@ -49,12 +46,6 @@ func _ready() -> void:
 	if parent.has_node("StatsComponent"):
 		stats_component = parent.get_node("StatsComponent")
 		FileLogger.log_info("WeaponComponent", "Found StatsComponent")
-	
-	# Initialize melee weapon spawners - use scene root as parent so effects aren't
-	# affected by ship rotation (they manage their own global_rotation/position)
-	var effects_parent := get_tree().current_scene
-	_radiant_arc_spawner = RadiantArcSpawnerScript.new(effects_parent)
-	_ion_wake_spawner = IonWakeSpawnerScript.new(effects_parent)
 
 
 func _process(delta: float) -> void:
@@ -162,22 +153,50 @@ func _fire_projectile_weapon(weapon_id: String, data: Dictionary, _level: int) -
 	weapon_fired.emit(weapon_id, spawned)
 
 
-func _fire_orbit_weapon(_weapon_id: String, _data: Dictionary, _level: int) -> void:
+func _fire_orbit_weapon(weapon_id: String, data: Dictionary, _level: int) -> void:
 	# Orbit weapons create projectiles that circle the player
-	# Handled by OrbitWeaponComponent (future implementation)
-	pass
+	var parent := get_parent()
+	if not parent:
+		return
+	var config: Dictionary = _flatten_weapon_data(data)
+	var spawner = _get_or_create_spawner(weapon_id, data)
+	if spawner and spawner.has_method("spawn"):
+		var result = spawner.spawn(parent.global_position, config, parent)
+		if result:
+			weapon_fired.emit(weapon_id, [result])
+	else:
+		FileLogger.log_warn("WeaponComponent", "No spawner for orbit weapon: %s" % weapon_id)
 
 
-func _fire_area_weapon(_weapon_id: String, _data: Dictionary, _level: int) -> void:
+func _fire_area_weapon(weapon_id: String, data: Dictionary, _level: int) -> void:
 	# Area weapons create damage zones around the player
-	# Handled by AreaWeaponComponent (future implementation)
-	pass
+	var parent := get_parent()
+	if not parent:
+		return
+	var config: Dictionary = _flatten_weapon_data(data)
+	var spawner = _get_or_create_spawner(weapon_id, data)
+	if spawner and spawner.has_method("spawn"):
+		var result = spawner.spawn(parent.global_position, config, parent)
+		if result:
+			weapon_fired.emit(weapon_id, [result])
+	else:
+		FileLogger.log_warn("WeaponComponent", "No spawner for area weapon: %s" % weapon_id)
 
 
-func _fire_beam_weapon(_weapon_id: String, _data: Dictionary, _level: int) -> void:
+func _fire_beam_weapon(weapon_id: String, data: Dictionary, _level: int) -> void:
 	# Beam weapons fire continuous damage rays
-	# Handled by BeamWeaponComponent (future implementation)
-	pass
+	var parent := get_parent()
+	if not parent:
+		return
+	var config: Dictionary = _flatten_weapon_data(data)
+	var direction: Vector2 = _get_fire_direction(data)
+	var spawner = _get_or_create_spawner(weapon_id, data)
+	if spawner and spawner.has_method("spawn"):
+		var result = spawner.spawn(parent.global_position, direction, config, parent)
+		if result:
+			weapon_fired.emit(weapon_id, [result])
+	else:
+		FileLogger.log_warn("WeaponComponent", "No spawner for beam weapon: %s" % weapon_id)
 
 
 func _fire_melee_weapon(weapon_id: String, data: Dictionary, _level: int) -> void:
@@ -198,20 +217,36 @@ func _fire_melee_with_config(weapon_id: String, config: Dictionary, source: Node
 	"""Fire a melee weapon with explicit flat config. Used by both auto-fire and test lab."""
 	var spawn_pos: Vector2 = source.global_position
 	var direction: Vector2 = Vector2.RIGHT.rotated(source.rotation)
-	
-	match weapon_id:
-		"radiant_arc":
-			if _radiant_arc_spawner:
-				var arc = _radiant_arc_spawner.spawn(spawn_pos, direction, config, source)
-				if arc:
-					weapon_fired.emit(weapon_id, [arc])
-		"ion_wake":
-			if _ion_wake_spawner:
-				var wake = _ion_wake_spawner.spawn(spawn_pos, config, source)
-				if wake:
-					weapon_fired.emit(weapon_id, [wake])
-		_:
-			push_warning("WeaponComponent: Unknown melee weapon: " + weapon_id)
+
+	# Look up weapon data for spawner path
+	var weapon_data: Dictionary = DataLoader.get_weapon(weapon_id)
+	var spawner = _get_or_create_spawner(weapon_id, weapon_data)
+	if spawner == null:
+		push_warning("WeaponComponent: No spawner for melee weapon: " + weapon_id)
+		return
+
+	# Spawners may have different spawn() signatures. Try direction-based first,
+	# then fall back to position-only (like IonWake).
+	var result = null
+	if spawner.has_method("spawn"):
+		# Check parameter count to decide which call signature to use.
+		# RadiantArc-style: spawn(pos, direction, params, follow_source)
+		# IonWake-style: spawn(pos, params, follow_source)
+		var script: Script = spawner.get_script()
+		var methods: Array = script.get_script_method_list() if script else []
+		var spawn_arg_count: int = 4  # default to direction-based
+		for m in methods:
+			if m.get("name", "") == "spawn":
+				var args: Array = m.get("args", [])
+				spawn_arg_count = args.size()
+				break
+		if spawn_arg_count >= 4:
+			result = spawner.spawn(spawn_pos, direction, config, source)
+		else:
+			result = spawner.spawn(spawn_pos, config, source)
+
+	if result:
+		weapon_fired.emit(weapon_id, [result])
 
 
 func fire_weapon_with_config(weapon_id: String, config: Dictionary, source: Node2D) -> void:
@@ -311,6 +346,38 @@ func _flatten_weapon_data(data: Dictionary) -> Dictionary:
 		flat["particles_color"] = _hex_to_color(particles.get("color", "#ffffffcc"))
 	
 	return flat
+
+
+func _get_or_create_spawner(weapon_id: String, weapon_data: Dictionary):
+	"""Dynamically load and cache a weapon's spawner from its 'spawner' path in weapons.json."""
+	if _spawner_cache.has(weapon_id):
+		return _spawner_cache[weapon_id]
+
+	var spawner_path: String = weapon_data.get("spawner", "")
+	if spawner_path.is_empty():
+		FileLogger.log_warn("WeaponComponent", "No spawner path for weapon: %s" % weapon_id)
+		return null
+
+	# Load the spawner script (cached)
+	var script: GDScript = null
+	if _spawner_script_cache.has(spawner_path):
+		script = _spawner_script_cache[spawner_path]
+	else:
+		if not ResourceLoader.exists(spawner_path):
+			FileLogger.log_warn("WeaponComponent", "Spawner script not found: %s" % spawner_path)
+			return null
+		script = load(spawner_path) as GDScript
+		if script == null:
+			FileLogger.log_warn("WeaponComponent", "Failed to load spawner script: %s" % spawner_path)
+			return null
+		_spawner_script_cache[spawner_path] = script
+
+	# Instantiate spawner with scene root as parent (effects shouldn't follow ship rotation)
+	var effects_parent: Node = get_tree().current_scene
+	var spawner = script.new(effects_parent)
+	_spawner_cache[weapon_id] = spawner
+	FileLogger.log_info("WeaponComponent", "Created spawner for weapon: %s from %s" % [weapon_id, spawner_path])
+	return spawner
 
 
 func _hex_to_color(hex: String) -> Color:

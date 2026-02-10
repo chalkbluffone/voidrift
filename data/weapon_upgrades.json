@@ -1,0 +1,260 @@
+{
+	"radiant_arc": {
+		"display_name": "Radiant Arc",
+		"base_behavior": "Emits a short-range photonic slash in a wide arc from the ship's forward edge, instantly cutting through and damaging any targets caught in its path.",
+		"type": "melee",
+		"element": "none",
+		"special": "none",
+		"tags": ["melee", "slash"],
+		"strategy_synergies": "Prioritize damage/count then size; knockback helps safety",
+		"tier_stats": {
+			"damage": { "common": 2.0, "uncommon": 2.4, "rare": 2.8, "epic": 3.2, "legendary": 4.0 },
+			"projectile_count": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 },
+			"size": { "common": 0.20, "uncommon": 0.24, "rare": 0.28, "epic": 0.32, "legendary": 0.40 },
+			"knockback": { "common": 0.5, "uncommon": 0.6, "rare": 0.7, "epic": 0.8, "legendary": 1.0 }
+		}
+	},
+	"ion_wake": {
+		"display_name": "Ion Wake",
+		"base_behavior": "Leaves a charged AoE pulse at your position and leaves an ionized damage trail behind your ship that burns anything crossing it.",
+		"type": "aoe",
+		"element": "fire",
+		"special": "burn_trail",
+		"tags": ["fire", "dot", "aoe"],
+		"strategy_synergies": "Size/quantity boost coverage; great with duration/cooldown tomes",
+		"tier_stats": {
+			"damage": { "common": 2.0, "uncommon": 2.4, "rare": 2.8, "epic": 3.2, "legendary": 4.0 },
+			"projectile_count": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 },
+			"size": { "common": 0.15, "uncommon": 0.18, "rare": 0.21, "epic": 0.24, "legendary": 0.30 },
+			"duration": { "common": 0.18, "uncommon": 0.21, "rare": 0.25, "epic": 0.29, "legendary": 0.36 }
+		}
+	},
+	"nikolas_coil": {
+		"display_name": "Nikola's Coil",
+		"base_behavior": "Fires an instant Tesla arc that chains to nearby enemies via successive bounces.",
+		"type": "projectile",
+		"element": "lightning",
+		"special": "chain_bounce",
+		"tags": ["lightning", "bounce", "projectile"],
+		"strategy_synergies": "Stack bounces and size for chaining; quantity for coverage",
+		"tier_stats": {
+			"damage": { "common": 2.0, "uncommon": 2.4, "rare": 2.8, "epic": 3.2, "legendary": 4.0 },
+			"projectile_count": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 },
+			"size": { "common": 0.20, "uncommon": 0.24, "rare": 0.28, "epic": 0.32, "legendary": 0.40 },
+			"projectile_bounces": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 }
+		}
+	},
+	"space_napalm": {
+		"display_name": "Space Napalm",
+		"base_behavior": "Launches a volatile incendiary orb that detonates on impact, blanketing the blast radius with burning damage.",
+		"type": "projectile",
+		"element": "fire",
+		"special": "aoe_blast",
+		"tags": ["fire", "aoe", "projectile"],
+		"strategy_synergies": "Size/quantity for bigger blasts; damage scaling strong; projectile speed minor",
+		"tier_stats": {
+			"damage": { "common": 2.5, "uncommon": 3.0, "rare": 3.5, "epic": 4.0, "legendary": 5.0 },
+			"projectile_count": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 },
+			"projectile_speed": { "common": 0.10, "uncommon": 0.12, "rare": 0.14, "epic": 0.16, "legendary": 0.20 },
+			"size": { "common": 0.16, "uncommon": 0.19, "rare": 0.22, "epic": 0.26, "legendary": 0.32 }
+		}
+	},
+	"psp_9000": {
+		"display_name": "PSP-9000",
+		"base_behavior": "PSP or Personal Space Program, deploys orbiting security drones that body-check nearby enemies for physical damage and knockback.",
+		"type": "orbit",
+		"element": "physical",
+		"special": "knockback",
+		"tags": ["orbit", "knockback", "projectile"],
+		"strategy_synergies": "Size/knockback for safety; speed to tighten orbit coverage",
+		"tier_stats": {
+			"damage": { "common": 3.0, "uncommon": 3.6, "rare": 4.2, "epic": 4.8, "legendary": 6.0 },
+			"projectile_count": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 },
+			"projectile_speed": { "common": 0.35, "uncommon": 0.42, "rare": 0.49, "epic": 0.56, "legendary": 0.70 },
+			"size": { "common": 0.20, "uncommon": 0.24, "rare": 0.28, "epic": 0.32, "legendary": 0.40 },
+			"knockback": { "common": 0.7, "uncommon": 0.8, "rare": 0.8, "epic": 1.0, "legendary": 1.3 }
+		}
+	},
+	"space_whale_tusk": {
+		"display_name": "Space Whale Tusk",
+		"base_behavior": "Fires a Space Whale Tusk projectile that ricochets between targets, dealing physical damage on each bounce.",
+		"type": "projectile",
+		"element": "physical",
+		"special": "bounce",
+		"tags": ["projectile", "bounce"],
+		"strategy_synergies": "Bounces then count; speed for more hits; pairs with size",
+		"tier_stats": {
+			"damage": { "common": 2.5, "uncommon": 3.0, "rare": 3.5, "epic": 4.0, "legendary": 5.0 },
+			"projectile_count": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 },
+			"projectile_speed": { "common": 0.20, "uncommon": 0.24, "rare": 0.28, "epic": 0.32, "legendary": 0.40 },
+			"projectile_bounces": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 },
+			"knockback": { "common": 0.3, "uncommon": 0.3, "rare": 0.4, "epic": 0.5, "legendary": 0.6 }
+		}
+	},
+	"straight_line_negotiator": {
+		"display_name": "Straight-Line Negotiator",
+		"base_behavior": "Fires a magnet-accelerated spike that travels in a perfectly straight line and pierces through multiple enemies.",
+		"type": "projectile",
+		"element": "physical",
+		"special": "pierce",
+		"tags": ["projectile", "pierce", "crit"],
+		"strategy_synergies": "Crit-focused; take crit tomes; projectile count and speed for coverage",
+		"tier_stats": {
+			"damage": { "common": 1.75, "uncommon": 2.1, "rare": 2.45, "epic": 2.8, "legendary": 3.5 },
+			"projectile_count": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 },
+			"projectile_speed": { "common": 0.30, "uncommon": 0.36, "rare": 0.42, "epic": 0.48, "legendary": 0.60 },
+			"size": { "common": 0.20, "uncommon": 0.20, "rare": 0.20, "epic": 0.30, "legendary": 0.30 },
+			"crit_chance": { "common": 0.08, "uncommon": 0.10, "rare": 0.11, "epic": 0.13, "legendary": 0.16 },
+			"crit_damage": { "common": 0.18, "uncommon": 0.22, "rare": 0.25, "epic": 0.29, "legendary": 0.36 }
+		}
+	},
+	"timmy_gun": {
+		"display_name": "Timmy Gun",
+		"base_behavior": "The Timson Sub-Space Machine Gun model T2928A1, unloads a burst of physical rounds that ricochet off targets, bouncing to hit additional enemies before dissipating.",
+		"type": "projectile",
+		"element": "physical",
+		"special": "bounce",
+		"tags": ["projectile", "bounce", "crit"],
+		"strategy_synergies": "Bounce first for chaining; crit tomes; keep damage scaling",
+		"tier_stats": {
+			"damage": { "common": 2.5, "uncommon": 3.0, "rare": 3.5, "epic": 4.0, "legendary": 5.0 },
+			"projectile_count": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 },
+			"projectile_speed": { "common": 0.40, "uncommon": 0.50, "rare": 0.60, "epic": 0.60, "legendary": 0.80 },
+			"crit_chance": { "common": 0.10, "uncommon": 0.12, "rare": 0.14, "epic": 0.16, "legendary": 0.20 },
+			"crit_damage": { "common": 0.20, "uncommon": 0.24, "rare": 0.28, "epic": 0.32, "legendary": 0.40 },
+			"projectile_bounces": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 }
+		}
+	},
+	"nope_bubble": {
+		"display_name": "Nope Bubble",
+		"base_behavior": "Blocks hits with rechargeable shield charges, consuming one per block and releasing a staggering shockwave.",
+		"type": "aoe",
+		"element": "physical",
+		"special": "block_shockwave",
+		"tags": ["aoe", "defense", "knockback"],
+		"strategy_synergies": "Quantity for more shields; knockback for space; cooldown/armor synergies",
+		"tier_stats": {
+			"damage": { "common": 2.0, "uncommon": 2.4, "rare": 2.8, "epic": 3.2, "legendary": 4.0 },
+			"projectile_count": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 },
+			"size": { "common": 0.15, "uncommon": 0.18, "rare": 0.21, "epic": 0.24, "legendary": 0.30 },
+			"knockback": { "common": 0.8, "uncommon": 0.9, "rare": 1.1, "epic": 1.2, "legendary": 1.5 }
+		}
+	},
+	"snarky_comeback": {
+		"display_name": "Snarky Comeback",
+		"base_behavior": "Throws a radiant arc projectile that returns back... created by General Cliff Snarky during the Great Flobus Wars of Quadrant 12.",
+		"type": "projectile",
+		"element": "physical",
+		"special": "return_path",
+		"tags": ["projectile", "return"],
+		"strategy_synergies": "Count then size; speed for faster cycles; works well with cooldown",
+		"tier_stats": {
+			"damage": { "common": 2.0, "uncommon": 2.4, "rare": 2.8, "epic": 3.2, "legendary": 4.0 },
+			"projectile_count": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 },
+			"projectile_speed": { "common": 0.10, "uncommon": 0.12, "rare": 0.14, "epic": 0.16, "legendary": 0.20 },
+			"size": { "common": 0.14, "uncommon": 0.17, "rare": 0.20, "epic": 0.22, "legendary": 0.28 }
+		}
+	},
+	"proximity_tax": {
+		"display_name": "Proximity Tax",
+		"base_behavior": "Emits a constant damage aura around your ship.",
+		"type": "aoe",
+		"element": "none",
+		"special": "constant_aura",
+		"tags": ["aoe", "dot"],
+		"strategy_synergies": "Pure area scaling; size is main multiplier; pairs with duration/cooldown",
+		"tier_stats": {
+			"damage": { "common": 1.4, "uncommon": 1.7, "rare": 2.0, "epic": 2.2, "legendary": 2.8 },
+			"size": { "common": 0.14, "uncommon": 0.17, "rare": 0.20, "epic": 0.22, "legendary": 0.28 }
+		}
+	},
+	"spin_cycle": {
+		"display_name": "Spin Cycle",
+		"base_behavior": "Creates a lingering four-quadrant AoE around your ship that pulses damage outward one sector at a time in a clockwise sweep.",
+		"type": "aoe",
+		"element": "physical",
+		"special": "linger",
+		"tags": ["aoe", "linger"],
+		"strategy_synergies": "Duration and count for coverage; size helpful; pairs with cooldown",
+		"tier_stats": {
+			"damage": { "common": 1.5, "uncommon": 1.8, "rare": 2.1, "epic": 2.4, "legendary": 3.0 },
+			"projectile_count": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 },
+			"size": { "common": 0.10, "uncommon": 0.12, "rare": 0.14, "epic": 0.16, "legendary": 0.20 },
+			"duration": { "common": 0.08, "uncommon": 0.10, "rare": 0.11, "epic": 0.13, "legendary": 0.16 }
+		}
+	},
+	"broken_tractor_beam": {
+		"display_name": "Broken Tractor Beam",
+		"base_behavior": "Tethers to a target with a malfunctioning tractor beam that irradiates it over time and stays locked on until the target dies... on accident.",
+		"type": "beam",
+		"element": "none",
+		"special": "lock_target",
+		"tags": ["beam", "channel"],
+		"strategy_synergies": "Duration and size to secure kill window; pair with cooldown/defense",
+		"tier_stats": {
+			"damage": { "common": 2.0, "uncommon": 2.4, "rare": 2.8, "epic": 3.2, "legendary": 4.0 },
+			"size": { "common": 0.20, "uncommon": 0.24, "rare": 0.28, "epic": 0.32, "legendary": 0.40 },
+			"duration": { "common": 0.20, "uncommon": 0.24, "rare": 0.28, "epic": 0.32, "legendary": 0.40 }
+		}
+	},
+	"straight_shooter": {
+		"display_name": "Straight Shooter",
+		"base_behavior": "Fires a manual-aim, high-velocity round that pierces through enemies in a straight line.",
+		"type": "projectile",
+		"element": "physical",
+		"special": "pierce",
+		"tags": ["projectile", "pierce", "crit"],
+		"strategy_synergies": "High damage scaling; count for multi-shots; size for easier hits",
+		"tier_stats": {
+			"damage": { "common": 4.0, "uncommon": 4.8, "rare": 5.6, "epic": 6.4, "legendary": 8.0 },
+			"projectile_count": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 },
+			"size": { "common": 0.13, "uncommon": 0.16, "rare": 0.18, "epic": 0.21, "legendary": 0.26 }
+		}
+	},
+	"space_nukes": {
+		"display_name": "Space Nukes",
+		"base_behavior": "Homing rockets.",
+		"type": "projectile",
+		"element": "physical",
+		"special": "homing",
+		"tags": ["projectile", "homing", "crit"],
+		"strategy_synergies": "Crit chance is strong; count for more rockets; speed for reliability",
+		"tier_stats": {
+			"damage": { "common": 2.0, "uncommon": 2.4, "rare": 2.8, "epic": 3.2, "legendary": 4.0 },
+			"projectile_count": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 },
+			"projectile_speed": { "common": 0.20, "uncommon": 0.24, "rare": 0.28, "epic": 0.32, "legendary": 0.40 },
+			"crit_chance": { "common": 0.08, "uncommon": 0.10, "rare": 0.11, "epic": 0.13, "legendary": 0.16 }
+		}
+	},
+	"personal_space_violator": {
+		"display_name": "Personal Space Violator",
+		"base_behavior": "Fires a piercing cone burst of pellets that hits harder the farther it travels.",
+		"type": "projectile",
+		"element": "physical",
+		"special": "pierce_cone",
+		"tags": ["projectile", "cone", "crit"],
+		"strategy_synergies": "Count boosts pellet count; damage and crit solid; size for spread control",
+		"tier_stats": {
+			"damage": { "common": 3.0, "uncommon": 3.6, "rare": 4.2, "epic": 4.8, "legendary": 6.0 },
+			"projectile_count": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 },
+			"size": { "common": 0.15, "uncommon": 0.18, "rare": 0.21, "epic": 0.24, "legendary": 0.30 },
+			"crit_chance": { "common": 0.07, "uncommon": 0.08, "rare": 0.10, "epic": 0.11, "legendary": 0.14 },
+			"knockback": { "common": 0.35, "uncommon": 0.42, "rare": 0.49, "epic": 0.56, "legendary": 0.70 }
+		}
+	},
+	"tothian_mines": {
+		"display_name": "Tothian Mines",
+		"base_behavior": "Drops proximity mines.",
+		"type": "aoe",
+		"element": "physical",
+		"special": "knockback",
+		"tags": ["aoe", "trap", "knockback"],
+		"strategy_synergies": "Duration and size for coverage; count for area denial; pairs with cooldown",
+		"tier_stats": {
+			"damage": { "common": 3.0, "uncommon": 3.6, "rare": 4.2, "epic": 4.8, "legendary": 6.0 },
+			"projectile_count": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 },
+			"size": { "common": 0.15, "uncommon": 0.18, "rare": 0.21, "epic": 0.24, "legendary": 0.30 },
+			"duration": { "common": 0.40, "uncommon": 0.48, "rare": 0.56, "epic": 0.64, "legendary": 0.80 }
+		}
+	}
+}

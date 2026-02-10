@@ -1,6 +1,7 @@
 {
 	"ion_wake": {
 		"display_name": "Ion Wake",
+		"description": "",
 		"motion": {
 			"fade_in": 0.33,
 			"fade_out": 0.45
@@ -30,6 +31,7 @@
 	},
 	"radiant_arc": {
 		"display_name": "Radiant Arc",
+		"description": "",
 		"motion": {
 			"fade_in": 0.18,
 			"fade_out": 0.15,
@@ -82,5 +84,185 @@
 			"pulse_strength": 0.7,
 			"uv_scroll_speed": 0.0
 		}
+	},
+	"nikolas_coil": {
+		"display_name": "Nikola's Coil",
+		"description": "",
+		"type": "projectile",
+		"scene": "res://effects/projectile_base/ProjectileBase.tscn",
+		"spawner": "res://effects/projectile_base/projectile_base_spawner.gd",
+		"stats": { "cooldown": 1.2, "damage": 10.0 },
+		"shape": {},
+		"motion": {},
+		"visual": {},
+		"unlock_condition": "default"
+	},
+	"space_napalm": {
+		"display_name": "Space Napalm",
+		"description": "",
+		"type": "projectile",
+		"scene": "res://effects/projectile_base/ProjectileBase.tscn",
+		"spawner": "res://effects/projectile_base/projectile_base_spawner.gd",
+		"stats": { "cooldown": 1.5, "damage": 12.0 },
+		"shape": {},
+		"motion": {},
+		"visual": {},
+		"unlock_condition": "default"
+	},
+	"psp_9000": {
+		"display_name": "PSP-9000",
+		"description": "",
+		"type": "orbit",
+		"scene": "res://effects/orbit_base/OrbitBase.tscn",
+		"spawner": "res://effects/orbit_base/orbit_base_spawner.gd",
+		"stats": { "cooldown": 2.0, "damage": 15.0 },
+		"shape": {},
+		"motion": {},
+		"visual": {},
+		"unlock_condition": "default"
+	},
+	"space_whale_tusk": {
+		"display_name": "Space Whale Tusk",
+		"description": "",
+		"type": "projectile",
+		"scene": "res://effects/projectile_base/ProjectileBase.tscn",
+		"spawner": "res://effects/projectile_base/projectile_base_spawner.gd",
+		"stats": { "cooldown": 1.3, "damage": 12.0 },
+		"shape": {},
+		"motion": {},
+		"visual": {},
+		"unlock_condition": "default"
+	},
+	"straight_line_negotiator": {
+		"display_name": "Straight-Line Negotiator",
+		"description": "",
+		"type": "projectile",
+		"scene": "res://effects/projectile_base/ProjectileBase.tscn",
+		"spawner": "res://effects/projectile_base/projectile_base_spawner.gd",
+		"stats": { "cooldown": 0.8, "damage": 8.0 },
+		"shape": {},
+		"motion": {},
+		"visual": {},
+		"unlock_condition": "default"
+	},
+	"timmy_gun": {
+		"display_name": "Timmy Gun",
+		"description": "",
+		"type": "projectile",
+		"scene": "res://effects/projectile_base/ProjectileBase.tscn",
+		"spawner": "res://effects/projectile_base/projectile_base_spawner.gd",
+		"stats": { "cooldown": 0.6, "damage": 8.0 },
+		"shape": {},
+		"motion": {},
+		"visual": {},
+		"unlock_condition": "default"
+	},
+	"nope_bubble": {
+		"display_name": "Nope Bubble",
+		"description": "",
+		"type": "aoe",
+		"scene": "res://effects/aoe_base/AoEBase.tscn",
+		"spawner": "res://effects/aoe_base/aoe_base_spawner.gd",
+		"stats": { "cooldown": 3.0, "damage": 10.0 },
+		"shape": {},
+		"motion": {},
+		"visual": {},
+		"unlock_condition": "default"
+	},
+	"snarky_comeback": {
+		"display_name": "Snarky Comeback",
+		"description": "",
+		"type": "projectile",
+		"scene": "res://effects/projectile_base/ProjectileBase.tscn",
+		"spawner": "res://effects/projectile_base/projectile_base_spawner.gd",
+		"stats": { "cooldown": 1.0, "damage": 10.0 },
+		"shape": {},
+		"motion": {},
+		"visual": {},
+		"unlock_condition": "default"
+	},
+	"proximity_tax": {
+		"display_name": "Proximity Tax",
+		"description": "",
+		"type": "aoe",
+		"scene": "res://effects/aoe_base/AoEBase.tscn",
+		"spawner": "res://effects/aoe_base/aoe_base_spawner.gd",
+		"stats": { "cooldown": 0.5, "damage": 5.0 },
+		"shape": {},
+		"motion": {},
+		"visual": {},
+		"unlock_condition": "default"
+	},
+	"spin_cycle": {
+		"display_name": "Spin Cycle",
+		"description": "",
+		"type": "aoe",
+		"scene": "res://effects/aoe_base/AoEBase.tscn",
+		"spawner": "res://effects/aoe_base/aoe_base_spawner.gd",
+		"stats": { "cooldown": 2.0, "damage": 8.0 },
+		"shape": {},
+		"motion": {},
+		"visual": {},
+		"unlock_condition": "default"
+	},
+	"broken_tractor_beam": {
+		"display_name": "Broken Tractor Beam",
+		"description": "",
+		"type": "beam",
+		"scene": "res://effects/beam_base/BeamBase.tscn",
+		"spawner": "res://effects/beam_base/beam_base_spawner.gd",
+		"stats": { "cooldown": 2.5, "damage": 10.0, "duration": 2.0 },
+		"shape": {},
+		"motion": {},
+		"visual": {},
+		"unlock_condition": "default"
+	},
+	"straight_shooter": {
+		"display_name": "Straight Shooter",
+		"description": "",
+		"type": "projectile",
+		"scene": "res://effects/projectile_base/ProjectileBase.tscn",
+		"spawner": "res://effects/projectile_base/projectile_base_spawner.gd",
+		"stats": { "cooldown": 1.5, "damage": 20.0 },
+		"shape": {},
+		"motion": {},
+		"visual": {},
+		"unlock_condition": "default"
+	},
+	"space_nukes": {
+		"display_name": "Space Nukes",
+		"description": "",
+		"type": "projectile",
+		"scene": "res://effects/projectile_base/ProjectileBase.tscn",
+		"spawner": "res://effects/projectile_base/projectile_base_spawner.gd",
+		"stats": { "cooldown": 1.8, "damage": 12.0 },
+		"shape": {},
+		"motion": {},
+		"visual": {},
+		"unlock_condition": "default"
+	},
+	"personal_space_violator": {
+		"display_name": "Personal Space Violator",
+		"description": "",
+		"type": "projectile",
+		"scene": "res://effects/projectile_base/ProjectileBase.tscn",
+		"spawner": "res://effects/projectile_base/projectile_base_spawner.gd",
+		"stats": { "cooldown": 1.0, "damage": 15.0 },
+		"shape": {},
+		"motion": {},
+		"visual": {},
+		"unlock_condition": "default"
+	},
+	"tothian_mines": {
+		"display_name": "Tothian Mines",
+		"description": "",
+		"type": "aoe",
+		"scene": "res://effects/aoe_base/AoEBase.tscn",
+		"spawner": "res://effects/aoe_base/aoe_base_spawner.gd",
+		"stats": { "cooldown": 2.5, "damage": 15.0, "duration": 3.0 },
+		"shape": {},
+		"motion": {},
+		"visual": {},
+		"unlock_condition": "default"
 	}
 }

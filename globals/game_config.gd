@@ -109,19 +109,45 @@ const WEAPON_EFFECT_COUNT_BY_RARITY: Dictionary = {
 	"legendary": 3,
 }
 
-# Weapons: base per-level amounts (before rarity tier multiplier).
-# NOTE: weapon upgrades are weapon-local (do not affect other weapons).
-const WEAPON_UPGRADE_BASE_AMOUNTS: Dictionary = {
-	"damage": 0.08,            # +8% weapon base damage
-	"attack_speed": 0.08,      # +8% shots/sec for this weapon
-	"projectile_speed": 0.10,  # +10% projectile speed
-	"size": 0.06,              # +6% projectile size (multiplies player size stat)
-	"projectile_count": 1.0,   # +1 projectile (flat)
-	"crit_chance": 2.0,        # +2 percentage points weapon-only crit chance
-	"crit_damage": 0.15,       # +0.15 crit damage multiplier (additive)
+# =============================================================================
+# WEAPON TIER UPGRADE SYSTEM (Megabonk hybrid model)
+# =============================================================================
+
+# Maximum weapon level (each re-pick at level-up increments the weapon's level).
+const MAX_WEAPON_LEVEL := 40
+
+# Rarity factors applied to CSV-derived tier baseline deltas.
+# In "baseline_plus_factor" mode: final_delta = tier_value * rarity_factor.
+# In "direct" mode: final_delta = tier_value (factor ignored).
+const WEAPON_RARITY_FACTORS: Dictionary = {
+	"common": 1.0,
+	"uncommon": 1.2,
+	"rare": 1.4,
+	"epic": 1.6,
+	"legendary": 2.0,
 }
 
-# Weapons: default weights for picking stats from a weapon's upgrade_stats pool.
+# Toggle how tier values from weapon_upgrades.json are applied:
+#   "baseline_plus_factor" — multiply tier value by WEAPON_RARITY_FACTORS[rarity] (default)
+#   "direct"               — use the tier value as-is from the JSON
+const WEAPON_TIER_VALUE_MODE: String = "baseline_plus_factor"
+
+# How many stats are improved per weapon level-up, by rarity.
+# Each entry is [min_picks, max_picks]. The actual count is rolled uniformly.
+const WEAPON_STAT_PICK_COUNT: Dictionary = {
+	"common": [1, 2],
+	"uncommon": [2, 2],
+	"rare": [2, 2],
+	"epic": [2, 2],
+	"legendary": [2, 3],
+}
+
+# Floor value for any positive stat delta after scaling. Prevents zero-gain upgrades.
+const WEAPON_MIN_POSITIVE_DELTA: float = 0.01
+
+# Default weights for stat selection when picking which stats to upgrade.
+# Higher weight = more likely to be picked. Only stats present in the weapon's
+# tier_stats are eligible; this provides relative weighting among them.
 const WEAPON_UPGRADE_STAT_WEIGHTS: Dictionary = {
 	"damage": 1.0,
 	"attack_speed": 1.0,
@@ -130,35 +156,17 @@ const WEAPON_UPGRADE_STAT_WEIGHTS: Dictionary = {
 	"projectile_count": 0.25,
 	"crit_chance": 0.4,
 	"crit_damage": 0.35,
-}
-
-# Weapons: rarity-dependent multipliers for stat selection weights (rarity affects *which* stats are more likely).
-const WEAPON_UPGRADE_WEIGHT_MULT_BY_RARITY: Dictionary = {
-	"common": {
-		"projectile_count": 0.5,
-		"crit_damage": 0.8,
-	},
-	"uncommon": {
-		"projectile_count": 0.8,
-		"crit_damage": 1.0,
-	},
-	"rare": {
-		"projectile_count": 1.2,
-		"crit_damage": 1.2,
-	},
-	"epic": {
-		"projectile_count": 1.5,
-		"crit_damage": 1.35,
-	},
-	"legendary": {
-		"projectile_count": 2.0,
-		"crit_damage": 1.5,
-	},
+	"duration": 0.7,
+	"projectile_bounces": 0.5,
+	"knockback": 0.4,
 }
 
 # Weapons: explicit kind overrides for weapon-local stats.
+# Stats listed here use "flat" additions; all others default to "mult".
 const WEAPON_UPGRADE_STAT_KIND: Dictionary = {
 	"projectile_count": "flat",
+	"projectile_bounces": "flat",
 	"crit_chance": "flat",
 	"crit_damage": "flat",
+	"knockback": "flat",
 }

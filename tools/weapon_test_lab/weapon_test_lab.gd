@@ -181,15 +181,33 @@ func _flatten_weapon_config(weapon_data: Dictionary) -> Dictionary:
 	
 	# Detect weapon type by checking for weapon-specific shape params
 	var shape = weapon_data.get("shape", {})
-	var is_ion_wake = shape.has("inner_radius") or shape.has("expansion_speed")
-	
-	# Stats (common)
-	var stats = weapon_data.get("stats", {})
-	flat["damage"] = stats.get("damage", 10.0)
-	flat["duration"] = stats.get("duration", 1.0)
-	
-	# Motion (common)
+	var visual = weapon_data.get("visual", {})
 	var motion = weapon_data.get("motion", {})
+	var particles = weapon_data.get("particles", {})
+	var is_ion_wake = shape.has("inner_radius") or shape.has("expansion_speed")
+	var is_radiant_arc = shape.has("arc_angle_deg") or shape.has("thickness")
+	var is_stub = not is_ion_wake and not is_radiant_arc
+	
+	# Stats — only include stats that actually exist in the data
+	var stats = weapon_data.get("stats", {})
+	for stat_key in stats:
+		flat[stat_key] = stats[stat_key]
+	
+	# For stub/unimplemented weapons, only show the stats that exist — no defaults
+	if is_stub:
+		# Include any non-empty motion/shape/visual values that are actually present
+		for key in motion:
+			flat[key] = motion[key]
+		for key in shape:
+			flat[key] = shape[key]
+		for key in visual:
+			if visual[key] is String:
+				flat[key] = _hex_to_color(visual[key])
+			else:
+				flat[key] = visual[key]
+		return flat
+	
+	# Motion (common for implemented weapons)
 	flat["fade_in"] = motion.get("fade_in", 0.08)
 	flat["fade_out"] = motion.get("fade_out", 0.15)
 	
@@ -202,7 +220,6 @@ func _flatten_weapon_config(weapon_data: Dictionary) -> Dictionary:
 		flat["expansion_speed"] = shape.get("expansion_speed", 300.0)
 		
 		# Visual
-		var visual = weapon_data.get("visual", {})
 		flat["color_inner"] = _hex_to_color(visual.get("color_inner", "#66ccff"))
 		flat["color_outer"] = _hex_to_color(visual.get("color_outer", "#1a4d99"))
 		flat["color_edge"] = _hex_to_color(visual.get("color_edge", "#e6f5ff"))
@@ -226,7 +243,6 @@ func _flatten_weapon_config(weapon_data: Dictionary) -> Dictionary:
 		flat["seed_offset"] = motion.get("seed_offset", 0.0)
 		
 		# Visual
-		var visual = weapon_data.get("visual", {})
 		flat["color_a"] = _hex_to_color(visual.get("color_a", "#00ffff"))
 		flat["color_b"] = _hex_to_color(visual.get("color_b", "#ff00ff"))
 		flat["color_c"] = _hex_to_color(visual.get("color_c", "#0080ff"))
@@ -243,7 +259,6 @@ func _flatten_weapon_config(weapon_data: Dictionary) -> Dictionary:
 		flat["gradient_offset"] = visual.get("gradient_offset", 0.0)
 		
 		# Particles
-		var particles = weapon_data.get("particles", {})
 		flat["particles_enabled"] = particles.get("enabled", true)
 		flat["particles_amount"] = particles.get("amount", 20)
 		flat["particles_size"] = particles.get("size", 3.0)

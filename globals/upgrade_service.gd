@@ -27,6 +27,8 @@ const FLAT_STATS: Dictionary = {
 @onready var PersistenceManager: Node = get_node("/root/PersistenceManager")
 @onready var ProgressionManager: Node = get_node("/root/ProgressionManager")
 @onready var GameConfig: Node = get_node("/root/GameConfig")
+@onready var FileLogger: Node = get_node("/root/FileLogger")
+@onready var GameSeed: Node = get_node("/root/GameSeed")
 
 
 func _ready() -> void:
@@ -37,8 +39,8 @@ func generate_level_up_options() -> Array:
 	"""Generate 3-4 upgrade options for level up selection."""
 	var options: Array = []
 	var available_upgrades: Array = DataLoader.get_all_ship_upgrades()
-	var available_weapons: Array = DataLoader.get_all_weapons()
 	var luck: float = _get_player_luck()
+	var weapon_rng: RandomNumberGenerator = GameSeed.rng("weapon_upgrade")
 
 	var owned_weapons: Array = RunManager.run_data.weapons
 	var owned_modules: Array = []
@@ -114,7 +116,7 @@ func generate_level_up_options() -> Array:
 		if current_level_w >= max_level_w:
 			continue
 		var weapon_rarity: String = _roll_rarity({}, luck)
-		var weapon_effects: Array = _build_weapon_effects(weapon_data, weapon_rarity)
+		var weapon_effects: Array = _build_weapon_effects(weapon_id, weapon_rarity, weapon_rng)
 		candidates.append({
 			"weight": w_existing_weapon,
 			"type": "weapon",
@@ -127,21 +129,21 @@ func generate_level_up_options() -> Array:
 		})
 
 	# New weapons (only if slots available)
+	# Iterate over the weapons dict directly to access keys as weapon IDs
+	# (get_all_weapons() returns .values() which lack the key).
 	if not weapon_slots_full and w_new_weapon > 0.0:
-		for weapon in available_weapons:
-			var weapon_id: String = weapon.get("id", "")
-			if weapon_id == "":
+		for wid in DataLoader.weapons.keys():
+			if wid in owned_weapons:
 				continue
-			if weapon_id in owned_weapons:
+			if not PersistenceManager.is_weapon_unlocked(wid):
 				continue
-			if not PersistenceManager.is_weapon_unlocked(weapon_id):
-				continue
+			var w_data: Dictionary = DataLoader.weapons[wid]
 			candidates.append({
 				"weight": w_new_weapon,
 				"type": "weapon",
-				"id": weapon_id,
-				"rarity": String(weapon.get("rarity", "common")),
-				"data": weapon,
+				"id": wid,
+				"rarity": String(w_data.get("rarity", "common")),
+				"data": w_data,
 				"is_new": true,
 				"current_level": 0,
 			})
@@ -261,68 +263,108 @@ func _build_upgrade_effects(upgrade_data: Dictionary, rarity: String) -> Array:
 	return effects
 
 
-func _build_weapon_effects(weapon_data: Dictionary, rarity: String) -> Array:
+func _build_weapon_effects(weapon_id: String, rarity: String, rng: RandomNumberGenerator) -> Array:
+	"""Build weapon upgrade effects using tier-based data from weapon_upgrades.json.
+	   Reads deterministic per-rarity stat deltas, picks N stats via weighted selection,
+	   and applies rarity factors per the Megabonk hybrid model."""
 	var effects: Array = []
-	var upgrade_stats_any: Variant = weapon_data.get("upgrade_stats", [])
-	if not (upgrade_stats_any is Array):
-		return effects
-	var upgrade_stats: Array = upgrade_stats_any
-	if upgrade_stats.is_empty():
+
+	# Load tier data from weapon_upgrades.json
+	var upgrade_data: Dictionary = DataLoader.get_weapon_upgrade(weapon_id)
+	if upgrade_data.is_empty():
+		FileLogger.log_warn("UpgradeService", "No weapon_upgrade data for: %s" % weapon_id)
 		return effects
 
-	var desired_count: int = int(GameConfig.WEAPON_EFFECT_COUNT_BY_RARITY.get(rarity, 1))
-	var tier_mult: float = float(GameConfig.RARITY_TIER_MULT.get(rarity, 1.0))
+	var tier_stats: Dictionary = upgrade_data.get("tier_stats", {})
+	if tier_stats.is_empty():
+		FileLogger.log_warn("UpgradeService", "Empty tier_stats for weapon: %s" % weapon_id)
+		return effects
 
+	# Build weighted pool from eligible stats (only stats present in tier_stats)
 	var pool: Array[Dictionary] = []
-	for entry_any in upgrade_stats:
-		if entry_any is String:
-			var stat_name: String = String(entry_any)
-			var base_weight: float = float(GameConfig.WEAPON_UPGRADE_STAT_WEIGHTS.get(stat_name, 1.0))
-			var rarity_mult: float = 1.0
-			var rm_any: Variant = GameConfig.WEAPON_UPGRADE_WEIGHT_MULT_BY_RARITY.get(rarity, {})
-			if rm_any is Dictionary:
-				rarity_mult = float(rm_any.get(stat_name, 1.0))
-			pool.append({"stat": stat_name, "weight": base_weight * rarity_mult})
-		elif entry_any is Dictionary:
-			var entry: Dictionary = entry_any
-			var stat_name_d: String = String(entry.get("stat", ""))
-			if stat_name_d == "":
-				continue
-			var base_weight_d: float = float(entry.get("weight", GameConfig.WEAPON_UPGRADE_STAT_WEIGHTS.get(stat_name_d, 1.0)))
-			var rarity_mult_d: float = 1.0
-			var rm_any_d: Variant = entry.get("rarity_weight_mult", GameConfig.WEAPON_UPGRADE_WEIGHT_MULT_BY_RARITY.get(rarity, {}))
-			if rm_any_d is Dictionary:
-				rarity_mult_d = float(rm_any_d.get(stat_name_d, 1.0))
-			pool.append({"stat": stat_name_d, "weight": base_weight_d * rarity_mult_d, "amount": entry.get("amount", null), "kind": entry.get("kind", null)})
+	for stat_name in tier_stats.keys():
+		var stat_str: String = String(stat_name)
+		var base_weight: float = float(GameConfig.WEAPON_UPGRADE_STAT_WEIGHTS.get(stat_str, 1.0))
+		pool.append({"stat": stat_str, "weight": base_weight})
 
+	if pool.is_empty():
+		return effects
+
+	# Determine how many stats to upgrade this level-up
+	var pick_range: Array = GameConfig.WEAPON_STAT_PICK_COUNT.get(rarity, [1, 1])
+	var min_picks: int = int(pick_range[0])
+	var max_picks: int = int(pick_range[1])
+	var desired_count: int = min_picks
+	if max_picks > min_picks:
+		desired_count = min_picks + (rng.randi() % (max_picks - min_picks + 1))
+	desired_count = mini(desired_count, pool.size())
+
+	# Get rarity factor
+	var rarity_factor: float = 1.0
+	if GameConfig.WEAPON_TIER_VALUE_MODE == "baseline_plus_factor":
+		rarity_factor = float(GameConfig.WEAPON_RARITY_FACTORS.get(rarity, 1.0))
+
+	# Pick stats via weighted random selection (without replacement)
 	var remaining: Array[Dictionary] = pool.duplicate(true)
-	var picks: int = mini(desired_count, remaining.size())
-	for _i in range(picks):
-		var idx: int = _pick_weighted_index(remaining)
+	for _i in range(desired_count):
+		var idx: int = _pick_weighted_index_rng(remaining, rng)
 		if idx < 0:
 			break
 		var chosen: Dictionary = remaining[idx]
 		remaining.remove_at(idx)
+
 		var stat_name_c: String = String(chosen.get("stat", ""))
 		if stat_name_c == "":
 			continue
 
-		var kind: String = "mult"
-		if chosen.has("kind") and chosen["kind"] != null:
-			kind = String(chosen.get("kind", "mult"))
-		else:
-			kind = String(GameConfig.WEAPON_UPGRADE_STAT_KIND.get(stat_name_c, "mult"))
+		# Read deterministic baseline from tier_stats at the rolled rarity
+		var stat_tiers: Dictionary = tier_stats.get(stat_name_c, {})
+		var base_delta: float = float(stat_tiers.get(rarity, 0.0))
 
-		var base_amount: float = 0.0
-		if chosen.has("amount") and chosen["amount"] != null:
-			base_amount = float(chosen.get("amount", 0.0))
-		else:
-			base_amount = float(GameConfig.WEAPON_UPGRADE_BASE_AMOUNTS.get(stat_name_c, 0.0))
+		# Apply rarity factor scaling
+		var scaled_delta: float = base_delta * rarity_factor
 
-		var amount: float = base_amount * tier_mult
-		effects.append({"stat": stat_name_c, "kind": kind, "amount": amount})
+		# Determine stat kind (flat vs mult)
+		var kind: String = String(GameConfig.WEAPON_UPGRADE_STAT_KIND.get(stat_name_c, "mult"))
+
+		# Apply rounding and minimum floor
+		if kind == "flat" and stat_name_c in ["projectile_count", "projectile_bounces"]:
+			# Integer stats: round to nearest, ensure at least 1 if base > 0
+			scaled_delta = round(scaled_delta)
+			if base_delta > 0.0 and scaled_delta < 1.0:
+				scaled_delta = 1.0
+		else:
+			# Decimal stats: clamp to minimum positive delta
+			if base_delta > 0.0 and scaled_delta < GameConfig.WEAPON_MIN_POSITIVE_DELTA:
+				scaled_delta = GameConfig.WEAPON_MIN_POSITIVE_DELTA
+
+		effects.append({"stat": stat_name_c, "kind": kind, "amount": scaled_delta})
+
+	# Debug logging
+	var effect_summary: Array = []
+	for e in effects:
+		effect_summary.append("%s(%s): %.3f" % [e.get("stat", ""), e.get("kind", ""), e.get("amount", 0.0)])
+	FileLogger.log_debug("UpgradeService", "Weapon upgrade [%s] rarity=%s factor=%.1f effects=[%s]" % [
+		weapon_id, rarity, rarity_factor, ", ".join(effect_summary)
+	])
 
 	return effects
+
+
+func _pick_weighted_index_rng(items: Array[Dictionary], rng: RandomNumberGenerator) -> int:
+	"""Weighted random selection using a seeded RNG for determinism."""
+	var total := 0.0
+	for it in items:
+		total += float(it.get("weight", 1.0))
+	if total <= 0.0:
+		return -1
+	var roll: float = rng.randf() * total
+	var acc := 0.0
+	for i in range(items.size()):
+		acc += float(items[i].get("weight", 1.0))
+		if roll <= acc:
+			return i
+	return items.size() - 1
 
 
 func _normalize_effect(effect: Dictionary) -> Dictionary:

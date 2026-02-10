@@ -470,28 +470,63 @@ signal damage_taken(amount: int, source: Node)
 
 ### weapons.json
 
+Stores visual/scene configuration for each weapon. Gameplay stats and upgrade scaling live in `weapon_upgrades.json`.
+
 ```json
 {
-  "plasma_cannon": {
-    "id": "plasma_cannon",
-    "name": "Plasma Cannon",
-    "description": "Fires plasma bolts that explode on impact",
-    "rarity": "common",
-    "base_stats": {
-      "damage": 10,
-      "attack_speed": 1.0,
-      "projectile_count": 1,
-      "projectile_speed": 500,
-      "size": 1.0,
-      "knockback": 0.5
-    },
-    "projectile_scene": "res://scenes/projectiles/plasma_bolt.tscn",
-    "upgrade_stats": ["damage", "attack_speed", "projectile_count", "size"],
-    "max_level": 40,
-    "tags": ["projectile", "explosive"]
+  "radiant_arc": {
+    "display_name": "Radiant Arc",
+    "type": "melee",
+    "scene": "res://effects/radiant_arc/RadiantArc.tscn",
+    "spawner": "res://effects/radiant_arc/radiant_arc_spawner.gd",
+    "stats": { "cooldown": 1.0, "damage": 10.0, "duration": 1.0 },
+    "shape": { "arc_angle_deg": 310.0, "radius": 156.0, "thickness": 65.0 },
+    "motion": { "fade_in": 0.18, "fade_out": 0.15, "sweep_speed": 1.0 },
+    "visual": { "color_a": "#ff0000", "glow_strength": 10.0 },
+    "unlock_condition": "default"
   }
 }
 ```
+
+### weapon_upgrades.json
+
+Stores per-weapon, per-rarity-tier stat tables for the Megabonk hybrid upgrade model. Each weapon's `tier_stats` defines which stats are eligible for upgrades and their deterministic baseline deltas per rarity tier (Common/Uncommon/Rare/Epic/Legendary). Values are decimals (e.g., 20% → 0.20).
+
+```json
+{
+  "radiant_arc": {
+    "display_name": "Radiant Arc",
+    "base_behavior": "Emits a short-range photonic slash...",
+    "type": "melee",
+    "element": "none",
+    "special": "none",
+    "tags": ["melee", "slash"],
+    "strategy_synergies": "Prioritize damage/count then size...",
+    "tier_stats": {
+      "damage": { "common": 2.0, "uncommon": 2.4, "rare": 2.8, "epic": 3.2, "legendary": 4.0 },
+      "projectile_count": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 },
+      "size": { "common": 0.2, "uncommon": 0.24, "rare": 0.28, "epic": 0.32, "legendary": 0.4 }
+    }
+  }
+}
+```
+
+#### Megabonk Hybrid Upgrade Model
+
+When a player re-picks a weapon at level-up:
+
+1. **Rarity roll**: Luck-weighted random roll determines rarity (common → legendary)
+2. **Stat pick**: `WEAPON_STAT_PICK_COUNT[rarity]` determines how many stats improve (e.g., Common: 1–2, Legendary: 2–3)
+3. **Stat selection**: Weighted random from the weapon's `tier_stats` keys using `WEAPON_UPGRADE_STAT_WEIGHTS`
+4. **Delta computation**: Read `tier_stats[stat][rarity]`, multiply by `WEAPON_RARITY_FACTORS[rarity]` (if mode = `baseline_plus_factor`)
+5. **Apply**: Returns `[{stat, kind, amount}]` array consumed by `WeaponComponent.apply_level_up_effects()`
+
+Config toggles in `GameConfig`:
+
+- `WEAPON_TIER_VALUE_MODE`: `"baseline_plus_factor"` (default) or `"direct"` (raw tier values)
+- `WEAPON_STAT_PICK_COUNT`: min/max stat picks per rarity
+- `WEAPON_RARITY_FACTORS`: multiplier per rarity tier
+- `WEAPON_MIN_POSITIVE_DELTA`: floor for positive deltas
 
 ### characters.json
 

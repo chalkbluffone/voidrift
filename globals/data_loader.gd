@@ -5,6 +5,7 @@ extends Node
 
 # Loaded data dictionaries
 var weapons: Dictionary = {}
+var weapon_upgrades: Dictionary = {}
 var characters: Dictionary = {}
 var ship_upgrades: Dictionary = {}
 var items: Dictionary = {}
@@ -22,6 +23,7 @@ func _ready() -> void:
 func _load_all_data() -> void:
 	# Load base game data
 	weapons = _load_json_file(BASE_DATA_PATH + "weapons.json")
+	weapon_upgrades = _load_json_file(BASE_DATA_PATH + "weapon_upgrades.json")
 	characters = _load_json_file(BASE_DATA_PATH + "characters.json")
 	ship_upgrades = _load_json_file(BASE_DATA_PATH + "ship_upgrades.json")
 	items = _load_json_file(BASE_DATA_PATH + "items.json")
@@ -30,8 +32,8 @@ func _load_all_data() -> void:
 	# Load and merge mods
 	_load_mods()
 	
-	print("[DataLoader] Loaded %d weapons, %d characters, %d ship_upgrades, %d items, %d enemies" % [
-		weapons.size(), characters.size(), ship_upgrades.size(), items.size(), enemies.size()
+	print("[DataLoader] Loaded %d weapons, %d weapon_upgrades, %d characters, %d ship_upgrades, %d items, %d enemies" % [
+		weapons.size(), weapon_upgrades.size(), characters.size(), ship_upgrades.size(), items.size(), enemies.size()
 	])
 
 func _load_mods() -> void:
@@ -67,6 +69,7 @@ func _load_mod(mod_path: String) -> void:
 	
 	# Merge mod data into base data
 	_merge_data(weapons, _load_json_file(mod_path + "weapons.json"))
+	_merge_data(weapon_upgrades, _load_json_file(mod_path + "weapon_upgrades.json"))
 	_merge_data(characters, _load_json_file(mod_path + "characters.json"))
 	_merge_data(ship_upgrades, _load_json_file(mod_path + "ship_upgrades.json"))
 	_merge_data(items, _load_json_file(mod_path + "items.json"))
@@ -115,6 +118,15 @@ func _load_json_file(path: String) -> Dictionary:
 
 func get_weapon(id: String) -> Dictionary:
 	return weapons.get(id, {})
+
+func get_weapon_upgrade(id: String) -> Dictionary:
+	return weapon_upgrades.get(id, {})
+
+func get_all_weapon_upgrades() -> Array:
+	return weapon_upgrades.values()
+
+func get_weapon_upgrade_ids() -> Array:
+	return weapon_upgrades.keys()
 
 func get_character(id: String) -> Dictionary:
 	return characters.get(id, {})
