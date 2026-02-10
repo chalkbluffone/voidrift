@@ -1,9 +1,7 @@
 extends CanvasLayer
 
 ## HUD - Displays player stats, XP, level, and run timer.
-## Scales automatically based on screen resolution.
-
-const REFERENCE_HEIGHT := 1080.0  # Design resolution height
+## Scales automatically via project stretch mode (canvas_items).
 
 # Top left - HP bar
 @onready var hp_bar: ProgressBar = $TopLeft/HPBar
@@ -20,11 +18,6 @@ const REFERENCE_HEIGHT := 1080.0  # Design resolution height
 # Bottom - XP bar stretched across screen
 @onready var xp_bar: ProgressBar = $BottomXP/XPBar
 @onready var xp_label: Label = $BottomXP/XPBar/XPLabel
-
-# Containers for scaling
-@onready var top_left: Control = $TopLeft
-@onready var top_center: Control = $TopCenter
-@onready var top_right: Control = $TopRight
 
 # Left side - weapons list
 @onready var left_weapons: Control = $LeftWeapons
@@ -57,10 +50,6 @@ func _ready() -> void:
 	# Apply synthwave colors
 	_apply_synthwave_theme()
 	
-	# Scale HUD based on resolution
-	_update_scale()
-	get_tree().root.size_changed.connect(_update_scale)
-	
 	# Connect to GameManager signals
 	GameManager.xp_changed.connect(_on_xp_changed)
 	GameManager.credits_changed.connect(_on_credits_changed)
@@ -75,16 +64,6 @@ func _ready() -> void:
 	_update_timer(0.0)
 	_update_level(1)
 	_update_credits(0)
-
-
-func _update_scale() -> void:
-	var viewport_height := get_viewport().get_visible_rect().size.y
-	var scale_factor := viewport_height / REFERENCE_HEIGHT
-	top_left.scale = Vector2(scale_factor, scale_factor)
-	top_center.scale = Vector2(scale_factor, scale_factor)
-	top_right.scale = Vector2(scale_factor, scale_factor)
-	# Bottom XP bar doesn't need scaling - it stretches with anchors
-	FileLogger.log_debug("HUD", "Scaled to %.2f (viewport height: %.0f)" % [scale_factor, viewport_height])
 
 
 func _apply_synthwave_theme() -> void:
