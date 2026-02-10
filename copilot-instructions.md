@@ -57,17 +57,17 @@ Replaces Megabonk's jump mechanic. Ship briefly phases into another dimension:
 
 ## Sci-Fi Theme Mapping (from Megabonk)
 
-| Megabonk       | Voidrift                          | Description                                 |
-| -------------- | --------------------------------- | ------------------------------------------- |
-| Tomes          | Ship Upgrades / Modules           | Passive stat bonuses (max level 99)         |
-| Charge Shrines | Space Gas Stations                | Stand in zone to charge, receive stat bonus |
-| Shady Guy      | Space Vendor / Trader Ship        | Purchase 1 of 3 items for Credits           |
-| Chests         | Cargo Pods                        | Found around map, contain items             |
-| Vases/Pots     | Minable Asteroids                 | Press button to mine, drops ISC/XP/Stardust |
-| Gold (in-run)  | Intergalactic Space Credits (ISC) | Currency spent during run, symbol: ⟐        |
-| Silver (meta)  | Stardust                          | Permanent currency for unlocks, symbol: ✦  |
-| Trees/Towers   | Large Asteroids / Wrecks          | Static collision obstacles                  |
-| Forest/Desert  | Nebula sectors                    | Themed arena variants                       |
+| Megabonk       | Voidrift                          | Description                                                         |
+| -------------- | --------------------------------- | ------------------------------------------------------------------- |
+| Tomes          | Ship Upgrades / Modules           | Passive stat bonuses (max level 99)                                 |
+| Charge Shrines | Space Gas Stations                | Stand in zone to charge, receive stat bonus                         |
+| Shady Guy      | Space Vendor / Trader Ship        | Purchase 1 of 3 items for Credits                                   |
+| Chests         | Cargo Pods                        | Found around map, contain items                                     |
+| Vases/Pots     | Minable Asteroids                 | Press button to mine, drops Intergalactic Space Credits/XP/Stardust |
+| Gold (in-run)  | Intergalactic Space Credits (ISC) | Currency spent during run, symbol: ⟐                                |
+| Silver (meta)  | Stardust                          | Permanent currency for unlocks, symbol: ✦                           |
+| Trees/Towers   | Large Asteroids / Wrecks          | Static collision obstacles                                          |
+| Forest/Desert  | Nebula sectors                    | Themed arena variants                                               |
 
 ---
 

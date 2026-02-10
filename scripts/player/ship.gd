@@ -7,6 +7,7 @@ extends CharacterBody2D
 signal phase_shift_started
 signal phase_shift_ended
 signal phase_energy_changed(current: int, maximum: int)
+signal died
 
 # --- Preloads ---
 const StatsComponentScript := preload("res://scripts/core/stats_component.gd")
@@ -325,9 +326,22 @@ func _on_hp_changed(_current: float, _maximum: float) -> void:
 
 
 func _on_died() -> void:
-	# GameManager handles run end via signal connection
-	# Play death animation, disable controls, etc.
+	# Disable controls and physics
 	set_physics_process(false)
+	set_process_input(false)
+	
+	# Disable collision so enemies pass through
+	if collision_shape:
+		collision_shape.set_deferred("disabled", true)
+	
+	# Death flash animation
+	if sprite:
+		var tween := create_tween()
+		tween.tween_property(sprite, "modulate", Color(1, 0.3, 0.3, 1), 0.1)
+		tween.tween_property(sprite, "modulate", Color(1, 1, 1, 0), 0.4)
+	
+	# Propagate to RunManager so it can trigger game over
+	died.emit()
 
 
 func _on_level_up_completed(option: Dictionary) -> void:

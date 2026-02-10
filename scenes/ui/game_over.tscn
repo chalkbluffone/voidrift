@@ -1,8 +1,11 @@
-[gd_scene load_steps=1 format=3 uid="uid://dgameover00001"]
+[gd_scene load_steps=2 format=3 uid="uid://dgameover00001"]
+
+[ext_resource type="Script" path="res://scripts/ui/game_over.gd" id="1_script"]
 
 [node name="GameOver" type="CanvasLayer"]
 layer = 100
 process_mode = 3
+script = ExtResource("1_script")
 
 [node name="ColorRect" type="ColorRect" parent="."]
 anchors_preset = 15
@@ -51,7 +54,7 @@ horizontal_alignment = 1
 
 [node name="CreditsLabel" type="Label" parent="VBoxContainer/StatsContainer"]
 layout_mode = 2
-text = "⟐ ISC Earned: 0"
+text = "⟐ Intergalactic Space Credits Earned: 0"
 horizontal_alignment = 1
 
 [node name="StardustLabel" type="Label" parent="VBoxContainer/StatsContainer"]
