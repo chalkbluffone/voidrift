@@ -288,7 +288,7 @@
     }
   },
   "space_whale_tusk": {
-    "description": "Fires a Space Whale Tusk projectile that ricochets between targets, dealing physical damage on each bounce. Actually made from space whales.",
+    "description": "Fires a Space Whale Tusk projectile that ricochets between targets, dealing physical damage on each bounce. Actually made from space whales. Harvested on Gleebus V, the only planet where space whales are found. It's a little unethical, but those tusks make for great weapons.",
     "display_name": "Space Whale Tusk",
     "motion": {
 
