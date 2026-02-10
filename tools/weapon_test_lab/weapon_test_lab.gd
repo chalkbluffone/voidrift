@@ -89,6 +89,8 @@ func _process(delta: float) -> void:
 	_process_ship_movement(delta)
 	_process_auto_fire(delta)
 	_process_auto_spawn(delta)
+	if _show_hitboxes:
+		_apply_hitbox_visibility()
 
 
 func _process_ship_movement(delta: float) -> void:
@@ -471,6 +473,7 @@ func _on_auto_spawn_toggled(enabled: bool) -> void:
 
 func _on_show_hitboxes_toggled(enabled: bool) -> void:
 	_show_hitboxes = enabled
+	_apply_hitbox_visibility()
 
 
 # --- Save/Load to weapons.json ---
@@ -503,3 +506,83 @@ func get_current_config() -> Dictionary:
 
 func get_current_weapon_id() -> String:
 	return _current_weapon_id
+
+
+# --- Hitbox Debug Visualization ---
+
+## Recursively find all CollisionShape2D nodes and add/remove debug overlays.
+func _apply_hitbox_visibility() -> void:
+	_apply_hitbox_recursive(self)
+
+
+func _apply_hitbox_recursive(node: Node) -> void:
+	if node is CollisionShape2D:
+		var cs: CollisionShape2D = node as CollisionShape2D
+		if _show_hitboxes:
+			_ensure_debug_overlay(cs)
+		else:
+			_remove_debug_overlay(cs)
+	for child in node.get_children():
+		_apply_hitbox_recursive(child)
+
+
+func _ensure_debug_overlay(cs: CollisionShape2D) -> void:
+	# Skip if overlay already exists
+	for child in cs.get_children():
+		if child.has_meta("hitbox_debug_overlay"):
+			return
+	var overlay := HitboxDebugOverlay.new()
+	overlay.set_meta("hitbox_debug_overlay", true)
+	cs.add_child(overlay)
+
+
+func _remove_debug_overlay(cs: CollisionShape2D) -> void:
+	for child in cs.get_children():
+		if child.has_meta("hitbox_debug_overlay"):
+			child.queue_free()
+
+
+## Lightweight node that draws the parent CollisionShape2D's shape outline.
+class HitboxDebugOverlay extends Node2D:
+	func _process(_delta: float) -> void:
+		queue_redraw()
+
+	func _draw() -> void:
+		var parent := get_parent()
+		if not parent is CollisionShape2D:
+			return
+		var cs: CollisionShape2D = parent as CollisionShape2D
+		var shape: Shape2D = cs.shape
+		if shape == null:
+			return
+
+		# Pick color based on what the collision shape belongs to
+		var color := Color(0.0, 1.0, 0.0, 0.6)  # Green default
+		var grandparent := cs.get_parent()
+		if grandparent:
+			if grandparent.is_in_group("enemies"):
+				color = Color(1.0, 0.2, 0.2, 0.6)  # Red for enemies
+			elif grandparent is CharacterBody2D:
+				color = Color(0.2, 0.6, 1.0, 0.6)  # Blue for player ship
+			elif grandparent.name == "PickupRange":
+				color = Color(1.0, 1.0, 0.2, 0.3)  # Yellow for pickup range
+
+		if shape is CircleShape2D:
+			var r: float = shape.radius
+			draw_arc(Vector2.ZERO, r, 0.0, TAU, 48, color, 1.5)
+			draw_circle(Vector2.ZERO, r, Color(color.r, color.g, color.b, color.a * 0.15))
+		elif shape is RectangleShape2D:
+			var half: Vector2 = shape.size * 0.5
+			var rect := Rect2(-half, shape.size)
+			draw_rect(rect, Color(color.r, color.g, color.b, color.a * 0.15), true)
+			draw_rect(rect, color, false, 1.5)
+		elif shape is CapsuleShape2D:
+			var r: float = shape.radius
+			var h: float = shape.height * 0.5 - r
+			draw_arc(Vector2(0, -h), r, 0, PI, 24, color, 1.5)
+			draw_arc(Vector2(0, h), r, PI, TAU, 24, color, 1.5)
+			draw_line(Vector2(-r, -h), Vector2(-r, h), color, 1.5)
+			draw_line(Vector2(r, -h), Vector2(r, h), color, 1.5)
+		else:
+			# Fallback: draw a small marker
+			draw_circle(Vector2.ZERO, 5.0, color)
