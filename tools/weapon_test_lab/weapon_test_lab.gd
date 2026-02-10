@@ -185,8 +185,9 @@ func _flatten_weapon_config(weapon_data: Dictionary) -> Dictionary:
 	var motion = weapon_data.get("motion", {})
 	var particles = weapon_data.get("particles", {})
 	var is_ion_wake = shape.has("inner_radius") or shape.has("expansion_speed")
-	var is_radiant_arc = shape.has("arc_angle_deg") or shape.has("thickness")
-	var is_stub = not is_ion_wake and not is_radiant_arc
+	var is_nikolas_coil = shape.has("arc_width") or shape.has("search_radius")
+	var is_radiant_arc = (shape.has("arc_angle_deg") or shape.has("thickness")) and not is_nikolas_coil
+	var is_stub = not is_ion_wake and not is_radiant_arc and not is_nikolas_coil
 	
 	# Stats — only include stats that actually exist in the data
 	var stats = weapon_data.get("stats", {})
@@ -211,7 +212,26 @@ func _flatten_weapon_config(weapon_data: Dictionary) -> Dictionary:
 	flat["fade_in"] = motion.get("fade_in", 0.08)
 	flat["fade_out"] = motion.get("fade_out", 0.15)
 	
-	if is_ion_wake:
+	if is_nikolas_coil:
+		# === NIKOLA'S COIL PARAMETERS ===
+		# Shape
+		flat["arc_width"] = shape.get("arc_width", 8.0)
+		flat["search_radius"] = shape.get("search_radius", 300.0)
+		
+		# Motion
+		flat["cascade_delay"] = motion.get("cascade_delay", 0.08)
+		flat["hold_time"] = motion.get("hold_time", 0.30)
+		
+		# Visual
+		flat["color_core"] = _hex_to_color(visual.get("color_core", "#ffffff"))
+		flat["color_glow"] = _hex_to_color(visual.get("color_glow", "#4488ff"))
+		flat["color_fringe"] = _hex_to_color(visual.get("color_fringe", "#8844cc"))
+		flat["glow_strength"] = visual.get("glow_strength", 4.0)
+		flat["bolt_width"] = visual.get("bolt_width", 0.5)
+		flat["jaggedness"] = visual.get("jaggedness", 0.7)
+		flat["branch_intensity"] = visual.get("branch_intensity", 0.3)
+		flat["flicker_speed"] = visual.get("flicker_speed", 30.0)
+	elif is_ion_wake:
 		# === ION WAKE PARAMETERS ===
 		# Shape
 		flat["inner_radius"] = shape.get("inner_radius", 20.0)
@@ -277,52 +297,59 @@ func _flatten_weapon_config(weapon_data: Dictionary) -> Dictionary:
 func _unflatten_weapon_config(flat: Dictionary, original: Dictionary) -> Dictionary:
 	var result = original.duplicate(true)
 	
-	# Check if this is an ion_wake by looking for ion_wake-specific params
+	# Detect weapon type from flat config keys
 	var is_ion_wake = flat.has("inner_radius") or flat.has("outer_radius") or flat.has("expansion_speed")
+	var is_nikolas_coil = flat.has("arc_width") or flat.has("search_radius") or flat.has("cascade_delay")
 	
-	# Stats (common)
+	# Stats (common) — only write stats that exist in flat
 	if not result.has("stats"):
 		result["stats"] = {}
-	result["stats"]["damage"] = flat.get("damage", 10.0)
-	result["stats"]["duration"] = flat.get("duration", 1.0)
+	if flat.has("damage"): result["stats"]["damage"] = flat["damage"]
+	if flat.has("duration"): result["stats"]["duration"] = flat["duration"]
+	if flat.has("cooldown"): result["stats"]["cooldown"] = flat["cooldown"]
 	
-	# Shape - weapon-specific
 	if not result.has("shape"):
 		result["shape"] = {}
+	if not result.has("motion"):
+		result["motion"] = {}
+	if not result.has("visual"):
+		result["visual"] = {}
 	
-	if is_ion_wake:
-		# Ion Wake shape params
+	if is_nikolas_coil:
+		# === NIKOLA'S COIL ===
+		# Shape
+		result["shape"]["arc_width"] = flat.get("arc_width", 8.0)
+		result["shape"]["search_radius"] = flat.get("search_radius", 300.0)
+		# Motion
+		result["motion"]["cascade_delay"] = flat.get("cascade_delay", 0.08)
+		result["motion"]["hold_time"] = flat.get("hold_time", 0.30)
+		result["motion"]["fade_in"] = flat.get("fade_in", 0.04)
+		result["motion"]["fade_out"] = flat.get("fade_out", 0.15)
+		# Visual
+		result["visual"]["color_core"] = _color_to_hex(flat.get("color_core", Color.WHITE))
+		result["visual"]["color_glow"] = _color_to_hex(flat.get("color_glow", Color(0.27, 0.53, 1.0)))
+		result["visual"]["color_fringe"] = _color_to_hex(flat.get("color_fringe", Color(0.53, 0.27, 0.8)))
+		result["visual"]["glow_strength"] = flat.get("glow_strength", 4.0)
+		result["visual"]["bolt_width"] = flat.get("bolt_width", 0.5)
+		result["visual"]["jaggedness"] = flat.get("jaggedness", 0.7)
+		result["visual"]["branch_intensity"] = flat.get("branch_intensity", 0.3)
+		result["visual"]["flicker_speed"] = flat.get("flicker_speed", 30.0)
+		# Remove any radiant arc keys that may have leaked in
+		for bad_key in ["arc_angle_deg", "thickness", "radius", "taper", "length_scale", "distance"]:
+			result["shape"].erase(bad_key)
+		for bad_key in ["speed", "sweep_speed", "rotation_offset_deg", "seed_offset"]:
+			result["motion"].erase(bad_key)
+		for bad_key in ["color_a", "color_b", "color_c", "core_strength", "noise_strength", "uv_scroll_speed", "chromatic_aberration", "pulse_strength", "pulse_speed", "electric_strength", "electric_frequency", "electric_speed", "gradient_offset"]:
+			result["visual"].erase(bad_key)
+		result.erase("particles")
+	elif is_ion_wake:
+		# === ION WAKE ===
 		result["shape"]["inner_radius"] = flat.get("inner_radius", 20.0)
 		result["shape"]["outer_radius"] = flat.get("outer_radius", 200.0)
 		result["shape"]["ring_thickness"] = flat.get("ring_thickness", 30.0)
 		result["shape"]["expansion_speed"] = flat.get("expansion_speed", 300.0)
-	else:
-		# Radiant Arc shape params
-		result["shape"]["arc_angle_deg"] = flat.get("arc_angle_deg", 90.0)
-		result["shape"]["radius"] = flat.get("radius", 42.0)
-		result["shape"]["thickness"] = flat.get("thickness", 18.0)
-		result["shape"]["taper"] = flat.get("taper", 0.5)
-		result["shape"]["length_scale"] = flat.get("length_scale", 0.75)
-		result["shape"]["distance"] = flat.get("distance", 25.0)
-	
-	# Motion
-	if not result.has("motion"):
-		result["motion"] = {}
-	result["motion"]["fade_in"] = flat.get("fade_in", 0.08)
-	result["motion"]["fade_out"] = flat.get("fade_out", 0.15)
-	if not is_ion_wake:
-		# Radiant Arc-specific motion params
-		result["motion"]["seed_offset"] = flat.get("seed_offset", 0.0)
-		result["motion"]["speed"] = flat.get("speed", 0.0)
-		result["motion"]["sweep_speed"] = flat.get("sweep_speed", 1.2)
-		result["motion"]["rotation_offset_deg"] = flat.get("rotation_offset_deg", 0.0)
-	
-	# Visual
-	if not result.has("visual"):
-		result["visual"] = {}
-	
-	if is_ion_wake:
-		# Ion Wake colors and visual params
+		result["motion"]["fade_in"] = flat.get("fade_in", 0.08)
+		result["motion"]["fade_out"] = flat.get("fade_out", 0.15)
 		result["visual"]["color_inner"] = _color_to_hex(flat.get("color_inner", Color(0.4, 0.8, 1.0)))
 		result["visual"]["color_outer"] = _color_to_hex(flat.get("color_outer", Color(0.1, 0.3, 0.5)))
 		result["visual"]["color_edge"] = _color_to_hex(flat.get("color_edge", Color(0.8, 0.9, 1.0)))
@@ -330,7 +357,19 @@ func _unflatten_weapon_config(flat: Dictionary, original: Dictionary) -> Diction
 		result["visual"]["edge_sharpness"] = flat.get("edge_sharpness", 2.0)
 		result["visual"]["edge_glow"] = flat.get("edge_glow", 1.5)
 	else:
-		# Radiant Arc colors and visual params
+		# === RADIANT ARC ===
+		result["shape"]["arc_angle_deg"] = flat.get("arc_angle_deg", 90.0)
+		result["shape"]["radius"] = flat.get("radius", 42.0)
+		result["shape"]["thickness"] = flat.get("thickness", 18.0)
+		result["shape"]["taper"] = flat.get("taper", 0.5)
+		result["shape"]["length_scale"] = flat.get("length_scale", 0.75)
+		result["shape"]["distance"] = flat.get("distance", 25.0)
+		result["motion"]["fade_in"] = flat.get("fade_in", 0.08)
+		result["motion"]["fade_out"] = flat.get("fade_out", 0.15)
+		result["motion"]["seed_offset"] = flat.get("seed_offset", 0.0)
+		result["motion"]["speed"] = flat.get("speed", 0.0)
+		result["motion"]["sweep_speed"] = flat.get("sweep_speed", 1.2)
+		result["motion"]["rotation_offset_deg"] = flat.get("rotation_offset_deg", 0.0)
 		result["visual"]["color_a"] = _color_to_hex(flat.get("color_a", Color.CYAN))
 		result["visual"]["color_b"] = _color_to_hex(flat.get("color_b", Color.MAGENTA))
 		result["visual"]["color_c"] = _color_to_hex(flat.get("color_c", Color(0, 0.5, 1)))
@@ -345,8 +384,6 @@ func _unflatten_weapon_config(flat: Dictionary, original: Dictionary) -> Diction
 		result["visual"]["electric_strength"] = flat.get("electric_strength", 0.0)
 		result["visual"]["electric_frequency"] = flat.get("electric_frequency", 20.0)
 		result["visual"]["electric_speed"] = flat.get("electric_speed", 15.0)
-		
-		# Radiant Arc particles only
 		if not result.has("particles"):
 			result["particles"] = {}
 		result["particles"]["enabled"] = flat.get("particles_enabled", true)

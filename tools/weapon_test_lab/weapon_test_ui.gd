@@ -500,6 +500,23 @@ func _get_slider_ranges(key: String, current_value: Variant) -> Array:
 			return [0.0, 1.0, 0.05]
 		"particles_radius":
 			return [0.0, 1.0, 0.05]
+		# Nikola's Coil / chain-lightning parameters
+		"arc_width":
+			return [1.0, 30.0, 0.5]
+		"search_radius":
+			return [50.0, 800.0, 10.0]
+		"cascade_delay":
+			return [0.01, 0.30, 0.01]
+		"hold_time":
+			return [0.1, 1.0, 0.05]
+		"flicker_speed":
+			return [5.0, 60.0, 1.0]
+		"bolt_width":
+			return [0.1, 1.0, 0.05]
+		"jaggedness":
+			return [0.0, 1.0, 0.05]
+		"branch_intensity":
+			return [0.0, 1.0, 0.05]
 		_:
 			# Default ranges based on current value
 			if current_value is int:

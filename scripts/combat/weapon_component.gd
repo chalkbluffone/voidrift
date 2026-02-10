@@ -86,7 +86,6 @@ func _process_weapons() -> void:
 func _fire_weapon(weapon_id: String, weapon_state: Dictionary) -> void:
 	var data: Dictionary = weapon_state.data
 	var weapon_type: String = data.get("type", "projectile")
-	
 	match weapon_type:
 		"projectile":
 			_fire_projectile_weapon(weapon_id, data, weapon_state.level)
@@ -101,6 +100,14 @@ func _fire_weapon(weapon_id: String, weapon_state: Dictionary) -> void:
 
 
 func _fire_projectile_weapon(weapon_id: String, data: Dictionary, _level: int) -> void:
+	# Check if this projectile weapon has a custom spawner (e.g., Nikola's Coil).
+	# If so, delegate to the spawner system instead of the generic projectile path.
+	var spawner_path: String = data.get("spawner", "")
+	if not spawner_path.is_empty() and not spawner_path.begins_with("res://effects/projectile_base/"):
+		FileLogger.log_info("WeaponComponent", "Delegating %s to custom spawner: %s" % [weapon_id, spawner_path])
+		_fire_projectile_via_spawner(weapon_id, data)
+		return
+
 	# Get base stats from nested base_stats dict
 	var base_stats: Dictionary = data.get("base_stats", {})
 	var base_projectiles: int = base_stats.get("projectile_count", 1)
@@ -151,6 +158,49 @@ func _fire_projectile_weapon(weapon_id: String, data: Dictionary, _level: int) -
 			spawned.append(projectile)
 	
 	weapon_fired.emit(weapon_id, spawned)
+
+
+func _fire_projectile_via_spawner(weapon_id: String, data: Dictionary) -> void:
+	"""Fire a projectile-type weapon that has a custom spawner (e.g., Nikola's Coil).
+	   Delegates to the spawner system using the same pattern as orbit/area/beam weapons."""
+	var parent := get_parent()
+	if not parent:
+		FileLogger.log_warn("WeaponComponent", "_fire_projectile_via_spawner: no parent for %s" % weapon_id)
+		return
+	var config: Dictionary = _flatten_weapon_data(data)
+	FileLogger.log_info("WeaponComponent", "Spawner config for %s: %d keys" % [weapon_id, config.size()])
+	var spawner = _get_or_create_spawner(weapon_id, data)
+	if spawner == null:
+		FileLogger.log_warn("WeaponComponent", "No spawner for custom projectile weapon: %s" % weapon_id)
+		return
+
+	if not spawner.has_method("spawn"):
+		FileLogger.log_warn("WeaponComponent", "Spawner missing spawn() for weapon: %s" % weapon_id)
+		return
+
+	# Detect spawn() signature (3-arg vs 4-arg) like _fire_melee_with_config does
+	var script: Script = spawner.get_script()
+	var methods: Array = script.get_script_method_list() if script else []
+	var spawn_arg_count: int = 3  # Default to position-only (chain lightning style)
+	for m in methods:
+		if m.get("name", "") == "spawn":
+			var args: Array = m.get("args", [])
+			spawn_arg_count = args.size()
+			break
+
+	FileLogger.log_info("WeaponComponent", "Firing %s via spawner (%d-arg) at %s" % [weapon_id, spawn_arg_count, str(parent.global_position)])
+	var result = null
+	if spawn_arg_count >= 4:
+		var direction: Vector2 = _get_fire_direction(data)
+		result = spawner.spawn(parent.global_position, direction, config, parent)
+	else:
+		result = spawner.spawn(parent.global_position, config, parent)
+
+	if result:
+		FileLogger.log_info("WeaponComponent", "Spawner produced result for %s" % weapon_id)
+		weapon_fired.emit(weapon_id, [result])
+	else:
+		FileLogger.log_info("WeaponComponent", "Spawner returned null for %s (no targets?)" % weapon_id)
 
 
 func _fire_orbit_weapon(weapon_id: String, data: Dictionary, _level: int) -> void:
@@ -256,12 +306,59 @@ func fire_weapon_with_config(weapon_id: String, config: Dictionary, source: Node
 	var weapon_type: String = "melee"  # Default for radiant_arc
 	if _equipped_weapons.has(weapon_id):
 		weapon_type = _equipped_weapons[weapon_id].data.get("type", "melee")
+	else:
+		# Not equipped yet — look up from DataLoader
+		var wd: Dictionary = DataLoader.get_weapon(weapon_id)
+		weapon_type = wd.get("type", "melee")
 	
 	match weapon_type:
 		"melee":
 			_fire_melee_with_config(weapon_id, config, source)
+		"projectile":
+			_fire_projectile_with_config(weapon_id, config, source)
 		_:
 			push_warning("WeaponComponent: fire_weapon_with_config not implemented for type: " + weapon_type)
+
+
+func _fire_projectile_with_config(weapon_id: String, config: Dictionary, source: Node2D) -> void:
+	"""Fire a projectile weapon with explicit flat config (for test lab)."""
+	var weapon_data: Dictionary = DataLoader.get_weapon(weapon_id)
+	var spawner_path: String = weapon_data.get("spawner", "")
+	
+	# Custom spawner weapons (Nikola's Coil, etc.)
+	if not spawner_path.is_empty() and not spawner_path.begins_with("res://effects/projectile_base/"):
+		var spawner = _get_or_create_spawner(weapon_id, weapon_data)
+		if spawner == null:
+			push_warning("WeaponComponent: No spawner for weapon: " + weapon_id)
+			return
+		if not spawner.has_method("spawn"):
+			return
+		# Detect arg count
+		var script: Script = spawner.get_script()
+		var methods: Array = script.get_script_method_list() if script else []
+		var spawn_arg_count: int = 3
+		for m in methods:
+			if m.get("name", "") == "spawn":
+				spawn_arg_count = m.get("args", []).size()
+				break
+		var result = null
+		if spawn_arg_count >= 4:
+			var direction: Vector2 = Vector2.RIGHT.rotated(source.rotation)
+			result = spawner.spawn(source.global_position, direction, config, source)
+		else:
+			result = spawner.spawn(source.global_position, config, source)
+		if result:
+			weapon_fired.emit(weapon_id, [result])
+		return
+	
+	# Generic projectile weapons — fire the standard projectile path
+	var fire_dir: Vector2 = Vector2.RIGHT.rotated(source.rotation)
+	var proj_damage: float = float(config.get("damage", 10.0))
+	var proj_speed: float = float(config.get("projectile_speed", 400.0))
+	var piercing: int = int(config.get("piercing", 0))
+	var projectile := _spawn_projectile(weapon_id, fire_dir, proj_damage, proj_speed, piercing, 1.0)
+	if projectile:
+		weapon_fired.emit(weapon_id, [projectile])
 
 
 func _flatten_weapon_data(data: Dictionary) -> Dictionary:
@@ -272,18 +369,40 @@ func _flatten_weapon_data(data: Dictionary) -> Dictionary:
 	# Detect weapon type by checking for weapon-specific shape params
 	var shape = data.get("shape", {})
 	var is_ion_wake = shape.has("inner_radius") or shape.has("expansion_speed")
+	var is_nikolas_coil = shape.has("arc_width") or shape.has("search_radius")
 	
 	# Stats (common)
 	var stats = data.get("stats", {})
 	flat["damage"] = stats.get("damage", 10.0)
 	flat["duration"] = stats.get("duration", 1.0)
+	flat["cooldown"] = stats.get("cooldown", 1.0)
 	
 	# Motion (common)
 	var motion = data.get("motion", {})
 	flat["fade_in"] = motion.get("fade_in", 0.08)
 	flat["fade_out"] = motion.get("fade_out", 0.15)
 	
-	if is_ion_wake:
+	if is_nikolas_coil:
+		# === NIKOLA'S COIL PARAMETERS ===
+		# Shape
+		flat["arc_width"] = shape.get("arc_width", 8.0)
+		flat["search_radius"] = shape.get("search_radius", 300.0)
+		
+		# Motion
+		flat["cascade_delay"] = motion.get("cascade_delay", 0.08)
+		flat["hold_time"] = motion.get("hold_time", 0.30)
+		
+		# Visual
+		var visual = data.get("visual", {})
+		flat["color_core"] = _hex_to_color(visual.get("color_core", "#ffffff"))
+		flat["color_glow"] = _hex_to_color(visual.get("color_glow", "#4488ff"))
+		flat["color_fringe"] = _hex_to_color(visual.get("color_fringe", "#8844cc"))
+		flat["glow_strength"] = visual.get("glow_strength", 4.0)
+		flat["bolt_width"] = visual.get("bolt_width", 0.5)
+		flat["jaggedness"] = visual.get("jaggedness", 0.7)
+		flat["branch_intensity"] = visual.get("branch_intensity", 0.3)
+		flat["flicker_speed"] = visual.get("flicker_speed", 30.0)
+	elif is_ion_wake:
 		# === ION WAKE PARAMETERS ===
 		# Shape
 		flat["inner_radius"] = shape.get("inner_radius", 20.0)
