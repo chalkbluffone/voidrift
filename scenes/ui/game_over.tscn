@@ -51,12 +51,12 @@ horizontal_alignment = 1
 
 [node name="CreditsLabel" type="Label" parent="VBoxContainer/StatsContainer"]
 layout_mode = 2
-text = "Credits Earned: 0"
+text = "⟐ ISC Earned: 0"
 horizontal_alignment = 1
 
 [node name="StardustLabel" type="Label" parent="VBoxContainer/StatsContainer"]
 layout_mode = 2
-text = "Stardust Earned: 0"
+text = "✦ Stardust Earned: 0"
 horizontal_alignment = 1
 
 [node name="ButtonsContainer" type="HBoxContainer" parent="VBoxContainer"]

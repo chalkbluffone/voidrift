@@ -249,7 +249,7 @@ func _on_credits_changed(amount: int) -> void:
 
 
 func _update_credits(amount: int) -> void:
-	credits_label.text = "$ %d" % amount
+	credits_label.text = "⟐ %d" % amount
 
 
 func _animate_credits_gain() -> void:
