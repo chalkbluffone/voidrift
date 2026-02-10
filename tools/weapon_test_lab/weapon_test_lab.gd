@@ -552,6 +552,9 @@ class HitboxDebugOverlay extends Node2D:
 		if not parent is CollisionShape2D:
 			return
 		var cs: CollisionShape2D = parent as CollisionShape2D
+		# Only draw when the collision shape is actually active
+		if cs.disabled:
+			return
 		var shape: Shape2D = cs.shape
 		if shape == null:
 			return
