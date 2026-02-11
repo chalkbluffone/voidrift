@@ -168,6 +168,22 @@ func _fire_projectile_via_spawner(weapon_id: String, data: Dictionary) -> void:
 		FileLogger.log_warn("WeaponComponent", "_fire_projectile_via_spawner: no parent for %s" % weapon_id)
 		return
 	var config: Dictionary = _flatten_weapon_data(data)
+	
+	# Inject runtime stats that aren't in the JSON (size, projectile_count with bonuses)
+	var size_mult: float = 1.0
+	var weapon_size_mult: float = _get_weapon_mult(weapon_id, StatsComponentScript.STAT_SIZE)
+	if stats_component:
+		size_mult = stats_component.get_stat(StatsComponentScript.STAT_SIZE)
+	config["size_mult"] = size_mult * (1.0 + weapon_size_mult)
+	
+	# Merge projectile_count bonuses from stats + weapon upgrades
+	var base_proj_count: int = int(config.get("projectile_count", 1))
+	var bonus_proj: int = 0
+	var weapon_bonus_proj: int = int(round(_get_weapon_flat(weapon_id, StatsComponentScript.STAT_PROJECTILE_COUNT)))
+	if stats_component:
+		bonus_proj = stats_component.get_stat_int(StatsComponentScript.STAT_PROJECTILE_COUNT)
+	config["projectile_count"] = base_proj_count + bonus_proj + weapon_bonus_proj
+	
 	FileLogger.log_info("WeaponComponent", "Spawner config for %s: %d keys" % [weapon_id, config.size()])
 	var spawner = _get_or_create_spawner(weapon_id, data)
 	if spawner == null:
@@ -433,6 +449,16 @@ func _flatten_weapon_data(data: Dictionary) -> Dictionary:
 		flat["sweep_speed"] = motion.get("sweep_speed", 1.2)
 		flat["rotation_offset_deg"] = motion.get("rotation_offset_deg", 0.0)
 		flat["seed_offset"] = motion.get("seed_offset", 0.0)
+		
+		# Boomerang motion (used by snarky_comeback, harmless for radiant_arc)
+		flat["projectile_speed"] = motion.get("projectile_speed", 400.0)
+		flat["max_range"] = motion.get("max_range", 500.0)
+		flat["spin_speed"] = motion.get("spin_speed", 1.0)
+		flat["return_radius"] = motion.get("return_radius", 30.0)
+		
+		# Projectile count for spawner-limited weapons (snarky_comeback uses this)
+		var base_stats = data.get("base_stats", {})
+		flat["projectile_count"] = base_stats.get("projectile_count", 1)
 		
 		# Visual
 		var visual = data.get("visual", {})
