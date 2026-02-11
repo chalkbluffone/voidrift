@@ -47,34 +47,20 @@ func spawn(
 	if _active_instances.size() >= max_count:
 		return null
 
-	# Find the densest cluster: score each enemy position by neighbor count within AoE radius
-	var aoe_radius: float = float(params.get("aoe_radius", 80.0))
-	var size_mult: float = float(params.get("size_mult", 1.0))
-	var effective_radius: float = aoe_radius * size_mult
-
+	# Find the closest enemy to the player
 	var best_target: Vector2 = Vector2.ZERO
-	var best_score: int = 0
+	var best_dist: float = INF
 
-	# Valid enemy positions
-	var enemy_positions: Array[Vector2] = []
 	for enemy in enemies:
 		if not enemy is Node2D or not is_instance_valid(enemy):
 			continue
-		enemy_positions.append((enemy as Node2D).global_position)
+		var dist: float = spawn_pos.distance_to((enemy as Node2D).global_position)
+		if dist < best_dist:
+			best_dist = dist
+			best_target = (enemy as Node2D).global_position
 
-	if enemy_positions.is_empty():
+	if best_dist == INF:
 		return null
-
-	# Score each enemy position by how many neighbors are within the AoE radius
-	for i in range(enemy_positions.size()):
-		var pos: Vector2 = enemy_positions[i]
-		var score: int = 0
-		for j in range(enemy_positions.size()):
-			if pos.distance_to(enemy_positions[j]) <= effective_radius:
-				score += 1
-		if score > best_score:
-			best_score = score
-			best_target = pos
 
 	# Aim at the best cluster position
 	direction = (best_target - spawn_pos).normalized()
