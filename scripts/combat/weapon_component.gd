@@ -382,13 +382,14 @@ func _flatten_weapon_data(data: Dictionary) -> Dictionary:
 	   Matches the format used by weapon_test_lab for consistency."""
 	var flat: Dictionary = {}
 	
-	# Detect weapon type by checking for weapon-specific shape params
+	# Detect weapon type by checking for weapon-specific shape/stats params
 	var shape = data.get("shape", {})
+	var stats = data.get("stats", {})
 	var is_ion_wake = shape.has("inner_radius") or shape.has("expansion_speed")
 	var is_nikolas_coil = shape.has("arc_width") or shape.has("search_radius")
+	var is_space_napalm = shape.has("aoe_radius") or stats.has("burn_damage")
 	
 	# Stats (common)
-	var stats = data.get("stats", {})
 	flat["damage"] = stats.get("damage", 10.0)
 	flat["duration"] = stats.get("duration", 1.0)
 	flat["cooldown"] = stats.get("cooldown", 1.0)
@@ -398,7 +399,41 @@ func _flatten_weapon_data(data: Dictionary) -> Dictionary:
 	flat["fade_in"] = motion.get("fade_in", 0.08)
 	flat["fade_out"] = motion.get("fade_out", 0.15)
 	
-	if is_nikolas_coil:
+	if is_space_napalm:
+		# === SPACE NAPALM PARAMETERS ===
+		# Stats
+		flat["burn_damage"] = stats.get("burn_damage", 5.0)
+		flat["burn_duration"] = stats.get("burn_duration", 3.5)
+		flat["dot_interval"] = stats.get("dot_interval", 0.5)
+		flat["projectile_count"] = stats.get("projectile_count", 1)
+		
+		# Shape
+		flat["aoe_radius"] = shape.get("aoe_radius", 80.0)
+		flat["spread_time"] = shape.get("spread_time", 0.8)
+		flat["proj_size"] = shape.get("proj_size", 12.0)
+		
+		# Motion
+		flat["projectile_speed"] = motion.get("projectile_speed", 350.0)
+		
+		# Visual — projectile
+		var visual = data.get("visual", {})
+		flat["proj_color_core"] = _hex_to_color(visual.get("proj_color_core", "#fffff5"))
+		flat["proj_color_mid"] = _hex_to_color(visual.get("proj_color_mid", "#ff9a1a"))
+		flat["proj_color_edge"] = _hex_to_color(visual.get("proj_color_edge", "#cc2600"))
+		flat["proj_glow_strength"] = visual.get("proj_glow_strength", 4.0)
+		flat["proj_morph_speed"] = visual.get("proj_morph_speed", 3.0)
+		flat["proj_morph_intensity"] = visual.get("proj_morph_intensity", 0.25)
+		flat["proj_tail_length"] = visual.get("proj_tail_length", 0.35)
+		
+		# Visual — fire AoE
+		flat["fire_color_core"] = _hex_to_color(visual.get("fire_color_core", "#fff280"))
+		flat["fire_color_mid"] = _hex_to_color(visual.get("fire_color_mid", "#ff730d"))
+		flat["fire_color_outer"] = _hex_to_color(visual.get("fire_color_outer", "#9a1400"))
+		flat["fire_color_smoke"] = _hex_to_color(visual.get("fire_color_smoke", "#261a14"))
+		flat["fire_glow_strength"] = visual.get("fire_glow_strength", 3.5)
+		flat["fire_flame_speed"] = visual.get("fire_flame_speed", 3.0)
+		flat["fire_flame_turbulence"] = visual.get("fire_flame_turbulence", 0.6)
+	elif is_nikolas_coil:
 		# === NIKOLA'S COIL PARAMETERS ===
 		# Shape
 		flat["arc_width"] = shape.get("arc_width", 8.0)
