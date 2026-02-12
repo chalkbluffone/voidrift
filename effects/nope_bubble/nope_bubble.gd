@@ -25,10 +25,16 @@ var _current_layers: int = 2
 var _max_layers: int = 2
 var _follow_source: Node2D = null
 var _shield_mesh: MeshInstance2D = null
+var _shield_area: Area2D = null
+var _shield_collision: CollisionShape2D = null
 var _layer_label: Label = null
 var _shader_material: ShaderMaterial = null
 var _hit_flash_timer: float = 0.0
 var _hit_flash_duration: float = 0.15
+
+# --- Regen timer (self-managed, independent of weapon component cooldown) ---
+var _regen_timer: float = 0.0
+var _regen_active: bool = false
 
 # --- Shockwave tracking ---
 var _active_shockwaves: Array[Node2D] = []
@@ -105,6 +111,11 @@ func intercept_damage(amount: float, source: Node) -> float:
 	_hit_flash_timer = _hit_flash_duration
 	_update_visuals()
 	
+	# Start regen timer if not already running
+	if not _regen_active:
+		_regen_active = true
+		_regen_timer = cooldown
+	
 	if FileLogger:
 		var block_type: String = "weak" if is_boss else "full"
 		FileLogger.log_info("NopeBubble", "Layer consumed (%s block): %d/%d remaining" % [block_type, _current_layers, _max_layers])
@@ -131,6 +142,16 @@ func _process(delta: float) -> void:
 	if _shader_material:
 		var pulse: float = _hit_flash_timer / _hit_flash_duration if _hit_flash_duration > 0 else 0.0
 		_shader_material.set_shader_parameter("pulse", pulse)
+	
+	# Self-managed layer regen timer
+	if _regen_active and _current_layers < _max_layers:
+		_regen_timer -= delta
+		if _regen_timer <= 0.0:
+			add_layer()
+			if _current_layers < _max_layers:
+				_regen_timer = cooldown  # Reset for next layer
+			else:
+				_regen_active = false  # Fully recharged
 	
 	# Clean up finished shockwaves
 	_active_shockwaves = _active_shockwaves.filter(func(sw): return is_instance_valid(sw))
@@ -172,9 +193,37 @@ func _create_visuals() -> void:
 	_layer_label.visible = false
 	add_child(_layer_label)
 
+	# --- Shield collision area (enemies collide with the bubble, not the tiny ship) ---
+	_shield_area = Area2D.new()
+	_shield_area.collision_layer = 0  # Not detectable by others
+	_shield_area.collision_mask = 8   # Detect enemies (layer 8)
+	_shield_area.name = "ShieldCollision"
+	_shield_collision = CollisionShape2D.new()
+	var circle_shape: CircleShape2D = CircleShape2D.new()
+	circle_shape.radius = size * 1.2  # Match visual ring position (UV 0.92 on quad size*2.6)
+	_shield_collision.shape = circle_shape
+	_shield_area.add_child(_shield_collision)
+	add_child(_shield_area)
+
+	# When an enemy enters the bubble, trigger contact damage on the ship
+	_shield_area.area_entered.connect(_on_enemy_entered_bubble)
+	_shield_area.body_entered.connect(_on_enemy_body_entered_bubble)
+
 
 func _update_visuals() -> void:
 	if not _shield_mesh:
+		return
+	
+	var is_down: bool = _current_layers <= 0
+	
+	# Hide everything when shield is depleted
+	_shield_mesh.visible = not is_down
+	if _shield_area:
+		_shield_collision.set_deferred("disabled", is_down)
+	if _layer_label:
+		_layer_label.visible = not is_down and _max_layers >= 5
+	
+	if is_down:
 		return
 	
 	# Opacity based on layer ratio
@@ -192,19 +241,47 @@ func _update_visuals() -> void:
 		# Fallback for no shader — modulate the mesh directly
 		_shield_mesh.modulate = Color(current_color.r, current_color.g, current_color.b, visual_opacity * 0.4)
 	
-	# Show numeric counter when max layers >= 5
-	if _layer_label:
-		if _max_layers >= 5:
-			_layer_label.text = str(_current_layers)
-			_layer_label.visible = true
-			# Reposition label in case size changed
-			_layer_label.position = Vector2(size * 0.7, -(size * 0.9))
-		else:
-			_layer_label.visible = false
+	# Update layer counter text
+	if _layer_label and _max_layers >= 5:
+		_layer_label.text = str(_current_layers)
+		_layer_label.position = Vector2(size * 0.7, -(size * 0.9))
 	
 	# Update mesh size in case size param changed
 	if _shield_mesh and _shield_mesh.mesh:
 		(_shield_mesh.mesh as QuadMesh).size = Vector2(size * 2.6, size * 2.6)
+	
+	# Update collision radius to match bubble size
+	if _shield_collision and _shield_collision.shape:
+		(_shield_collision.shape as CircleShape2D).radius = size * 1.2
+
+
+## Enemy Area2D entered the shield bubble — trigger contact damage on the ship
+func _on_enemy_entered_bubble(area: Area2D) -> void:
+	if _current_layers <= 0:
+		return
+	# Check if this is an enemy (in "enemies" group or has enemy_type)
+	var enemy: Node = area
+	if not (enemy.is_in_group("enemies") or "enemy_type" in enemy):
+		return
+	# Trigger the ship's take_damage which will go through the interceptor
+	if _follow_source and _follow_source.has_method("take_damage"):
+		var contact_damage: float = 10.0
+		if "enemy_type" in enemy and enemy.enemy_type == "boss":
+			contact_damage = 30.0
+		_follow_source.take_damage(contact_damage, enemy)
+
+
+## Enemy PhysicsBody entered the shield bubble
+func _on_enemy_body_entered_bubble(body: Node2D) -> void:
+	if _current_layers <= 0:
+		return
+	if not (body.is_in_group("enemies") or "enemy_type" in body):
+		return
+	if _follow_source and _follow_source.has_method("take_damage"):
+		var contact_damage: float = 10.0
+		if "enemy_type" in body and body.enemy_type == "boss":
+			contact_damage = 30.0
+		_follow_source.take_damage(contact_damage, body)
 
 
 func _spawn_shockwave(source: Node2D) -> void:
@@ -243,37 +320,6 @@ func _spawn_shockwave(source: Node2D) -> void:
 	cone_polygon.polygon = cone_points
 	hitbox.add_child(cone_polygon)
 	
-	# Visual: cone mesh with fade
-	var visual_mesh: MeshInstance2D = MeshInstance2D.new()
-	var arr_mesh: ArrayMesh = ArrayMesh.new()
-	var arrays: Array = []
-	arrays.resize(Mesh.ARRAY_MAX)
-	
-	var vertices: PackedVector2Array = PackedVector2Array()
-	var colors: PackedColorArray = PackedColorArray()
-	var shockwave_color: Color = Color(0.5, 0.8, 1.0, 0.6)
-	
-	# Build triangle fan for cone visual
-	for i in range(segments):
-		var t0: float = float(i) / float(segments)
-		var t1: float = float(i + 1) / float(segments)
-		var a0: float = -half_angle + t0 * half_angle * 2.0
-		var a1: float = -half_angle + t1 * half_angle * 2.0
-		
-		vertices.append(Vector2.ZERO)
-		vertices.append(direction.rotated(a0) * shockwave_range)
-		vertices.append(direction.rotated(a1) * shockwave_range)
-		
-		colors.append(Color(shockwave_color.r, shockwave_color.g, shockwave_color.b, 0.6))
-		colors.append(Color(shockwave_color.r, shockwave_color.g, shockwave_color.b, 0.0))
-		colors.append(Color(shockwave_color.r, shockwave_color.g, shockwave_color.b, 0.0))
-	
-	arrays[Mesh.ARRAY_VERTEX] = vertices
-	arrays[Mesh.ARRAY_COLOR] = colors
-	arr_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-	visual_mesh.mesh = arr_mesh
-	shockwave.add_child(visual_mesh)
-	
 	# Add to parent (world root)
 	get_parent().add_child(shockwave)
 	_active_shockwaves.append(shockwave)
@@ -289,9 +335,9 @@ func _spawn_shockwave(source: Node2D) -> void:
 		_on_shockwave_body_hit(body, hit_targets)
 	)
 	
-	# Animate: expand and fade out over 0.3s, then destroy
+	# Destroy shockwave after brief delay (collision window)
 	var tween: Tween = shockwave.create_tween()
-	tween.tween_property(visual_mesh, "modulate:a", 0.0, 0.3)
+	tween.tween_interval(0.3)
 	tween.tween_callback(shockwave.queue_free)
 
 

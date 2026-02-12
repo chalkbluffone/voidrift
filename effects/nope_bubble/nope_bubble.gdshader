@@ -10,9 +10,9 @@ uniform float opacity : hint_range(0.0, 1.0) = 1.0;
 uniform float pulse : hint_range(0.0, 1.0) = 0.0;
 
 // Tuning knobs
-const float SHIELD_RADIUS = 0.82;
-const float SHELL_HALF   = 0.065;  // membrane thickness (half-width)
-const float GLOW_WIDTH   = 0.10;   // soft outer bloom
+const float SHIELD_RADIUS = 0.92;
+const float SHELL_HALF   = 0.025;  // membrane thickness (half-width)
+const float GLOW_WIDTH   = 0.04;   // soft outer bloom
 const float ARC_INTENSITY = 0.45;  // voronoi vein brightness
 const float PLASMA_SPEED  = 0.35;  // flow speed of noise
 

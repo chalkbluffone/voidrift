@@ -13,11 +13,10 @@ func _init(parent: Node) -> void:
 
 
 func spawn(spawn_pos: Vector2, params: Dictionary = {}, follow_source: Node2D = null) -> Node2D:
-	# If bubble already exists and is valid, update params and regenerate a layer
+	# If bubble already exists and is valid, just update params — regen is self-managed
 	if is_instance_valid(_active_bubble):
 		if params:
 			_active_bubble.setup(params)
-		_active_bubble.add_layer()
 		return _active_bubble
 	
 	# Create a new bubble

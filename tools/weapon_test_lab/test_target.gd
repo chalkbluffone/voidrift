@@ -21,6 +21,8 @@ const KNOCKBACK_FRICTION: float = 8.0
 func _ready() -> void:
 	current_hp = max_hp
 	_update_visual()
+	add_to_group("enemies")
+	collision_layer = 8  # Enemy layer — detectable by player weapons and shield bubble
 	
 	# Connect area signals for detecting radiant arc damage
 	area_entered.connect(_on_area_entered)
