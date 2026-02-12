@@ -54,16 +54,23 @@ func _build_ui() -> void:
 	# Main panel - left side of screen
 	_main_panel = PanelContainer.new()
 	_main_panel.set_anchors_preset(Control.PRESET_LEFT_WIDE)
-	_main_panel.custom_minimum_size = Vector2(350, 0)
+	_main_panel.custom_minimum_size = Vector2(420, 0)
 	_main_panel.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	_main_panel.focus_mode = Control.FOCUS_NONE
 	add_child(_main_panel)
 	
-	# Main vertical layout
+	# Main vertical layout with left padding
+	var margin = MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 10)
+	margin.add_theme_constant_override("margin_right", 10)
+	margin.add_theme_constant_override("margin_top", 10)
+	margin.add_theme_constant_override("margin_bottom", 10)
+	_main_panel.add_child(margin)
+	
 	var main_vbox = VBoxContainer.new()
 	main_vbox.add_theme_constant_override("separation", 8)
 	main_vbox.focus_mode = Control.FOCUS_NONE
-	_main_panel.add_child(main_vbox)
+	margin.add_child(main_vbox)
 	
 	# --- Header ---
 	var header = Label.new()
@@ -371,13 +378,13 @@ func _add_slider_control(key: String, value: Variant) -> void:
 	
 	# Label
 	var label = Label.new()
-	label.custom_minimum_size = Vector2(140, 0)
+	label.custom_minimum_size = Vector2(180, 0)
 	label.text = _format_key_name(key)
 	hbox.add_child(label)
 	
 	# Value label
 	var value_label = Label.new()
-	value_label.custom_minimum_size = Vector2(60, 0)
+	value_label.custom_minimum_size = Vector2(50, 0)
 	value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	value_label.text = _format_value(value)
 	hbox.add_child(value_label)
@@ -406,7 +413,7 @@ func _add_color_control(key: String, value: Color) -> void:
 	_config_container.add_child(hbox)
 	
 	var label = Label.new()
-	label.custom_minimum_size = Vector2(140, 0)
+	label.custom_minimum_size = Vector2(180, 0)
 	label.text = _format_key_name(key)
 	hbox.add_child(label)
 	
