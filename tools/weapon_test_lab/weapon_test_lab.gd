@@ -594,8 +594,7 @@ func _push_live_config_update() -> void:
 	var bubbles = get_tree().get_nodes_in_group("nope_bubble")
 	for bubble in bubbles:
 		if is_instance_valid(bubble) and bubble.has_method("setup"):
-			bubble.setup(_current_config)
-			bubble._update_visuals()
+			bubble.setup(_current_config)  # setup() calls _update_visuals() internally
 
 
 ## Lightweight node that draws the parent CollisionShape2D's shape outline.

@@ -18,7 +18,7 @@ extends Node2D
 @export var shockwave_angle_deg: float = 45.0
 @export var boss_damage_reduction: float = 0.5
 @export var particle_count: int = 48
-@export var color: Color = Color(0.55, 0.15, 0.85, 0.8)
+@export var color: Color = Color(0.55, 0.15, 0.85, 0.55)
 @export var cooldown: float = 3.0  # Used for display only; spawner handles regen timing
 
 # --- Internal state ---
@@ -36,6 +36,10 @@ var _hit_flash_duration: float = 0.15
 # --- Regen timer (self-managed, independent of weapon component cooldown) ---
 var _regen_timer: float = 0.0
 var _regen_active: bool = false
+
+# --- Ambient flow particles ---
+var _ambient_particles: CPUParticles2D = null
+var _ambient_time: float = 0.0
 
 # --- Shockwave tracking ---
 var _active_shockwaves: Array[Node2D] = []
@@ -60,6 +64,8 @@ func setup(params: Dictionary) -> void:
 	else:
 		# Live update: clamp current layers to new max, don't reset
 		_current_layers = mini(_current_layers, _max_layers)
+	# Always apply visual changes so live updates take effect immediately
+	_update_visuals()
 
 
 func spawn_at(pos: Vector2) -> void:
@@ -156,6 +162,18 @@ func _process(delta: float) -> void:
 			else:
 				_regen_active = false  # Fully recharged
 	
+	# Animate ambient flow particles — slow orbit rotation
+	_ambient_time += delta
+	if _ambient_particles and _ambient_particles.visible:
+		# Rotate the emission direction to create a swirling flow
+		var orbit_speed: float = 0.6  # Radians per second
+		var angle: float = _ambient_time * orbit_speed
+		_ambient_particles.direction = Vector2(cos(angle), sin(angle))
+		# Modulate alpha based on layer health for breathing effect
+		var breath: float = 0.5 + 0.5 * sin(_ambient_time * 1.8)
+		var layer_ratio: float = float(_current_layers) / max(float(_max_layers), 1.0)
+		_ambient_particles.modulate.a = clampf(0.3 + breath * 0.4 * layer_ratio, 0.1, 0.8)
+
 	# Clean up finished shockwaves
 	_active_shockwaves = _active_shockwaves.filter(func(sw): return is_instance_valid(sw))
 
@@ -172,9 +190,8 @@ func _create_visuals() -> void:
 	if shader:
 		_shader_material = ShaderMaterial.new()
 		_shader_material.shader = shader
-		# Boost alpha for visibility: use full-alpha color, control transparency via shader
-		var shield_color_bright: Color = Color(color.r, color.g, color.b, max(color.a, 0.7))
-		_shader_material.set_shader_parameter("shield_color", shield_color_bright)
+		# Pass color directly — user controls transparency via color alpha
+		_shader_material.set_shader_parameter("shield_color", color)
 		_shader_material.set_shader_parameter("opacity", 1.0)
 		_shader_material.set_shader_parameter("pulse", 0.0)
 		_shield_mesh.material = _shader_material
@@ -212,6 +229,58 @@ func _create_visuals() -> void:
 	_shield_area.area_entered.connect(_on_enemy_entered_bubble)
 	_shield_area.body_entered.connect(_on_enemy_body_entered_bubble)
 
+	# --- Ambient flow particles (persistent swirling motes inside the bubble) ---
+	_ambient_particles = CPUParticles2D.new()
+	_ambient_particles.emitting = true
+	_ambient_particles.one_shot = false
+	_ambient_particles.amount = 24
+	_ambient_particles.lifetime = 2.5
+	_ambient_particles.explosiveness = 0.0  # Steady stream, not burst
+	_ambient_particles.randomness = 0.4
+
+	# Emit from a ring matching the inner shell area
+	_ambient_particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_RING
+	_ambient_particles.emission_ring_radius = size * 0.85
+	_ambient_particles.emission_ring_inner_radius = size * 0.2
+
+	# Slow drift — direction animated in _process for orbital swirl
+	_ambient_particles.direction = Vector2(1, 0)
+	_ambient_particles.spread = 90.0
+	_ambient_particles.initial_velocity_min = 8.0
+	_ambient_particles.initial_velocity_max = 25.0
+	_ambient_particles.gravity = Vector2.ZERO
+	_ambient_particles.damping_min = 5.0
+	_ambient_particles.damping_max = 15.0
+
+	# Tiny glowing motes
+	_ambient_particles.scale_amount_min = 0.8
+	_ambient_particles.scale_amount_max = 1.8
+
+	# Synthwave flow colors — soft glow cycling through the palette
+	var flow_ramp: Gradient = Gradient.new()
+	flow_ramp.offsets = PackedFloat32Array([0.0, 0.3, 0.7, 1.0])
+	flow_ramp.colors = PackedColorArray([
+		Color(0.0, 0.8, 0.9, 0.0),      # Cyan (fade in)
+		Color(0.6, 0.1, 0.95, 0.7),     # Neon purple (visible)
+		Color(0.85, 0.1, 0.5, 0.5),     # Hot pink (fading)
+		Color(0.3, 0.7, 1.0, 0.0),      # Electric blue (invisible)
+	])
+	_ambient_particles.color_ramp = flow_ramp
+
+	# Initial color variation so particles aren't all the same
+	var flow_initial: Gradient = Gradient.new()
+	flow_initial.offsets = PackedFloat32Array([0.0, 0.33, 0.66, 1.0])
+	flow_initial.colors = PackedColorArray([
+		Color(0.0, 0.9, 0.9, 1.0),      # Cyan
+		Color(0.74, 0.07, 0.99, 1.0),   # Neon purple
+		Color(1.0, 0.08, 0.58, 1.0),    # Hot pink
+		Color(0.49, 0.98, 1.0, 1.0),    # Electric blue
+	])
+	_ambient_particles.color_initial_ramp = flow_initial
+
+	_ambient_particles.z_index = 1  # Above shield mesh, below UI
+	add_child(_ambient_particles)
+
 
 func _update_visuals() -> void:
 	if not _shield_mesh:
@@ -225,6 +294,9 @@ func _update_visuals() -> void:
 		_shield_collision.set_deferred("disabled", is_down)
 	if _layer_label:
 		_layer_label.visible = not is_down
+	if _ambient_particles:
+		_ambient_particles.visible = not is_down
+		_ambient_particles.emitting = not is_down
 	
 	if is_down:
 		_spawn_break_particles()
@@ -234,9 +306,10 @@ func _update_visuals() -> void:
 	var layer_ratio: float = float(_current_layers) / max(float(_max_layers), 1.0)
 	var visual_opacity: float = clampf(0.15 + layer_ratio * 0.85, 0.1, 1.0)
 	
-	# Color shift: full layers = bright blue, low layers = dim red-ish
+	# Color shift: full layers = bright, low layers = dim red-ish
 	var current_color: Color = color.lerp(Color(1.0, 0.3, 0.2, 1.0), 1.0 - layer_ratio)
-	current_color.a = max(current_color.a, 0.7)  # Keep alpha high — shader handles transparency
+	# Preserve user's alpha — shader uses shield_color.a * opacity for transparency
+	current_color.a = color.a
 	
 	if _shader_material:
 		_shader_material.set_shader_parameter("opacity", visual_opacity)
@@ -256,6 +329,11 @@ func _update_visuals() -> void:
 	# Update collision radius to match bubble size
 	if _shield_collision and _shield_collision.shape:
 		(_shield_collision.shape as CircleShape2D).radius = size * 1.2
+
+	# Update ambient particle emission to match bubble size
+	if _ambient_particles:
+		_ambient_particles.emission_ring_radius = size * 0.85
+		_ambient_particles.emission_ring_inner_radius = size * 0.2
 
 
 ## Enemy Area2D entered the shield bubble — trigger contact damage on the ship

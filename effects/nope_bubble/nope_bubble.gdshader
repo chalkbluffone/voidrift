@@ -11,7 +11,7 @@ uniform float pulse : hint_range(0.0, 1.0) = 0.0;
 
 // Tuning knobs
 const float SHIELD_RADIUS = 0.92;
-const float SHELL_HALF   = 0.025;  // membrane thickness (half-width)
+const float SHELL_HALF   = 0.004;  // ~1px thin ring edge
 const float GLOW_WIDTH   = 0.04;   // soft outer bloom
 const float ARC_INTENSITY = 0.45;  // voronoi vein brightness
 const float PLASMA_SPEED  = 0.35;  // flow speed of noise
@@ -78,8 +78,8 @@ void fragment() {
 	// ---- Shell band mask (ring, not filled disc) ----
 	float inner_edge = SHIELD_RADIUS - SHELL_HALF;
 	float outer_edge = SHIELD_RADIUS + SHELL_HALF;
-	float band = smoothstep(inner_edge - 0.04, inner_edge + 0.02, dist)
-	           * smoothstep(outer_edge + 0.04, outer_edge - 0.02, dist);
+	float band = smoothstep(inner_edge - 0.006, inner_edge, dist)
+	           * smoothstep(outer_edge + 0.006, outer_edge, dist);
 
 	// Outer glow (soft bloom beyond the shell)
 	float glow_d = max(dist - outer_edge, 0.0);
