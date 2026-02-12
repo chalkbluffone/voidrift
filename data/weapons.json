@@ -99,10 +99,10 @@
     "spawner": "res://effects/nope_bubble/nope_bubble_spawner.gd",
     "stats": {
       "boss_damage_reduction": 0.5,
-      "cooldown": 4.0,
+      "cooldown": 3.0,
       "damage": 10.0,
       "knockback": 200.0,
-      "projectile_count": 2
+      "projectile_count": 7
     },
     "type": "area",
     "unlock_condition": "default",

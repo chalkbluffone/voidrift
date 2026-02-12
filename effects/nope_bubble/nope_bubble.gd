@@ -183,14 +183,14 @@ func _create_visuals() -> void:
 	_shield_mesh.z_index = 0
 	add_child(_shield_mesh)
 	
-	# --- Layer counter label ---
+	# --- Layer counter label (roman numerals, near ship) ---
 	_layer_label = Label.new()
 	_layer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_layer_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_layer_label.position = Vector2(size * 0.7, -(size * 0.9))  # Top-right, just outside the ring
-	_layer_label.add_theme_font_size_override("font_size", 18)
+	_layer_label.position = Vector2(20, -35)  # 2 o'clock position relative to ship
+	_layer_label.add_theme_font_size_override("font_size", 16)
 	_layer_label.add_theme_color_override("font_color", Color(0.8, 0.6, 1.0, 0.95))
-	_layer_label.visible = false
+	_layer_label.visible = true
 	add_child(_layer_label)
 
 	# --- Shield collision area (enemies collide with the bubble, not the tiny ship) ---
@@ -221,7 +221,7 @@ func _update_visuals() -> void:
 	if _shield_area:
 		_shield_collision.set_deferred("disabled", is_down)
 	if _layer_label:
-		_layer_label.visible = not is_down and _max_layers >= 5
+		_layer_label.visible = not is_down
 	
 	if is_down:
 		return
@@ -241,10 +241,9 @@ func _update_visuals() -> void:
 		# Fallback for no shader — modulate the mesh directly
 		_shield_mesh.modulate = Color(current_color.r, current_color.g, current_color.b, visual_opacity * 0.4)
 	
-	# Update layer counter text
-	if _layer_label and _max_layers >= 5:
-		_layer_label.text = str(_current_layers)
-		_layer_label.position = Vector2(size * 0.7, -(size * 0.9))
+	# Update layer counter text (roman numerals)
+	if _layer_label:
+		_layer_label.text = _to_roman(_current_layers)
 	
 	# Update mesh size in case size param changed
 	if _shield_mesh and _shield_mesh.mesh:
@@ -282,6 +281,20 @@ func _on_enemy_body_entered_bubble(body: Node2D) -> void:
 		if "enemy_type" in body and body.enemy_type == "boss":
 			contact_damage = 30.0
 		_follow_source.take_damage(contact_damage, body)
+
+
+## Convert integer to Roman numeral string
+func _to_roman(num: int) -> String:
+	if num <= 0:
+		return "0"
+	var result: String = ""
+	var values: Array[int] = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1]
+	var symbols: Array[String] = ["M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"]
+	for i in range(values.size()):
+		while num >= values[i]:
+			result += symbols[i]
+			num -= values[i]
+	return result
 
 
 func _spawn_shockwave(source: Node2D) -> void:
