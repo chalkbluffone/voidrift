@@ -17,6 +17,7 @@ extends Node2D
 @export var shockwave_range: float = 200.0
 @export var shockwave_angle_deg: float = 45.0
 @export var boss_damage_reduction: float = 0.5
+@export var particle_count: int = 48
 @export var color: Color = Color(0.55, 0.15, 0.85, 0.8)
 @export var cooldown: float = 3.0  # Used for display only; spawner handles regen timing
 
@@ -107,8 +108,10 @@ func intercept_damage(amount: float, source: Node) -> float:
 	if source and source is Node2D:
 		_spawn_shockwave(source as Node2D)
 	
-	# Visual feedback — hit flash
+	# Visual feedback — hit flash + per-layer hit particles
 	_hit_flash_timer = _hit_flash_duration
+	if source and source is Node2D:
+		_spawn_hit_particles(source as Node2D)
 	_update_visuals()
 	
 	# Start regen timer if not already running
@@ -224,6 +227,7 @@ func _update_visuals() -> void:
 		_layer_label.visible = not is_down
 	
 	if is_down:
+		_spawn_break_particles()
 		return
 	
 	# Opacity based on layer ratio
@@ -263,11 +267,12 @@ func _on_enemy_entered_bubble(area: Area2D) -> void:
 	if not (enemy.is_in_group("enemies") or "enemy_type" in enemy):
 		return
 	# Trigger the ship's take_damage which will go through the interceptor
+	# Deferred to avoid physics flush conflict when creating shockwave Area2D
 	if _follow_source and _follow_source.has_method("take_damage"):
 		var contact_damage: float = 10.0
 		if "enemy_type" in enemy and enemy.enemy_type == "boss":
 			contact_damage = 30.0
-		_follow_source.take_damage(contact_damage, enemy)
+		_follow_source.call_deferred("take_damage", contact_damage, enemy)
 
 
 ## Enemy PhysicsBody entered the shield bubble
@@ -280,7 +285,7 @@ func _on_enemy_body_entered_bubble(body: Node2D) -> void:
 		var contact_damage: float = 10.0
 		if "enemy_type" in body and body.enemy_type == "boss":
 			contact_damage = 30.0
-		_follow_source.take_damage(contact_damage, body)
+		_follow_source.call_deferred("take_damage", contact_damage, body)
 
 
 ## Convert integer to Roman numeral string
@@ -295,6 +300,127 @@ func _to_roman(num: int) -> String:
 			result += symbols[i]
 			num -= values[i]
 	return result
+
+
+## Synthwave color palette for particles
+const SYNTHWAVE_COLORS: Array[Color] = [
+	Color(0.0, 1.0, 1.0, 1.0),     # Cyan
+	Color(1.0, 0.08, 0.58, 1.0),    # Hot pink
+	Color(0.49, 0.98, 1.0, 1.0),    # Electric blue
+	Color(0.74, 0.07, 0.99, 1.0),   # Neon purple
+	Color(1.0, 0.0, 0.4, 1.0),      # Magenta-red
+	Color(0.3, 0.0, 0.8, 1.0),      # Deep violet
+]
+
+
+## Spawn a directional burst of particles when a layer is hit (not broken)
+func _spawn_hit_particles(source: Node2D) -> void:
+	var particles: CPUParticles2D = CPUParticles2D.new()
+	particles.emitting = true
+	particles.one_shot = true
+	particles.explosiveness = 0.9
+	particles.amount = maxi(particle_count / 3, 4)
+	particles.lifetime = 0.4
+
+	# Emit from the ring where the hit occurred
+	particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_RING
+	particles.emission_ring_radius = size * 1.0
+	particles.emission_ring_inner_radius = size * 0.7
+
+	# Scatter outward from hit direction
+	var hit_dir: Vector2 = Vector2.ZERO
+	if source:
+		hit_dir = (source.global_position - global_position).normalized()
+	if hit_dir == Vector2.ZERO:
+		hit_dir = Vector2.RIGHT
+	particles.direction = hit_dir
+	particles.spread = 45.0
+	particles.initial_velocity_min = 80.0
+	particles.initial_velocity_max = 200.0
+	particles.gravity = Vector2.ZERO
+	particles.damping_min = 100.0
+	particles.damping_max = 160.0
+
+	# Tiny 1px scale
+	particles.scale_amount_min = 1.0
+	particles.scale_amount_max = 2.5
+
+	# Synthwave color ramp: pick 2 random synthwave colors for the gradient
+	var c1: Color = SYNTHWAVE_COLORS[randi() % SYNTHWAVE_COLORS.size()]
+	var c2: Color = SYNTHWAVE_COLORS[randi() % SYNTHWAVE_COLORS.size()]
+	var gradient: Gradient = Gradient.new()
+	gradient.set_color(0, c1)
+	gradient.set_color(1, Color(c2.r, c2.g, c2.b, 0.0))
+	particles.color_ramp = gradient
+
+	# Initial color ramp: random from palette for each particle
+	particles.color_initial_ramp = Gradient.new()
+	particles.color_initial_ramp.set_color(0, SYNTHWAVE_COLORS[randi() % SYNTHWAVE_COLORS.size()])
+	particles.color_initial_ramp.set_color(1, SYNTHWAVE_COLORS[randi() % SYNTHWAVE_COLORS.size()])
+
+	particles.z_index = 1
+	add_child(particles)
+
+	var timer: SceneTreeTimer = get_tree().create_timer(particles.lifetime + 0.1)
+	timer.timeout.connect(particles.queue_free)
+
+
+## Spawn a burst of particles when the shield fully breaks
+func _spawn_break_particles() -> void:
+	var particles: CPUParticles2D = CPUParticles2D.new()
+	particles.emitting = true
+	particles.one_shot = true
+	particles.explosiveness = 1.0
+	particles.amount = particle_count
+	particles.lifetime = 0.6
+	
+	# Ring emission at the shield perimeter
+	particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_RING
+	particles.emission_ring_radius = size * 1.2
+	particles.emission_ring_inner_radius = size * 0.8
+	
+	# Scatter outward in all directions
+	particles.direction = Vector2(0, -1)
+	particles.spread = 180.0
+	particles.initial_velocity_min = 60.0
+	particles.initial_velocity_max = 180.0
+	particles.gravity = Vector2.ZERO
+	particles.damping_min = 80.0
+	particles.damping_max = 120.0
+	
+	# Tiny 1px scale
+	particles.scale_amount_min = 1.0
+	particles.scale_amount_max = 2.0
+	
+	# Synthwave gradient: cycle through multiple colors for a dramatic break
+	var gradient: Gradient = Gradient.new()
+	gradient.offsets = PackedFloat32Array([0.0, 0.25, 0.5, 0.75, 1.0])
+	gradient.colors = PackedColorArray([
+		Color(0.0, 1.0, 1.0, 1.0),     # Cyan
+		Color(1.0, 0.08, 0.58, 1.0),    # Hot pink
+		Color(0.74, 0.07, 0.99, 1.0),   # Neon purple
+		Color(0.49, 0.98, 1.0, 0.6),    # Electric blue (fading)
+		Color(1.0, 0.0, 0.4, 0.0),      # Magenta-red (invisible)
+	])
+	particles.color_ramp = gradient
+	
+	# Initial ramp: random synthwave start color per particle
+	var initial_ramp: Gradient = Gradient.new()
+	initial_ramp.offsets = PackedFloat32Array([0.0, 0.33, 0.66, 1.0])
+	initial_ramp.colors = PackedColorArray([
+		Color(0.0, 1.0, 1.0, 1.0),     # Cyan
+		Color(1.0, 0.08, 0.58, 1.0),    # Hot pink
+		Color(0.74, 0.07, 0.99, 1.0),   # Neon purple
+		Color(0.49, 0.98, 1.0, 1.0),    # Electric blue
+	])
+	particles.color_initial_ramp = initial_ramp
+	
+	particles.z_index = 1
+	add_child(particles)
+	
+	# Auto-cleanup after particles finish
+	var timer: SceneTreeTimer = get_tree().create_timer(particles.lifetime + 0.1)
+	timer.timeout.connect(particles.queue_free)
 
 
 func _spawn_shockwave(source: Node2D) -> void:

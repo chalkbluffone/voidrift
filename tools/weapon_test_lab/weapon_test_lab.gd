@@ -215,6 +215,7 @@ func _flatten_weapon_config(weapon_data: Dictionary) -> Dictionary:
 	if is_nope_bubble:
 		# === NOPE BUBBLE PARAMETERS ===
 		flat["knockback"] = stats.get("knockback", 600.0)
+		flat["particle_count"] = stats.get("particle_count", 48)
 		flat["projectile_count"] = stats.get("projectile_count", 2)
 		flat["boss_damage_reduction"] = stats.get("boss_damage_reduction", 0.5)
 		flat["size"] = shape.get("size", 80.0)
@@ -348,6 +349,7 @@ func _unflatten_weapon_config(flat: Dictionary, original: Dictionary) -> Diction
 	if is_nope_bubble:
 		# === NOPE BUBBLE ===
 		result["stats"]["knockback"] = flat.get("knockback", 600.0)
+		result["stats"]["particle_count"] = int(flat.get("particle_count", 48))
 		result["stats"]["projectile_count"] = int(flat.get("projectile_count", 2))
 		result["stats"]["boss_damage_reduction"] = flat.get("boss_damage_reduction", 0.5)
 		result["shape"]["size"] = flat.get("size", 80.0)

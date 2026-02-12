@@ -534,6 +534,8 @@ func _get_slider_ranges(key: String, current_value: Variant) -> Array:
 		"branch_intensity":
 			return [0.0, 1.0, 0.05]
 		# Nope Bubble parameters
+		"particle_count":
+			return [4.0, 200.0, 4.0]
 		"knockback":
 			return [100.0, 1500.0, 50.0]
 		"shockwave_range":
