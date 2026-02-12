@@ -15,6 +15,7 @@ signal load_config_pressed()
 signal target_settings_changed(speed: float, spawn_rate: float, hp: float)
 signal auto_spawn_toggled(enabled: bool)
 signal show_hitboxes_toggled(enabled: bool)
+signal boss_target_toggled(enabled: bool)
 
 # UI Node references
 var _main_panel: PanelContainer
@@ -36,6 +37,7 @@ var _target_hp_slider: HSlider
 var _target_hp_label: Label
 var _auto_spawn_check: CheckButton
 var _show_hitboxes_check: CheckButton
+var _boss_target_check: CheckButton
 
 # State
 var _weapons: Array[Dictionary] = []
@@ -247,6 +249,13 @@ func _build_ui() -> void:
 	_show_hitboxes_check.focus_mode = Control.FOCUS_CLICK
 	_show_hitboxes_check.toggled.connect(func(pressed): show_hitboxes_toggled.emit(pressed))
 	debug_hbox.add_child(_show_hitboxes_check)
+	
+	_boss_target_check = CheckButton.new()
+	_boss_target_check.text = "Boss Targets"
+	_boss_target_check.button_pressed = false
+	_boss_target_check.focus_mode = Control.FOCUS_CLICK
+	_boss_target_check.toggled.connect(func(pressed): boss_target_toggled.emit(pressed))
+	debug_hbox.add_child(_boss_target_check)
 	
 	_add_separator(main_vbox)
 	
@@ -478,7 +487,7 @@ func _get_slider_ranges(key: String, current_value: Variant) -> Array:
 		"piercing":
 			return [0, 20, 1]
 		"size":
-			return [0.1, 5.0, 0.1]
+			return [10.0, 300.0, 5.0]
 		"attack_speed":
 			return [0.1, 10.0, 0.1]
 		"orbit_speed":
@@ -516,6 +525,15 @@ func _get_slider_ranges(key: String, current_value: Variant) -> Array:
 		"jaggedness":
 			return [0.0, 1.0, 0.05]
 		"branch_intensity":
+			return [0.0, 1.0, 0.05]
+		# Nope Bubble parameters
+		"knockback":
+			return [100.0, 1500.0, 50.0]
+		"shockwave_range":
+			return [50.0, 500.0, 10.0]
+		"shockwave_angle_deg":
+			return [15.0, 180.0, 5.0]
+		"boss_damage_reduction":
 			return [0.0, 1.0, 0.05]
 		_:
 			# Default ranges based on current value

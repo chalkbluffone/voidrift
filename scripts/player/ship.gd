@@ -50,6 +50,11 @@ var _last_input_device: String = "keyboard" # "keyboard" or "joypad"
 const KNOCKBACK_FRICTION := 10.0
 const DAMAGE_IFRAMES := 0.5  # Brief i-frames after taking damage
 
+# --- Damage Interceptors ---
+# Callables that receive (amount: float, source: Node) and return modified damage float.
+# Used by Nope Bubble and similar defensive weapons to block/reduce incoming damage.
+var _damage_interceptors: Array[Callable] = []
+
 
 func _ready() -> void:
 	if FileLogger:
@@ -281,6 +286,15 @@ func take_damage(amount: float, source: Node = null) -> float:
 	if _is_invincible or _is_phasing:
 		return 0.0
 	
+	# Run damage interceptors (e.g. Nope Bubble shield)
+	var intercepted_amount: float = amount
+	for interceptor in _damage_interceptors:
+		if interceptor.is_valid():
+			intercepted_amount = interceptor.call(intercepted_amount, source)
+			if intercepted_amount <= 0.0:
+				return 0.0
+	amount = intercepted_amount
+	
 	var actual_damage: float = stats.take_damage(amount, source)
 	
 	if actual_damage > 0:
@@ -298,6 +312,19 @@ func take_damage(amount: float, source: Node = null) -> float:
 		_iframes_timer = DAMAGE_IFRAMES
 	
 	return actual_damage
+
+
+func register_damage_interceptor(callback: Callable) -> void:
+	if not _damage_interceptors.has(callback):
+		_damage_interceptors.append(callback)
+		if FileLogger:
+			FileLogger.log_info("Ship", "Registered damage interceptor")
+
+
+func unregister_damage_interceptor(callback: Callable) -> void:
+	_damage_interceptors.erase(callback)
+	if FileLogger:
+		FileLogger.log_info("Ship", "Unregistered damage interceptor")
 
 
 func _flash_damage() -> void:

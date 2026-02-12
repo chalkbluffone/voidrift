@@ -34,17 +34,14 @@ script = ExtResource("1_2gnfn")
 script = ExtResource("3_stats")
 
 [node name="WeaponComponent" type="Node2D" parent="." unique_id=115243728]
-position = Vector2(-6, 0)
 script = ExtResource("4_weapon")
 
 [node name="Sprite2D" type="AnimatedSprite2D" parent="." unique_id=2107609749]
-position = Vector2(-6, 0)
 rotation = 1.5707964
 sprite_frames = SubResource("SpriteFrames_4tobq")
 animation = &"new_animation"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1103779473]
-position = Vector2(-6, 0)
 shape = SubResource("CircleShape2D_tfsc7")
 
 [node name="PickupRange" type="Area2D" parent="." unique_id=1955449693]

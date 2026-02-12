@@ -2,9 +2,13 @@
 	"broken_tractor_beam": {
 		"description": "Tethers to a target with a malfunctioning tractor beam that irradiates it over time and stays locked on until the target dies… on accident. Whoops.",
 		"display_name": "Broken Tractor Beam",
-		"motion": {},
+		"motion": {
+
+		},
 		"scene": "res://effects/beam_base/BeamBase.tscn",
-		"shape": {},
+		"shape": {
+
+		},
 		"spawner": "res://effects/beam_base/beam_base_spawner.gd",
 		"stats": {
 			"cooldown": 2.5,
@@ -13,7 +17,9 @@
 		},
 		"type": "beam",
 		"unlock_condition": "default",
-		"visual": {}
+		"visual": {
+
+		}
 	},
 	"ion_wake": {
 		"description": "A charged pulse at your position and leaves an ionized damage trail behind your ship that really hurts. Oh no! Sulu's Tea!",
@@ -81,24 +87,39 @@
 	"nope_bubble": {
 		"description": "Blocks hits with rechargeable shield charges, consuming one per block and releasing a staggering shockwave.",
 		"display_name": "Nope Bubble",
-		"motion": {},
-		"scene": "res://effects/aoe_base/AoEBase.tscn",
-		"shape": {},
-		"spawner": "res://effects/aoe_base/aoe_base_spawner.gd",
+		"motion": {
+
+		},
+		"scene": "res://effects/nope_bubble/NopeBubble.tscn",
+		"shape": {
+			"shockwave_range": 200.0,
+			"shockwave_angle_deg": 45.0,
+			"size": 80.0
+		},
+		"spawner": "res://effects/nope_bubble/nope_bubble_spawner.gd",
 		"stats": {
 			"cooldown": 3.0,
-			"damage": 10.0
+			"damage": 10.0,
+			"knockback": 600.0,
+			"projectile_count": 2.0,
+			"boss_damage_reduction": 0.5
 		},
-		"type": "aoe",
+		"type": "area",
 		"unlock_condition": "default",
-		"visual": {}
+		"visual": {
+			"color": "#8c26d9cc"
+		}
 	},
 	"personal_space_violator": {
 		"description": "Violates the personal space of enemies by firing projectiles that aggressively seek out and damage them. Not recommended for use in crowded areas. For sure not a space shotgun.",
 		"display_name": "Personal Space Violator",
-		"motion": {},
+		"motion": {
+
+		},
 		"scene": "res://effects/projectile_base/ProjectileBase.tscn",
-		"shape": {},
+		"shape": {
+
+		},
 		"spawner": "res://effects/projectile_base/projectile_base_spawner.gd",
 		"stats": {
 			"cooldown": 1.0,
@@ -106,14 +127,20 @@
 		},
 		"type": "projectile",
 		"unlock_condition": "default",
-		"visual": {}
+		"visual": {
+
+		}
 	},
 	"proximity_tax": {
 		"description": "Imposes a damaging aura around the ship that harms enemies who get too close. It's like a tax, but in space...and kills bad guys.",
 		"display_name": "Proximity Tax",
-		"motion": {},
+		"motion": {
+
+		},
 		"scene": "res://effects/aoe_base/AoEBase.tscn",
-		"shape": {},
+		"shape": {
+
+		},
 		"spawner": "res://effects/aoe_base/aoe_base_spawner.gd",
 		"stats": {
 			"cooldown": 0.5,
@@ -121,14 +148,20 @@
 		},
 		"type": "aoe",
 		"unlock_condition": "default",
-		"visual": {}
+		"visual": {
+
+		}
 	},
 	"psp_9000": {
 		"description": "PSP or Personal Space Program, deploys orbiting security drones that body-check nearby enemies for physical damage and knockback. Not to be confused with a certain handheld gaming device.",
 		"display_name": "PSP-9000",
-		"motion": {},
+		"motion": {
+
+		},
 		"scene": "res://effects/orbit_base/OrbitBase.tscn",
-		"shape": {},
+		"shape": {
+
+		},
 		"spawner": "res://effects/orbit_base/orbit_base_spawner.gd",
 		"stats": {
 			"cooldown": 2.0,
@@ -136,7 +169,9 @@
 		},
 		"type": "orbit",
 		"unlock_condition": "default",
-		"visual": {}
+		"visual": {
+
+		}
 	},
 	"radiant_arc": {
 		"description": "Emits a short-range photonic slash in a wide arc from the ship’s forward edge, instantly cutting through and damaging any targets caught in its path. Really cool looking.",
@@ -210,7 +245,7 @@
 			"sweep_speed": 2.0
 		},
 		"particles": {
-			"amount": 60,
+			"amount": 60.0,
 			"color": "#cccccccc",
 			"drag": 2.0,
 			"enabled": true,
@@ -235,7 +270,7 @@
 			"cooldown": 1.0,
 			"damage": 10.0,
 			"duration": 1.45,
-			"projectile_count": 1
+			"projectile_count": 1.0
 		},
 		"type": "projectile",
 		"unlock_condition": "default",
@@ -265,14 +300,14 @@
 			"fade_out": 0.5
 		},
 		"particles": {
-			"trail_amount": 35,
+			"trail_amount": 35.0,
 			"trail_lifetime": 0.35,
-			"burst_amount": 50,
-			"flame_amount": 55,
+			"burst_amount": 50.0,
+			"flame_amount": 55.0,
 			"flame_lifetime": 0.6,
-			"ember_amount": 20,
+			"ember_amount": 20.0,
 			"ember_lifetime": 0.5,
-			"smoke_amount": 12,
+			"smoke_amount": 12.0,
 			"smoke_lifetime": 1.2
 		},
 		"scene": "res://effects/space_napalm/SpaceNapalm.tscn",
@@ -288,7 +323,7 @@
 			"burn_damage": 5.0,
 			"burn_duration": 3.5,
 			"dot_interval": 0.5,
-			"projectile_count": 1
+			"projectile_count": 1.0
 		},
 		"type": "projectile",
 		"unlock_condition": "default",
@@ -312,9 +347,13 @@
 	"space_nukes": {
 		"description": "Launches a barrage of explosive projectiles that detonate on impact, causing area damage to nearby enemies. It's like fireworks, but deadlier. In space.",
 		"display_name": "Space Nukes",
-		"motion": {},
+		"motion": {
+
+		},
 		"scene": "res://effects/projectile_base/ProjectileBase.tscn",
-		"shape": {},
+		"shape": {
+
+		},
 		"spawner": "res://effects/projectile_base/projectile_base_spawner.gd",
 		"stats": {
 			"cooldown": 1.8,
@@ -322,14 +361,20 @@
 		},
 		"type": "projectile",
 		"unlock_condition": "default",
-		"visual": {}
+		"visual": {
+
+		}
 	},
 	"space_whale_tusk": {
 		"description": "Fires a Space Whale Tusk projectile that ricochets between targets, dealing physical damage on each bounce. Actually made from space whales. Harvested on Gleebus V, the only planet where space whales are found. It's a little unethical, but those tusks make for great weapons.",
 		"display_name": "Space Whale Tusk",
-		"motion": {},
+		"motion": {
+
+		},
 		"scene": "res://effects/projectile_base/ProjectileBase.tscn",
-		"shape": {},
+		"shape": {
+
+		},
 		"spawner": "res://effects/projectile_base/projectile_base_spawner.gd",
 		"stats": {
 			"cooldown": 1.3,
@@ -337,14 +382,20 @@
 		},
 		"type": "projectile",
 		"unlock_condition": "default",
-		"visual": {}
+		"visual": {
+
+		}
 	},
 	"spin_cycle": {
 		"description": "Creates a swirling vortex of energy around the ship, damaging enemies caught within its radius. It's like a cosmic washing machine for bad guys.",
 		"display_name": "Spin Cycle",
-		"motion": {},
+		"motion": {
+
+		},
 		"scene": "res://effects/aoe_base/AoEBase.tscn",
-		"shape": {},
+		"shape": {
+
+		},
 		"spawner": "res://effects/aoe_base/aoe_base_spawner.gd",
 		"stats": {
 			"cooldown": 2.0,
@@ -352,14 +403,20 @@
 		},
 		"type": "aoe",
 		"unlock_condition": "default",
-		"visual": {}
+		"visual": {
+
+		}
 	},
 	"straight_line_negotiator": {
 		"description": "Fires a magnet-accelerated spike that travels in a perfectly straight line and pierces through multiple enemies. Definitely not a space sniper rifle. Honest.",
 		"display_name": "Straight-Line Negotiator",
-		"motion": {},
+		"motion": {
+
+		},
 		"scene": "res://effects/projectile_base/ProjectileBase.tscn",
-		"shape": {},
+		"shape": {
+
+		},
 		"spawner": "res://effects/projectile_base/projectile_base_spawner.gd",
 		"stats": {
 			"cooldown": 0.8,
@@ -367,14 +424,20 @@
 		},
 		"type": "projectile",
 		"unlock_condition": "default",
-		"visual": {}
+		"visual": {
+
+		}
 	},
 	"straight_shooter": {
 		"description": "Fires a auto-aim, high-velocity round that pierces through enemies in a straight line and can circumcise a Tarlaxian in under 3 parsecs.",
 		"display_name": "Straight Shooter",
-		"motion": {},
+		"motion": {
+
+		},
 		"scene": "res://effects/projectile_base/ProjectileBase.tscn",
-		"shape": {},
+		"shape": {
+
+		},
 		"spawner": "res://effects/projectile_base/projectile_base_spawner.gd",
 		"stats": {
 			"cooldown": 1.5,
@@ -382,14 +445,20 @@
 		},
 		"type": "projectile",
 		"unlock_condition": "default",
-		"visual": {}
+		"visual": {
+
+		}
 	},
 	"timmy_gun": {
 		"description": "The Timson Sub-Space Machine Gun model T2928A1, unloads a burst of physical rounds that ricochet off targets, bouncing to hit additional enemies before dissipating. Also, known as the \"Trench Broom\" as it was used in the great Balsurpian war of 2918 to disipate Balsurpians from the Ionic Trenches of Delton VII.",
 		"display_name": "Timmy Gun",
-		"motion": {},
+		"motion": {
+
+		},
 		"scene": "res://effects/projectile_base/ProjectileBase.tscn",
-		"shape": {},
+		"shape": {
+
+		},
 		"spawner": "res://effects/projectile_base/projectile_base_spawner.gd",
 		"stats": {
 			"cooldown": 0.6,
@@ -397,14 +466,20 @@
 		},
 		"type": "projectile",
 		"unlock_condition": "default",
-		"visual": {}
+		"visual": {
+
+		}
 	},
 	"tothian_mines": {
 		"description": "Deploys proximity-triggered mines that detonate when enemies come near, dealing area damage. Inspired by the ancient Tothian defense systems.",
 		"display_name": "Tothian Mines",
-		"motion": {},
+		"motion": {
+
+		},
 		"scene": "res://effects/aoe_base/AoEBase.tscn",
-		"shape": {},
+		"shape": {
+
+		},
 		"spawner": "res://effects/aoe_base/aoe_base_spawner.gd",
 		"stats": {
 			"cooldown": 2.5,
@@ -413,6 +488,8 @@
 		},
 		"type": "aoe",
 		"unlock_condition": "default",
-		"visual": {}
+		"visual": {
+
+		}
 	}
 }

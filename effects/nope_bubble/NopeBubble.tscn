@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://effects/nope_bubble/nope_bubble.gd" id="1_nope_bubble"]
+
+[node name="NopeBubble" type="Node2D"]
+script = ExtResource("1_nope_bubble")
+damage = 10.0
+knockback = 600.0
+projectile_count = 2
+size = 80.0
+shockwave_range = 200.0
+shockwave_angle_deg = 45.0
+boss_damage_reduction = 0.5

@@ -34,6 +34,7 @@ var _auto_spawn_targets: bool = false
 var _target_speed: float = 50.0
 var _target_spawn_rate: float = 2.0
 var _target_hp: float = 100.0
+var _spawn_boss_target: bool = false
 
 # Debug settings
 var _show_hitboxes: bool = false
@@ -78,6 +79,7 @@ func _ready() -> void:
 		ui_panel.target_settings_changed.connect(_on_target_settings_changed)
 		ui_panel.auto_spawn_toggled.connect(_on_auto_spawn_toggled)
 		ui_panel.show_hitboxes_toggled.connect(_on_show_hitboxes_toggled)
+		ui_panel.boss_target_toggled.connect(_on_boss_target_toggled)
 		ui_panel.initialize(weapon_list)
 	
 	# Initialize with first weapon
@@ -164,12 +166,25 @@ func spawn_target_at_random() -> void:
 func spawn_target_at(pos: Vector2) -> void:
 	var target = TestTargetScene.instantiate()
 	target.global_position = pos
-	target.max_hp = _target_hp
-	target.current_hp = _target_hp
-	target.move_speed = _target_speed
+	
+	if _spawn_boss_target:
+		target.enemy_type = "boss"
+		target.max_hp = max(_target_hp * 5, 500.0)
+		target.current_hp = target.max_hp
+		target.move_speed = _target_speed * 0.6
+	else:
+		target.max_hp = _target_hp
+		target.current_hp = _target_hp
+		target.move_speed = _target_speed
+	
 	target.set_target(test_ship)
 	target.add_to_group("enemies")
 	target_container.add_child(target)
+	
+	# Boss targets get a distinct purple color
+	if _spawn_boss_target and target.has_node("Visual"):
+		var visual_node: ColorRect = target.get_node("Visual")
+		visual_node.color = Color(0.6, 0.15, 0.8, 0.9)
 
 
 func clear_all_targets() -> void:
@@ -188,13 +203,25 @@ func _flatten_weapon_config(weapon_data: Dictionary) -> Dictionary:
 	var particles = weapon_data.get("particles", {})
 	var is_ion_wake = shape.has("inner_radius") or shape.has("expansion_speed")
 	var is_nikolas_coil = shape.has("arc_width") or shape.has("search_radius")
+	var is_nope_bubble = shape.has("shockwave_range") or shape.has("shockwave_angle_deg")
 	var is_radiant_arc = (shape.has("arc_angle_deg") or shape.has("thickness")) and not is_nikolas_coil
-	var is_stub = not is_ion_wake and not is_radiant_arc and not is_nikolas_coil
+	var is_stub = not is_ion_wake and not is_radiant_arc and not is_nikolas_coil and not is_nope_bubble
 	
 	# Stats — only include stats that actually exist in the data
 	var stats = weapon_data.get("stats", {})
 	for stat_key in stats:
 		flat[stat_key] = stats[stat_key]
+	
+	if is_nope_bubble:
+		# === NOPE BUBBLE PARAMETERS ===
+		flat["knockback"] = stats.get("knockback", 600.0)
+		flat["projectile_count"] = stats.get("projectile_count", 2)
+		flat["boss_damage_reduction"] = stats.get("boss_damage_reduction", 0.5)
+		flat["size"] = shape.get("size", 80.0)
+		flat["shockwave_range"] = shape.get("shockwave_range", 200.0)
+		flat["shockwave_angle_deg"] = shape.get("shockwave_angle_deg", 45.0)
+		flat["color"] = _hex_to_color(visual.get("color", "#4d99ffaa"))
+		return flat
 	
 	# For stub/unimplemented weapons, only show the stats that exist — no defaults
 	if is_stub:
@@ -302,6 +329,7 @@ func _unflatten_weapon_config(flat: Dictionary, original: Dictionary) -> Diction
 	# Detect weapon type from flat config keys
 	var is_ion_wake = flat.has("inner_radius") or flat.has("outer_radius") or flat.has("expansion_speed")
 	var is_nikolas_coil = flat.has("arc_width") or flat.has("search_radius") or flat.has("cascade_delay")
+	var is_nope_bubble = flat.has("shockwave_range") or flat.has("shockwave_angle_deg")
 	
 	# Stats (common) — only write stats that exist in flat
 	if not result.has("stats"):
@@ -317,7 +345,17 @@ func _unflatten_weapon_config(flat: Dictionary, original: Dictionary) -> Diction
 	if not result.has("visual"):
 		result["visual"] = {}
 	
-	if is_nikolas_coil:
+	if is_nope_bubble:
+		# === NOPE BUBBLE ===
+		result["stats"]["knockback"] = flat.get("knockback", 600.0)
+		result["stats"]["projectile_count"] = int(flat.get("projectile_count", 2))
+		result["stats"]["boss_damage_reduction"] = flat.get("boss_damage_reduction", 0.5)
+		result["shape"]["size"] = flat.get("size", 80.0)
+		result["shape"]["shockwave_range"] = flat.get("shockwave_range", 200.0)
+		result["shape"]["shockwave_angle_deg"] = flat.get("shockwave_angle_deg", 45.0)
+		if flat.has("color") and flat["color"] is Color:
+			result["visual"]["color"] = _color_to_hex(flat["color"])
+	elif is_nikolas_coil:
 		# === NIKOLA'S COIL ===
 		# Shape
 		result["shape"]["arc_width"] = flat.get("arc_width", 8.0)
@@ -422,6 +460,8 @@ func _on_weapon_selected(weapon_id: String) -> void:
 
 func _on_config_changed(key: String, value: Variant) -> void:
 	_current_config[key] = value
+	# Push live updates to persistent effects like the Nope Bubble
+	_push_live_config_update()
 
 
 func _on_fire_pressed() -> void:
@@ -474,6 +514,10 @@ func _on_auto_spawn_toggled(enabled: bool) -> void:
 func _on_show_hitboxes_toggled(enabled: bool) -> void:
 	_show_hitboxes = enabled
 	_apply_hitbox_visibility()
+
+
+func _on_boss_target_toggled(enabled: bool) -> void:
+	_spawn_boss_target = enabled
 
 
 # --- Save/Load to weapons.json ---
@@ -540,6 +584,16 @@ func _remove_debug_overlay(cs: CollisionShape2D) -> void:
 	for child in cs.get_children():
 		if child.has_meta("hitbox_debug_overlay"):
 			child.queue_free()
+
+
+## Push current config to any active persistent effect (e.g. Nope Bubble) in real time.
+func _push_live_config_update() -> void:
+	# Find any active NopeBubble in the scene tree
+	var bubbles = get_tree().get_nodes_in_group("nope_bubble")
+	for bubble in bubbles:
+		if is_instance_valid(bubble) and bubble.has_method("setup"):
+			bubble.setup(_current_config)
+			bubble._update_visuals()
 
 
 ## Lightweight node that draws the parent CollisionShape2D's shape outline.

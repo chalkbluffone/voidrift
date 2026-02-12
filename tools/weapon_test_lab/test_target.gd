@@ -10,6 +10,9 @@ class_name TestTarget
 var current_hp: float = 100.0
 var target_node: Node2D = null  # The ship to move toward
 var _target_radius: float = 20.0  # Ship collision radius
+var enemy_type: String = "normal"  # "normal" or "boss"
+var _knockback_velocity: Vector2 = Vector2.ZERO
+const KNOCKBACK_FRICTION: float = 8.0
 
 @onready var visual: ColorRect = $Visual
 @onready var hp_label: Label = $HPLabel
@@ -24,6 +27,13 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	# Process knockback decay
+	if _knockback_velocity.length() > 1.0:
+		_knockback_velocity = _knockback_velocity.move_toward(Vector2.ZERO, KNOCKBACK_FRICTION * delta * 100)
+		global_position += _knockback_velocity * delta
+	else:
+		_knockback_velocity = Vector2.ZERO
+	
 	if target_node and move_speed > 0:
 		var direction = (target_node.global_position - global_position).normalized()
 		global_position += direction * move_speed * delta
@@ -45,12 +55,21 @@ func _on_area_entered(area: Area2D) -> void:
 
 
 func _on_reached_ship() -> void:
-	# Target reached the ship - destroy self
+	# Deal contact damage to the ship so Nope Bubble and other defenses can react
+	if target_node and target_node.has_method("take_damage"):
+		var contact_damage: float = 10.0
+		if enemy_type == "boss":
+			contact_damage = 30.0
+		target_node.take_damage(contact_damage, self)
 	queue_free()
 
 
 func set_target(node: Node2D) -> void:
 	target_node = node
+
+
+func apply_knockback(force: Vector2) -> void:
+	_knockback_velocity += force
 
 
 func take_damage(amount: float, _source = null) -> void:

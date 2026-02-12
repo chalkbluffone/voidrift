@@ -332,8 +332,24 @@ func fire_weapon_with_config(weapon_id: String, config: Dictionary, source: Node
 			_fire_melee_with_config(weapon_id, config, source)
 		"projectile":
 			_fire_projectile_with_config(weapon_id, config, source)
+		"area":
+			_fire_area_with_config(weapon_id, config, source)
 		_:
 			push_warning("WeaponComponent: fire_weapon_with_config not implemented for type: " + weapon_type)
+
+
+func _fire_area_with_config(weapon_id: String, config: Dictionary, source: Node2D) -> void:
+	"""Fire an area weapon with explicit flat config (for test lab)."""
+	var weapon_data: Dictionary = DataLoader.get_weapon(weapon_id)
+	var spawner = _get_or_create_spawner(weapon_id, weapon_data)
+	if spawner == null:
+		push_warning("WeaponComponent: No spawner for area weapon: " + weapon_id)
+		return
+	if not spawner.has_method("spawn"):
+		return
+	var result = spawner.spawn(source.global_position, config, source)
+	if result:
+		weapon_fired.emit(weapon_id, [result])
 
 
 func _fire_projectile_with_config(weapon_id: String, config: Dictionary, source: Node2D) -> void:
@@ -388,6 +404,7 @@ func _flatten_weapon_data(data: Dictionary) -> Dictionary:
 	var is_ion_wake = shape.has("inner_radius") or shape.has("expansion_speed")
 	var is_nikolas_coil = shape.has("arc_width") or shape.has("search_radius")
 	var is_space_napalm = shape.has("aoe_radius") or stats.has("burn_damage")
+	var is_nope_bubble = shape.has("shockwave_range") or shape.has("shockwave_angle_deg")
 	
 	# Stats (common)
 	flat["damage"] = stats.get("damage", 10.0)
@@ -399,7 +416,22 @@ func _flatten_weapon_data(data: Dictionary) -> Dictionary:
 	flat["fade_in"] = motion.get("fade_in", 0.08)
 	flat["fade_out"] = motion.get("fade_out", 0.15)
 	
-	if is_space_napalm:
+	if is_nope_bubble:
+		# === NOPE BUBBLE PARAMETERS ===
+		# Stats
+		flat["knockback"] = stats.get("knockback", 600.0)
+		flat["projectile_count"] = stats.get("projectile_count", 2)
+		flat["boss_damage_reduction"] = stats.get("boss_damage_reduction", 0.5)
+		
+		# Shape
+		flat["size"] = shape.get("size", 80.0)
+		flat["shockwave_range"] = shape.get("shockwave_range", 200.0)
+		flat["shockwave_angle_deg"] = shape.get("shockwave_angle_deg", 45.0)
+		
+		# Visual
+		var visual = data.get("visual", {})
+		flat["color"] = _hex_to_color(visual.get("color", "#4d99ffaa"))
+	elif is_space_napalm:
 		# === SPACE NAPALM PARAMETERS ===
 		# Stats
 		flat["burn_damage"] = stats.get("burn_damage", 5.0)
