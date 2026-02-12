@@ -10,9 +10,9 @@ uniform float opacity : hint_range(0.0, 1.0) = 1.0;
 uniform float pulse : hint_range(0.0, 1.0) = 0.0;
 
 // Tuning knobs
-const float SHIELD_RADIUS = 0.40;
-const float SHELL_HALF   = 0.052;  // membrane thickness (half-width)
-const float GLOW_WIDTH   = 0.09;   // soft outer bloom
+const float SHIELD_RADIUS = 0.82;
+const float SHELL_HALF   = 0.065;  // membrane thickness (half-width)
+const float GLOW_WIDTH   = 0.10;   // soft outer bloom
 const float ARC_INTENSITY = 0.45;  // voronoi vein brightness
 const float PLASMA_SPEED  = 0.35;  // flow speed of noise
 
@@ -120,6 +120,9 @@ void fragment() {
 	// Also add a faint inner haze (very transparent) so small shields don't look empty
 	float inner_haze = smoothstep(inner_edge, inner_edge - 0.13, dist) * 0.08 * opacity;
 	final_alpha = max(final_alpha, inner_haze);
+
+	// ---- Circular mask: force alpha to zero before quad edge to prevent square clipping ----
+	final_alpha *= smoothstep(1.0, 0.94, dist);
 
 	if (final_alpha < 0.005) {
 		discard;

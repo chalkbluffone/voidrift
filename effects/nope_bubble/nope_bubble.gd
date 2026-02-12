@@ -140,7 +140,7 @@ func _create_visuals() -> void:
 	# --- Shield mesh (circle) ---
 	_shield_mesh = MeshInstance2D.new()
 	var circle_mesh: QuadMesh = QuadMesh.new()
-	circle_mesh.size = Vector2(size * 5.0, size * 5.0)  # Large quad — shield ring at UV 0.40 leaves 60% margin for glow fadeout
+	circle_mesh.size = Vector2(size * 2.6, size * 2.6)  # Ring at UV 0.82 fills most of the quad
 	_shield_mesh.mesh = circle_mesh
 	
 	# Load and apply shader
@@ -204,7 +204,7 @@ func _update_visuals() -> void:
 	
 	# Update mesh size in case size param changed
 	if _shield_mesh and _shield_mesh.mesh:
-		(_shield_mesh.mesh as QuadMesh).size = Vector2(size * 5.0, size * 5.0)
+		(_shield_mesh.mesh as QuadMesh).size = Vector2(size * 2.6, size * 2.6)
 
 
 func _spawn_shockwave(source: Node2D) -> void:
