@@ -86,12 +86,13 @@ void fragment() {
 	float outer_glow = exp(-glow_d * glow_d / (GLOW_WIDTH * GLOW_WIDTH)) * 0.55;
 
 	// ---- Plasma noise ----
-	// Use polar-ish coords so noise wraps around the shield
-	vec2 plasma_uv = vec2(angle * 1.5, dist * 12.0) + vec2(TIME * PLASMA_SPEED, TIME * PLASMA_SPEED * 0.7);
+	// Use circular coords (cos/sin) instead of raw angle to avoid polar seam
+	vec2 circle = vec2(cos(angle), sin(angle));
+	vec2 plasma_uv = circle * 3.0 + vec2(dist * 6.0) + vec2(TIME * PLASMA_SPEED, TIME * PLASMA_SPEED * 0.7);
 	float plasma = fbm(plasma_uv * 2.5);
 
 	// ---- Electric arc veins (voronoi) ----
-	vec2 arc_uv = vec2(angle * 2.0 + TIME * 0.2, dist * 16.0 - TIME * 0.3);
+	vec2 arc_uv = circle * 3.5 + vec2(dist * 8.0 + TIME * 0.2, -TIME * 0.3);
 	float arcs = 1.0 - voronoi(arc_uv * 1.8);
 	arcs = pow(arcs, 3.0) * ARC_INTENSITY;  // sharpen into thin veins
 
