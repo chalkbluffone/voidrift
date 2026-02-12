@@ -551,6 +551,13 @@ func remove_weapon(weapon_id: String) -> bool:
 	if not _equipped_weapons.has(weapon_id):
 		return false
 	
+	# Clean up spawner's active effects (persistent bubbles, projectiles, etc.)
+	if _spawner_cache.has(weapon_id):
+		var spawner = _spawner_cache[weapon_id]
+		if spawner.has_method("cleanup"):
+			spawner.cleanup()
+		_spawner_cache.erase(weapon_id)
+	
 	_equipped_weapons.erase(weapon_id)
 	_weapon_level_bonuses.erase(weapon_id)
 	weapon_removed.emit(weapon_id)

@@ -48,3 +48,10 @@ func spawn(spawn_pos: Vector2, params: Dictionary = {}, follow_source: Node2D = 
 
 func _on_bubble_destroyed() -> void:
 	_active_bubble = null
+
+
+func cleanup() -> void:
+	"""Destroy the active bubble. Called when weapon is unequipped."""
+	if is_instance_valid(_active_bubble):
+		_active_bubble.queue_free()
+	_active_bubble = null

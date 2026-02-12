@@ -76,3 +76,11 @@ func spawn(
 
 	_active_instances.append(instance)
 	return instance
+
+
+func cleanup() -> void:
+	"""Destroy all active boomerangs. Called when weapon is unequipped."""
+	for inst in _active_instances:
+		if is_instance_valid(inst):
+			inst.queue_free()
+	_active_instances.clear()
