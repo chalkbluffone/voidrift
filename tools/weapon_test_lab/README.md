@@ -51,80 +51,48 @@ Sliders and color pickers for every configurable weapon parameter. Changes apply
 
 #### 5. Save/Load
 
-- **Save**: Saves current configuration to `user://weapon_configs/{weapon_id}.cfg`
-- **Load**: Loads saved configuration for the current weapon
+- **Save to JSON**: Saves current configuration directly to `data/weapons.json`
+- **Reload JSON**: Reloads from `data/weapons.json` (discards unsaved changes)
 
-## Available Weapons
+## Dynamic Weapon Loading
 
-| Weapon        | Type       | Description                                      |
-| ------------- | ---------- | ------------------------------------------------ |
-| Radiant Arc   | Melee      | Neon slash effect with full visual customization |
-| Plasma Cannon | Projectile | Basic projectile weapon                          |
-| Laser Array   | Projectile | Rapid-fire spread weapon                         |
-| Ion Orbit     | Orbit      | Orbital damage spheres                           |
-| Missile Pod   | Projectile | Homing missiles                                  |
+The weapon test lab is **fully data-driven**. All weapons are loaded from `data/weapons.json` at runtime via `DataLoader`. No hardcoded weapon lists or type-specific parameter handling exists in the lab code.
 
-## Radiant Arc Parameters
+### How It Works
 
-The Radiant Arc has the most extensive parameter set:
-
-### Geometry
-
-- **Arc Angle Deg**: Sweep angle of the arc (10-360°)
-- **Radius**: Inner radius of the arc
-- **Thickness**: Width of the arc
-- **Taper**: How the thickness falls off along the arc
-- **Length Scale**: Overall scale multiplier
-- **Distance**: Offset from the spawn point
-
-### Timing
-
-- **Speed**: Forward travel speed (0 = stationary)
-- **Duration**: How long the effect lasts
-- **Fade In/Out**: Transition times
-
-### Visuals
-
-- **Color A/B/C**: Three-color gradient
-- **Glow Strength**: Intensity of the glow effect
-- **Core Strength**: Brightness of the central core
-- **Noise Strength**: Distortion amount
-- **UV Scroll Speed**: Animation speed
-
-## Saved Configurations
-
-Configurations are saved to:
-
-```
-user://weapon_configs/{weapon_id}.cfg
-```
-
-On Windows, this is typically:
-
-```
-C:\Users\{username}\AppData\Roaming\Godot\app_userdata\Voidrift\weapon_configs\
-```
-
-### Using Saved Configs in Game
-
-To use a saved configuration in your weapon code:
-
-```gdscript
-# Load saved config
-var config = ConfigFile.new()
-if config.load("user://weapon_configs/radiant_arc.cfg") == OK:
-    var arc_angle = config.get_value("config", "arc_angle_deg", 90.0)
-    # ... apply to weapon
-```
-
-Or create a `RadiantArcConfig` resource with the saved values.
+1. **Weapon list**: Built dynamically from `DataLoader.get_weapon_ids()` on startup
+2. **Parameter discovery**: When a weapon is selected, `WeaponDataFlattener.flatten()` walks ALL sub-dictionaries (`stats`, `shape`, `motion`, `visual`, `particles`, `base_stats`) and extracts every key/value pair
+3. **UI generation**: Sliders, color pickers, and checkboxes are created automatically for each parameter. Slider ranges are inferred from key naming conventions (e.g., keys containing "radius" get [0, 500], keys ending in "\_deg" get [0, 360])
+4. **Save roundtrip**: `WeaponDataFlattener.unflatten()` uses a key map to write values back to their original JSON sections — no weapon-type detection needed
+5. **Live updates**: Persistent effects (like Nope Bubble) receive real-time config pushes via group-based discovery
 
 ## Adding New Weapons
 
-1. Add weapon definition to `data/weapons.json`
-2. Add entry to `_available_weapons` array in `weapon_test_lab.gd`
-3. Add default config in `_get_default_config()`
-4. Add slider ranges in `weapon_test_ui.gd` `_get_slider_ranges()`
+1. Add weapon definition to `data/weapons.json` with the standard structure (stats, shape, motion, visual, particles sections as needed)
+2. Create the spawner script and effect scene in `effects/your_weapon/`
+3. **That's it.** The test lab will automatically:
+   - Show the weapon in the selection list
+   - Generate parameter controls for every key in every sub-dictionary
+   - Fire the weapon using the real `WeaponComponent` code path
+   - Save/reload configuration to `weapons.json`
+
+No test lab code changes are required when adding new weapons.
+
+### Naming Conventions for Good Slider Ranges
+
+When adding parameters to a new weapon, use these naming patterns for automatic slider range inference:
+
+| Pattern in key name          | Range              | Example keys                           |
+| ---------------------------- | ------------------ | -------------------------------------- |
+| `_deg`, `angle`              | 0-360, step 5      | `arc_angle_deg`, `shockwave_angle_deg` |
+| `radius`, `range`            | 0-500, step 5      | `search_radius`, `shockwave_range`     |
+| `strength`, `intensity`      | 0-10, step 0.1     | `glow_strength`, `branch_intensity`    |
+| `speed`                      | 0-100, step 1      | `sweep_speed`, `flicker_speed`         |
+| `count`, `amount`            | 1-200, step 1      | `projectile_count`, `particles_amount` |
+| `size`, `thickness`, `width` | 1-300, step 1      | `proj_size`, `arc_width`               |
+| `duration`, `lifetime`       | 0.05-10, step 0.05 | `burn_duration`, `particles_lifetime`  |
+| `fade_*`                     | 0-1, step 0.01     | `fade_in`, `fade_out`                  |
+| `offset`                     | -1 to 1, step 0.05 | `gradient_offset`, `seed_offset`       |
 
 ## Notes
 

@@ -437,119 +437,98 @@ func _add_checkbox_control(key: String, value: bool) -> void:
 
 
 func _get_slider_ranges(key: String, current_value: Variant) -> Array:
-	# Returns [min, max, step]
+	## Pattern-based slider range inference. No hardcoded weapon-type detection.
+	## New parameters from new weapons get sensible ranges automatically based on
+	## naming conventions (e.g., any key with "radius" gets [0, 500, 5]).
+	## Returns [min, max, step].
+	
+	# --- Exact key overrides for common parameters ---
+	# These take priority when we know the exact semantics.
 	match key:
-		"arc_angle_deg":
-			return [10.0, 360.0, 5.0]
-		"radius":
-			return [5.0, 200.0, 1.0]
-		"thickness":
-			return [1.0, 100.0, 1.0]
+		"damage":
+			return [0.0, 500.0, 1.0]
+		"cooldown":
+			return [0.05, 10.0, 0.05]
 		"taper":
 			return [0.0, 1.0, 0.05]
 		"length_scale":
 			return [0.1, 3.0, 0.05]
 		"distance":
 			return [0.0, 150.0, 1.0]
-		"speed":
-			return [0.0, 1000.0, 10.0]
-		"duration":
-			return [0.05, 5.0, 0.05]
-		"fade_in", "fade_out":
-			return [0.0, 1.0, 0.01]
-		"glow_strength":
-			return [0.0, 10.0, 0.1]
-		"core_strength":
-			return [0.0, 3.0, 0.1]
-		"noise_strength":
-			return [0.0, 2.0, 0.05]
-		"uv_scroll_speed":
-			return [0.0, 10.0, 0.1]
-		"chromatic_aberration":
-			return [0.0, 2.0, 0.05]
-		"pulse_strength":
-			return [0.0, 1.0, 0.05]
-		"pulse_speed":
-			return [1.0, 30.0, 1.0]
-		"electric_strength":
-			return [0.0, 1.5, 0.05]
-		"electric_frequency":
-			return [5.0, 50.0, 1.0]
-		"electric_speed":
-			return [1.0, 30.0, 1.0]
-		"gradient_offset":
-			return [-1.0, 1.0, 0.05]
-		"rotation_offset_deg":
-			return [-180.0, 180.0, 5.0]
-		"seed_offset":
-			return [0.0, 100.0, 1.0]
-		"damage":
-			return [1.0, 500.0, 1.0]
 		"projectile_speed":
 			return [50.0, 2000.0, 10.0]
-		"projectile_count":
-			return [1, 20, 1]
-		"spread":
-			return [0.0, 180.0, 1.0]
-		"piercing":
-			return [0, 20, 1]
-		"size":
-			return [10.0, 300.0, 5.0]
-		"attack_speed":
-			return [0.1, 10.0, 0.1]
-		"orbit_speed":
-			return [50.0, 500.0, 10.0]
-		# Particle settings
-		"particles_amount":
-			return [1, 100, 1]
-		"particles_size":
-			return [1.0, 20.0, 0.5]
-		"particles_speed":
-			return [10.0, 300.0, 5.0]
-		"particles_lifetime":
-			return [0.1, 2.0, 0.05]
-		"particles_spread":
-			return [0.0, 1.0, 0.05]
-		"particles_drag":
-			return [0.0, 2.0, 0.1]
-		"particles_outward":
-			return [0.0, 1.0, 0.05]
-		"particles_radius":
-			return [0.0, 1.0, 0.05]
-		# Nikola's Coil / chain-lightning parameters
-		"arc_width":
-			return [1.0, 30.0, 0.5]
-		"search_radius":
-			return [50.0, 800.0, 10.0]
-		"cascade_delay":
-			return [0.01, 0.30, 0.01]
-		"hold_time":
-			return [0.1, 1.0, 0.05]
-		"flicker_speed":
-			return [5.0, 60.0, 1.0]
-		"bolt_width":
-			return [0.1, 1.0, 0.05]
-		"jaggedness":
-			return [0.0, 1.0, 0.05]
-		"branch_intensity":
-			return [0.0, 1.0, 0.05]
-		# Nope Bubble parameters
-		"particle_count":
-			return [4.0, 200.0, 4.0]
-		"knockback":
-			return [100.0, 1500.0, 50.0]
-		"shockwave_range":
-			return [50.0, 500.0, 10.0]
-		"shockwave_angle_deg":
-			return [15.0, 180.0, 5.0]
 		"boss_damage_reduction":
 			return [0.0, 1.0, 0.05]
-		_:
-			# Default ranges based on current value
-			if current_value is int:
-				return [0, max(100, int(current_value) * 2), 1]
-			else:
-				return [0.0, max(10.0, float(current_value) * 2), 0.1]
+		"knockback":
+			return [0.0, 1500.0, 50.0]
+	
+	# --- Pattern-based inference (checked top-to-bottom, first match wins) ---
+	
+	# Degree/angle parameters
+	if key.ends_with("_deg") or key.contains("angle"):
+		return [0.0, 360.0, 5.0]
+	
+	# Radius and range parameters
+	if key.contains("radius") or key.contains("range"):
+		return [0.0, 500.0, 5.0]
+	
+	# Fade parameters (0-1 range)
+	if key.begins_with("fade_"):
+		return [0.0, 1.0, 0.01]
+	
+	# Strength/intensity parameters
+	if key.contains("strength") or key.contains("intensity"):
+		return [0.0, 10.0, 0.1]
+	
+	# Count/amount parameters (integers)
+	if key.contains("count") or key.contains("amount"):
+		return [1, 200, 1]
+	
+	# Size/thickness/width parameters
+	if key.contains("size") or key.contains("thickness") or key.contains("width"):
+		return [1.0, 300.0, 1.0]
+	
+	# Speed parameters
+	if key.contains("speed"):
+		return [0.0, 100.0, 1.0]
+	
+	# Duration/lifetime/interval parameters
+	if key.contains("duration") or key.contains("lifetime") or key.contains("interval"):
+		return [0.05, 10.0, 0.05]
+	
+	# Delay/hold time parameters
+	if key.contains("delay") or key.contains("hold"):
+		return [0.01, 2.0, 0.01]
+	
+	# Offset parameters
+	if key.contains("offset"):
+		return [-1.0, 1.0, 0.05]
+	
+	# Spread/drag/outward parameters (0-2 range)
+	if key.contains("spread") or key.contains("drag") or key.contains("outward"):
+		return [0.0, 2.0, 0.05]
+	
+	# Jaggedness/taper-like (0-1 range)
+	if key.contains("jagged") or key.contains("aberration"):
+		return [0.0, 2.0, 0.05]
+	
+	# Piercing (integer)
+	if key.contains("piercing"):
+		return [0, 20, 1]
+	
+	# Frequency parameters
+	if key.contains("frequency"):
+		return [1.0, 50.0, 1.0]
+	
+	# Scale parameters
+	if key.contains("scale"):
+		return [0.1, 3.0, 0.05]
+	
+	# --- Default fallback based on value type ---
+	if current_value is int:
+		return [0, max(100, int(current_value) * 2), 1]
+	else:
+		return [0.0, max(10.0, float(current_value) * 2), 0.1]
 
 
 func _format_key_name(key: String) -> String:

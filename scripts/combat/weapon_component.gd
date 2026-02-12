@@ -167,7 +167,7 @@ func _fire_projectile_via_spawner(weapon_id: String, data: Dictionary) -> void:
 	if not parent:
 		FileLogger.log_warn("WeaponComponent", "_fire_projectile_via_spawner: no parent for %s" % weapon_id)
 		return
-	var config: Dictionary = _flatten_weapon_data(data)
+	var config: Dictionary = WeaponDataFlattener.flatten(data).flat
 	
 	# Inject runtime stats that aren't in the JSON (size, projectile_count with bonuses)
 	var size_mult: float = 1.0
@@ -224,7 +224,7 @@ func _fire_orbit_weapon(weapon_id: String, data: Dictionary, _level: int) -> voi
 	var parent := get_parent()
 	if not parent:
 		return
-	var config: Dictionary = _flatten_weapon_data(data)
+	var config: Dictionary = WeaponDataFlattener.flatten(data).flat
 	var spawner = _get_or_create_spawner(weapon_id, data)
 	if spawner and spawner.has_method("spawn"):
 		var result = spawner.spawn(parent.global_position, config, parent)
@@ -239,7 +239,7 @@ func _fire_area_weapon(weapon_id: String, data: Dictionary, _level: int) -> void
 	var parent := get_parent()
 	if not parent:
 		return
-	var config: Dictionary = _flatten_weapon_data(data)
+	var config: Dictionary = WeaponDataFlattener.flatten(data).flat
 	var spawner = _get_or_create_spawner(weapon_id, data)
 	if spawner and spawner.has_method("spawn"):
 		var result = spawner.spawn(parent.global_position, config, parent)
@@ -254,7 +254,7 @@ func _fire_beam_weapon(weapon_id: String, data: Dictionary, _level: int) -> void
 	var parent := get_parent()
 	if not parent:
 		return
-	var config: Dictionary = _flatten_weapon_data(data)
+	var config: Dictionary = WeaponDataFlattener.flatten(data).flat
 	var direction: Vector2 = _get_fire_direction(data)
 	var spawner = _get_or_create_spawner(weapon_id, data)
 	if spawner and spawner.has_method("spawn"):
@@ -274,7 +274,7 @@ func _fire_melee_weapon(weapon_id: String, data: Dictionary, _level: int) -> voi
 		return
 	
 	# Build flat config from nested weapon data (same format as weapon test lab)
-	var config: Dictionary = _flatten_weapon_data(data)
+	var config: Dictionary = WeaponDataFlattener.flatten(data).flat
 	
 	_fire_melee_with_config(weapon_id, config, parent)
 
@@ -393,173 +393,6 @@ func _fire_projectile_with_config(weapon_id: String, config: Dictionary, source:
 		weapon_fired.emit(weapon_id, [projectile])
 
 
-func _flatten_weapon_data(data: Dictionary) -> Dictionary:
-	"""Flatten nested weapon JSON data into a flat config dictionary for spawners.
-	   Matches the format used by weapon_test_lab for consistency."""
-	var flat: Dictionary = {}
-	
-	# Detect weapon type by checking for weapon-specific shape/stats params
-	var shape = data.get("shape", {})
-	var stats = data.get("stats", {})
-	var is_ion_wake = shape.has("inner_radius") or shape.has("expansion_speed")
-	var is_nikolas_coil = shape.has("arc_width") or shape.has("search_radius")
-	var is_space_napalm = shape.has("aoe_radius") or stats.has("burn_damage")
-	var is_nope_bubble = shape.has("shockwave_range") or shape.has("shockwave_angle_deg")
-	
-	# Stats (common)
-	flat["damage"] = stats.get("damage", 10.0)
-	flat["duration"] = stats.get("duration", 1.0)
-	flat["cooldown"] = stats.get("cooldown", 1.0)
-	
-	# Motion (common)
-	var motion = data.get("motion", {})
-	flat["fade_in"] = motion.get("fade_in", 0.08)
-	flat["fade_out"] = motion.get("fade_out", 0.15)
-	
-	if is_nope_bubble:
-		# === NOPE BUBBLE PARAMETERS ===
-		# Stats
-		flat["knockback"] = stats.get("knockback", 600.0)
-		flat["projectile_count"] = stats.get("projectile_count", 2)
-		flat["boss_damage_reduction"] = stats.get("boss_damage_reduction", 0.5)
-		
-		# Shape
-		flat["size"] = shape.get("size", 80.0)
-		flat["shockwave_range"] = shape.get("shockwave_range", 200.0)
-		flat["shockwave_angle_deg"] = shape.get("shockwave_angle_deg", 45.0)
-		
-		# Visual
-		var visual = data.get("visual", {})
-		flat["color"] = _hex_to_color(visual.get("color", "#4d99ffaa"))
-	elif is_space_napalm:
-		# === SPACE NAPALM PARAMETERS ===
-		# Stats
-		flat["burn_damage"] = stats.get("burn_damage", 5.0)
-		flat["burn_duration"] = stats.get("burn_duration", 3.5)
-		flat["dot_interval"] = stats.get("dot_interval", 0.5)
-		flat["projectile_count"] = stats.get("projectile_count", 1)
-		
-		# Shape
-		flat["aoe_radius"] = shape.get("aoe_radius", 80.0)
-		flat["spread_time"] = shape.get("spread_time", 0.8)
-		flat["proj_size"] = shape.get("proj_size", 12.0)
-		
-		# Motion
-		flat["projectile_speed"] = motion.get("projectile_speed", 350.0)
-		
-		# Visual — projectile
-		var visual = data.get("visual", {})
-		flat["proj_color_core"] = _hex_to_color(visual.get("proj_color_core", "#fffff5"))
-		flat["proj_color_mid"] = _hex_to_color(visual.get("proj_color_mid", "#ff9a1a"))
-		flat["proj_color_edge"] = _hex_to_color(visual.get("proj_color_edge", "#cc2600"))
-		flat["proj_glow_strength"] = visual.get("proj_glow_strength", 4.0)
-		flat["proj_morph_speed"] = visual.get("proj_morph_speed", 3.0)
-		flat["proj_morph_intensity"] = visual.get("proj_morph_intensity", 0.25)
-		flat["proj_tail_length"] = visual.get("proj_tail_length", 0.35)
-		
-		# Visual — fire AoE
-		flat["fire_color_core"] = _hex_to_color(visual.get("fire_color_core", "#fff280"))
-		flat["fire_color_mid"] = _hex_to_color(visual.get("fire_color_mid", "#ff730d"))
-		flat["fire_color_outer"] = _hex_to_color(visual.get("fire_color_outer", "#9a1400"))
-		flat["fire_color_smoke"] = _hex_to_color(visual.get("fire_color_smoke", "#261a14"))
-		flat["fire_glow_strength"] = visual.get("fire_glow_strength", 3.5)
-		flat["fire_flame_speed"] = visual.get("fire_flame_speed", 3.0)
-		flat["fire_flame_turbulence"] = visual.get("fire_flame_turbulence", 0.6)
-	elif is_nikolas_coil:
-		# === NIKOLA'S COIL PARAMETERS ===
-		# Shape
-		flat["arc_width"] = shape.get("arc_width", 8.0)
-		flat["search_radius"] = shape.get("search_radius", 300.0)
-		
-		# Motion
-		flat["cascade_delay"] = motion.get("cascade_delay", 0.08)
-		flat["hold_time"] = motion.get("hold_time", 0.30)
-		
-		# Visual
-		var visual = data.get("visual", {})
-		flat["color_core"] = _hex_to_color(visual.get("color_core", "#ffffff"))
-		flat["color_glow"] = _hex_to_color(visual.get("color_glow", "#4488ff"))
-		flat["color_fringe"] = _hex_to_color(visual.get("color_fringe", "#8844cc"))
-		flat["glow_strength"] = visual.get("glow_strength", 4.0)
-		flat["bolt_width"] = visual.get("bolt_width", 0.5)
-		flat["jaggedness"] = visual.get("jaggedness", 0.7)
-		flat["branch_intensity"] = visual.get("branch_intensity", 0.3)
-		flat["flicker_speed"] = visual.get("flicker_speed", 30.0)
-	elif is_ion_wake:
-		# === ION WAKE PARAMETERS ===
-		# Shape
-		flat["inner_radius"] = shape.get("inner_radius", 20.0)
-		flat["outer_radius"] = shape.get("outer_radius", 200.0)
-		flat["ring_thickness"] = shape.get("ring_thickness", 30.0)
-		flat["expansion_speed"] = shape.get("expansion_speed", 300.0)
-		
-		# Visual
-		var visual = data.get("visual", {})
-		flat["color_inner"] = _hex_to_color(visual.get("color_inner", "#66ccff"))
-		flat["color_outer"] = _hex_to_color(visual.get("color_outer", "#1a4d99"))
-		flat["color_edge"] = _hex_to_color(visual.get("color_edge", "#e6f5ff"))
-		flat["glow_strength"] = visual.get("glow_strength", 2.0)
-		flat["edge_sharpness"] = visual.get("edge_sharpness", 2.0)
-		flat["edge_glow"] = visual.get("edge_glow", 1.0)
-	else:
-		# === RADIANT ARC PARAMETERS ===
-		# Shape
-		flat["arc_angle_deg"] = shape.get("arc_angle_deg", 90.0)
-		flat["radius"] = shape.get("radius", 42.0)
-		flat["thickness"] = shape.get("thickness", 18.0)
-		flat["taper"] = shape.get("taper", 0.5)
-		flat["length_scale"] = shape.get("length_scale", 0.75)
-		flat["distance"] = shape.get("distance", 25.0)
-		
-		# Motion
-		flat["speed"] = motion.get("speed", 0.0)
-		flat["sweep_speed"] = motion.get("sweep_speed", 1.2)
-		flat["rotation_offset_deg"] = motion.get("rotation_offset_deg", 0.0)
-		flat["seed_offset"] = motion.get("seed_offset", 0.0)
-		
-		# Boomerang motion (used by snarky_comeback, harmless for radiant_arc)
-		flat["projectile_speed"] = motion.get("projectile_speed", 400.0)
-		flat["max_range"] = motion.get("max_range", 500.0)
-		flat["spin_speed"] = motion.get("spin_speed", 1.0)
-		flat["return_radius"] = motion.get("return_radius", 30.0)
-		
-		# Projectile count for spawner-limited weapons (snarky_comeback uses this)
-		var base_stats = data.get("base_stats", {})
-		flat["projectile_count"] = base_stats.get("projectile_count", 1)
-		
-		# Visual
-		var visual = data.get("visual", {})
-		flat["color_a"] = _hex_to_color(visual.get("color_a", "#00ffff"))
-		flat["color_b"] = _hex_to_color(visual.get("color_b", "#ff00ff"))
-		flat["color_c"] = _hex_to_color(visual.get("color_c", "#0080ff"))
-		flat["glow_strength"] = visual.get("glow_strength", 3.0)
-		flat["core_strength"] = visual.get("core_strength", 1.2)
-		flat["noise_strength"] = visual.get("noise_strength", 0.3)
-		flat["uv_scroll_speed"] = visual.get("uv_scroll_speed", 3.0)
-		flat["chromatic_aberration"] = visual.get("chromatic_aberration", 0.0)
-		flat["pulse_strength"] = visual.get("pulse_strength", 0.0)
-		flat["pulse_speed"] = visual.get("pulse_speed", 8.0)
-		flat["electric_strength"] = visual.get("electric_strength", 0.0)
-		flat["electric_frequency"] = visual.get("electric_frequency", 20.0)
-		flat["electric_speed"] = visual.get("electric_speed", 15.0)
-		flat["gradient_offset"] = visual.get("gradient_offset", 0.0)
-		
-		# Particles
-		var particles = data.get("particles", {})
-		flat["particles_enabled"] = particles.get("enabled", true)
-		flat["particles_amount"] = particles.get("amount", 20)
-		flat["particles_size"] = particles.get("size", 3.0)
-		flat["particles_speed"] = particles.get("speed", 30.0)
-		flat["particles_lifetime"] = particles.get("lifetime", 0.4)
-		flat["particles_spread"] = particles.get("spread", 0.3)
-		flat["particles_drag"] = particles.get("drag", 1.0)
-		flat["particles_outward"] = particles.get("outward", 0.7)
-		flat["particles_radius"] = particles.get("radius", 1.0)
-		flat["particles_color"] = _hex_to_color(particles.get("color", "#ffffffcc"))
-	
-	return flat
-
-
 func _get_or_create_spawner(weapon_id: String, weapon_data: Dictionary):
 	"""Dynamically load and cache a weapon's spawner from its 'spawner' path in weapons.json."""
 	if _spawner_cache.has(weapon_id):
@@ -590,13 +423,6 @@ func _get_or_create_spawner(weapon_id: String, weapon_data: Dictionary):
 	_spawner_cache[weapon_id] = spawner
 	FileLogger.log_info("WeaponComponent", "Created spawner for weapon: %s from %s" % [weapon_id, spawner_path])
 	return spawner
-
-
-func _hex_to_color(hex: String) -> Color:
-	"""Convert hex color string to Color object."""
-	if hex.is_empty():
-		return Color.WHITE
-	return Color.from_string(hex, Color.WHITE)
 
 
 func _spawn_projectile(_weapon_id: String, direction: Vector2, damage: float, speed: float, piercing: int, size_mult: float, weapon_crit_chance: float = 0.0, weapon_crit_damage: float = 0.0) -> Node2D:

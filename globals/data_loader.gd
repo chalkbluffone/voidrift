@@ -158,9 +158,13 @@ func get_all_enemies() -> Array:
 func get_weapon_ids() -> Array:
 	return weapons.keys()
 
+func get_enabled_weapon_ids() -> Array:
+	"""Return only weapon IDs where enabled != false (defaults to true if key missing)."""
+	return weapons.keys().filter(func(id): return weapons[id].get("enabled", true))
+
 func get_unlocked_weapons() -> Array:
 	# TODO: Filter by player's unlock progress
-	return weapons.values().filter(func(w): return w.get("unlock_condition") == "default")
+	return weapons.values().filter(func(w): return w.get("enabled", true) and w.get("unlock_condition") == "default")
 
 func get_unlocked_characters() -> Array:
 	# TODO: Filter by player's unlock progress

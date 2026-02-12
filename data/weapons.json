@@ -2,6 +2,7 @@
   "broken_tractor_beam": {
     "description": "Tethers to a target with a malfunctioning tractor beam that irradiates it over time and stays locked on until the target dies… on accident. Whoops.",
     "display_name": "Broken Tractor Beam",
+    "enabled": false,
     "motion": {
 
     },
@@ -24,6 +25,7 @@
   "ion_wake": {
     "description": "A charged pulse at your position and leaves an ionized damage trail behind your ship that really hurts. Oh no! Sulu's Tea!",
     "display_name": "Ion Wake",
+    "enabled": true,
     "motion": {
       "fade_in": 0.33,
       "fade_out": 0.45
@@ -54,6 +56,7 @@
   "nikolas_coil": {
     "description": "Fires an instant Tesla arc that chains to nearby enemies via successive bounces. Not a trendy car.",
     "display_name": "Nikola's Coil",
+    "enabled": true,
     "motion": {
       "cascade_delay": 0.08,
       "fade_in": 0.04,
@@ -87,6 +90,7 @@
   "nope_bubble": {
     "description": "Blocks hits with rechargeable shield charges, consuming one per block and releasing a staggering shockwave.",
     "display_name": "Nope Bubble",
+    "enabled": true,
     "motion": {
 
     },
@@ -114,6 +118,7 @@
   "personal_space_violator": {
     "description": "Violates the personal space of enemies by firing projectiles that aggressively seek out and damage them. Not recommended for use in crowded areas. For sure not a space shotgun.",
     "display_name": "Personal Space Violator",
+    "enabled": true,
     "motion": {
 
     },
@@ -135,6 +140,7 @@
   "proximity_tax": {
     "description": "Imposes a damaging aura around the ship that harms enemies who get too close. It's like a tax, but in space...and kills bad guys.",
     "display_name": "Proximity Tax",
+    "enabled": true,
     "motion": {
 
     },
@@ -156,6 +162,7 @@
   "psp_9000": {
     "description": "PSP or Personal Space Program, deploys orbiting security drones that body-check nearby enemies for physical damage and knockback. Not to be confused with a certain handheld gaming device.",
     "display_name": "PSP-9000",
+    "enabled": true,
     "motion": {
 
     },
@@ -176,8 +183,7 @@
   },
   "radiant_arc": {
     "description": "Emits a short-range photonic slash in a wide arc from the ship’s forward edge, instantly cutting through and damaging any targets caught in its path. Really cool looking.",
-    "display_name": "Radiant Arc",
-    "motion": {
+    "display_name": "Radiant Arc",    "enabled": true,    "motion": {
       "fade_in": 0.18,
       "fade_out": 0.15,
       "rotation_offset_deg": 0.0,
@@ -233,6 +239,7 @@
   "snarky_comeback": {
     "description": "Throws a radiant arc projectile that returns back… created by General Cliff Snarky during the Great Flobus Wars of Quadrant 12. Also talks a grip of shit.",
     "display_name": "Snarky Comeback",
+    "enabled": true,
     "motion": {
       "fade_in": 0.18,
       "fade_out": 0.3,
@@ -295,6 +302,7 @@
   "space_napalm": {
     "description": "Launches a volatile incendiary orb that detonates on impact, blanketing the blast radius with burning damage over time. Not to be confused with regular napalm.",
     "display_name": "Space Napalm",
+    "enabled": true,
     "motion": {
       "fade_in": 0.08,
       "fade_out": 0.5,
@@ -348,6 +356,7 @@
   "space_nukes": {
     "description": "Launches a barrage of explosive projectiles that detonate on impact, causing area damage to nearby enemies. It's like fireworks, but deadlier. In space.",
     "display_name": "Space Nukes",
+    "enabled": true,
     "motion": {
 
     },
@@ -369,6 +378,7 @@
   "space_whale_tusk": {
     "description": "Fires a Space Whale Tusk projectile that ricochets between targets, dealing physical damage on each bounce. Actually made from space whales. Harvested on Gleebus V, the only planet where space whales are found. It's a little unethical, but those tusks make for great weapons.",
     "display_name": "Space Whale Tusk",
+    "enabled": true,
     "motion": {
 
     },
@@ -390,6 +400,7 @@
   "spin_cycle": {
     "description": "Creates a swirling vortex of energy around the ship, damaging enemies caught within its radius. It's like a cosmic washing machine for bad guys.",
     "display_name": "Spin Cycle",
+    "enabled": true,
     "motion": {
 
     },
@@ -411,6 +422,7 @@
   "straight_line_negotiator": {
     "description": "Fires a magnet-accelerated spike that travels in a perfectly straight line and pierces through multiple enemies. Definitely not a space sniper rifle. Honest.",
     "display_name": "Straight-Line Negotiator",
+    "enabled": true,
     "motion": {
 
     },
@@ -432,6 +444,7 @@
   "straight_shooter": {
     "description": "Fires a auto-aim, high-velocity round that pierces through enemies in a straight line and can circumcise a Tarlaxian in under 3 parsecs.",
     "display_name": "Straight Shooter",
+    "enabled": true,
     "motion": {
 
     },
@@ -453,6 +466,7 @@
   "timmy_gun": {
     "description": "The Timson Sub-Space Machine Gun model T2928A1, unloads a burst of physical rounds that ricochet off targets, bouncing to hit additional enemies before dissipating. Also, known as the \"Trench Broom\" as it was used in the great Balsurpian war of 2918 to disipate Balsurpians from the Ionic Trenches of Delton VII.",
     "display_name": "Timmy Gun",
+    "enabled": true,
     "motion": {
 
     },
@@ -474,6 +488,7 @@
   "tothian_mines": {
     "description": "Deploys proximity-triggered mines that detonate when enemies come near, dealing area damage. Inspired by the ancient Tothian defense systems.",
     "display_name": "Tothian Mines",
+    "enabled": true,
     "motion": {
 
     },
