@@ -130,25 +130,35 @@
     }
   },
   "personal_space_violator": {
-    "description": "Violates the personal space of enemies by firing projectiles that aggressively seek out and damage them. Not recommended for use in crowded areas. For sure not a space shotgun.",
+    "description": "Unleashes a wide spray of neon pellets that shred anything foolish enough to get close. Devastating at point-blank range but loses punch fast — if they're far away, you're just tickling them with glowing confetti.",
     "display_name": "Personal Space Violator",
-    "enabled": false,
+    "enabled": true,
     "motion": {
-
+      "spread_degrees": 45.0
     },
-    "scene": "res://effects/projectile_base/ProjectileBase.tscn",
+    "scene": "res://effects/personal_space_violator/PersonalSpaceViolator.tscn",
     "shape": {
-
+      "pellet_radius": 0.5
     },
-    "spawner": "res://effects/projectile_base/projectile_base_spawner.gd",
+    "spawner": "res://effects/personal_space_violator/personal_space_violator_spawner.gd",
     "stats": {
-      "cooldown": 1.0,
-      "damage": 15.0
+      "cooldown": 1.2,
+      "damage": 18.0,
+      "projectile_count": 7,
+      "projectile_speed": 600.0,
+      "falloff_start": 80.0,
+      "falloff_end": 350.0,
+      "lifetime": 0.8
     },
+    "targeting": "nearest",
     "type": "projectile",
     "unlock_condition": "default",
     "visual": {
-
+      "color_core": "#FFFFFF",
+      "color_glow": "#39FF14",
+      "glow_strength": 2.5,
+      "pellet_height_px": 5,
+      "bloom_intensity": 3.0
     }
   },
   "proximity_tax": {

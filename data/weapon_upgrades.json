@@ -228,11 +228,11 @@
 	},
 	"personal_space_violator": {
 		"display_name": "Personal Space Violator",
-		"base_behavior": "Fires a piercing cone burst of pellets that hits harder the farther it travels.",
+		"base_behavior": "Fires a wide cone burst of 7 neon glowing pellets. Devastating at close range; damage falls off rapidly with distance. Get in their face.",
 		"type": "projectile",
 		"element": "physical",
-		"special": "pierce_cone",
-		"tags": ["projectile", "cone", "crit"],
+		"special": "shotgun_falloff",
+		"tags": ["projectile", "cone", "crit", "close_range"],
 		"strategy_synergies": "Count boosts pellet count; damage and crit solid; size for spread control",
 		"tier_stats": {
 			"damage": { "common": 3.0, "uncommon": 3.6, "rare": 4.2, "epic": 4.8, "legendary": 6.0 },
