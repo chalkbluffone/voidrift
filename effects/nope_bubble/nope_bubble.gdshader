@@ -11,9 +11,9 @@ uniform float pulse : hint_range(0.0, 1.0) = 0.0;
 
 // Tuning knobs
 const float SHIELD_RADIUS = 0.92;
-const float SHELL_HALF   = 0.004;  // ~1px thin ring edge
-const float GLOW_WIDTH   = 0.04;   // soft outer bloom
-const float ARC_INTENSITY = 0.45;  // voronoi vein brightness
+const float SHELL_HALF   = 0.012;  // wider visible ring edge
+const float GLOW_WIDTH   = 0.10;   // broad neon bloom
+const float ARC_INTENSITY = 0.85;  // bright voronoi veins
 const float PLASMA_SPEED  = 0.35;  // flow speed of noise
 
 // ---- Hash helpers ----
@@ -81,9 +81,13 @@ void fragment() {
 	float band = smoothstep(inner_edge - 0.006, inner_edge, dist)
 	           * smoothstep(outer_edge + 0.006, outer_edge, dist);
 
-	// Outer glow (soft bloom beyond the shell)
+	// Outer glow (neon bloom beyond the shell)
 	float glow_d = max(dist - outer_edge, 0.0);
-	float outer_glow = exp(-glow_d * glow_d / (GLOW_WIDTH * GLOW_WIDTH)) * 0.55;
+	float outer_glow = exp(-glow_d * glow_d / (GLOW_WIDTH * GLOW_WIDTH)) * 0.7;
+
+	// Inner glow (soft bloom inside the shell)
+	float inner_glow_d = max(inner_edge - dist, 0.0);
+	float inner_glow = exp(-inner_glow_d * inner_glow_d / (0.06 * 0.06)) * 0.35;
 
 	// ---- Plasma noise ----
 	// Use circular coords (cos/sin) instead of raw angle to avoid polar seam
@@ -96,37 +100,37 @@ void fragment() {
 	float arcs = 1.0 - voronoi(arc_uv * 1.8);
 	arcs = pow(arcs, 3.0) * ARC_INTENSITY;  // sharpen into thin veins
 
-	// ---- Color palette: deep purple → magenta → white-hot ----
-	vec3 deep_purple = vec3(0.25, 0.05, 0.45);
-	vec3 magenta     = vec3(0.85, 0.15, 0.65);
-	vec3 white_hot   = vec3(1.0, 0.9, 1.0);
+	// ---- Color palette derived from shield_color ----
+	// Dark spots = dark version of base color, moving energy = lighter tint
+	vec3 base = shield_color.rgb;
+	vec3 dark_base   = base * 0.2;                              // deep shadow
+	vec3 light_tint  = mix(base, vec3(1.0), 0.2);               // subtle lighten
+	vec3 bright_core = mix(base, vec3(1.0), 0.35);              // slightly brighter, still colored
 
 	// Blend based on energy (plasma + arcs)
 	float energy = clamp(plasma * 0.7 + arcs, 0.0, 1.0);
-	vec3 col = mix(deep_purple, magenta, energy);
-	col = mix(col, white_hot, smoothstep(0.7, 1.0, energy));
-
-	// Tint toward the uniform colour subtly
-	col = mix(col, shield_color.rgb, 0.2);
+	vec3 col = mix(dark_base, light_tint, energy);
+	col = mix(col, bright_core, smoothstep(0.75, 1.0, energy));
 
 	// ---- Pulse hit flash (additive white overlay) ----
 	col = mix(col, vec3(1.0), pulse * 0.85);
 
 	// ---- Combine alphas ----
-	float shell_alpha = band * (0.6 + 0.4 * energy) * shield_color.a * opacity;
-	float glow_alpha  = outer_glow * opacity * shield_color.a * 0.6;
+	float shell_alpha = band * (0.7 + 0.3 * energy) * shield_color.a * opacity;
+	float glow_alpha  = (outer_glow + inner_glow) * opacity * shield_color.a * 0.85;
 	float final_alpha = max(shell_alpha, glow_alpha);
 
-	// Also add a faint inner haze (very transparent) so small shields don't look empty
-	float inner_haze = smoothstep(inner_edge, inner_edge - 0.13, dist) * 0.08 * opacity;
+	// Inner haze — visible energy fill so the bubble feels alive
+	float inner_haze = smoothstep(inner_edge, inner_edge - 0.18, dist) * 0.12 * opacity;
 	final_alpha = max(final_alpha, inner_haze);
 
 	// ---- Circular mask: force alpha to zero before quad edge to prevent square clipping ----
 	final_alpha *= smoothstep(1.0, 0.94, dist);
 
-	if (final_alpha < 0.005) {
+	if (final_alpha < 0.003) {
 		discard;
 	}
 
-	COLOR = vec4(col, final_alpha);
+	// Boost brightness for neon punch, apply 40% transparency
+	COLOR = vec4(col * 1.1, final_alpha * 0.6);
 }

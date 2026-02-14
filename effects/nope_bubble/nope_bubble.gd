@@ -18,7 +18,8 @@ extends Node2D
 @export var shockwave_angle_deg: float = 45.0
 @export var boss_damage_reduction: float = 0.5
 @export var particle_count: int = 48
-@export var color: Color = Color(0.55, 0.15, 0.85, 0.55)
+@export var ambient_particle_count: int = 24
+@export var color: Color = Color(0.65, 0.2, 1.0, 0.75)
 @export var cooldown: float = 3.0  # Used for display only; spawner handles regen timing
 
 # --- Internal state ---
@@ -41,8 +42,12 @@ var _regen_active: bool = false
 var _ambient_particles: CPUParticles2D = null
 var _ambient_time: float = 0.0
 
+# --- Swirl particles (orbit the shell edge) ---
+var _swirl_particles: CPUParticles2D = null
+
 # --- Shockwave tracking ---
 var _active_shockwaves: Array[Node2D] = []
+var _was_down: bool = false  # Track if shield was already down to avoid repeat break particles
 
 # --- Per-enemy hit cooldown to prevent rapid re-triggers ---
 var _enemy_hit_cooldowns: Dictionary = {}  # enemy instance_id -> remaining cooldown
@@ -146,10 +151,16 @@ func _process(delta: float) -> void:
 		var orbit_speed: float = 0.6  # Radians per second
 		var angle: float = _ambient_time * orbit_speed
 		_ambient_particles.direction = Vector2(cos(angle), sin(angle))
-		# Modulate alpha based on layer health for breathing effect
+		# Breathing effect for ambient particles
 		var breath: float = 0.5 + 0.5 * sin(_ambient_time * 1.8)
-		var layer_ratio: float = float(_current_layers) / max(float(_max_layers), 1.0)
-		_ambient_particles.modulate.a = clampf(0.3 + breath * 0.4 * layer_ratio, 0.1, 0.8)
+		_ambient_particles.modulate.a = clampf(0.3 + breath * 0.4, 0.1, 0.8)
+
+	# Animate swirl particles — fast orbit around the shell edge
+	if _swirl_particles and _swirl_particles.visible:
+		var swirl_speed: float = 2.5  # Radians per second (fast orbit)
+		var swirl_angle: float = -_ambient_time * swirl_speed  # Negative = clockwise
+		# Tangential direction for clockwise orbital motion
+		_swirl_particles.direction = Vector2(-sin(swirl_angle), cos(swirl_angle))
 
 	# Clean up finished shockwaves
 	_active_shockwaves = _active_shockwaves.filter(func(sw): return is_instance_valid(sw))
@@ -238,7 +249,7 @@ func _create_visuals() -> void:
 	_ambient_particles = CPUParticles2D.new()
 	_ambient_particles.emitting = true
 	_ambient_particles.one_shot = false
-	_ambient_particles.amount = 24
+	_ambient_particles.amount = ambient_particle_count
 	_ambient_particles.lifetime = 2.5
 	_ambient_particles.explosiveness = 0.0  # Steady stream, not burst
 	_ambient_particles.randomness = 0.4
@@ -286,6 +297,48 @@ func _create_visuals() -> void:
 	_ambient_particles.z_index = 1  # Above shield mesh, below UI
 	add_child(_ambient_particles)
 
+	# --- Swirl particles (tiny 1px motes orbiting tightly around the shell edge) ---
+	_swirl_particles = CPUParticles2D.new()
+	_swirl_particles.emitting = true
+	_swirl_particles.one_shot = false
+	_swirl_particles.amount = 40
+	_swirl_particles.lifetime = 3.0
+	_swirl_particles.explosiveness = 0.0
+	_swirl_particles.randomness = 0.2
+
+	# Emit from a tight ring hugging the shell edge
+	var swirl_radius: float = size * 1.05
+	_swirl_particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_RING
+	_swirl_particles.emission_ring_radius = swirl_radius
+	_swirl_particles.emission_ring_inner_radius = swirl_radius * 0.98
+
+	# Fast tangential drift — direction animated in _process for orbital swirl
+	_swirl_particles.direction = Vector2(1, 0)
+	_swirl_particles.spread = 15.0
+	_swirl_particles.initial_velocity_min = 30.0
+	_swirl_particles.initial_velocity_max = 55.0
+	_swirl_particles.gravity = Vector2.ZERO
+	_swirl_particles.damping_min = 2.0
+	_swirl_particles.damping_max = 8.0
+
+	# Tiny 1px motes
+	_swirl_particles.scale_amount_min = 0.4
+	_swirl_particles.scale_amount_max = 0.8
+
+	# Color ramp — bright sparkle that fades
+	var swirl_ramp: Gradient = Gradient.new()
+	swirl_ramp.offsets = PackedFloat32Array([0.0, 0.2, 0.8, 1.0])
+	swirl_ramp.colors = PackedColorArray([
+		Color(0.8, 0.5, 1.0, 0.0),      # Fade in
+		Color(0.9, 0.7, 1.0, 0.9),      # Bright lilac
+		Color(0.6, 0.2, 0.95, 0.6),     # Neon purple
+		Color(0.4, 0.1, 0.8, 0.0),      # Fade out
+	])
+	_swirl_particles.color_ramp = swirl_ramp
+
+	_swirl_particles.z_index = 2  # Above ambient particles
+	add_child(_swirl_particles)
+
 
 func _update_visuals() -> void:
 	if not _shield_mesh:
@@ -302,26 +355,24 @@ func _update_visuals() -> void:
 	if _ambient_particles:
 		_ambient_particles.visible = not is_down
 		_ambient_particles.emitting = not is_down
+	if _swirl_particles:
+		_swirl_particles.visible = not is_down
+		_swirl_particles.emitting = not is_down
 	
 	if is_down:
-		_spawn_break_particles()
+		if not _was_down:
+			_was_down = true
+			_spawn_break_particles()
 		return
 	
-	# Opacity based on layer ratio
-	var layer_ratio: float = float(_current_layers) / max(float(_max_layers), 1.0)
-	var visual_opacity: float = clampf(0.15 + layer_ratio * 0.85, 0.1, 1.0)
-	
-	# Color shift: full layers = bright, low layers = dim red-ish
-	var current_color: Color = color.lerp(Color(1.0, 0.3, 0.2, 1.0), 1.0 - layer_ratio)
-	# Preserve user's alpha — shader uses shield_color.a * opacity for transparency
-	current_color.a = color.a
+	_was_down = false
 	
 	if _shader_material:
-		_shader_material.set_shader_parameter("opacity", visual_opacity)
-		_shader_material.set_shader_parameter("shield_color", current_color)
+		_shader_material.set_shader_parameter("opacity", 1.0)
+		_shader_material.set_shader_parameter("shield_color", color)
 	else:
 		# Fallback for no shader — modulate the mesh directly
-		_shield_mesh.modulate = Color(current_color.r, current_color.g, current_color.b, visual_opacity * 0.4)
+		_shield_mesh.modulate = Color(color.r, color.g, color.b, color.a * 0.4)
 	
 	# Update layer counter text (roman numerals)
 	if _layer_label:
@@ -335,10 +386,20 @@ func _update_visuals() -> void:
 	if _shield_collision and _shield_collision.shape:
 		(_shield_collision.shape as CircleShape2D).radius = size * 1.3
 
-	# Update ambient particle emission to match bubble size
+	# Update ambient particle emission to match bubble size and count
 	if _ambient_particles:
+		if _ambient_particles.amount != ambient_particle_count:
+			_ambient_particles.emitting = false
+			_ambient_particles.amount = ambient_particle_count
+			_ambient_particles.emitting = true
 		_ambient_particles.emission_ring_radius = size * 0.85
 		_ambient_particles.emission_ring_inner_radius = size * 0.2
+
+	# Update swirl particle ring to match bubble size
+	if _swirl_particles:
+		var swirl_r: float = size * 1.05
+		_swirl_particles.emission_ring_radius = swirl_r
+		_swirl_particles.emission_ring_inner_radius = swirl_r * 0.98
 
 
 ## Enemy Area2D entered the shield bubble

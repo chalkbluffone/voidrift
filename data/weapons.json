@@ -106,11 +106,12 @@
     },
     "spawner": "res://effects/nope_bubble/nope_bubble_spawner.gd",
     "stats": {
+      "ambient_particle_count": 24.0,
       "boss_damage_reduction": 0.5,
       "cooldown": 3.0,
       "damage": 10.0,
-      "knockback": 800.0,
-      "particle_count": 64.0,
+      "knockback": 200.0,
+      "particle_count": 25.0,
       "projectile_count": 10.0
     },
     "type": "area",
