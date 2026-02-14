@@ -26,6 +26,7 @@ func spawn(
 		The spawned RadiantArc instance
 	"""
 	var arc = load("res://effects/radiant_arc/RadiantArc.tscn").instantiate()
+	arc.z_index = -1
 	_parent_node.add_child(arc)
 	
 	if params:

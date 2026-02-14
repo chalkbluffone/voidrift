@@ -15,7 +15,7 @@ extends RefCounted
 
 ## Sections of weapon JSON that contain editable parameters.
 ## Order matters for display grouping in the UI.
-const EDITABLE_SECTIONS := ["stats", "base_stats", "shape", "motion", "visual", "particles"]
+const EDITABLE_SECTIONS := ["stats", "base_stats", "shape", "spawn", "motion", "visual", "particles"]
 
 ## Metadata keys that should NOT be flattened into editable parameters.
 const METADATA_KEYS := ["description", "display_name", "enabled", "scene", "spawner", "type", "unlock_condition"]

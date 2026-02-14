@@ -44,6 +44,10 @@ var _ambient_time: float = 0.0
 # --- Shockwave tracking ---
 var _active_shockwaves: Array[Node2D] = []
 
+# --- Per-enemy hit cooldown to prevent rapid re-triggers ---
+var _enemy_hit_cooldowns: Dictionary = {}  # enemy instance_id -> remaining cooldown
+const BUBBLE_HIT_COOLDOWN: float = 0.5  # Seconds before same enemy can trigger again
+
 @onready var FileLogger: Node = get_node_or_null("/root/FileLogger")
 
 
@@ -88,46 +92,19 @@ func add_layer() -> void:
 
 
 ## Damage interceptor callback — registered on the Ship.
-## Returns modified damage amount: 0.0 for full block, reduced for weak block.
+## Now only handles boss damage reduction — layer consumption and knockback
+## are handled by _handle_bubble_collision via Area2D/overlap detection.
 func intercept_damage(amount: float, source: Node) -> float:
 	if _current_layers <= 0:
 		return amount  # Shield is down, damage passes through
 	
-	# Consume a layer
-	_current_layers -= 1
+	# The bubble blocked this hit — don't consume a layer here
+	# (already consumed by _handle_bubble_collision)
 	
 	# Determine block type
 	var is_boss: bool = false
 	if source and "enemy_type" in source:
 		is_boss = source.enemy_type == "boss"
-	
-	# Apply knockback to attacker
-	if source and source is Node2D and source.has_method("apply_knockback"):
-		var kb_direction: Vector2 = Vector2.ZERO
-		if _follow_source:
-			kb_direction = (source.global_position - _follow_source.global_position).normalized()
-		else:
-			kb_direction = (source.global_position - global_position).normalized()
-		source.apply_knockback(kb_direction * knockback)
-	
-	# Spawn shockwave cone toward the attacker
-	if source and source is Node2D:
-		_spawn_shockwave(source as Node2D)
-	
-	# Visual feedback — hit flash + per-layer hit particles
-	_hit_flash_timer = _hit_flash_duration
-	if source and source is Node2D:
-		_spawn_hit_particles(source as Node2D)
-	_update_visuals()
-	
-	# Start regen timer if not already running
-	if not _regen_active:
-		_regen_active = true
-		_regen_timer = cooldown
-	
-	if FileLogger:
-		var block_type: String = "weak" if is_boss else "full"
-		FileLogger.log_info("NopeBubble", "Layer consumed (%s block): %d/%d remaining" % [block_type, _current_layers, _max_layers])
 	
 	# Return damage: 0 for full block, reduced for boss
 	if is_boss:
@@ -176,6 +153,32 @@ func _process(delta: float) -> void:
 
 	# Clean up finished shockwaves
 	_active_shockwaves = _active_shockwaves.filter(func(sw): return is_instance_valid(sw))
+	
+	# Tick per-enemy hit cooldowns
+	var expired_keys: Array = []
+	for eid in _enemy_hit_cooldowns:
+		_enemy_hit_cooldowns[eid] -= delta
+		if _enemy_hit_cooldowns[eid] <= 0.0:
+			expired_keys.append(eid)
+	for eid in expired_keys:
+		_enemy_hit_cooldowns.erase(eid)
+	
+	# Periodic overlap check: catch enemies that are inside the bubble
+	# (body_entered only fires once per entry, so we need this for persistent enemies)
+	# Also do direct distance check against all enemies as a reliable fallback
+	if _current_layers > 0:
+		var bubble_radius: float = size * 1.3
+		for enemy in get_tree().get_nodes_in_group("enemies"):
+			if enemy is Node2D and is_instance_valid(enemy):
+				var dist: float = global_position.distance_to(enemy.global_position)
+				if dist < bubble_radius + 22.0:  # 22 = enemy collision radius
+					_handle_bubble_collision(enemy)
+					# Continuously push enemies away (not just on first contact)
+					if enemy.has_method("apply_knockback"):
+						var push_dir: Vector2 = (enemy.global_position - global_position).normalized()
+						if push_dir == Vector2.ZERO:
+							push_dir = Vector2.RIGHT
+						enemy.apply_knockback(push_dir * knockback * delta * 10.0)
 
 
 func _create_visuals() -> void:
@@ -213,19 +216,21 @@ func _create_visuals() -> void:
 	_layer_label.visible = true
 	add_child(_layer_label)
 
-	# --- Shield collision area (enemies collide with the bubble, not the tiny ship) ---
+	# --- Shield collision area (for detecting enemies entering bubble) ---
 	_shield_area = Area2D.new()
-	_shield_area.collision_layer = 0  # Not detectable by others
-	_shield_area.collision_mask = 8   # Detect enemies (layer 8)
+	_shield_area.collision_layer = 0
+	_shield_area.collision_mask = 8
+	_shield_area.monitoring = true
+	_shield_area.monitorable = true
 	_shield_area.name = "ShieldCollision"
 	_shield_collision = CollisionShape2D.new()
 	var circle_shape: CircleShape2D = CircleShape2D.new()
-	circle_shape.radius = size * 1.2  # Match visual ring position (UV 0.92 on quad size*2.6)
+	circle_shape.radius = size * 1.3
 	_shield_collision.shape = circle_shape
 	_shield_area.add_child(_shield_collision)
 	add_child(_shield_area)
 
-	# When an enemy enters the bubble, trigger contact damage on the ship
+	# When an enemy enters the bubble, trigger collision handling
 	_shield_area.area_entered.connect(_on_enemy_entered_bubble)
 	_shield_area.body_entered.connect(_on_enemy_body_entered_bubble)
 
@@ -328,7 +333,7 @@ func _update_visuals() -> void:
 	
 	# Update collision radius to match bubble size
 	if _shield_collision and _shield_collision.shape:
-		(_shield_collision.shape as CircleShape2D).radius = size * 1.2
+		(_shield_collision.shape as CircleShape2D).radius = size * 1.3
 
 	# Update ambient particle emission to match bubble size
 	if _ambient_particles:
@@ -336,34 +341,63 @@ func _update_visuals() -> void:
 		_ambient_particles.emission_ring_inner_radius = size * 0.2
 
 
-## Enemy Area2D entered the shield bubble — trigger contact damage on the ship
+## Enemy Area2D entered the shield bubble
 func _on_enemy_entered_bubble(area: Area2D) -> void:
-	if _current_layers <= 0:
-		return
-	# Check if this is an enemy (in "enemies" group or has enemy_type)
-	var enemy: Node = area
-	if not (enemy.is_in_group("enemies") or "enemy_type" in enemy):
-		return
-	# Trigger the ship's take_damage which will go through the interceptor
-	# Deferred to avoid physics flush conflict when creating shockwave Area2D
-	if _follow_source and _follow_source.has_method("take_damage"):
-		var contact_damage: float = 10.0
-		if "enemy_type" in enemy and enemy.enemy_type == "boss":
-			contact_damage = 30.0
-		_follow_source.call_deferred("take_damage", contact_damage, enemy)
+	# area is the child Area2D (HitboxArea), NOT the BaseEnemy parent
+	var enemy: Node = area.get_parent() if area.get_parent() else area
+	_handle_bubble_collision(enemy)
 
 
 ## Enemy PhysicsBody entered the shield bubble
 func _on_enemy_body_entered_bubble(body: Node2D) -> void:
+	_handle_bubble_collision(body)
+
+
+## Core collision handler — directly applies knockback and consumes a layer
+## instead of routing through ship.take_damage (which has i-frames / timing issues).
+func _handle_bubble_collision(enemy: Node) -> void:
 	if _current_layers <= 0:
 		return
-	if not (body.is_in_group("enemies") or "enemy_type" in body):
+	if not (enemy.is_in_group("enemies") or "enemy_type" in enemy):
 		return
-	if _follow_source and _follow_source.has_method("take_damage"):
-		var contact_damage: float = 10.0
-		if "enemy_type" in body and body.enemy_type == "boss":
-			contact_damage = 30.0
-		_follow_source.call_deferred("take_damage", contact_damage, body)
+	
+	# Per-enemy cooldown to prevent rapid re-triggers from overlap checks
+	var eid: int = enemy.get_instance_id()
+	if _enemy_hit_cooldowns.has(eid):
+		return
+	_enemy_hit_cooldowns[eid] = BUBBLE_HIT_COOLDOWN
+	
+	# Consume a layer
+	_current_layers -= 1
+	
+	# Apply knockback directly to the enemy (no routing through ship.take_damage)
+	if enemy is Node2D and enemy.has_method("apply_knockback"):
+		var kb_direction: Vector2 = Vector2.ZERO
+		if _follow_source:
+			kb_direction = (enemy.global_position - _follow_source.global_position).normalized()
+		else:
+			kb_direction = (enemy.global_position - global_position).normalized()
+		enemy.apply_knockback(kb_direction * knockback)
+	
+	# Spawn shockwave cone toward the attacker (deferred to avoid physics flush conflict)
+	if enemy is Node2D:
+		call_deferred("_spawn_shockwave", enemy)
+	
+	# Visual feedback
+	_hit_flash_timer = _hit_flash_duration
+	if enemy is Node2D:
+		_spawn_hit_particles(enemy as Node2D)
+	_update_visuals()
+	
+	# Start regen timer if not already running
+	if not _regen_active:
+		_regen_active = true
+		_regen_timer = cooldown
+	
+	if FileLogger:
+		var is_boss: bool = "enemy_type" in enemy and enemy.enemy_type == "boss"
+		var block_type: String = "weak" if is_boss else "full"
+		FileLogger.log_info("NopeBubble", "Layer consumed (%s block): %d/%d remaining" % [block_type, _current_layers, _max_layers])
 
 
 ## Convert integer to Roman numeral string

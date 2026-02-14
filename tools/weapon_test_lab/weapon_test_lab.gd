@@ -28,6 +28,7 @@ var _current_key_map: Dictionary = {}  # Maps flat keys back to JSON sections
 var _auto_fire_enabled: bool = true
 var _fire_timer: float = 0.0
 var _fire_rate: float = 1.0
+var _base_fire_rate: float = 1.0  # Fire rate from slider
 var _target_spawn_timer: float = 0.0
 var _auto_spawn_targets: bool = false
 
@@ -118,7 +119,10 @@ func _process_auto_fire(delta: float) -> void:
 		return
 	
 	_fire_timer += delta
-	var interval = 1.0 / max(0.1, _fire_rate)
+	# Apply projectile_count as a fire rate multiplier
+	var projectile_count: float = float(_current_config.get("projectile_count", 1.0))
+	var effective_fire_rate: float = _base_fire_rate * max(1.0, projectile_count)
+	var interval = 1.0 / max(0.1, effective_fire_rate)
 	
 	if _fire_timer >= interval:
 		_fire_timer = 0.0
@@ -205,6 +209,9 @@ func _on_config_changed(key: String, value: Variant) -> void:
 	_current_config[key] = value
 	# Push live updates to persistent effects like the Nope Bubble
 	_push_live_config_update()
+	# If projectile_count changed, update display (fire rate multiplier)
+	if key == "projectile_count":
+		_update_fire_rate_display()
 
 
 func _on_fire_pressed() -> void:
@@ -237,7 +244,14 @@ func _on_export_resource_pressed(_filename: String) -> void:
 
 
 func set_fire_rate(rate: float) -> void:
-	_fire_rate = max(0.1, rate)
+	_base_fire_rate = max(0.1, rate)
+	_update_fire_rate_display()
+
+
+func _update_fire_rate_display() -> void:
+	# Calculate effective fire rate with projectile_count multiplier
+	var projectile_count: float = float(_current_config.get("projectile_count", 1.0))
+	_fire_rate = _base_fire_rate * max(1.0, projectile_count)
 
 
 func set_auto_spawn_targets(enabled: bool) -> void:

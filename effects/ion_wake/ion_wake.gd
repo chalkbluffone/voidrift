@@ -1,197 +1,219 @@
 extends Node2D
 class_name IonWake
 
-## Ion Wake - A planar shockwave ring that expands outward from the ship
-## Inspired by the classic sci-fi "Saturn ring explosion" effect
+## Simple orange AoE circle that grows and explodes into particles
 
-
-# === SHAPE PARAMETERS ===
-@export var inner_radius: float = 20.0  # Starting radius
-@export var outer_radius: float = 200.0  # Maximum expansion radius
-@export var ring_thickness: float = 30.0  # Thickness of the ring band
-@export var expansion_speed: float = 300.0  # How fast the ring expands (pixels/sec)
-
-# === TIMING ===
-@export var duration: float = 1.0  # Total lifetime
-@export var fade_in: float = 0.05  # Fade-in time at start
-@export var fade_out: float = 0.3  # Fade-out time at end
-
-# === COLORS ===
-@export var color_inner: Color = Color(0.4, 0.8, 1.0, 1.0)  # Inner/trailing color
-@export var color_outer: Color = Color(0.1, 0.3, 0.8, 1.0)  # Outer color  
-@export var color_edge: Color = Color(0.9, 0.95, 1.0, 1.0)  # Leading edge highlight
+# === SHAPE ===
+@export var size: float = 32.0             # Circle radius and particle spread radius
+@export_range(0.0, 2.0, 0.05) var growth_percent: float = 0.2  # 0.2 = 20% larger
 
 # === VISUAL ===
-@export var glow_strength: float = 2.0  # Overall brightness
-@export var edge_sharpness: float = 2.0  # How sharp the ring edges are
-@export var edge_glow: float = 1.0  # Leading edge brightness
+@export var circle_color: Color = Color(1.0, 0.35, 0.08, 0.8):  # Base color for particles
+	set(value):
+		circle_color = value
+		if _sprite:
+			_sprite.modulate = circle_color
+
+# === TIMING ===
+@export var hold_time: float = 1.0        # How long to grow before exploding
+
+# === PARTICLES ===
+@export var particles_count: int = 160     # Number of particles on explosion
+@export var particles_speed_min: float = 100.0
+@export var particles_speed_max: float = 250.0
+@export var particles_lifetime: float = 0.5  # How long particles live
+@export var particles_gravity: float = 0.0  # Downward pull on particles
+@export var particles_excitement: float = 30.0  # How much particles wander like fireflies
 
 # === STATS ===
-@export var damage: float = 15.0  # Damage dealt to enemies
+@export var damage: float = 15.0
 
-# Movement tracking
-var _follow_source: Node2D = null
-
-# Damage tracking
+# --- Internal ---
 var _hit_targets: Array = []
 var _hitbox: Area2D = null
 var _hitbox_collision: CollisionShape2D = null
-
-# Internal state
-var _elapsed: float = 0.0
-var _is_active: bool = true
-var _mesh_instance: MeshInstance2D
-var _shader_material: ShaderMaterial
+var _sprite: Sprite2D
+var _tween: Tween
 var _current_radius: float = 0.0
 
 
-## Load weapon parameters from a dictionary (typically from weapons.json).
 func load_from_data(data: Dictionary) -> void:
-	# Stats
 	var stats = data.get("stats", {})
 	damage = stats.get("damage", damage)
-	duration = stats.get("duration", duration)
-	
-	# Shape
+
 	var shape = data.get("shape", {})
-	inner_radius = shape.get("inner_radius", inner_radius)
-	outer_radius = shape.get("outer_radius", outer_radius)
-	ring_thickness = shape.get("ring_thickness", ring_thickness)
-	expansion_speed = shape.get("expansion_speed", expansion_speed)
-	
-	# Motion/Timing
+	size = shape.get("size", size)
+	growth_percent = shape.get("growth_percent", growth_percent)
+
 	var motion = data.get("motion", {})
-	fade_in = motion.get("fade_in", fade_in)
-	fade_out = motion.get("fade_out", fade_out)
+	hold_time = motion.get("hold_time", hold_time)
 	
-	# Visual
+	var particles_data = data.get("particles", {})
+	particles_count = particles_data.get("count", particles_count)
+	particles_speed_min = particles_data.get("speed_min", particles_speed_min)
+	particles_speed_max = particles_data.get("speed_max", particles_speed_max)
+	particles_lifetime = particles_data.get("lifetime", particles_lifetime)
+	particles_gravity = particles_data.get("gravity", particles_gravity)
+	particles_excitement = particles_data.get("excitement", particles_excitement)
+
 	var visual = data.get("visual", {})
-	color_inner = _parse_color(visual.get("color_inner", ""), color_inner)
-	color_outer = _parse_color(visual.get("color_outer", ""), color_outer)
-	color_edge = _parse_color(visual.get("color_edge", ""), color_edge)
-	glow_strength = visual.get("glow_strength", glow_strength)
-	edge_sharpness = visual.get("edge_sharpness", edge_sharpness)
-	edge_glow = visual.get("edge_glow", edge_glow)
-
-
-func _parse_color(hex_string: String, fallback: Color) -> Color:
-	if hex_string.is_empty():
-		return fallback
-	var hex = hex_string.trim_prefix("#")
-	if hex.length() == 6:
-		return Color(hex)
-	elif hex.length() == 8:
-		return Color.from_string(hex_string, fallback)
-	return fallback
+	if visual.has("circle_color"):
+		var color_string = visual.get("circle_color")
+		if color_string is String:
+			circle_color = Color(color_string)
+		elif color_string is Color:
+			circle_color = color_string
 
 
 func _ready() -> void:
-	# Create MeshInstance2D
-	_mesh_instance = MeshInstance2D.new()
-	add_child(_mesh_instance)
+	# Register for live config updates from test lab
+	add_to_group("ion_wake")
+	add_to_group("weapon_effect")
 	
-	# Texture for UVs
-	var img = Image.create(4, 4, false, Image.FORMAT_RGBA8)
-	img.fill(Color.WHITE)
-	_mesh_instance.texture = ImageTexture.create_from_image(img)
-	
-	# Create shader material
-	_shader_material = ShaderMaterial.new()
-	_shader_material.shader = load("res://effects/ion_wake/ion_wake.gdshader")
-	_mesh_instance.material = _shader_material
-	
-	_current_radius = inner_radius
-	_generate_ring_mesh()
+	# Sprite: white circle texture
+	var img = Image.create(128, 128, false, Image.FORMAT_RGBA8)
+	img.fill(Color(0, 0, 0, 0))  # Transparent background
+	# Draw a filled circle
+	var center = Vector2(64, 64)
+	var radius = 64.0
+	for x in range(128):
+		for y in range(128):
+			var dist = Vector2(x, y).distance_to(center)
+			if dist <= radius:
+				img.set_pixel(x, y, Color.WHITE)
+	_sprite = Sprite2D.new()
+	_sprite.texture = ImageTexture.create_from_image(img)
+	_sprite.centered = true
+	add_child(_sprite)
+
+	# Initial scale: sprite diameter = size * 2
+	var start_diameter = size * 2.0
+	_sprite.scale = Vector2(start_diameter / 128.0, start_diameter / 128.0)
+	_current_radius = size
+
+	# Apply color from parameter
+	_sprite.modulate = circle_color
+
 	call_deferred("_create_hitbox")
-	_update_shader_uniforms()
+	call_deferred("_start_expansion")
+
+
+func _start_expansion() -> void:
+	# Calculate max_radius from growth_percent
+	var calculated_max_radius = size * (1.0 + growth_percent)
+	var expand_time = hold_time  # Grow over the hold time
+	var start_diameter = size * 2.0
+	var end_diameter = calculated_max_radius * 2.0
+	var start_scale = start_diameter / 128.0
+	var end_scale = end_diameter / 128.0
+
+	_tween = create_tween()
+
+	# Scale the circle from start_radius to calculated max (growth over hold_time)
+	_tween.tween_method(_on_scale_update, start_scale, end_scale, expand_time)
+
+	# Explode into particles after hold_time
+	_tween.tween_callback(_explode_into_particles)
+	
+	# Cleanup shortly after explosion
+	_tween.tween_callback(queue_free).set_delay(0.1)
+
+
+func _on_scale_update(scale_val: float) -> void:
+	_sprite.scale = Vector2(scale_val, scale_val)
+	# Current radius = (sprite_scale * 128) / 2
+	_current_radius = (scale_val * 128.0) / 2.0
+	_update_hitbox()
+
+
+func _explode_into_particles() -> void:
+	# Hide the main sprite
+	_sprite.visible = false
+	
+	# Disable hitbox
+	if _hitbox:
+		_hitbox.monitoring = false
+	
+	# Use CPUParticles2D for reliable particle lifecycle (same approach as Radiant Arc)
+	var particles := CPUParticles2D.new()
+	get_parent().add_child(particles)
+	particles.global_position = global_position
+	particles.z_index = -2  # Render below enemies and ship
+	particles.z_as_relative = false
+	
+	# One-shot explosion burst
+	particles.emitting = true
+	particles.one_shot = true
+	particles.explosiveness = 1.0  # All emit at once
+	particles.amount = particles_count
+	particles.lifetime = particles_lifetime
+	
+	# Movement: firefly-like wandering controlled by excitement
+	particles.direction = Vector2.ZERO
+	particles.spread = 180.0
+	particles.initial_velocity_min = particles_excitement * 0.3
+	particles.initial_velocity_max = particles_excitement
+	particles.gravity = Vector2(0, particles_gravity)
+	# Angular velocity for swirling firefly motion
+	particles.angular_velocity_min = -particles_excitement * 3.0
+	particles.angular_velocity_max = particles_excitement * 3.0
+	# Randomness makes each particle wander differently
+	particles.randomness = 1.0
+	# Damping so particles don't fly away
+	particles.damping_min = particles_excitement * 0.5
+	particles.damping_max = particles_excitement * 1.5
+	
+	# Scale: 1px sparks
+	particles.scale_amount_min = 1.0
+	particles.scale_amount_max = 1.0
+	
+	# Emit from entire circle area
+	particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE
+	particles.emission_sphere_radius = _current_radius
+	
+	# Color: base circle_color with slight variation
+	particles.color = circle_color
+	
+	# Color ramp: fade out
+	var color_ramp := Gradient.new()
+	color_ramp.set_color(0, Color(1.0, 1.0, 1.0, 1.0))  # Full opacity at start
+	color_ramp.set_color(1, Color(1.0, 1.0, 1.0, 0.0))  # Fully transparent at end
+	particles.color_ramp = color_ramp
+	
+	# Slight hue variation
+	particles.color_initial_ramp = null
+	particles.hue_variation_min = -0.04
+	particles.hue_variation_max = 0.04
+	
+	# Clean up after particles finish
+	get_tree().create_timer(particles_lifetime + 0.5).timeout.connect(particles.queue_free)
 
 
 func _create_hitbox() -> void:
-	"""Create an Area2D hitbox as an expanding ring."""
 	_hitbox = Area2D.new()
-	_hitbox.collision_layer = 4  # Player weapons layer
-	_hitbox.collision_mask = 8   # Enemies layer
+	_hitbox.collision_layer = 4
+	_hitbox.collision_mask = 8
 	_hitbox.monitoring = true
 	_hitbox.monitorable = true
 	add_child(_hitbox)
-	
-	# Circle collision that expands with the ring
+
 	_hitbox_collision = CollisionShape2D.new()
 	var circle = CircleShape2D.new()
-	circle.radius = inner_radius + ring_thickness * 0.5
+	circle.radius = _current_radius
 	_hitbox_collision.shape = circle
 	_hitbox.add_child(_hitbox_collision)
-	
 	_hitbox.area_entered.connect(_on_hitbox_area_entered)
 
 
-func _generate_ring_mesh() -> void:
-	"""Generate the ring mesh procedurally with UVs."""
-	if not _mesh_instance:
-		return
-	
-	var vertices = PackedVector2Array()
-	var uvs = PackedVector2Array()
-	var segments = 64
-	
-	# Triangle strip: Inner, Outer alternating around the ring
-	for i in range(segments + 1):
-		var t = float(i) / float(segments)
-		var angle = t * TAU
-		var dir = Vector2(cos(angle), sin(angle))
-		
-		# Inner vertex (UV.x = 1, trailing edge)
-		vertices.push_back(dir * _current_radius)
-		uvs.push_back(Vector2(1.0, t))
-		
-		# Outer vertex (UV.x = 0, leading edge)
-		vertices.push_back(dir * (_current_radius + ring_thickness))
-		uvs.push_back(Vector2(0.0, t))
-	
-	var arrays = []
-	arrays.resize(Mesh.ARRAY_MAX)
-	arrays[Mesh.ARRAY_VERTEX] = vertices
-	arrays[Mesh.ARRAY_TEX_UV] = uvs
-	
-	var am = ArrayMesh.new()
-	am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLE_STRIP, arrays)
-	_mesh_instance.mesh = am
-
-
-func _update_shader_uniforms() -> void:
-	"""Update shader uniforms based on current state."""
-	if not _shader_material:
-		return
-	
-	# Calculate alpha: fade in then fade out
-	var alpha = 1.0
-	if _elapsed < fade_in:
-		alpha = _elapsed / fade_in
-	elif _elapsed > duration - fade_out:
-		alpha = 1.0 - (_elapsed - (duration - fade_out)) / fade_out
-	
-	_shader_material.set_shader_parameter("color_inner", color_inner)
-	_shader_material.set_shader_parameter("color_outer", color_outer)
-	_shader_material.set_shader_parameter("color_edge", color_edge)
-	_shader_material.set_shader_parameter("glow_strength", glow_strength)
-	_shader_material.set_shader_parameter("edge_sharpness", edge_sharpness)
-	_shader_material.set_shader_parameter("edge_glow", edge_glow)
-	_shader_material.set_shader_parameter("alpha", alpha)
-
-
 func _update_hitbox() -> void:
-	"""Update the hitbox to match the current ring radius."""
 	if _hitbox_collision and _hitbox_collision.shape is CircleShape2D:
-		_hitbox_collision.shape.radius = _current_radius + ring_thickness * 0.5
+		_hitbox_collision.shape.radius = _current_radius
 
 
 func _on_hitbox_area_entered(area: Area2D) -> void:
-	"""Handle collision with enemies/targets."""
 	if area in _hit_targets:
 		return
-	
 	_hit_targets.append(area)
-	
 	if area.has_method("take_damage"):
 		area.take_damage(damage, self)
 	elif area.get_parent() and area.get_parent().has_method("take_damage"):
@@ -202,51 +224,15 @@ func get_damage() -> float:
 	return damage
 
 
-func _process(delta: float) -> void:
-	if not _is_active:
-		return
-	
-	_elapsed += delta
-	
-	if _elapsed >= duration:
-		_is_active = false
-		queue_free()
-		return
-	
-	# Follow source position
-	if _follow_source and is_instance_valid(_follow_source):
-		global_position = _follow_source.global_position
-	
-	# Expand the ring
-	_current_radius += expansion_speed * delta
-	_current_radius = min(_current_radius, outer_radius)
-	
-	_generate_ring_mesh()
-	_update_hitbox()
-	_update_shader_uniforms()
-
+# === PUBLIC API ===
 
 func setup(params: Dictionary) -> IonWake:
-	"""Set up the effect from a parameter dictionary."""
 	for key in params:
 		if key in self:
 			set(key, params[key])
-	
-	if is_node_ready():
-		_current_radius = inner_radius
-		_generate_ring_mesh()
-		_update_shader_uniforms()
-	
 	return self
 
 
 func spawn_at(spawn_pos: Vector2) -> IonWake:
-	"""Position the effect at a spawn point."""
 	global_position = spawn_pos
-	return self
-
-
-func set_follow_source(source: Node2D) -> IonWake:
-	"""Set a source node to follow."""
-	_follow_source = source
 	return self

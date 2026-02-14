@@ -365,7 +365,11 @@ func update_config_ui(weapon_id: String, config: Dictionary) -> void:
 
 func _add_config_control(key: String, value: Variant) -> void:
 	if value is float or value is int:
-		_add_slider_control(key, value)
+		# Use spinbox for ring_thickness_ratio for precise entry
+		if key == "ring_thickness_ratio":
+			_add_spinbox_control(key, value)
+		else:
+			_add_slider_control(key, value)
 	elif value is Color:
 		_add_color_control(key, value)
 	elif value is bool:
@@ -406,6 +410,35 @@ func _add_slider_control(key: String, value: Variant) -> void:
 	slider.value_changed.connect(_on_slider_value_changed.bind(key))
 	hbox.add_child(slider)
 	_sliders[key] = slider
+
+
+func _add_spinbox_control(key: String, value: Variant) -> void:
+	var hbox = HBoxContainer.new()
+	_config_container.add_child(hbox)
+	
+	# Label
+	var label = Label.new()
+	label.custom_minimum_size = Vector2(180, 0)
+	label.text = _format_key_name(key)
+	hbox.add_child(label)
+	
+	# SpinBox for direct numeric input
+	var spinbox = SpinBox.new()
+	spinbox.custom_minimum_size = Vector2(150, 0)
+	spinbox.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	spinbox.update_on_text_changed = true
+	spinbox.select_all_on_focus = true
+	
+	# Set appropriate ranges based on key name
+	var ranges = _get_slider_ranges(key, value)
+	spinbox.min_value = ranges[0]
+	spinbox.max_value = ranges[1]
+	spinbox.step = ranges[2]
+	spinbox.value = value
+	
+	spinbox.value_changed.connect(_on_spinbox_value_changed.bind(key))
+	hbox.add_child(spinbox)
+	_sliders[key] = spinbox  # Reuse _sliders dictionary for spinboxes too
 
 
 func _add_color_control(key: String, value: Color) -> void:
@@ -461,6 +494,8 @@ func _get_slider_ranges(key: String, current_value: Variant) -> Array:
 			return [0.0, 1.0, 0.05]
 		"knockback":
 			return [0.0, 1500.0, 50.0]
+		"ring_thickness_ratio":
+			return [0.1, 0.5, 0.1]
 	
 	# --- Pattern-based inference (checked top-to-bottom, first match wins) ---
 	
@@ -550,6 +585,11 @@ func _on_slider_value_changed(value: float, key: String) -> void:
 		_labels[key].text = _format_value(value)
 	
 	# Emit change
+	config_changed.emit(key, value)
+
+
+func _on_spinbox_value_changed(value: float, key: String) -> void:
+	# SpinBox displays its own value, no need to update a separate label
 	config_changed.emit(key, value)
 
 

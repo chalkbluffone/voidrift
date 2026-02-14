@@ -76,6 +76,12 @@ func _process_weapons() -> void:
 				var atk_speed: float = float(base_stats.get("attack_speed", 1.0))
 				atk_speed = _apply_weapon_stat_mod(weapon_id, StatsComponentScript.STAT_ATTACK_SPEED, atk_speed)
 				cooldown = 1.0 / max(0.05, atk_speed)
+			
+			# Apply projectile_count as a fire rate multiplier
+			var projectile_count: float = float(stats_dict.get("projectile_count", 1.0))
+			if projectile_count > 1.0:
+				cooldown /= projectile_count
+			
 			var attack_speed := 1.0
 			if stats_component:
 				attack_speed = stats_component.get_stat(StatsComponentScript.STAT_ATTACK_SPEED)
@@ -431,6 +437,7 @@ func _spawn_projectile(_weapon_id: String, direction: Vector2, damage: float, sp
 		return null
 	
 	var projectile: Node2D = PROJECTILE_SCENE.instantiate()
+	projectile.z_index = -1
 	var style: Dictionary = _get_projectile_style(_weapon_id)
 	
 	# Set projectile properties

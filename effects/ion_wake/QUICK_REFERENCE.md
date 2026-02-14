@@ -9,27 +9,29 @@ var wake = spawner.spawn(position, params, follow_source)
 
 ## Key Parameters
 
-| Parameter         | Default | Description            |
-| ----------------- | ------- | ---------------------- |
-| `inner_radius`    | 20      | Starting radius        |
-| `outer_radius`    | 200     | Max expansion radius   |
-| `ring_thickness`  | 30      | Ring band width        |
-| `expansion_speed` | 300     | Expansion speed (px/s) |
-| `duration`        | 1.0     | Effect lifetime        |
-| `damage`          | 15      | Damage on hit          |
+| Parameter          | Default | Description                          |
+| ------------------ | ------- | ------------------------------------ |
+| `start_radius`     | 30      | Ring radius at spawn (px)            |
+| `max_radius`       | 350     | Ring radius at full expansion (px)   |
+| `ring_width_ratio` | 0.35    | Ring thickness as fraction of radius |
+| `expansion_speed`  | 300     | Expansion speed (px/s)               |
+| `duration`         | 1.0     | Effect lifetime                      |
+| `damage`           | 15      | Damage on hit                        |
 
-## Color Scheme
+## Color
 
-- `color_edge` - White leading edge glow
-- `color_inner` - Bright cyan middle
-- `color_outer` - Deep blue trailing
+- `base_color` - Set one color, the full fire palette is derived from it
 
-## Visual Effects (0 = off, 1 = max)
+## Fire Appearance
 
-- `chromatic_aberration` - RGB split
-- `pulse_strength` - Flicker
-- `electric_strength` - Arcs
-- `glow_strength` - Overall glow
+| Parameter          | Default | Description                        |
+| ------------------ | ------- | ---------------------------------- |
+| `intensity`        | 2.0     | Overall brightness (0.5-5.0)       |
+| `fire_speed`       | 1.0     | Flame animation speed (0-5.0)      |
+| `distortion`       | 0.06    | Noise warp on ring edges (0-0.2)   |
+| `fire_detail`      | 3.5     | Noise tiling scale (1-8)           |
+| `glow_spread`      | 0.1     | Soft glow past ring edges (0-0.25) |
+| `density_contrast` | 0.5     | Dark hole visibility in fire (0-1) |
 
 ## JSON Config (weapons.json)
 
@@ -37,17 +39,18 @@ var wake = spawner.spawn(position, params, follow_source)
 {
   "ion_wake": {
     "type": "melee",
-    "stats": { "damage": 15, "duration": 0.8, "cooldown": 2.5 },
+    "stats": { "damage": 13, "duration": 1.0, "cooldown": 2.5 },
     "shape": {
-      "inner_radius": 25,
-      "outer_radius": 250,
-      "ring_thickness": 35,
-      "expansion_speed": 350
+      "start_radius": 36,
+      "max_radius": 365,
+      "ring_width_ratio": 0.35,
+      "expansion_speed": 140
     },
     "visual": {
-      "color_inner": "#66ccff",
-      "color_outer": "#1a4d99",
-      "color_edge": "#ccf0ff"
+      "base_color": "#ff4400",
+      "intensity": 2.0,
+      "fire_speed": 1.0,
+      "fire_detail": 3.5
     }
   }
 }

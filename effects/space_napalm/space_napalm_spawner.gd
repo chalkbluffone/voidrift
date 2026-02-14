@@ -67,6 +67,7 @@ func spawn(
 
 	var scene: PackedScene = load("res://effects/space_napalm/SpaceNapalm.tscn")
 	var instance: Node2D = scene.instantiate()
+	instance.z_index = -1
 	_parent_node.add_child(instance)
 
 	if params:

@@ -36,6 +36,7 @@ func spawn(
 		return null
 
 	var coil = load("res://effects/nikolas_coil/NikolasCoil.tscn").instantiate()
+	coil.z_index = -1
 	_parent_node.add_child(coil)
 
 	if params:

@@ -26,6 +26,7 @@ func spawn(spawn_pos: Vector2, params: Dictionary = {}, follow_source: Node2D = 
 		return null
 	
 	var instance: Node2D = scene.instantiate()
+	instance.z_index = -1
 	_parent_node.add_child(instance)
 	
 	if params:
