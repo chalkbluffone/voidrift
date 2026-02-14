@@ -340,8 +340,25 @@ func fire_weapon_with_config(weapon_id: String, config: Dictionary, source: Node
 			_fire_projectile_with_config(weapon_id, config, source)
 		"area":
 			_fire_area_with_config(weapon_id, config, source)
+		"beam":
+			_fire_beam_with_config(weapon_id, config, source)
 		_:
 			push_warning("WeaponComponent: fire_weapon_with_config not implemented for type: " + weapon_type)
+
+
+func _fire_beam_with_config(weapon_id: String, config: Dictionary, source: Node2D) -> void:
+	"""Fire a beam weapon with explicit flat config (for test lab)."""
+	var weapon_data: Dictionary = DataLoader.get_weapon(weapon_id)
+	var spawner = _get_or_create_spawner(weapon_id, weapon_data)
+	if spawner == null:
+		push_warning("WeaponComponent: No spawner for beam weapon: " + weapon_id)
+		return
+	if not spawner.has_method("spawn"):
+		return
+	var direction: Vector2 = Vector2.RIGHT.rotated(source.rotation)
+	var result = spawner.spawn(source.global_position, direction, config, source)
+	if result:
+		weapon_fired.emit(weapon_id, [result])
 
 
 func _fire_area_with_config(weapon_id: String, config: Dictionary, source: Node2D) -> void:

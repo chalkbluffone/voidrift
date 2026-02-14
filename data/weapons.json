@@ -2,24 +2,33 @@
   "broken_tractor_beam": {
     "description": "Tethers to a target with a malfunctioning tractor beam that irradiates it over time and stays locked on until the target dies… on accident. Whoops.",
     "display_name": "Broken Tractor Beam",
-    "enabled": false,
+    "enabled": true,
     "motion": {
-
+      "burst_multiplier": 2.0,
+      "pull_speed": 80.0
     },
-    "scene": "res://effects/beam_base/BeamBase.tscn",
+    "scene": "res://effects/broken_tractor_beam/BrokenTractorBeam.tscn",
     "shape": {
-
+      "size": 300.0
     },
-    "spawner": "res://effects/beam_base/beam_base_spawner.gd",
+    "spawner": "res://effects/broken_tractor_beam/broken_tractor_beam_spawner.gd",
     "stats": {
       "cooldown": 2.5,
       "damage": 10.0,
+      "dot_interval": 0.5,
       "duration": 2.0
     },
+    "targeting": "nearest",
     "type": "beam",
     "unlock_condition": "default",
     "visual": {
-
+      "beam_width": 12.0,
+      "color_core": "#88CCFF",
+      "color_glow": "#4488FF",
+      "glow_strength": 1.5,
+      "particle_count": 30,
+      "particle_lifetime": 0.4,
+      "particle_speed": 200.0
     }
   },
   "ion_wake": {
