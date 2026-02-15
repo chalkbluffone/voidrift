@@ -170,15 +170,15 @@
 	},
 	"spin_cycle": {
 		"display_name": "Spin Cycle",
-		"base_behavior": "Creates a lingering four-quadrant AoE around your ship that pulses damage outward one sector at a time in a clockwise sweep.",
+		"base_behavior": "Creates a visible ring around your ship with a bright wedge that sweeps clockwise, damaging enemies caught in the active slice.",
 		"type": "aoe",
 		"element": "physical",
 		"special": "linger",
 		"tags": ["aoe", "linger"],
-		"strategy_synergies": "Duration and count for coverage; size helpful; pairs with cooldown",
+		"strategy_synergies": "Size scales ring radius; attack speed scales sweep speed; pairs with damage and cooldown",
 		"tier_stats": {
 			"damage": { "common": 1.5, "uncommon": 1.8, "rare": 2.1, "epic": 2.4, "legendary": 3.0 },
-			"projectile_count": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 },
+			"attack_speed": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 },
 			"size": { "common": 0.10, "uncommon": 0.12, "rare": 0.14, "epic": 0.16, "legendary": 0.20 },
 			"duration": { "common": 0.08, "uncommon": 0.10, "rare": 0.11, "epic": 0.13, "legendary": 0.16 }
 		}
