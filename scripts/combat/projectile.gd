@@ -90,7 +90,11 @@ func _on_body_entered(body: Node2D) -> void:
 
 
 func _on_area_entered(area: Area2D) -> void:
-	# In case enemies use Area2D hitboxes
+	# Direct enemy Area2D (e.g., TestTarget)
+	if area.is_in_group("enemies"):
+		_hit_enemy(area)
+		return
+	# Child hitbox Area2D (e.g., BaseEnemy's HitboxArea)
 	var parent := area.get_parent()
 	if parent and parent.is_in_group("enemies"):
 		_hit_enemy(parent)

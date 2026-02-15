@@ -1,9 +1,10 @@
 class_name AoEBaseSpawner
 
-## Stub spawner for AoE-type weapons.
-## Replace with a weapon-specific spawner when implementing the weapon.
+## Spawner for AoE-type persistent aura weapons.
+## Maintains a single active aura around the player and updates its params live.
 
 var _parent_node: Node
+var _active_aura: Node2D = null
 
 
 func _init(parent: Node) -> void:
@@ -11,20 +12,46 @@ func _init(parent: Node) -> void:
 
 
 func spawn(
-	_spawn_pos: Vector2,
+	spawn_pos: Vector2,
 	params: Dictionary = {},
-	_follow_source: Node2D = null
+	follow_source: Node2D = null
 ) -> Node2D:
-	"""
-	Spawn an AoE-type weapon effect (stub).
+	if is_instance_valid(_active_aura):
+		if params and _active_aura.has_method("setup"):
+			_active_aura.setup(params)
+		if follow_source and _active_aura.has_method("set_follow_source"):
+			_active_aura.set_follow_source(follow_source)
+		return _active_aura
 
-	Args:
-		spawn_pos: World position to spawn at
-		params: Dictionary of parameter overrides
-		follow_source: Optional Node2D to track
+	var scene: PackedScene = load("res://effects/aoe_base/AoEBase.tscn")
+	if scene == null:
+		push_warning("AoEBaseSpawner: Failed to load AoEBase.tscn")
+		return null
 
-	Returns:
-		null (not yet implemented)
-	"""
-	push_warning("AoEBaseSpawner: spawn() not yet implemented for params: %s" % str(params))
-	return null
+	var instance: Node2D = scene.instantiate()
+	instance.z_index = -1
+	_parent_node.add_child(instance)
+
+	if params and instance.has_method("setup"):
+		instance.setup(params)
+	if instance.has_method("spawn_at"):
+		instance.spawn_at(spawn_pos)
+	else:
+		instance.global_position = spawn_pos
+
+	if follow_source and instance.has_method("set_follow_source"):
+		instance.set_follow_source(follow_source)
+
+	instance.tree_exiting.connect(_on_aura_destroyed)
+	_active_aura = instance
+	return instance
+
+
+func _on_aura_destroyed() -> void:
+	_active_aura = null
+
+
+func cleanup() -> void:
+	if is_instance_valid(_active_aura):
+		_active_aura.queue_free()
+	_active_aura = null

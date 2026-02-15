@@ -496,6 +496,8 @@ func _get_slider_ranges(key: String, current_value: Variant) -> Array:
 			return [0.0, 1500.0, 50.0]
 		"ring_thickness_ratio":
 			return [0.1, 0.5, 0.1]
+		"pellet_radius":
+			return [0.0, 500.0, 1.0]
 	
 	# --- Pattern-based inference (checked top-to-bottom, first match wins) ---
 	
@@ -503,8 +505,12 @@ func _get_slider_ranges(key: String, current_value: Variant) -> Array:
 	if key.ends_with("_deg") or key.contains("angle"):
 		return [0.0, 360.0, 5.0]
 	
-	# Radius and range parameters
-	if key.contains("radius") or key.contains("range"):
+	# Radius parameters
+	if key.contains("radius"):
+		return [0.0, 500.0, 1.0]
+
+	# Range parameters
+	if key.contains("range"):
 		return [0.0, 500.0, 5.0]
 	
 	# Fade parameters (0-1 range)

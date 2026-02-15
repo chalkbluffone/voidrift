@@ -26,7 +26,7 @@
       "color_core": "#88CCFF",
       "color_glow": "#4488FF",
       "glow_strength": 1.5,
-      "particle_count": 30,
+      "particle_count": 30.0,
       "particle_lifetime": 0.4,
       "particle_speed": 200.0
     }
@@ -104,9 +104,7 @@
     "description": "Blocks hits with rechargeable shield charges, consuming one per block and releasing a staggering shockwave.",
     "display_name": "Nope Bubble",
     "enabled": true,
-    "motion": {
-
-    },
+    "motion": {},
     "scene": "res://effects/nope_bubble/NopeBubble.tscn",
     "shape": {
       "shockwave_angle_deg": 45.0,
@@ -138,62 +136,53 @@
     },
     "scene": "res://effects/personal_space_violator/PersonalSpaceViolator.tscn",
     "shape": {
-      "pellet_radius": 0.5
+      "pellet_radius": 2.0
     },
     "spawner": "res://effects/personal_space_violator/personal_space_violator_spawner.gd",
     "stats": {
       "cooldown": 1.2,
-      "damage": 18.0,
-      "projectile_count": 7,
-      "projectile_speed": 600.0,
-      "falloff_start": 80.0,
+      "damage": 6.0,
       "falloff_end": 350.0,
-      "lifetime": 0.8
+      "falloff_start": 80.0,
+      "lifetime": 0.8,
+      "projectile_count": 7.0,
+      "projectile_speed": 600.0
     },
     "targeting": "nearest",
     "type": "projectile",
     "unlock_condition": "default",
     "visual": {
-      "color_core": "#FFFFFF",
-      "color_glow": "#39FF14",
-      "glow_strength": 2.5,
-      "pellet_height_px": 5,
-      "bloom_intensity": 3.0
+      "bloom_intensity": 3.0,
+      "color_core": "#ffffff",
+      "color_glow": "#39ff14",
+      "glow_strength": 0.5,
+      "pellet_height_px": 5.0
     }
   },
   "proximity_tax": {
     "description": "Imposes a damaging aura around the ship that harms enemies who get too close. It's like a tax, but in space...and kills bad guys.",
     "display_name": "Proximity Tax",
-    "enabled": false,
-    "motion": {
-
-    },
+    "enabled": true,
+    "motion": {},
     "scene": "res://effects/aoe_base/AoEBase.tscn",
-    "shape": {
-
-    },
+    "shape": {},
     "spawner": "res://effects/aoe_base/aoe_base_spawner.gd",
     "stats": {
       "cooldown": 0.5,
-      "damage": 5.0
+      "damage": 5.0,
+      "size": 90.0
     },
-    "type": "aoe",
+    "type": "area",
     "unlock_condition": "default",
-    "visual": {
-
-    }
+    "visual": {}
   },
   "psp_9000": {
     "description": "PSP or Personal Space Program, deploys orbiting security drones that body-check nearby enemies for physical damage and knockback. Not to be confused with a certain handheld gaming device.",
     "display_name": "PSP-9000",
     "enabled": false,
-    "motion": {
-
-    },
+    "motion": {},
     "scene": "res://effects/orbit_base/OrbitBase.tscn",
-    "shape": {
-
-    },
+    "shape": {},
     "spawner": "res://effects/orbit_base/orbit_base_spawner.gd",
     "stats": {
       "cooldown": 2.0,
@@ -201,9 +190,7 @@
     },
     "type": "orbit",
     "unlock_condition": "default",
-    "visual": {
-
-    }
+    "visual": {}
   },
   "radiant_arc": {
     "description": "Emits a short-range photonic slash in a wide arc from the ship’s forward edge, instantly cutting through and damaging any targets caught in its path. Really cool looking.",
@@ -383,13 +370,9 @@
     "description": "Launches a barrage of explosive projectiles that detonate on impact, causing area damage to nearby enemies. It's like fireworks, but deadlier. In space.",
     "display_name": "Space Nukes",
     "enabled": false,
-    "motion": {
-
-    },
+    "motion": {},
     "scene": "res://effects/projectile_base/ProjectileBase.tscn",
-    "shape": {
-
-    },
+    "shape": {},
     "spawner": "res://effects/projectile_base/projectile_base_spawner.gd",
     "stats": {
       "cooldown": 1.8,
@@ -397,21 +380,15 @@
     },
     "type": "projectile",
     "unlock_condition": "default",
-    "visual": {
-
-    }
+    "visual": {}
   },
   "space_whale_tusk": {
     "description": "Fires a Space Whale Tusk projectile that ricochets between targets, dealing physical damage on each bounce. Actually made from space whales. Harvested on Gleebus V, the only planet where space whales are found. It's a little unethical, but those tusks make for great weapons.",
     "display_name": "Space Whale Tusk",
     "enabled": false,
-    "motion": {
-
-    },
+    "motion": {},
     "scene": "res://effects/projectile_base/ProjectileBase.tscn",
-    "shape": {
-
-    },
+    "shape": {},
     "spawner": "res://effects/projectile_base/projectile_base_spawner.gd",
     "stats": {
       "cooldown": 1.3,
@@ -419,21 +396,15 @@
     },
     "type": "projectile",
     "unlock_condition": "default",
-    "visual": {
-
-    }
+    "visual": {}
   },
   "spin_cycle": {
     "description": "Creates a swirling vortex of energy around the ship, damaging enemies caught within its radius. It's like a cosmic washing machine for bad guys.",
     "display_name": "Spin Cycle",
     "enabled": false,
-    "motion": {
-
-    },
+    "motion": {},
     "scene": "res://effects/aoe_base/AoEBase.tscn",
-    "shape": {
-
-    },
+    "shape": {},
     "spawner": "res://effects/aoe_base/aoe_base_spawner.gd",
     "stats": {
       "cooldown": 2.0,
@@ -441,21 +412,15 @@
     },
     "type": "aoe",
     "unlock_condition": "default",
-    "visual": {
-
-    }
+    "visual": {}
   },
   "straight_line_negotiator": {
     "description": "Fires a magnet-accelerated spike that travels in a perfectly straight line and pierces through multiple enemies. Definitely not a space sniper rifle. Honest.",
     "display_name": "Straight-Line Negotiator",
     "enabled": false,
-    "motion": {
-
-    },
+    "motion": {},
     "scene": "res://effects/projectile_base/ProjectileBase.tscn",
-    "shape": {
-
-    },
+    "shape": {},
     "spawner": "res://effects/projectile_base/projectile_base_spawner.gd",
     "stats": {
       "cooldown": 0.8,
@@ -463,21 +428,15 @@
     },
     "type": "projectile",
     "unlock_condition": "default",
-    "visual": {
-
-    }
+    "visual": {}
   },
   "straight_shooter": {
     "description": "Fires a auto-aim, high-velocity round that pierces through enemies in a straight line and can circumcise a Tarlaxian in under 3 parsecs.",
     "display_name": "Straight Shooter",
     "enabled": false,
-    "motion": {
-
-    },
+    "motion": {},
     "scene": "res://effects/projectile_base/ProjectileBase.tscn",
-    "shape": {
-
-    },
+    "shape": {},
     "spawner": "res://effects/projectile_base/projectile_base_spawner.gd",
     "stats": {
       "cooldown": 1.5,
@@ -485,21 +444,15 @@
     },
     "type": "projectile",
     "unlock_condition": "default",
-    "visual": {
-
-    }
+    "visual": {}
   },
   "timmy_gun": {
     "description": "The Timson Sub-Space Machine Gun model T2928A1, unloads a burst of physical rounds that ricochet off targets, bouncing to hit additional enemies before dissipating. Also, known as the \"Trench Broom\" as it was used in the great Balsurpian war of 2918 to disipate Balsurpians from the Ionic Trenches of Delton VII.",
     "display_name": "Timmy Gun",
     "enabled": false,
-    "motion": {
-
-    },
+    "motion": {},
     "scene": "res://effects/projectile_base/ProjectileBase.tscn",
-    "shape": {
-
-    },
+    "shape": {},
     "spawner": "res://effects/projectile_base/projectile_base_spawner.gd",
     "stats": {
       "cooldown": 0.6,
@@ -507,21 +460,15 @@
     },
     "type": "projectile",
     "unlock_condition": "default",
-    "visual": {
-
-    }
+    "visual": {}
   },
   "tothian_mines": {
     "description": "Deploys proximity-triggered mines that detonate when enemies come near, dealing area damage. Inspired by the ancient Tothian defense systems.",
     "display_name": "Tothian Mines",
     "enabled": false,
-    "motion": {
-
-    },
+    "motion": {},
     "scene": "res://effects/aoe_base/AoEBase.tscn",
-    "shape": {
-
-    },
+    "shape": {},
     "spawner": "res://effects/aoe_base/aoe_base_spawner.gd",
     "stats": {
       "cooldown": 2.5,
@@ -530,8 +477,6 @@
     },
     "type": "aoe",
     "unlock_condition": "default",
-    "visual": {
-
-    }
+    "visual": {}
   }
 }

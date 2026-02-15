@@ -15,7 +15,7 @@ var persistent_data: Dictionary = {
 	"total_wins": 0,
 	"total_time_played": 0.0,
 	"unlocked_characters": ["scout"],
-	"unlocked_weapons": ["plasma_cannon", "laser_array", "ion_orbit"],
+	"unlocked_weapons": ["plasma_cannon", "laser_array", "ion_orbit", "proximity_tax"],
 	"high_score": 0,
 	"best_time": 0.0,
 	"settings": {
@@ -53,6 +53,8 @@ func load_game() -> void:
 				for key in persistent_data:
 					if data.has(key):
 						persistent_data[key] = data[key]
+				if "proximity_tax" not in persistent_data.unlocked_weapons:
+					persistent_data.unlocked_weapons.append("proximity_tax")
 			file.close()
 			game_loaded.emit()
 
@@ -65,7 +67,7 @@ func reset_save() -> void:
 		"total_wins": 0,
 		"total_time_played": 0.0,
 		"unlocked_characters": ["scout"],
-		"unlocked_weapons": ["plasma_cannon", "laser_array", "ion_orbit"],
+		"unlocked_weapons": ["plasma_cannon", "laser_array", "ion_orbit", "proximity_tax"],
 		"high_score": 0,
 		"best_time": 0.0,
 		"settings": {
