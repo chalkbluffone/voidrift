@@ -1,0 +1,19 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "godot: headless sanity check",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"tools/headless_sanity_check.ps1"
+			],
+			"isBackground": false,
+			"group": "test"
+		}
+	]
+}

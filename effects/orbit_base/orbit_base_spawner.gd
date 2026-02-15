@@ -1,30 +1,61 @@
 class_name OrbitBaseSpawner
 
-## Stub spawner for orbit-type weapons.
-## Replace with a weapon-specific spawner when implementing the weapon.
+## Spawner for orbit-type weapons (PSP-9000 prototype).
+## Maintains a single persistent orbit effect and updates it on re-fire.
 
 var _parent_node: Node
+var _active_orbit: Node2D = null
+var FileLogger: Node = null
 
 
 func _init(parent: Node) -> void:
 	_parent_node = parent
+	if _parent_node:
+		FileLogger = _parent_node.get_node_or_null("/root/FileLogger")
 
 
 func spawn(
-	_spawn_pos: Vector2,
+	spawn_pos: Vector2,
 	params: Dictionary = {},
-	_follow_source: Node2D = null
+	follow_source: Node2D = null
 ) -> Node2D:
-	"""
-	Spawn an orbit-type weapon effect (stub).
+	if is_instance_valid(_active_orbit):
+		if params:
+			_active_orbit.setup(params)
+		if follow_source:
+			_active_orbit.set_follow_source(follow_source)
+		if FileLogger:
+			FileLogger.log_debug("OrbitBaseSpawner", "Updated active PSP orbit instance")
+		return _active_orbit
 
-	Args:
-		spawn_pos: World position to spawn at
-		params: Dictionary of parameter overrides
-		follow_source: Optional Node2D to track
+	var scene: PackedScene = load("res://effects/orbit_base/OrbitBase.tscn")
+	if scene == null:
+		push_warning("OrbitBaseSpawner: Failed to load OrbitBase.tscn")
+		return null
 
-	Returns:
-		null (not yet implemented)
-	"""
-	push_warning("OrbitBaseSpawner: spawn() not yet implemented for params: %s" % str(params))
-	return null
+	var instance: Node2D = scene.instantiate()
+	instance.z_index = 1
+	_parent_node.add_child(instance)
+
+	if params:
+		instance.setup(params)
+	instance.spawn_at(spawn_pos)
+
+	if follow_source:
+		instance.set_follow_source(follow_source)
+
+	instance.tree_exiting.connect(_on_orbit_destroyed)
+	_active_orbit = instance
+	if FileLogger:
+		FileLogger.log_info("OrbitBaseSpawner", "Spawned PSP orbit instance")
+	return instance
+
+
+func _on_orbit_destroyed() -> void:
+	_active_orbit = null
+
+
+func cleanup() -> void:
+	if is_instance_valid(_active_orbit):
+		_active_orbit.queue_free()
+	_active_orbit = null

@@ -249,7 +249,7 @@
 		"element": "physical",
 		"special": "knockback",
 		"tags": ["aoe", "trap", "knockback"],
-		"strategy_synergies": "Duration and size for coverage; count for area denial; pairs with cooldown",
+		"strategy_synergies": "Duration and size for coverage; count accelerates drop cadence; pairs with cooldown",
 		"tier_stats": {
 			"damage": { "common": 3.0, "uncommon": 3.6, "rare": 4.2, "epic": 4.8, "legendary": 6.0 },
 			"projectile_count": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 },

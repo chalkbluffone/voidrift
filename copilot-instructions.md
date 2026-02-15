@@ -712,6 +712,49 @@ When implementing new features, verify:
 - [ ] Works at different zoom levels
 - [ ] Performance acceptable with many enemies
 
+### Mandatory Runtime Sanity Check (Headless Godot)
+
+After any code or data change, run a headless Godot launch to catch integration/load/runtime startup issues that static checks can miss.
+
+Command:
+
+```powershell
+& "C:\git\godot\Godot_v4.6-stable_win64\Godot_v4.6-stable_win64.exe" --headless --path "C:\git\voidrift" --import --quit
+```
+
+Preferred local workflow:
+
+- Run VS Code task: `godot: headless sanity check`
+- Or run script directly: `tools/headless_sanity_check.ps1`
+
+Agent rule: After any non-trivial code or data change, always run this headless sanity check before reporting completion.
+
+Pass/fail criteria:
+
+- Pass: process exits with code `0`
+- Fail: non-zero exit code, or new error output in startup logs
+
+Recommended captured logs for debugging:
+
+- `debug_log_headless_stdout.txt`
+- `debug_log_headless_stderr.txt`
+
+### Mandatory Weapon Implementation Verification (Do Not Skip)
+
+When adding or changing any weapon, do **all** checks below before reporting completion:
+
+- [ ] Weapon is `enabled` in `data/weapons.json` when intended for active testing
+- [ ] Unlock path is valid for existing saves (default unlocks or migration in `PersistenceManager`)
+- [ ] Weapon appears in run selection/equip flow (not just present in JSON)
+- [ ] Effect node actually spawns (verify via `FileLogger` in `debug_log.txt`)
+- [ ] Effect is visibly rendered (z-index/layer/alpha/scale validated)
+- [ ] Core behavior works in-game (damage, collision/contact, movement/orbit)
+- [ ] Stat scaling works (`damage`, `projectile_count`, `size`, `speed`, `knockback`, etc. as applicable)
+- [ ] Persistent effects clean up correctly on unequip/remove
+- [ ] `get_errors` shows no new script/JSON errors in edited files
+
+Never mark a weapon task as done if any checkbox above is unverified.
+
 ---
 
 ## Debugging Technique: FileLogger

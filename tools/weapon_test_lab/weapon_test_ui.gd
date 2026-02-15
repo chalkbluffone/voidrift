@@ -482,6 +482,10 @@ func _get_slider_ranges(key: String, current_value: Variant) -> Array:
 			return [0.0, 500.0, 1.0]
 		"cooldown":
 			return [0.05, 10.0, 0.05]
+		"launch_arc_min_deg":
+			return [0.0, 90.0, 1.0]
+		"launch_arc_max_deg":
+			return [0.0, 90.0, 1.0]
 		"taper":
 			return [0.0, 1.0, 0.05]
 		"length_scale":

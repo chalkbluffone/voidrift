@@ -15,7 +15,7 @@ var persistent_data: Dictionary = {
 	"total_wins": 0,
 	"total_time_played": 0.0,
 	"unlocked_characters": ["scout"],
-	"unlocked_weapons": ["plasma_cannon", "laser_array", "ion_orbit", "proximity_tax"],
+	"unlocked_weapons": ["plasma_cannon", "laser_array", "ion_orbit", "proximity_tax", "psp_9000", "space_nukes", "tothian_mines"],
 	"high_score": 0,
 	"best_time": 0.0,
 	"settings": {
@@ -31,6 +31,18 @@ var persistent_data: Dictionary = {
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	load_game()
+	_ensure_default_unlocks()
+
+
+func _ensure_default_unlocks() -> void:
+	if "proximity_tax" not in persistent_data.unlocked_weapons:
+		persistent_data.unlocked_weapons.append("proximity_tax")
+	if "psp_9000" not in persistent_data.unlocked_weapons:
+		persistent_data.unlocked_weapons.append("psp_9000")
+	if "space_nukes" not in persistent_data.unlocked_weapons:
+		persistent_data.unlocked_weapons.append("space_nukes")
+	if "tothian_mines" not in persistent_data.unlocked_weapons:
+		persistent_data.unlocked_weapons.append("tothian_mines")
 
 
 # --- Persistence ---
@@ -53,8 +65,7 @@ func load_game() -> void:
 				for key in persistent_data:
 					if data.has(key):
 						persistent_data[key] = data[key]
-				if "proximity_tax" not in persistent_data.unlocked_weapons:
-					persistent_data.unlocked_weapons.append("proximity_tax")
+				_ensure_default_unlocks()
 			file.close()
 			game_loaded.emit()
 
@@ -67,7 +78,7 @@ func reset_save() -> void:
 		"total_wins": 0,
 		"total_time_played": 0.0,
 		"unlocked_characters": ["scout"],
-		"unlocked_weapons": ["plasma_cannon", "laser_array", "ion_orbit", "proximity_tax"],
+		"unlocked_weapons": ["plasma_cannon", "laser_array", "ion_orbit", "proximity_tax", "psp_9000", "space_nukes", "tothian_mines"],
 		"high_score": 0,
 		"best_time": 0.0,
 		"settings": {
@@ -78,6 +89,7 @@ func reset_save() -> void:
 			"show_damage_numbers": true,
 		}
 	}
+	_ensure_default_unlocks()
 	save_game()
 	data_reset.emit()
 

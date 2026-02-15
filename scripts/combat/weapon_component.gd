@@ -79,6 +79,12 @@ func _process_weapons() -> void:
 			
 			# Apply projectile_count as a fire rate multiplier
 			var projectile_count: float = float(stats_dict.get("projectile_count", 1.0))
+			if weapon_id == "tothian_mines":
+				var weapon_bonus_projectiles: float = _get_weapon_flat(weapon_id, StatsComponentScript.STAT_PROJECTILE_COUNT)
+				projectile_count += weapon_bonus_projectiles
+				if stats_component:
+					projectile_count += float(stats_component.get_stat_int(StatsComponentScript.STAT_PROJECTILE_COUNT))
+				projectile_count = maxf(1.0, projectile_count)
 			if projectile_count > 1.0:
 				cooldown /= projectile_count
 			
@@ -174,21 +180,46 @@ func _fire_projectile_via_spawner(weapon_id: String, data: Dictionary) -> void:
 		FileLogger.log_warn("WeaponComponent", "_fire_projectile_via_spawner: no parent for %s" % weapon_id)
 		return
 	var config: Dictionary = WeaponDataFlattener.flatten(data).flat
-	
-	# Inject runtime stats that aren't in the JSON (size, projectile_count with bonuses)
-	var size_mult: float = 1.0
-	var weapon_size_mult: float = _get_weapon_mult(weapon_id, StatsComponentScript.STAT_SIZE)
+
+	# Inject runtime scaling for custom projectile spawners.
+	# Mirrors generic projectile path so weapon level-ups and global stats apply consistently.
+	var global_size_mult: float = 1.0
+	var global_speed_mult: float = 1.0
+	var global_duration_mult: float = 1.0
 	if stats_component:
-		size_mult = stats_component.get_stat(StatsComponentScript.STAT_SIZE)
-	config["size_mult"] = size_mult * (1.0 + weapon_size_mult)
-	
-	# Merge projectile_count bonuses from stats + weapon upgrades
+		global_size_mult = stats_component.get_stat(StatsComponentScript.STAT_SIZE)
+		global_speed_mult = stats_component.get_stat(StatsComponentScript.STAT_PROJECTILE_SPEED)
+		global_duration_mult = stats_component.get_stat(StatsComponentScript.STAT_DURATION)
+
+	var weapon_size_mult: float = _get_weapon_mult(weapon_id, StatsComponentScript.STAT_SIZE)
+	config["size_mult"] = global_size_mult * (1.0 + weapon_size_mult)
+
 	var base_proj_count: int = int(config.get("projectile_count", 1))
 	var bonus_proj: int = 0
 	var weapon_bonus_proj: int = int(round(_get_weapon_flat(weapon_id, StatsComponentScript.STAT_PROJECTILE_COUNT)))
 	if stats_component:
 		bonus_proj = stats_component.get_stat_int(StatsComponentScript.STAT_PROJECTILE_COUNT)
-	config["projectile_count"] = base_proj_count + bonus_proj + weapon_bonus_proj
+	config["projectile_count"] = maxi(1, base_proj_count + bonus_proj + weapon_bonus_proj)
+
+	var base_damage: float = float(config.get("damage", 10.0))
+	var weapon_damage_flat: float = _get_weapon_flat(weapon_id, StatsComponentScript.STAT_DAMAGE)
+	var weapon_damage_mult: float = _get_weapon_mult(weapon_id, StatsComponentScript.STAT_DAMAGE)
+	config["damage"] = (base_damage + weapon_damage_flat) * (1.0 + weapon_damage_mult)
+
+	var base_speed: float = float(config.get("projectile_speed", 400.0))
+	var weapon_speed_flat: float = _get_weapon_flat(weapon_id, StatsComponentScript.STAT_PROJECTILE_SPEED)
+	var weapon_speed_mult: float = _get_weapon_mult(weapon_id, StatsComponentScript.STAT_PROJECTILE_SPEED)
+	config["projectile_speed"] = (base_speed + weapon_speed_flat) * (global_speed_mult * (1.0 + weapon_speed_mult))
+
+	var base_duration: float = float(config.get("duration", config.get("lifetime", 0.0)))
+	if base_duration > 0.0:
+		var weapon_duration_flat: float = _get_weapon_flat(weapon_id, StatsComponentScript.STAT_DURATION)
+		var weapon_duration_mult: float = _get_weapon_mult(weapon_id, StatsComponentScript.STAT_DURATION)
+		config["duration"] = (base_duration + weapon_duration_flat) * (global_duration_mult * (1.0 + weapon_duration_mult))
+		config["lifetime"] = config["duration"]
+
+	config["crit_chance"] = float(config.get("crit_chance", 0.0)) + _get_weapon_flat(weapon_id, StatsComponentScript.STAT_CRIT_CHANCE)
+	config["crit_damage"] = float(config.get("crit_damage", 0.0)) + _get_weapon_flat(weapon_id, StatsComponentScript.STAT_CRIT_DAMAGE)
 	
 	FileLogger.log_info("WeaponComponent", "Spawner config for %s: %d keys" % [weapon_id, config.size()])
 	var spawner = _get_or_create_spawner(weapon_id, data)
@@ -231,6 +262,38 @@ func _fire_orbit_weapon(weapon_id: String, data: Dictionary, _level: int) -> voi
 	if not parent:
 		return
 	var config: Dictionary = WeaponDataFlattener.flatten(data).flat
+
+	# Runtime scaling: mirror custom-spawner flow so orbit weapons benefit
+	# from global stats and weapon-level upgrades.
+	var size_mult: float = 1.0
+	var projectile_speed_mult: float = 1.0
+	var knockback_mult: float = 1.0
+	if stats_component:
+		size_mult = stats_component.get_stat(StatsComponentScript.STAT_SIZE)
+		projectile_speed_mult = stats_component.get_stat(StatsComponentScript.STAT_PROJECTILE_SPEED)
+		knockback_mult = stats_component.get_stat(StatsComponentScript.STAT_KNOCKBACK)
+
+	var weapon_size_mult: float = _get_weapon_mult(weapon_id, StatsComponentScript.STAT_SIZE)
+	var weapon_projectile_speed_mult: float = _get_weapon_mult(weapon_id, StatsComponentScript.STAT_PROJECTILE_SPEED)
+	var weapon_projectile_speed_flat: float = _get_weapon_flat(weapon_id, StatsComponentScript.STAT_PROJECTILE_SPEED)
+	var weapon_knockback_mult: float = _get_weapon_mult(weapon_id, StatsComponentScript.STAT_KNOCKBACK)
+	var weapon_knockback_flat: float = _get_weapon_flat(weapon_id, StatsComponentScript.STAT_KNOCKBACK)
+
+	config["size"] = size_mult * (1.0 + weapon_size_mult)
+
+	var base_speed: float = float(config.get("projectile_speed", 2.2))
+	config["projectile_speed"] = (base_speed + weapon_projectile_speed_flat) * (projectile_speed_mult * (1.0 + weapon_projectile_speed_mult))
+
+	var base_knockback: float = float(config.get("knockback", 280.0))
+	config["knockback"] = (base_knockback + weapon_knockback_flat) * (knockback_mult * (1.0 + weapon_knockback_mult))
+
+	var base_proj_count: int = int(config.get("projectile_count", 1))
+	var bonus_proj: int = 0
+	var weapon_bonus_proj: int = int(round(_get_weapon_flat(weapon_id, StatsComponentScript.STAT_PROJECTILE_COUNT)))
+	if stats_component:
+		bonus_proj = stats_component.get_stat_int(StatsComponentScript.STAT_PROJECTILE_COUNT)
+	config["projectile_count"] = maxi(1, base_proj_count + bonus_proj + weapon_bonus_proj)
+
 	var spawner = _get_or_create_spawner(weapon_id, data)
 	if spawner and spawner.has_method("spawn"):
 		var result = spawner.spawn(parent.global_position, config, parent)
@@ -246,6 +309,31 @@ func _fire_area_weapon(weapon_id: String, data: Dictionary, _level: int) -> void
 	if not parent:
 		return
 	var config: Dictionary = WeaponDataFlattener.flatten(data).flat
+
+	if weapon_id == "tothian_mines":
+		var global_size_mult: float = 1.0
+		var global_duration_mult: float = 1.0
+		if stats_component:
+			global_size_mult = stats_component.get_stat(StatsComponentScript.STAT_SIZE)
+			global_duration_mult = stats_component.get_stat(StatsComponentScript.STAT_DURATION)
+
+		var weapon_damage_flat: float = _get_weapon_flat(weapon_id, StatsComponentScript.STAT_DAMAGE)
+		var weapon_damage_mult: float = _get_weapon_mult(weapon_id, StatsComponentScript.STAT_DAMAGE)
+		var base_damage: float = float(config.get("damage", 10.0))
+		config["damage"] = (base_damage + weapon_damage_flat) * (1.0 + weapon_damage_mult)
+
+		var weapon_size_mult: float = _get_weapon_mult(weapon_id, StatsComponentScript.STAT_SIZE)
+		var base_size: float = float(config.get("size", 92.0))
+		config["size"] = maxf(8.0, base_size * global_size_mult * (1.0 + weapon_size_mult))
+
+		var base_trigger_radius: float = float(config.get("trigger_radius", 52.0))
+		config["trigger_radius"] = maxf(8.0, base_trigger_radius * global_size_mult * (1.0 + weapon_size_mult))
+
+		var weapon_duration_flat: float = _get_weapon_flat(weapon_id, StatsComponentScript.STAT_DURATION)
+		var weapon_duration_mult: float = _get_weapon_mult(weapon_id, StatsComponentScript.STAT_DURATION)
+		var base_duration: float = float(config.get("duration", 3.0))
+		config["duration"] = maxf(0.15, (base_duration + weapon_duration_flat) * (global_duration_mult * (1.0 + weapon_duration_mult)))
+
 	var spawner = _get_or_create_spawner(weapon_id, data)
 	if spawner and spawner.has_method("spawn"):
 		var result = spawner.spawn(parent.global_position, config, parent)
@@ -338,12 +426,28 @@ func fire_weapon_with_config(weapon_id: String, config: Dictionary, source: Node
 			_fire_melee_with_config(weapon_id, config, source)
 		"projectile":
 			_fire_projectile_with_config(weapon_id, config, source)
+		"orbit":
+			_fire_orbit_with_config(weapon_id, config, source)
 		"area":
 			_fire_area_with_config(weapon_id, config, source)
 		"beam":
 			_fire_beam_with_config(weapon_id, config, source)
 		_:
 			push_warning("WeaponComponent: fire_weapon_with_config not implemented for type: " + weapon_type)
+
+
+func _fire_orbit_with_config(weapon_id: String, config: Dictionary, source: Node2D) -> void:
+	"""Fire an orbit weapon with explicit flat config (for test lab/manual fire)."""
+	var weapon_data: Dictionary = DataLoader.get_weapon(weapon_id)
+	var spawner = _get_or_create_spawner(weapon_id, weapon_data)
+	if spawner == null:
+		push_warning("WeaponComponent: No spawner for orbit weapon: " + weapon_id)
+		return
+	if not spawner.has_method("spawn"):
+		return
+	var result = spawner.spawn(source.global_position, config, source)
+	if result:
+		weapon_fired.emit(weapon_id, [result])
 
 
 func _fire_beam_with_config(weapon_id: String, config: Dictionary, source: Node2D) -> void:
