@@ -218,6 +218,19 @@ func get_unlocked_captains() -> Array[Dictionary]:
 	result.assign(captains.values().filter(func(c: Variant) -> bool: return c.get("unlock_condition") == "default"))
 	return result
 
+
+func get_all_ship_upgrade_ids() -> Array[String]:
+	var result: Array[String] = []
+	result.assign(ship_upgrades.keys())
+	return result
+
+
+func get_default_ship_upgrades() -> Array[Dictionary]:
+	## Return ship upgrades with unlock_condition == "default" (always available).
+	var result: Array[Dictionary] = []
+	result.assign(ship_upgrades.values().filter(func(u: Variant) -> bool: return u.get("unlock_condition") == "default"))
+	return result
+
 ## Return synergy data for a ship+captain combo, or empty dict if none.
 func get_synergy_for_combo(ship_id: String, captain_id: String) -> Dictionary:
 	var key: String = ship_id + "+" + captain_id

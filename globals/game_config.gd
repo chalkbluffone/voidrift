@@ -98,6 +98,8 @@ const MODULE_EXTRA_EFFECT_POOL: Array[Dictionary] = [
 	{"stat": "movement_speed", "kind": "mult", "amount": 0.03},
 	{"stat": "pickup_range", "kind": "mult", "amount": 0.10},
 	{"stat": "crit_chance", "kind": "flat", "amount": 2.0},
+	{"stat": "duration", "kind": "mult", "amount": 0.03},
+	{"stat": "crit_damage", "kind": "mult", "amount": 0.05},
 ]
 
 # Weapons: number of rolled weapon-only effects per weapon level-up.

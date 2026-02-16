@@ -62,7 +62,7 @@
 	"description": "Self-repairing hull systems",
 	"icon": "res://assets/icons/upgrades/repair_nanites.png",
 	"stat": "hp_regen",
-	"per_level": 40,
+	"per_level": 8,
 	"max_level": 99,
 	"unlock_condition": "default",
 	"rarity_weights": {
@@ -102,7 +102,7 @@
 	"max_level": 99,
 	"unlock_condition": {
 	  "type": "play_character",
-	  "character": "fortress",
+	  "character": "dreadnought",
 	  "runs": 5
 	},
 	"rarity_weights": {
@@ -192,7 +192,7 @@
 	"description": "Increases pickup range",
 	"icon": "res://assets/icons/upgrades/tractor_beam.png",
 	"stat": "pickup_range",
-	"per_level": 75,
+	"per_level": 15,
 	"max_level": 99,
 	"unlock_condition": {
 	  "type": "use_gas_station",
@@ -301,6 +301,123 @@
 	  "common": 60,
 	  "uncommon": 25,
 	  "rare": 10,
+	  "epic": 4,
+	  "legendary": 1
+	}
+  },
+  
+  "critical_amplifier": {
+	"id": "critical_amplifier",
+	"name": "Critical Amplifier",
+	"description": "Boosts critical hit damage multiplier",
+	"icon": "res://assets/icons/upgrades/critical_amplifier.png",
+	"stat": "crit_damage",
+	"per_level": 0.15,
+	"max_level": 99,
+	"unlock_condition": "default",
+	"rarity_weights": {
+	  "common": 60,
+	  "uncommon": 25,
+	  "rare": 10,
+	  "epic": 4,
+	  "legendary": 1
+	}
+  },
+  
+  "temporal_extender": {
+	"id": "temporal_extender",
+	"name": "Temporal Extender",
+	"description": "Extends weapon effect durations",
+	"icon": "res://assets/icons/upgrades/temporal_extender.png",
+	"stat": "duration",
+	"per_level": 8,
+	"max_level": 99,
+	"unlock_condition": "default",
+	"rarity_weights": {
+	  "common": 60,
+	  "uncommon": 25,
+	  "rare": 10,
+	  "epic": 4,
+	  "legendary": 1
+	}
+  },
+  
+  "velocity_booster": {
+	"id": "velocity_booster",
+	"name": "Velocity Booster",
+	"description": "Increases projectile travel speed",
+	"icon": "res://assets/icons/upgrades/velocity_booster.png",
+	"stat": "projectile_speed",
+	"per_level": 10,
+	"max_level": 99,
+	"unlock_condition": "default",
+	"rarity_weights": {
+	  "common": 60,
+	  "uncommon": 25,
+	  "rare": 10,
+	  "epic": 4,
+	  "legendary": 1
+	}
+  },
+  
+  "parasitic_hull": {
+	"id": "parasitic_hull",
+	"name": "Parasitic Hull",
+	"description": "Drains enemy life force on hit",
+	"icon": "res://assets/icons/upgrades/parasitic_hull.png",
+	"stat": "lifesteal",
+	"per_level": 3,
+	"max_level": 99,
+	"unlock_condition": {
+	  "type": "survive_time",
+	  "seconds": 480
+	},
+	"rarity_weights": {
+	  "common": 55,
+	  "uncommon": 28,
+	  "rare": 12,
+	  "epic": 4,
+	  "legendary": 1
+	}
+  },
+  
+  "elite_hunter": {
+	"id": "elite_hunter",
+	"name": "Elite Hunter",
+	"description": "Deals bonus damage to elite and boss enemies",
+	"icon": "res://assets/icons/upgrades/elite_hunter.png",
+	"stat": "damage_to_elites",
+	"per_level": 8,
+	"max_level": 99,
+	"unlock_condition": {
+	  "type": "defeat_elites",
+	  "count": 50
+	},
+	"rarity_weights": {
+	  "common": 60,
+	  "uncommon": 25,
+	  "rare": 10,
+	  "epic": 4,
+	  "legendary": 1
+	}
+  },
+  
+  "phase_coils": {
+	"id": "phase_coils",
+	"name": "Phase Coils",
+	"description": "Grants additional phase shift charges",
+	"icon": "res://assets/icons/upgrades/phase_coils.png",
+	"stat": "extra_phase_shifts",
+	"per_level": 1,
+	"max_level": 3,
+	"unlock_condition": {
+	  "type": "use_phase_shift",
+	  "count": 200
+	},
+	"rarity_weights": {
+	  "common": 55,
+	  "uncommon": 28,
+	  "rare": 12,
 	  "epic": 4,
 	  "legendary": 1
 	}

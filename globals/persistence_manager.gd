@@ -18,10 +18,11 @@ static func _get_default_persistent_data() -> Dictionary:
 		"total_runs": 0,
 		"total_wins": 0,
 		"total_time_played": 0.0,
-		"unlocked_ships": ["scout"],
+		"unlocked_ships": ["starchaser"],
 		"unlocked_captains": ["captain_nightmare", "captain_finswick"],
 		"discovered_synergies": [],
 		"unlocked_weapons": ["plasma_cannon", "laser_array", "ion_orbit", "proximity_tax", "psp_9000", "space_nukes", "tothian_mines", "timmy_gun"],
+		"unlocked_modules": [],
 		"high_score": 0,
 		"best_time": 0.0,
 		"settings": {
@@ -126,6 +127,30 @@ func is_captain_unlocked(captain_id: String) -> bool:
 
 func is_weapon_unlocked(weapon_id: String) -> bool:
 	return weapon_id in persistent_data.unlocked_weapons
+
+
+## Check if a ship upgrade module is unlocked.
+## Modules with unlock_condition "default" are always available.
+## Other modules must be explicitly unlocked via unlock_module().
+func is_module_unlocked(module_id: String) -> bool:
+	var DataLoader: Node = get_node_or_null("/root/DataLoader")
+	if DataLoader == null:
+		return true
+	var module_data: Dictionary = DataLoader.get_ship_upgrade(module_id)
+	if module_data.is_empty():
+		return false
+	var condition: Variant = module_data.get("unlock_condition", "default")
+	if condition == "default":
+		return true
+	return module_id in persistent_data.get("unlocked_modules", [])
+
+
+func unlock_module(module_id: String) -> void:
+	if not persistent_data.has("unlocked_modules"):
+		persistent_data["unlocked_modules"] = []
+	if module_id not in persistent_data.unlocked_modules:
+		persistent_data.unlocked_modules.append(module_id)
+		save_game()
 
 
 # --- Getters/Setters for persistent data ---

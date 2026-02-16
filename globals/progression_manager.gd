@@ -15,7 +15,7 @@ const XP_GROWTH: float = 1.15  # Each level needs 15% more XP
 
 # --- Loadout Limits ---
 const MAX_WEAPON_SLOTS: int = 2
-const MAX_MODULE_SLOTS: int = 2
+const MAX_MODULE_SLOTS: int = 4
 
 @onready var RunManager: Node = get_node("/root/RunManager")
 @onready var UpgradeService: Node = get_node("/root/UpgradeService")

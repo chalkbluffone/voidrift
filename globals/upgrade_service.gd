@@ -10,6 +10,7 @@ const PERCENT_POINT_STATS: Dictionary = {
 	"crit_chance": true,
 	"luck": true,
 	"difficulty": true,
+	"lifesteal": true,
 }
 
 # Stats that should be treated as flat additions.
@@ -103,6 +104,9 @@ func _build_module_candidates(
 	for upgrade in available_upgrades:
 		var upgrade_id: String = upgrade.get("id", "")
 		if upgrade_id == "":
+			continue
+		# Skip modules that haven't been unlocked yet
+		if not PersistenceManager.is_module_unlocked(upgrade_id):
 			continue
 		var current_stacks: int = ProgressionManager.get_upgrade_stacks(upgrade_id)
 		var max_level: int = int(upgrade.get("max_level", 99))
