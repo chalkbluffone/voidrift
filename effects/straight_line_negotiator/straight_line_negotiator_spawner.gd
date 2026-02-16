@@ -13,23 +13,7 @@ func spawn(
 	params: Dictionary = {},
 	follow_source: Node2D = null
 ) -> Node2D:
-	var enemies: Array = _parent_node.get_tree().get_nodes_in_group("enemies")
-	if enemies.is_empty():
-		return null
-
-	var nearest: Node2D = null
-	var nearest_dist: float = INF
-	for enemy_any in enemies:
-		if not enemy_any is Node2D:
-			continue
-		if not is_instance_valid(enemy_any):
-			continue
-		var enemy: Node2D = enemy_any as Node2D
-		var dist: float = spawn_pos.distance_to(enemy.global_position)
-		if dist < nearest_dist:
-			nearest_dist = dist
-			nearest = enemy
-
+	var nearest: Node2D = EffectUtils.find_nearest_enemy(_parent_node.get_tree(), spawn_pos)
 	if nearest == null:
 		return null
 

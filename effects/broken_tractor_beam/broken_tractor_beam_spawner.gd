@@ -22,16 +22,7 @@ func spawn(
 
 	# Pre-check: any enemies within search radius?
 	var search_radius: float = float(params.get("search_radius", params.get("size", 300.0)))
-	var enemies: Array = _parent_node.get_tree().get_nodes_in_group("enemies")
-	var has_target: bool = false
-	for enemy in enemies:
-		if enemy is Node2D and is_instance_valid(enemy):
-			var d: float = spawn_pos.distance_to(enemy.global_position)
-			if d < search_radius:
-				has_target = true
-				break
-
-	if not has_target:
+	if not EffectUtils.has_enemy_in_range(_parent_node.get_tree(), spawn_pos, search_radius):
 		return null
 
 	var beam: Node2D = load("res://effects/broken_tractor_beam/BrokenTractorBeam.tscn").instantiate()

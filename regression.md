@@ -4,7 +4,6 @@
 
 | #   | Location                        | Issue                                                                                                                                                                                            |
 | --- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 21  | 8 spawner files                 | **"Find nearest enemy" loop copy-pasted** across all spawners. Should be a shared utility function.                                                                                              |
 | 24  | pause_menu.gd + options_menu.gd | **Duplicated options handlers** — identical `_on_master_volume_changed`, `_on_sfx_volume_changed`, etc. in both files. Extract a shared options controller.                                      |
 | 25  | settings_manager.gd             | `set_sfx_volume()` and `set_music_volume()` are nearly identical — extract `_set_bus_volume()`. Also `apply_all_settings()` duplicates setter logic.                                             |
 | 26  | progression_manager.gd          | `add_credits()` and `add_stardust()` follow identical patterns. Extract shared helper.                                                                                                           |

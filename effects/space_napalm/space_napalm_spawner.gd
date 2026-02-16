@@ -33,8 +33,8 @@ func spawn(
 		The spawned SpaceNapalm instance, or null if no enemies or at max instances.
 	"""
 	# Only fire when enemies exist
-	var enemies: Array = _parent_node.get_tree().get_nodes_in_group("enemies")
-	if enemies.is_empty():
+	var nearest: Node2D = EffectUtils.find_nearest_enemy(_parent_node.get_tree(), spawn_pos)
+	if nearest == null:
 		return null
 
 	# Purge dead references and enforce projectile count limit
@@ -47,22 +47,7 @@ func spawn(
 	if _active_instances.size() >= max_count:
 		return null
 
-	# Find the closest enemy to the player
-	var best_target: Vector2 = Vector2.ZERO
-	var best_dist: float = INF
-
-	for enemy in enemies:
-		if not enemy is Node2D or not is_instance_valid(enemy):
-			continue
-		var dist: float = spawn_pos.distance_to((enemy as Node2D).global_position)
-		if dist < best_dist:
-			best_dist = dist
-			best_target = (enemy as Node2D).global_position
-
-	if best_dist == INF:
-		return null
-
-	# Aim at the best cluster position
+	var best_target: Vector2 = nearest.global_position
 	direction = (best_target - spawn_pos).normalized()
 
 	var scene: PackedScene = load("res://effects/space_napalm/SpaceNapalm.tscn")

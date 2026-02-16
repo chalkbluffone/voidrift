@@ -34,24 +34,10 @@ func spawn(
 		or if already at max active instances.
 	"""
 	# Only fire when there's an actual enemy target — and aim at the nearest one
-	var enemies: Array = _parent_node.get_tree().get_nodes_in_group("enemies")
-	if enemies.is_empty():
+	var nearest: Node2D = EffectUtils.find_nearest_enemy(_parent_node.get_tree(), spawn_pos)
+	if nearest == null:
 		return null
-
-	# Find nearest enemy and override the direction to point at it
-	var nearest: Node2D = null
-	var nearest_dist: float = INF
-	for enemy in enemies:
-		if not enemy is Node2D:
-			continue
-		if not is_instance_valid(enemy):
-			continue
-		var dist: float = spawn_pos.distance_to(enemy.global_position)
-		if dist < nearest_dist:
-			nearest_dist = dist
-			nearest = enemy as Node2D
-	if nearest:
-		direction = (nearest.global_position - spawn_pos).normalized()
+	direction = (nearest.global_position - spawn_pos).normalized()
 
 	# Purge dead references and enforce projectile count limit
 	_active_instances = _active_instances.filter(func(inst: Node) -> bool: return is_instance_valid(inst) and inst.is_inside_tree())

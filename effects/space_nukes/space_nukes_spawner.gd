@@ -22,10 +22,6 @@ func spawn(
 	params: Dictionary = {},
 	follow_source: Node2D = null
 ) -> Node2D:
-	var enemies: Array = _parent_node.get_tree().get_nodes_in_group("enemies")
-	if enemies.is_empty():
-		return null
-
 	_active_instances = _active_instances.filter(
 		func(inst: Node) -> bool: return is_instance_valid(inst) and inst.is_inside_tree()
 	)
@@ -37,7 +33,7 @@ func spawn(
 	var size_mult: float = maxf(0.2, float(params.get("size_mult", 1.0)))
 	var targeting_radius: float = BASE_TARGETING_RADIUS * size_mult
 
-	var targets: Array[Node2D] = _get_targets_in_area(targeting_center, targeting_radius, enemies)
+	var targets: Array[Node2D] = EffectUtils.find_enemies_in_range(_parent_node.get_tree(), targeting_center, targeting_radius)
 	if targets.is_empty():
 		return null
 
@@ -84,22 +80,6 @@ func spawn(
 			first_instance = instance
 
 	return first_instance
-
-
-func _get_targets_in_area(center: Vector2, radius: float, enemies: Array) -> Array[Node2D]:
-	var out: Array[Node2D] = []
-	for enemy_any in enemies:
-		if not enemy_any is Node2D or not is_instance_valid(enemy_any):
-			continue
-		var enemy: Node2D = enemy_any as Node2D
-		if center.distance_to(enemy.global_position) <= radius:
-			out.append(enemy)
-
-	out.sort_custom(
-		func(a: Node2D, b: Node2D) -> bool:
-			return center.distance_to(a.global_position) < center.distance_to(b.global_position)
-	)
-	return out
 
 
 func cleanup() -> void:
