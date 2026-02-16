@@ -3,22 +3,26 @@ extends Node
 ## FileLogger - Writes log output to a file for debugging.
 ## Autoload as "FileLogger" in project settings.
 
-const LOG_FILE_PATH := "res://debug_log.txt"
+const LOG_FILE_PATH_EDITOR := "res://debug_log.txt"
+const LOG_FILE_PATH_EXPORT := "user://debug_log.txt"
 const MAX_LOG_SIZE := 1024 * 1024  # 1MB max before truncating
 
 var _file: FileAccess = null
 var _log_path: String = ""
 
 func _ready() -> void:
+	# Use res:// in editor (writable project root), user:// in exported builds
+	var log_file_path: String = LOG_FILE_PATH_EDITOR if OS.has_feature("editor") else LOG_FILE_PATH_EXPORT
+	
 	# Get the actual path for display
-	_log_path = ProjectSettings.globalize_path(LOG_FILE_PATH)
+	_log_path = ProjectSettings.globalize_path(log_file_path)
 	
 	# Delete existing log file on startup
-	if FileAccess.file_exists(LOG_FILE_PATH):
+	if FileAccess.file_exists(log_file_path):
 		DirAccess.remove_absolute(_log_path)
 	
 	# Open file for writing (overwrite on each run)
-	_file = FileAccess.open(LOG_FILE_PATH, FileAccess.WRITE)
+	_file = FileAccess.open(log_file_path, FileAccess.WRITE)
 	if _file == null:
 		push_error("[FileLogger] Failed to open log file: " + _log_path)
 		return

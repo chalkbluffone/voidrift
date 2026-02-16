@@ -366,7 +366,7 @@ func _on_refresh_pressed() -> void:
 		FileLogger.log_info("LevelUpUI", "Refreshing options (spent %d credits)" % GameConfig.LEVEL_UP_REFRESH_COST)
 		
 		# Generate new options
-		_current_options = GameManager._generate_level_up_options()
+		_current_options = UpgradeService.generate_level_up_options()
 		_populate_cards()
 		_update_refresh_button()
 		_animate_cards_in()

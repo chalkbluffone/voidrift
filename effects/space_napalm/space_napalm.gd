@@ -382,9 +382,7 @@ func _create_projectile_mesh() -> void:
 	_proj_mesh.mesh = mesh
 
 	# White texture for shader
-	var img: Image = Image.create(4, 4, false, Image.FORMAT_RGBA8)
-	img.fill(Color.WHITE)
-	_proj_mesh.texture = ImageTexture.create_from_image(img)
+	_proj_mesh.texture = EffectUtils.get_white_pixel_texture()
 
 	# Shader material
 	_proj_material = ShaderMaterial.new()
@@ -421,9 +419,7 @@ func _create_fire_mesh() -> void:
 	_regenerate_fire_disc()
 
 	# White texture for shader
-	var img: Image = Image.create(4, 4, false, Image.FORMAT_RGBA8)
-	img.fill(Color.WHITE)
-	_fire_mesh.texture = ImageTexture.create_from_image(img)
+	_fire_mesh.texture = EffectUtils.get_white_pixel_texture()
 
 	# Shader material
 	_fire_material = ShaderMaterial.new()

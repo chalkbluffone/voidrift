@@ -71,9 +71,7 @@ func _create_visuals() -> void:
 	var quad: QuadMesh = QuadMesh.new()
 	_mesh.mesh = quad
 
-	var img: Image = Image.create(4, 4, false, Image.FORMAT_RGBA8)
-	img.fill(Color.WHITE)
-	_mesh.texture = ImageTexture.create_from_image(img)
+	_mesh.texture = EffectUtils.get_white_pixel_texture()
 
 	var shader: Shader = load("res://effects/aoe_base/proximity_tax_aura.gdshader")
 	if shader:
@@ -116,7 +114,7 @@ func _update_radius(radius: float) -> void:
 
 	var visual_extent: float = clamped_radius + glow_width_px + 6.0
 	if _mesh and _mesh.mesh is QuadMesh:
-		var quad_size := Vector2(visual_extent * 2.0, visual_extent * 2.0)
+		var quad_size: Vector2 = Vector2(visual_extent * 2.0, visual_extent * 2.0)
 		(_mesh.mesh as QuadMesh).size = quad_size
 		if _shader_material:
 			_shader_material.set_shader_parameter("quad_size_px", quad_size)

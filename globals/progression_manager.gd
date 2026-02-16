@@ -73,7 +73,17 @@ func select_level_up_option(option: Dictionary) -> void:
 		_add_ship_upgrade(id)
 	elif type == "weapon":
 		if id not in RunManager.run_data.weapons and RunManager.run_data.weapons.size() < MAX_WEAPON_SLOTS:
+			# New weapon — add to loadout
 			RunManager.run_data.weapons.append(id)
+		elif id in RunManager.run_data.weapons:
+			# Existing weapon re-pick — apply level-up stat effects
+			var effects: Array = option.get("effects", [])
+			if effects.size() > 0:
+				var player: Node = RunManager.get_player()
+				if player and player.has_method("get_weapon_component"):
+					var wc: Node = player.get_weapon_component()
+					if wc and wc.has_method("apply_level_up_effects"):
+						wc.apply_level_up_effects(id, effects)
 	
 	level_up_completed.emit(option)
 	RunManager.resume_game()

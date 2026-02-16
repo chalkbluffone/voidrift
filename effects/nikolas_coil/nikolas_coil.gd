@@ -91,9 +91,9 @@ func load_from_data(data: Dictionary) -> void:
 	fade_out = float(motion.get("fade_out", fade_out))
 
 	var visual: Dictionary = data.get("visual", {})
-	color_core = _parse_color(visual.get("color_core", ""), color_core)
-	color_glow = _parse_color(visual.get("color_glow", ""), color_glow)
-	color_fringe = _parse_color(visual.get("color_fringe", ""), color_fringe)
+	color_core = EffectUtils.parse_color(visual.get("color_core", ""), color_core)
+	color_glow = EffectUtils.parse_color(visual.get("color_glow", ""), color_glow)
+	color_fringe = EffectUtils.parse_color(visual.get("color_fringe", ""), color_fringe)
 	glow_strength = float(visual.get("glow_strength", glow_strength))
 	bolt_width = float(visual.get("bolt_width", bolt_width))
 	jaggedness = float(visual.get("jaggedness", jaggedness))
@@ -131,9 +131,7 @@ func fire_from(origin_pos: Vector2) -> NikolasCoil:
 
 	# Cache resources once
 	_shader_res = load("res://effects/nikolas_coil/nikolas_coil.gdshader")
-	var img: Image = Image.create(4, 4, false, Image.FORMAT_RGBA8)
-	img.fill(Color.WHITE)
-	_white_tex = ImageTexture.create_from_image(img)
+	_white_tex = EffectUtils.get_white_pixel_texture()
 
 	# Find chain targets
 	_chain_targets = _find_chain_targets(_origin, _max_bounces, search_radius)
@@ -596,9 +594,7 @@ func _create_impact_effect(impact_pos: Vector2, incoming_dir: Vector2) -> Dictio
 	molten_ramp.set_color(1, Color(0.3, 0.08, 0.02, 0.0))     # Dark ember fade
 	molten.color_ramp = molten_ramp
 
-	var pixel_img: Image = Image.create(4, 4, false, Image.FORMAT_RGBA8)
-	pixel_img.fill(Color.WHITE)
-	molten.texture = ImageTexture.create_from_image(pixel_img)
+	molten.texture = EffectUtils.get_white_pixel_texture()
 
 	add_child(molten)
 	result["molten"] = molten
@@ -641,7 +637,7 @@ func _create_impact_effect(impact_pos: Vector2, incoming_dir: Vector2) -> Dictio
 	ember_ramp.add_point(0.6, Color(0.6, 0.15, 0.02, 0.6))    # Deep red
 	ember_ramp.set_color(1, Color(0.2, 0.05, 0.01, 0.0))      # Dark
 	embers.color_ramp = ember_ramp
-	embers.texture = ImageTexture.create_from_image(pixel_img)
+	embers.texture = EffectUtils.get_white_pixel_texture()
 
 	add_child(embers)
 	result["embers"] = embers
@@ -732,7 +728,7 @@ func _create_impact_effect(impact_pos: Vector2, incoming_dir: Vector2) -> Dictio
 	flash_ramp.add_point(0.3, Color(color_glow.r, color_glow.g, color_glow.b, 0.8))
 	flash_ramp.set_color(1, Color(color_glow.r * 0.5, color_glow.g * 0.5, color_glow.b * 0.5, 0.0))
 	flash.color_ramp = flash_ramp
-	flash.texture = ImageTexture.create_from_image(pixel_img)
+	flash.texture = EffectUtils.get_white_pixel_texture()
 
 	add_child(flash)
 	result["flash"] = flash
@@ -819,12 +815,4 @@ func _pseudo_noise(x: float) -> float:
 	return fmod(sin(x * 12.9898 + 78.233) * 43758.5453, 1.0)
 
 
-func _parse_color(hex_string: String, fallback: Color) -> Color:
-	if hex_string.is_empty():
-		return fallback
-	var hex: String = hex_string.trim_prefix("#")
-	if hex.length() == 6:
-		return Color(hex)
-	elif hex.length() == 8:
-		return Color.from_string(hex_string, fallback)
-	return fallback
+

@@ -16,9 +16,9 @@ const StatsComponentScript := preload("res://scripts/core/stats_component.gd")
 var stats_component: Node = null
 
 # Autoload references
-@onready var DataLoader: Node = get_node("/root/DataLoader")
-@onready var GameManager: Node = get_node("/root/GameManager")
-@onready var FileLogger: Node = get_node("/root/FileLogger")
+@onready var DataLoader: Node = get_node_or_null("/root/DataLoader")
+@onready var GameManager: Node = get_node_or_null("/root/GameManager")
+@onready var FileLogger: Node = get_node_or_null("/root/FileLogger")
 
 # Dynamic spawner cache: {weapon_id: spawner_instance}
 var _spawner_cache: Dictionary = {}
@@ -37,6 +37,16 @@ var _weapon_level_bonuses: Dictionary = {}
 
 # Targeting
 var _targeting_range: float = 500.0
+
+
+## Detect the arg count of a spawner's spawn() method via reflection.
+func _get_spawner_arg_count(spawner: Object, default: int = 3) -> int:
+	var script: Script = spawner.get_script()
+	var methods: Array = script.get_script_method_list() if script else []
+	for m in methods:
+		if m.get("name", "") == "spawn":
+			return m.get("args", []).size()
+	return default
 
 
 func _ready() -> void:
@@ -232,14 +242,7 @@ func _fire_projectile_via_spawner(weapon_id: String, data: Dictionary) -> void:
 		return
 
 	# Detect spawn() signature (3-arg vs 4-arg) like _fire_melee_with_config does
-	var script: Script = spawner.get_script()
-	var methods: Array = script.get_script_method_list() if script else []
-	var spawn_arg_count: int = 3  # Default to position-only (chain lightning style)
-	for m in methods:
-		if m.get("name", "") == "spawn":
-			var args: Array = m.get("args", [])
-			spawn_arg_count = args.size()
-			break
+	var spawn_arg_count: int = _get_spawner_arg_count(spawner, 3)
 
 	FileLogger.log_info("WeaponComponent", "Firing %s via spawner (%d-arg) at %s" % [weapon_id, spawn_arg_count, str(parent.global_position)])
 	var result = null
@@ -392,14 +395,7 @@ func _fire_melee_with_config(weapon_id: String, config: Dictionary, source: Node
 		# Check parameter count to decide which call signature to use.
 		# RadiantArc-style: spawn(pos, direction, params, follow_source)
 		# IonWake-style: spawn(pos, params, follow_source)
-		var script: Script = spawner.get_script()
-		var methods: Array = script.get_script_method_list() if script else []
-		var spawn_arg_count: int = 4  # default to direction-based
-		for m in methods:
-			if m.get("name", "") == "spawn":
-				var args: Array = m.get("args", [])
-				spawn_arg_count = args.size()
-				break
+		var spawn_arg_count: int = _get_spawner_arg_count(spawner, 4)
 		if spawn_arg_count >= 4:
 			result = spawner.spawn(spawn_pos, direction, config, source)
 		else:
@@ -493,13 +489,7 @@ func _fire_projectile_with_config(weapon_id: String, config: Dictionary, source:
 		if not spawner.has_method("spawn"):
 			return
 		# Detect arg count
-		var script: Script = spawner.get_script()
-		var methods: Array = script.get_script_method_list() if script else []
-		var spawn_arg_count: int = 3
-		for m in methods:
-			if m.get("name", "") == "spawn":
-				spawn_arg_count = m.get("args", []).size()
-				break
+		var spawn_arg_count: int = _get_spawner_arg_count(spawner, 3)
 		var result = null
 		if spawn_arg_count >= 4:
 			var direction: Vector2 = Vector2.RIGHT.rotated(source.rotation)

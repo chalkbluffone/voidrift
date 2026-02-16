@@ -157,9 +157,7 @@ func _ready() -> void:
 	add_child(_mesh_instance)
 
 	# White pixel texture for UVs
-	var img: Image = Image.create(4, 4, false, Image.FORMAT_RGBA8)
-	img.fill(Color.WHITE)
-	_mesh_instance.texture = ImageTexture.create_from_image(img)
+	_mesh_instance.texture = EffectUtils.get_white_pixel_texture()
 
 	# Shader material — local copy with full_visible uniform for boomerang mode
 	_shader_material = ShaderMaterial.new()
@@ -533,9 +531,7 @@ func _create_particles() -> void:
 		color_ramp.set_color(1, Color(particles_color.r * 0.3, particles_color.g * 0.3, particles_color.b * 0.3, 0.0))
 	_particles.color_ramp = color_ramp
 
-	var pixel_img: Image = Image.create(4, 4, false, Image.FORMAT_RGBA8)
-	pixel_img.fill(Color.WHITE)
-	_particles.texture = ImageTexture.create_from_image(pixel_img)
+	_particles.texture = EffectUtils.get_white_pixel_texture()
 
 	add_child(_particles)
 

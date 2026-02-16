@@ -41,7 +41,7 @@
       "extra_phase_shifts": 1,
       "phase_shift_distance": 150
     },
-    "starting_weapon": "laser_array",
+    "starting_weapon": "straight_line_negotiator",
     "phase_shift": {
       "id": "blink",
       "name": "Blink",
@@ -74,7 +74,7 @@
       "pickup_range": 0.8,
       "phase_shift_distance": 180
     },
-    "starting_weapon": "ion_orbit",
+    "starting_weapon": "proximity_tax",
     "phase_shift": {
       "id": "ram_shift",
       "name": "Ram Shift",

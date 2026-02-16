@@ -36,8 +36,8 @@ const PROJECTILE_SCENE := preload("res://scenes/gameplay/projectile.tscn")
 var _pellets: Array = []  # Array of projectile node refs
 var _spawn_origin: Vector2 = Vector2.ZERO
 
-@onready var FileLogger: Node = get_node("/root/FileLogger")
-@onready var GameManager: Node = get_node("/root/GameManager")
+@onready var FileLogger: Node = get_node_or_null("/root/FileLogger")
+@onready var GameManager: Node = get_node_or_null("/root/GameManager")
 
 
 func setup(params: Dictionary) -> PersonalSpaceViolator:
@@ -133,11 +133,6 @@ func _calculate_falloff(distance: float) -> float:
 		var t: float = (distance - falloff_start) / (falloff_end - falloff_start)
 		return lerp(1.0, falloff_min_mult, t)
 
-
-func _parse_color(value, fallback: Color) -> Color:
-	if value is String and not value.is_empty():
-		return Color(value)
-	return fallback
 
 
 # --- Neon glow visual (replaces bullet sprite) ---

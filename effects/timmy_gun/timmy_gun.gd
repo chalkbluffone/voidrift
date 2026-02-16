@@ -34,8 +34,8 @@ var _burst_timer: float = 0.0
 var _fire_origin: Vector2 = Vector2.ZERO
 var _fire_direction: Vector2 = Vector2.RIGHT
 
-@onready var FileLogger: Node = get_node("/root/FileLogger")
-@onready var GameManager: Node = get_node("/root/GameManager")
+@onready var FileLogger: Node = get_node_or_null("/root/FileLogger")
+@onready var GameManager: Node = get_node_or_null("/root/GameManager")
 
 
 func setup(params: Dictionary) -> TimmyGun:

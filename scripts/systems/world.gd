@@ -14,10 +14,10 @@ func _ready() -> void:
 	_set_star_seed(stars_near_rect_path, "stars_near")
 	
 	# Start the run if no main menu launched it
-	if GameManager.current_state != GameManager.GameState.PLAYING:
-		GameManager.current_state = GameManager.GameState.PLAYING
-		GameManager.run_data.time_elapsed = 0.0
-		GameManager.run_data.time_remaining = GameManager.run_duration
+	if RunManager.current_state != RunManager.GameState.PLAYING:
+		RunManager.current_state = RunManager.GameState.PLAYING
+		RunManager.run_data.time_elapsed = 0.0
+		RunManager.run_data.time_remaining = RunManager.run_duration
 
 func _set_star_seed(rect_path: NodePath, ns: String) -> void:
 	var rect := get_node(rect_path) as ColorRect

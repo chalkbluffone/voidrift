@@ -142,6 +142,19 @@ func apply_knockback(force: Vector2) -> void:
 	_knockback_velocity += force
 
 
+func apply_slow(amount: float, duration: float) -> void:
+	## Temporarily reduces move_speed by amount (fraction, e.g. 0.5 = 50% slower)
+	## for the given duration in seconds.
+	var original_speed: float = move_speed
+	move_speed = move_speed * (1.0 - clampf(amount, 0.0, 0.9))
+	# Restore after duration
+	get_tree().create_timer(duration).timeout.connect(
+		func() -> void:
+			if is_instance_valid(self):
+				move_speed = original_speed
+	)
+
+
 func get_xp_value() -> float:
 	return xp_value
 

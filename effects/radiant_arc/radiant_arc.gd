@@ -116,9 +116,9 @@ func load_from_data(data: Dictionary) -> void:
 	
 	# Visual
 	var visual = data.get("visual", {})
-	color_a = _parse_color(visual.get("color_a", ""), color_a)
-	color_b = _parse_color(visual.get("color_b", ""), color_b)
-	color_c = _parse_color(visual.get("color_c", ""), color_c)
+	color_a = EffectUtils.parse_color(visual.get("color_a", ""), color_a)
+	color_b = EffectUtils.parse_color(visual.get("color_b", ""), color_b)
+	color_c = EffectUtils.parse_color(visual.get("color_c", ""), color_c)
 	glow_strength = visual.get("glow_strength", glow_strength)
 	core_strength = visual.get("core_strength", core_strength)
 	noise_strength = visual.get("noise_strength", noise_strength)
@@ -142,21 +142,8 @@ func load_from_data(data: Dictionary) -> void:
 	particles_drag = particles.get("drag", particles_drag)
 	particles_outward = particles.get("outward", particles_outward)
 	particles_radius = particles.get("radius", particles_radius)
-	particles_color = _parse_color(particles.get("color", ""), particles_color)
+	particles_color = EffectUtils.parse_color(particles.get("color", ""), particles_color)
 
-
-## Parse a hex color string like "#00ffff" or "#00ffffcc" into a Color.
-func _parse_color(hex_string: String, fallback: Color) -> Color:
-	if hex_string.is_empty():
-		return fallback
-	# Remove # if present
-	var hex = hex_string.trim_prefix("#")
-	if hex.length() == 6:
-		return Color(hex)
-	elif hex.length() == 8:
-		# RGBA format
-		return Color.from_string(hex_string, fallback)
-	return fallback
 
 func _ready() -> void:
 	# Find or create MeshInstance2D child
@@ -178,9 +165,7 @@ func _ready() -> void:
 	
 	# Texture fix for UVs
 	if not _mesh_instance.texture:
-		var img = Image.create(4, 4, false, Image.FORMAT_RGBA8)
-		img.fill(Color.WHITE)
-		_mesh_instance.texture = ImageTexture.create_from_image(img)
+		_mesh_instance.texture = EffectUtils.get_white_pixel_texture()
 	
 	# Create shader material if not exists
 	if not _mesh_instance.material:
@@ -314,9 +299,7 @@ func _create_particles() -> void:
 	_particles.color_ramp = color_ramp
 	
 	# Simple square texture
-	var pixel_img = Image.create(4, 4, false, Image.FORMAT_RGBA8)
-	pixel_img.fill(Color.WHITE)
-	_particles.texture = ImageTexture.create_from_image(pixel_img)
+	_particles.texture = EffectUtils.get_white_pixel_texture()
 	
 	add_child(_particles)
 

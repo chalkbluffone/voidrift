@@ -9,25 +9,29 @@ signal game_saved
 signal game_loaded
 signal data_reset
 
-var persistent_data: Dictionary = {
-	"stardust": 0,
-	"total_runs": 0,
-	"total_wins": 0,
-	"total_time_played": 0.0,
-	"unlocked_ships": ["scout"],
-	"unlocked_captains": ["captain_1", "captain_2"],
-	"discovered_synergies": [],
-	"unlocked_weapons": ["plasma_cannon", "laser_array", "ion_orbit", "proximity_tax", "psp_9000", "space_nukes", "tothian_mines", "timmy_gun"],
-	"high_score": 0,
-	"best_time": 0.0,
-	"settings": {
-		"master_volume": 1.0,
-		"music_volume": 0.8,
-		"sfx_volume": 1.0,
-		"screen_shake": true,
-		"show_damage_numbers": true,
+var persistent_data: Dictionary = _get_default_persistent_data()
+
+
+static func _get_default_persistent_data() -> Dictionary:
+	return {
+		"stardust": 0,
+		"total_runs": 0,
+		"total_wins": 0,
+		"total_time_played": 0.0,
+		"unlocked_ships": ["scout"],
+		"unlocked_captains": ["captain_1", "captain_2"],
+		"discovered_synergies": [],
+		"unlocked_weapons": ["plasma_cannon", "laser_array", "ion_orbit", "proximity_tax", "psp_9000", "space_nukes", "tothian_mines", "timmy_gun"],
+		"high_score": 0,
+		"best_time": 0.0,
+		"settings": {
+			"master_volume": 1.0,
+			"music_volume": 0.8,
+			"sfx_volume": 1.0,
+			"screen_shake": true,
+			"show_damage_numbers": true,
+		}
 	}
-}
 
 
 func _ready() -> void:
@@ -76,25 +80,7 @@ func load_game() -> void:
 
 func reset_save() -> void:
 	"""Reset all persistent data (for testing or player request)."""
-	persistent_data = {
-		"stardust": 0,
-		"total_runs": 0,
-		"total_wins": 0,
-		"total_time_played": 0.0,
-		"unlocked_ships": ["scout"],
-		"unlocked_captains": ["captain_1", "captain_2"],
-		"discovered_synergies": [],
-		"unlocked_weapons": ["plasma_cannon", "laser_array", "ion_orbit", "proximity_tax", "psp_9000", "space_nukes", "tothian_mines"],
-		"high_score": 0,
-		"best_time": 0.0,
-		"settings": {
-			"master_volume": 1.0,
-			"music_volume": 0.8,
-			"sfx_volume": 1.0,
-			"screen_shake": true,
-			"show_damage_numbers": true,
-		}
-	}
+	persistent_data = _get_default_persistent_data()
 	_ensure_default_unlocks()
 	save_game()
 	data_reset.emit()

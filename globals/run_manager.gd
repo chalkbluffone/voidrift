@@ -46,7 +46,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if current_state == GameState.PLAYING:
 		run_data.time_elapsed += delta
-		run_data.time_remaining = max(0.0, run_duration - run_data.time_elapsed)
+		run_data.time_remaining = run_duration - run_data.time_elapsed
 		time_updated.emit(run_data.time_elapsed, run_data.time_remaining)
 
 
@@ -164,7 +164,7 @@ func set_level_up_state() -> void:
 
 func register_player(player_node: Node) -> void:
 	_player = player_node
-	if _player.has_signal("died"):
+	if _player.has_signal("died") and not _player.died.is_connected(_on_player_died):
 		_player.died.connect(_on_player_died)
 
 

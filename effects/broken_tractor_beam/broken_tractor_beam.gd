@@ -55,7 +55,7 @@ func setup(params: Dictionary) -> BrokenTractorBeam:
 			var value: Variant = params[key]
 			# Handle Color values passed as strings
 			if get(key) is Color and value is String:
-				set(key, _parse_color(value, get(key) as Color))
+				set(key, EffectUtils.parse_color(String(value), get(key) as Color))
 			else:
 				set(key, value)
 	return self
@@ -76,8 +76,8 @@ func load_from_data(data: Dictionary) -> void:
 	burst_multiplier = float(motion.get("burst_multiplier", burst_multiplier))
 
 	var visual: Dictionary = data.get("visual", {})
-	color_core = _parse_color(visual.get("color_core", ""), color_core)
-	color_glow = _parse_color(visual.get("color_glow", ""), color_glow)
+	color_core = EffectUtils.parse_color(visual.get("color_core", ""), color_core)
+	color_glow = EffectUtils.parse_color(visual.get("color_glow", ""), color_glow)
 	glow_strength = float(visual.get("glow_strength", glow_strength))
 	particle_count = int(visual.get("particle_count", particle_count))
 	particle_speed = float(visual.get("particle_speed", particle_speed))
@@ -101,9 +101,7 @@ func _ready() -> void:
 	z_index = -1
 
 	# Create a tiny white texture for particles
-	var img: Image = Image.create(4, 4, false, Image.FORMAT_RGBA8)
-	img.fill(Color.WHITE)
-	_white_tex = ImageTexture.create_from_image(img)
+	_white_tex = EffectUtils.get_white_pixel_texture()
 
 
 func activate() -> void:
@@ -455,15 +453,4 @@ func _update_impact_particles() -> void:
 # UTILITY
 # =============================================================================
 
-func _parse_color(hex_str: Variant, fallback: Color) -> Color:
-	## Parse a hex color string like "#88CCFF" to a Color. Returns fallback if invalid.
-	if hex_str is not String or hex_str == "":
-		return fallback
-	var hex: String = hex_str as String
-	if hex.begins_with("#"):
-		hex = hex.substr(1)
-	if hex.length() == 6:
-		hex = "ff" + hex  # Prepend full alpha
-	elif hex.length() != 8:
-		return fallback
-	return Color(hex)
+

@@ -67,8 +67,7 @@ func _on_resume_pressed() -> void:
 func _on_restart_pressed() -> void:
 	get_tree().paused = false
 	# Reset run state so world.gd reinitializes properly
-	var game_manager = get_node("/root/GameManager")
-	game_manager.current_state = game_manager.GameState.MAIN_MENU
+	RunManager.current_state = RunManager.GameState.MAIN_MENU
 	get_tree().change_scene_to_file(GAME_SCENE)
 
 

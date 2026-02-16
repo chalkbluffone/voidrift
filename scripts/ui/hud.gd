@@ -132,8 +132,8 @@ func _process(_delta: float) -> void:
 	fps_label.text = "FPS: %d" % Engine.get_frames_per_second()
 	
 	# Update timer (countdown)
-	if GameManager.current_state == GameManager.GameState.PLAYING:
-		_update_timer(GameManager.run_data.time_remaining)
+	if RunManager.current_state == RunManager.GameState.PLAYING:
+		_update_timer(RunManager.run_data.time_remaining)
 	
 	# Update HP from player stats
 	if _player and _player.stats:

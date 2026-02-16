@@ -1,7 +1,7 @@
 extends Node2D
 class_name SpaceNukesEffect
 
-@onready var GameManager: Node = get_node("/root/GameManager")
+@onready var GameManager: Node = get_node_or_null("/root/GameManager")
 
 @export var damage: float = 12.0
 @export var projectile_speed: float = 520.0
@@ -106,7 +106,7 @@ func _process(delta: float) -> void:
 		_missile_visual.thrust = clampf(_missile_speed / maxf(1.0, projectile_speed), 0.2, 1.0)
 		_missile_visual.queue_redraw()
 
-	var trigger_distance: float = maxi(14.0, explosion_radius * size_mult * 0.12)
+	var trigger_distance: float = maxf(14.0, explosion_radius * size_mult * 0.12)
 	if _missile_pos.distance_to(_target_pos) <= trigger_distance:
 		_explode(_missile_pos)
 		return
@@ -142,7 +142,7 @@ func _update_target_position() -> void:
 
 
 func _check_enemy_contact() -> bool:
-	var contact_radius: float = maxi(14.0, 12.0 * size_mult)
+	var contact_radius: float = maxf(14.0, 12.0 * size_mult)
 	var enemies: Array = get_tree().get_nodes_in_group("enemies")
 	for enemy_any in enemies:
 		if not enemy_any is Node2D or not is_instance_valid(enemy_any):

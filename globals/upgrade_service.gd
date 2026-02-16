@@ -165,13 +165,13 @@ func generate_level_up_options() -> Array:
 	return options
 
 
-func _pick_weighted_index(items: Array[Dictionary]) -> int:
+func _pick_weighted_index(items: Array[Dictionary], rng: RandomNumberGenerator = null) -> int:
 	var total := 0.0
 	for it in items:
 		total += float(it.get("weight", 1.0))
 	if total <= 0.0:
 		return -1
-	var roll := randf() * total
+	var roll: float = rng.randf() * total if rng else randf() * total
 	var acc := 0.0
 	for i in range(items.size()):
 		acc += float(items[i].get("weight", 1.0))
@@ -310,7 +310,7 @@ func _build_weapon_effects(weapon_id: String, rarity: String, rng: RandomNumberG
 	# Pick stats via weighted random selection (without replacement)
 	var remaining: Array[Dictionary] = pool.duplicate(true)
 	for _i in range(desired_count):
-		var idx: int = _pick_weighted_index_rng(remaining, rng)
+		var idx: int = _pick_weighted_index(remaining, rng)
 		if idx < 0:
 			break
 		var chosen: Dictionary = remaining[idx]
@@ -354,20 +354,7 @@ func _build_weapon_effects(weapon_id: String, rarity: String, rng: RandomNumberG
 	return effects
 
 
-func _pick_weighted_index_rng(items: Array[Dictionary], rng: RandomNumberGenerator) -> int:
-	"""Weighted random selection using a seeded RNG for determinism."""
-	var total := 0.0
-	for it in items:
-		total += float(it.get("weight", 1.0))
-	if total <= 0.0:
-		return -1
-	var roll: float = rng.randf() * total
-	var acc := 0.0
-	for i in range(items.size()):
-		acc += float(items[i].get("weight", 1.0))
-		if roll <= acc:
-			return i
-	return items.size() - 1
+
 
 
 func _normalize_effect(effect: Dictionary) -> Dictionary:
