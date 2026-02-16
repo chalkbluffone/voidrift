@@ -15,7 +15,7 @@ var persistent_data: Dictionary = {
 	"total_wins": 0,
 	"total_time_played": 0.0,
 	"unlocked_characters": ["scout"],
-	"unlocked_weapons": ["plasma_cannon", "laser_array", "ion_orbit", "proximity_tax", "psp_9000", "space_nukes", "tothian_mines"],
+	"unlocked_weapons": ["plasma_cannon", "laser_array", "ion_orbit", "proximity_tax", "psp_9000", "space_nukes", "tothian_mines", "timmy_gun"],
 	"high_score": 0,
 	"best_time": 0.0,
 	"settings": {
@@ -43,6 +43,8 @@ func _ensure_default_unlocks() -> void:
 		persistent_data.unlocked_weapons.append("space_nukes")
 	if "tothian_mines" not in persistent_data.unlocked_weapons:
 		persistent_data.unlocked_weapons.append("tothian_mines")
+	if "timmy_gun" not in persistent_data.unlocked_weapons:
+		persistent_data.unlocked_weapons.append("timmy_gun")
 
 
 # --- Persistence ---

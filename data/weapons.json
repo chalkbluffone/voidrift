@@ -453,37 +453,35 @@
       "trail_alpha": 0.35
     }
   },
-  "straight_shooter": {
-    "description": "Fires a auto-aim, high-velocity round that pierces through enemies in a straight line and can circumcise a Tarlaxian in under 3 parsecs.",
-    "display_name": "Straight Shooter",
-    "enabled": false,
-    "motion": {},
-    "scene": "res://effects/projectile_base/ProjectileBase.tscn",
-    "shape": {},
-    "spawner": "res://effects/projectile_base/projectile_base_spawner.gd",
-    "stats": {
-      "cooldown": 1.5,
-      "damage": 20.0
-    },
-    "type": "projectile",
-    "unlock_condition": "default",
-    "visual": {}
-  },
   "timmy_gun": {
     "description": "The Timson Sub-Space Machine Gun model T2928A1, unloads a burst of physical rounds that ricochet off targets, bouncing to hit additional enemies before dissipating. Also, known as the \"Trench Broom\" as it was used in the great Balsurpian war of 2918 to disipate Balsurpians from the Ionic Trenches of Delton VII.",
     "display_name": "Timmy Gun",
-    "enabled": false,
-    "motion": {},
-    "scene": "res://effects/projectile_base/ProjectileBase.tscn",
-    "shape": {},
-    "spawner": "res://effects/projectile_base/projectile_base_spawner.gd",
+    "enabled": true,
+    "motion": {
+      "burst_interval": 0.06
+    },
+    "scene": "res://effects/timmy_gun/TimmyGun.tscn",
+    "shape": {
+      "bounce_range": 400.0
+    },
+    "spawner": "res://effects/timmy_gun/timmy_gun_spawner.gd",
     "stats": {
       "cooldown": 0.6,
-      "damage": 8.0
+      "damage": 8.0,
+      "lifetime": 1.5,
+      "projectile_bounces": 1.0,
+      "projectile_count": 5.0,
+      "projectile_speed": 900.0
     },
+    "targeting": "nearest",
     "type": "projectile",
     "unlock_condition": "default",
-    "visual": {}
+    "visual": {
+      "bullet_radius": 2.5,
+      "color_core": "#CCDDFF",
+      "color_glow": "#00BBFF",
+      "glow_strength": 2.0
+    }
   },
   "tothian_mines": {
     "description": "Deploys proximity-triggered mines that detonate when enemies come near, dealing area damage. Inspired by the ancient Tothian defense systems.",
