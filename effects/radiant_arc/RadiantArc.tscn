@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bm8x8t7oaao36"]
 
-[ext_resource type="Script" uid="uid://dqlu2kn8j3yic" path="res://effects/radiant_arc/radiant_arc.gd" id="1_f0w3a"]
+[ext_resource type="Script" uid="uid://snyoa3hi6ahy" path="res://effects/radiant_arc/radiant_arc.gd" id="1_f0w3a"]
 
 [node name="RadiantArc" type="Node2D"]
 script = ExtResource("1_f0w3a")
