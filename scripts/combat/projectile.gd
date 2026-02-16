@@ -35,7 +35,7 @@ func _ready() -> void:
 	rotation = direction.angle()
 	
 	# Debug sprite texture info
-	var tex_info := "null"
+	var tex_info: String = "null"
 	if sprite.texture:
 		tex_info = "size=%s" % sprite.texture.get_size()
 	FileLogger.log_debug("Projectile", "Ready at %s scale: %s visible: %s sprite_tex: %s z_index: %d" % [global_position, scale, visible, tex_info, z_index])
@@ -95,14 +95,14 @@ func _on_area_entered(area: Area2D) -> void:
 		_hit_enemy(area)
 		return
 	# Child hitbox Area2D (e.g., BaseEnemy's HitboxArea)
-	var parent := area.get_parent()
+	var parent: Node = area.get_parent()
 	if parent and parent.is_in_group("enemies"):
 		_hit_enemy(parent)
 
 
 func _hit_enemy(enemy: Node2D) -> void:
 	# Calculate damage with crits
-	var damage_info := {"damage": damage, "is_crit": false, "is_overcrit": false}
+	var damage_info: Dictionary = {"damage": damage, "is_crit": false, "is_overcrit": false}
 	
 	if _stats:
 		damage_info = _stats.calculate_damage(damage, _weapon_crit_chance, _weapon_crit_damage)

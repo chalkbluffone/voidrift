@@ -24,7 +24,7 @@ func spawn(
 	if not EffectUtils.has_enemy_in_range(_parent_node.get_tree(), spawn_pos, search_radius):
 		return null
 
-	var coil = load("res://effects/nikolas_coil/NikolasCoil.tscn").instantiate()
+	var coil: Node = load("res://effects/nikolas_coil/NikolasCoil.tscn").instantiate()
 	coil.z_index = -1
 	_parent_node.add_child(coil)
 

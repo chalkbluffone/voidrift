@@ -42,7 +42,7 @@ func get_or_create_spawner(weapon_id: String, weapon_data: Dictionary, effects_p
 			return null
 		_spawner_script_cache[spawner_path] = script
 
-	var spawner = script.new(effects_parent)
+	var spawner: Object = script.new(effects_parent)
 	_spawner_cache[weapon_id] = spawner
 	return spawner
 
@@ -51,7 +51,7 @@ func get_or_create_spawner(weapon_id: String, weapon_data: Dictionary, effects_p
 func cleanup_spawner(weapon_id: String) -> void:
 	if not _spawner_cache.has(weapon_id):
 		return
-	var spawner = _spawner_cache[weapon_id]
+	var spawner: Object = _spawner_cache[weapon_id]
 	if spawner.has_method("cleanup"):
 		spawner.cleanup()
 	_spawner_cache.erase(weapon_id)
@@ -60,7 +60,7 @@ func cleanup_spawner(weapon_id: String) -> void:
 ## Clean up all spawners.
 func cleanup_all() -> void:
 	for weapon_id in _spawner_cache.keys():
-		var spawner = _spawner_cache[weapon_id]
+		var spawner: Object = _spawner_cache[weapon_id]
 		if spawner.has_method("cleanup"):
 			spawner.cleanup()
 	_spawner_cache.clear()

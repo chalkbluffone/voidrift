@@ -60,26 +60,26 @@ func _build_ui() -> void:
 	add_child(_main_panel)
 	
 	# Main vertical layout with left padding
-	var margin = MarginContainer.new()
+	var margin: MarginContainer = MarginContainer.new()
 	margin.add_theme_constant_override("margin_left", 10)
 	margin.add_theme_constant_override("margin_right", 10)
 	margin.add_theme_constant_override("margin_top", 10)
 	margin.add_theme_constant_override("margin_bottom", 10)
 	_main_panel.add_child(margin)
 	
-	var main_vbox = VBoxContainer.new()
+	var main_vbox: VBoxContainer = VBoxContainer.new()
 	main_vbox.add_theme_constant_override("separation", 8)
 	main_vbox.focus_mode = Control.FOCUS_NONE
 	margin.add_child(main_vbox)
 	
 	# --- Header ---
-	var header = Label.new()
+	var header: Label = Label.new()
 	header.text = "🔧 WEAPON TEST LAB"
 	header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	header.add_theme_font_size_override("font_size", 20)
 	main_vbox.add_child(header)
 	
-	var toggle_hint = Label.new()
+	var toggle_hint: Label = Label.new()
 	toggle_hint.text = "Press TAB to toggle UI"
 	toggle_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	toggle_hint.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
@@ -88,7 +88,7 @@ func _build_ui() -> void:
 	_add_separator(main_vbox)
 	
 	# --- Weapon Selection ---
-	var weapon_label = Label.new()
+	var weapon_label: Label = Label.new()
 	weapon_label.text = "Select Weapon:"
 	main_vbox.add_child(weapon_label)
 	
@@ -101,14 +101,14 @@ func _build_ui() -> void:
 	_add_separator(main_vbox)
 	
 	# --- Fire Controls ---
-	var fire_label = Label.new()
+	var fire_label: Label = Label.new()
 	fire_label.text = "Fire Controls:"
 	main_vbox.add_child(fire_label)
 	
-	var fire_hbox = HBoxContainer.new()
+	var fire_hbox: HBoxContainer = HBoxContainer.new()
 	main_vbox.add_child(fire_hbox)
 	
-	var fire_btn = Button.new()
+	var fire_btn: Button = Button.new()
 	fire_btn.text = "Fire (SPACE)"
 	fire_btn.focus_mode = Control.FOCUS_CLICK
 	fire_btn.pressed.connect(func(): fire_pressed.emit())
@@ -122,10 +122,10 @@ func _build_ui() -> void:
 	fire_hbox.add_child(_auto_fire_check)
 	
 	# Fire rate
-	var rate_hbox = HBoxContainer.new()
+	var rate_hbox: HBoxContainer = HBoxContainer.new()
 	main_vbox.add_child(rate_hbox)
 	
-	var rate_label = Label.new()
+	var rate_label: Label = Label.new()
 	rate_label.text = "Fire Rate:"
 	rate_label.custom_minimum_size = Vector2(80, 0)
 	rate_hbox.add_child(rate_label)
@@ -148,20 +148,20 @@ func _build_ui() -> void:
 	_add_separator(main_vbox)
 	
 	# --- Target Controls ---
-	var target_label = Label.new()
+	var target_label: Label = Label.new()
 	target_label.text = "Test Targets:"
 	main_vbox.add_child(target_label)
 	
-	var target_hbox = HBoxContainer.new()
+	var target_hbox: HBoxContainer = HBoxContainer.new()
 	main_vbox.add_child(target_hbox)
 	
-	var spawn_btn = Button.new()
+	var spawn_btn: Button = Button.new()
 	spawn_btn.text = "Spawn 5"
 	spawn_btn.focus_mode = Control.FOCUS_CLICK
 	spawn_btn.pressed.connect(func(): spawn_targets_pressed.emit())
 	target_hbox.add_child(spawn_btn)
 	
-	var clear_btn = Button.new()
+	var clear_btn: Button = Button.new()
 	clear_btn.text = "Clear All"
 	clear_btn.focus_mode = Control.FOCUS_CLICK
 	clear_btn.pressed.connect(func(): clear_targets_pressed.emit())
@@ -175,10 +175,10 @@ func _build_ui() -> void:
 	target_hbox.add_child(_auto_spawn_check)
 	
 	# Target speed slider
-	var speed_hbox = HBoxContainer.new()
+	var speed_hbox: HBoxContainer = HBoxContainer.new()
 	main_vbox.add_child(speed_hbox)
 	
-	var speed_label = Label.new()
+	var speed_label: Label = Label.new()
 	speed_label.text = "Target Speed:"
 	speed_label.custom_minimum_size = Vector2(100, 0)
 	speed_hbox.add_child(speed_label)
@@ -199,10 +199,10 @@ func _build_ui() -> void:
 	speed_hbox.add_child(_target_speed_label)
 	
 	# Target spawn rate slider
-	var spawn_rate_hbox = HBoxContainer.new()
+	var spawn_rate_hbox: HBoxContainer = HBoxContainer.new()
 	main_vbox.add_child(spawn_rate_hbox)
 	
-	var spawn_rate_label = Label.new()
+	var spawn_rate_label: Label = Label.new()
 	spawn_rate_label.text = "Spawn Rate:"
 	spawn_rate_label.custom_minimum_size = Vector2(100, 0)
 	spawn_rate_hbox.add_child(spawn_rate_label)
@@ -223,10 +223,10 @@ func _build_ui() -> void:
 	spawn_rate_hbox.add_child(_target_spawn_rate_label)
 	
 	# Target HP slider
-	var hp_hbox = HBoxContainer.new()
+	var hp_hbox: HBoxContainer = HBoxContainer.new()
 	main_vbox.add_child(hp_hbox)
 	
-	var hp_label = Label.new()
+	var hp_label: Label = Label.new()
 	hp_label.text = "Target HP:"
 	hp_label.custom_minimum_size = Vector2(100, 0)
 	hp_hbox.add_child(hp_label)
@@ -247,7 +247,7 @@ func _build_ui() -> void:
 	hp_hbox.add_child(_target_hp_label)
 	
 	# Debug options
-	var debug_hbox = HBoxContainer.new()
+	var debug_hbox: HBoxContainer = HBoxContainer.new()
 	main_vbox.add_child(debug_hbox)
 	
 	_show_hitboxes_check = CheckButton.new()
@@ -267,11 +267,11 @@ func _build_ui() -> void:
 	_add_separator(main_vbox)
 	
 	# --- Config Section (Scrollable) ---
-	var config_label = Label.new()
+	var config_label: Label = Label.new()
 	config_label.text = "Weapon Parameters:"
 	main_vbox.add_child(config_label)
 	
-	var scroll = ScrollContainer.new()
+	var scroll: ScrollContainer = ScrollContainer.new()
 	scroll.custom_minimum_size = Vector2(0, 300)
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.focus_mode = Control.FOCUS_NONE
@@ -285,21 +285,21 @@ func _build_ui() -> void:
 	_add_separator(main_vbox)
 	
 	# --- Save/Load ---
-	var save_label = Label.new()
+	var save_label: Label = Label.new()
 	save_label.text = "Configuration:"
 	main_vbox.add_child(save_label)
 	
-	var save_hbox = HBoxContainer.new()
+	var save_hbox: HBoxContainer = HBoxContainer.new()
 	main_vbox.add_child(save_hbox)
 	
-	var save_btn = Button.new()
+	var save_btn: Button = Button.new()
 	save_btn.text = "💾 Save to JSON"
 	save_btn.tooltip_text = "Save changes to data/weapons.json"
 	save_btn.focus_mode = Control.FOCUS_CLICK
 	save_btn.pressed.connect(func(): save_config_pressed.emit())
 	save_hbox.add_child(save_btn)
 	
-	var load_btn = Button.new()
+	var load_btn: Button = Button.new()
 	load_btn.text = "📂 Reload JSON"
 	load_btn.tooltip_text = "Reload from data/weapons.json (discard changes)"
 	load_btn.focus_mode = Control.FOCUS_CLICK
@@ -309,14 +309,14 @@ func _build_ui() -> void:
 	# --- Instructions ---
 	_add_separator(main_vbox)
 	
-	var instructions = Label.new()
+	var instructions: Label = Label.new()
 	instructions.text = "Controls:\n• Mouse aims weapon\n• SPACE fires manually\n• Click targets to see damage"
 	instructions.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
 	main_vbox.add_child(instructions)
 
 
 func _add_separator(parent: Control) -> void:
-	var sep = HSeparator.new()
+	var sep: HSeparator = HSeparator.new()
 	parent.add_child(sep)
 
 
@@ -329,8 +329,8 @@ func _populate_weapon_list() -> void:
 	_weapon_list.clear()
 	
 	for weapon in _weapons:
-		var display_name = weapon.get("name", weapon.get("id", "Unknown"))
-		var weapon_type = weapon.get("type", "unknown")
+		var display_name: Variant = weapon.get("name", weapon.get("id", "Unknown"))
+		var weapon_type: Variant = weapon.get("type", "unknown")
 		_weapon_list.add_item("%s (%s)" % [display_name, weapon_type])
 	
 	if _weapons.size() > 0:
@@ -341,7 +341,7 @@ func _on_weapon_item_selected(index: int) -> void:
 	if index < 0 or index >= _weapons.size():
 		return
 	
-	var weapon_id = _weapons[index].get("id", "")
+	var weapon_id: String = _weapons[index].get("id", "")
 	_current_weapon_id = weapon_id
 	weapon_selected.emit(weapon_id)
 
@@ -359,7 +359,7 @@ func update_config_ui(weapon_id: String, config: Dictionary) -> void:
 	
 	# Add controls for each config parameter
 	for key in config:
-		var value = config[key]
+		var value: Variant = config[key]
 		_add_config_control(key, value)
 
 
@@ -377,17 +377,17 @@ func _add_config_control(key: String, value: Variant) -> void:
 
 
 func _add_slider_control(key: String, value: Variant) -> void:
-	var hbox = HBoxContainer.new()
+	var hbox: HBoxContainer = HBoxContainer.new()
 	_config_container.add_child(hbox)
 	
 	# Label
-	var label = Label.new()
+	var label: Label = Label.new()
 	label.custom_minimum_size = Vector2(180, 0)
 	label.text = _format_key_name(key)
 	hbox.add_child(label)
 	
 	# Value label
-	var value_label = Label.new()
+	var value_label: Label = Label.new()
 	value_label.custom_minimum_size = Vector2(50, 0)
 	value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	value_label.text = _format_value(value)
@@ -395,13 +395,13 @@ func _add_slider_control(key: String, value: Variant) -> void:
 	_labels[key] = value_label
 	
 	# Slider
-	var slider = HSlider.new()
+	var slider: HSlider = HSlider.new()
 	slider.custom_minimum_size = Vector2(100, 0)
 	slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	slider.focus_mode = Control.FOCUS_CLICK  # Don't capture keyboard navigation
 	
 	# Set appropriate ranges based on key name
-	var ranges = _get_slider_ranges(key, value)
+	var ranges: Array[float] = _get_slider_ranges(key, value)
 	slider.min_value = ranges[0]
 	slider.max_value = ranges[1]
 	slider.step = ranges[2]
@@ -413,24 +413,24 @@ func _add_slider_control(key: String, value: Variant) -> void:
 
 
 func _add_spinbox_control(key: String, value: Variant) -> void:
-	var hbox = HBoxContainer.new()
+	var hbox: HBoxContainer = HBoxContainer.new()
 	_config_container.add_child(hbox)
 	
 	# Label
-	var label = Label.new()
+	var label: Label = Label.new()
 	label.custom_minimum_size = Vector2(180, 0)
 	label.text = _format_key_name(key)
 	hbox.add_child(label)
 	
 	# SpinBox for direct numeric input
-	var spinbox = SpinBox.new()
+	var spinbox: SpinBox = SpinBox.new()
 	spinbox.custom_minimum_size = Vector2(150, 0)
 	spinbox.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	spinbox.update_on_text_changed = true
 	spinbox.select_all_on_focus = true
 	
 	# Set appropriate ranges based on key name
-	var ranges = _get_slider_ranges(key, value)
+	var ranges: Array[float] = _get_slider_ranges(key, value)
 	spinbox.min_value = ranges[0]
 	spinbox.max_value = ranges[1]
 	spinbox.step = ranges[2]
@@ -442,15 +442,15 @@ func _add_spinbox_control(key: String, value: Variant) -> void:
 
 
 func _add_color_control(key: String, value: Color) -> void:
-	var hbox = HBoxContainer.new()
+	var hbox: HBoxContainer = HBoxContainer.new()
 	_config_container.add_child(hbox)
 	
-	var label = Label.new()
+	var label: Label = Label.new()
 	label.custom_minimum_size = Vector2(180, 0)
 	label.text = _format_key_name(key)
 	hbox.add_child(label)
 	
-	var picker = ColorPickerButton.new()
+	var picker: ColorPickerButton = ColorPickerButton.new()
 	picker.custom_minimum_size = Vector2(80, 30)
 	picker.color = value
 	picker.color_changed.connect(_on_color_changed.bind(key))
@@ -459,17 +459,17 @@ func _add_color_control(key: String, value: Color) -> void:
 
 
 func _add_checkbox_control(key: String, value: bool) -> void:
-	var hbox = HBoxContainer.new()
+	var hbox: HBoxContainer = HBoxContainer.new()
 	_config_container.add_child(hbox)
 	
-	var check = CheckButton.new()
+	var check: CheckButton = CheckButton.new()
 	check.text = _format_key_name(key)
 	check.button_pressed = value
 	check.toggled.connect(func(pressed): config_changed.emit(key, pressed))
 	hbox.add_child(check)
 
 
-func _get_slider_ranges(key: String, current_value: Variant) -> Array:
+func _get_slider_ranges(key: String, current_value: Variant) -> Array[float]:
 	## Pattern-based slider range inference. No hardcoded weapon-type detection.
 	## New parameters from new weapons get sensible ranges automatically based on
 	## naming conventions (e.g., any key with "radius" gets [0, 500, 5]).
@@ -612,7 +612,7 @@ func _on_fire_rate_changed(value: float) -> void:
 		_fire_rate_label.text = "%.1f/s" % value
 	
 	# Find parent lab and update fire rate
-	var lab = get_parent()
+	var lab: Node = get_parent()
 	if lab and lab.has_method("set_fire_rate"):
 		lab.set_fire_rate(value)
 
@@ -639,7 +639,7 @@ func _input(event: InputEvent) -> void:
 	# This prevents WASD from affecting focused UI controls
 	if event.is_action_pressed("ui_left") or event.is_action_pressed("ui_right") or \
 	   event.is_action_pressed("ui_up") or event.is_action_pressed("ui_down"):
-		var focused = get_viewport().gui_get_focus_owner()
+		var focused: Control = get_viewport().gui_get_focus_owner()
 		if focused:
 			focused.release_focus()
 	

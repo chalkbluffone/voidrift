@@ -9,9 +9,9 @@ signal pause_toggled(is_paused: bool)
 signal time_updated(elapsed: float, remaining: float)
 
 # --- Scenes ---
-const MAIN_MENU_SCENE := "res://scenes/ui/main_menu.tscn"
-const GAMEPLAY_SCENE := "res://scenes/gameplay/world.tscn"
-const GAME_OVER_SCENE := "res://scenes/ui/game_over.tscn"
+const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
+const GAMEPLAY_SCENE: String = "res://scenes/gameplay/world.tscn"
+const GAME_OVER_SCENE: String = "res://scenes/ui/game_over.tscn"
 
 # --- Game State ---
 enum GameState {
@@ -25,7 +25,7 @@ enum GameState {
 var current_state: GameState = GameState.MAIN_MENU
 
 # --- Run Configuration ---
-const DEFAULT_RUN_DURATION := 600.0  # 10 minutes
+const DEFAULT_RUN_DURATION: float = 600.0  # 10 minutes
 var run_duration: float = DEFAULT_RUN_DURATION
 
 # --- Run Data ---
@@ -58,8 +58,8 @@ func go_to_main_menu() -> void:
 	get_tree().change_scene_to_file(MAIN_MENU_SCENE)
 
 
+## Begin a new run with the specified ship and captain.
 func start_run(ship_id: String, captain_id: String) -> void:
-	"""Begin a new run with the specified ship and captain."""
 	_reset_run_data()
 	
 	# Load ship
@@ -92,8 +92,8 @@ func start_run(ship_id: String, captain_id: String) -> void:
 	run_started.emit()
 
 
+## End the current run.
 func end_run(victory: bool) -> void:
-	"""End the current run."""
 	current_state = GameState.GAME_OVER
 	get_tree().paused = true
 	run_ended.emit(victory, run_data.duplicate())
@@ -154,8 +154,8 @@ func resume_game() -> void:
 	pause_toggled.emit(false)
 
 
+## Called by ProgressionManager when level up is triggered.
 func set_level_up_state() -> void:
-	"""Called by ProgressionManager when level up is triggered."""
 	current_state = GameState.LEVEL_UP
 	get_tree().paused = true
 
@@ -208,9 +208,9 @@ func get_run_time_formatted() -> String:
 	return "%02d:%02d" % [minutes, seconds]
 
 
-func get_equipped_weapons() -> Array:
+func get_equipped_weapons() -> Array[String]:
 	return run_data.weapons.duplicate()
 
 
-func get_ship_upgrades() -> Array:
+func get_ship_upgrades() -> Array[Dictionary]:
 	return run_data.ship_upgrades.duplicate()

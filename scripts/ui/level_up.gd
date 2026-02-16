@@ -4,19 +4,19 @@ extends CanvasLayer
 ## Displays 3 cards with upgrade options. Player can select, reroll, or skip.
 
 # Synthwave colors
-const COLOR_COMMON := Color(0.7, 0.7, 0.7, 1.0)       # Gray
-const COLOR_UNCOMMON := Color(0.2, 0.8, 0.2, 1.0)    # Green
-const COLOR_RARE := Color(0.2, 0.5, 1.0, 1.0)        # Blue
-const COLOR_EPIC := Color(0.67, 0.2, 0.95, 1.0)      # Purple
-const COLOR_LEGENDARY := Color(1.0, 0.8, 0.0, 1.0)   # Gold
+const COLOR_COMMON: Color = Color(0.7, 0.7, 0.7, 1.0)       # Gray
+const COLOR_UNCOMMON: Color = Color(0.2, 0.8, 0.2, 1.0)    # Green
+const COLOR_RARE: Color = Color(0.2, 0.5, 1.0, 1.0)        # Blue
+const COLOR_EPIC: Color = Color(0.67, 0.2, 0.95, 1.0)      # Purple
+const COLOR_LEGENDARY: Color = Color(1.0, 0.8, 0.0, 1.0)   # Gold
 
-const COLOR_WEAPON := Color(1.0, 0.3, 0.3, 1.0)      # Red-ish for weapons
-const COLOR_UPGRADE := Color(0.0, 0.9, 0.8, 1.0)     # Cyan for upgrades
+const COLOR_WEAPON: Color = Color(1.0, 0.3, 0.3, 1.0)      # Red-ish for weapons
+const COLOR_UPGRADE: Color = Color(0.0, 0.9, 0.8, 1.0)     # Cyan for upgrades
 
-const COLOR_PANEL_BG := Color(0.08, 0.05, 0.15, 0.95)
-const COLOR_PANEL_BORDER := Color(1.0, 0.08, 0.4, 1.0)  # Hot pink
-const COLOR_BUTTON := Color(0.67, 0.2, 0.95, 1.0)       # Neon purple
-const COLOR_BUTTON_HOVER := Color(1.0, 0.08, 0.4, 1.0)  # Hot pink
+const COLOR_PANEL_BG: Color = Color(0.08, 0.05, 0.15, 0.95)
+const COLOR_PANEL_BORDER: Color = Color(1.0, 0.08, 0.4, 1.0)  # Hot pink
+const COLOR_BUTTON: Color = Color(0.67, 0.2, 0.95, 1.0)       # Neon purple
+const COLOR_BUTTON_HOVER: Color = Color(1.0, 0.08, 0.4, 1.0)  # Hot pink
 
 @onready var GameConfig: Node = get_node("/root/GameConfig")
 
@@ -36,7 +36,7 @@ const COLOR_BUTTON_HOVER := Color(1.0, 0.08, 0.4, 1.0)  # Hot pink
 var _cards: Array[PanelContainer] = []
 var _card_buttons: Array[Button] = []
 var _current_options: Array = []
-var _is_showing := false
+var _is_showing: bool = false
 
 
 func _ready() -> void:
@@ -96,7 +96,7 @@ func _apply_synthwave_theme() -> void:
 
 
 func _style_card(card: PanelContainer) -> void:
-	var style := StyleBoxFlat.new()
+	var style: StyleBoxFlat = StyleBoxFlat.new()
 	style.bg_color = COLOR_PANEL_BG
 	style.border_color = COLOR_PANEL_BORDER
 	style.border_width_left = 2
@@ -111,7 +111,7 @@ func _style_card(card: PanelContainer) -> void:
 
 
 func _style_button(button: Button, base_color: Color) -> void:
-	var normal := StyleBoxFlat.new()
+	var normal: StyleBoxFlat = StyleBoxFlat.new()
 	normal.bg_color = base_color
 	normal.corner_radius_top_left = 4
 	normal.corner_radius_top_right = 4
@@ -119,7 +119,7 @@ func _style_button(button: Button, base_color: Color) -> void:
 	normal.corner_radius_bottom_right = 4
 	button.add_theme_stylebox_override("normal", normal)
 	
-	var hover := StyleBoxFlat.new()
+	var hover: StyleBoxFlat = StyleBoxFlat.new()
 	hover.bg_color = base_color.lightened(0.2)
 	hover.corner_radius_top_left = 4
 	hover.corner_radius_top_right = 4
@@ -127,7 +127,7 @@ func _style_button(button: Button, base_color: Color) -> void:
 	hover.corner_radius_bottom_right = 4
 	button.add_theme_stylebox_override("hover", hover)
 	
-	var pressed := StyleBoxFlat.new()
+	var pressed: StyleBoxFlat = StyleBoxFlat.new()
 	pressed.bg_color = base_color.darkened(0.2)
 	pressed.corner_radius_top_left = 4
 	pressed.corner_radius_top_right = 4
@@ -212,7 +212,7 @@ func _update_card(index: int, option: Dictionary) -> void:
 					else:
 						lines.append("+%.0f %s" % [amount, _format_stat_name(stat)])
 		
-		var effect_block := "\n".join(lines)
+		var effect_block: String = "\n".join(lines)
 		if current_stacks > 0:
 			description = "%s\nLevel: %d → %d\n%s" % [description, current_stacks, current_stacks + 1, effect_block]
 		else:
@@ -252,7 +252,7 @@ func _update_card(index: int, option: Dictionary) -> void:
 
 
 func _update_card_border(card: PanelContainer, color: Color) -> void:
-	var style := StyleBoxFlat.new()
+	var style: StyleBoxFlat = StyleBoxFlat.new()
 	style.bg_color = COLOR_PANEL_BG
 	style.border_color = color
 	style.border_width_left = 2

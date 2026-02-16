@@ -51,8 +51,8 @@ func _on_bubble_destroyed() -> void:
 	_active_bubble = null
 
 
+## Destroy the active bubble. Called when weapon is unequipped.
 func cleanup() -> void:
-	"""Destroy the active bubble. Called when weapon is unequipped."""
 	if is_instance_valid(_active_bubble):
 		_active_bubble.queue_free()
 	_active_bubble = null

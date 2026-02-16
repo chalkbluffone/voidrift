@@ -207,23 +207,23 @@ func get_current_level() -> int:
 	return 1
 
 
-func get_equipped_weapons() -> Array:
+func get_equipped_weapons() -> Array[String]:
 	if RunManager:
 		return RunManager.run_data.weapons.duplicate()
 	return []
 
 
-func get_ship_upgrades() -> Array:
+func get_ship_upgrades() -> Array[Dictionary]:
 	if RunManager:
 		return RunManager.run_data.ship_upgrades.duplicate()
 	return []
 
 
 # --- Constants for backwards compatibility ---
-const MAX_WEAPON_SLOTS := 2
-const MAX_MODULE_SLOTS := 2
-const XP_BASE := 100.0
-const XP_GROWTH := 1.15
+const MAX_WEAPON_SLOTS: int = 2
+const MAX_MODULE_SLOTS: int = 2
+const XP_BASE: float = 100.0
+const XP_GROWTH: float = 1.15
 
 enum GameState {
 	MAIN_MENU,

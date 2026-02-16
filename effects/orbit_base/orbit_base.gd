@@ -65,10 +65,10 @@ func _rebuild_drones() -> void:
 	_drones.clear()
 
 	for i in range(projectile_count):
-		var drone := Node2D.new()
+		var drone: Node2D = Node2D.new()
 		drone.name = "Drone_%d" % i
 
-		var triangle := Polygon2D.new()
+		var triangle: Polygon2D = Polygon2D.new()
 		triangle.color = Color(0.65, 0.9, 1.0, 0.95)
 		triangle.polygon = PackedVector2Array([
 			Vector2(drone_size * 1.2 * size, 0.0),
@@ -90,7 +90,7 @@ func _update_drone_positions() -> void:
 	var count: int = _drones.size()
 	var radius: float = orbit_radius * size
 	for i in range(count):
-		var drone := _drones[i]
+		var drone: Node2D = _drones[i]
 		if not is_instance_valid(drone):
 			continue
 		var angle: float = _orbit_phase + (TAU * float(i) / float(count))
@@ -112,15 +112,15 @@ func _check_contacts() -> void:
 	if _drones.is_empty():
 		return
 
-	var enemies := get_tree().get_nodes_in_group("enemies")
+	var enemies: Array[Node] = get_tree().get_nodes_in_group("enemies")
 	var contact_radius: float = maxf(8.0, drone_size * size * 1.2)
 
 	for enemy in enemies:
 		if not (enemy is Node2D) or not is_instance_valid(enemy):
 			continue
 
-		var enemy_2d := enemy as Node2D
-		var enemy_id := enemy_2d.get_instance_id()
+		var enemy_2d: Node2D = enemy as Node2D
+		var enemy_id: int = enemy_2d.get_instance_id()
 		if _enemy_hit_cooldowns.has(enemy_id):
 			continue
 

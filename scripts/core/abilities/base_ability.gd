@@ -27,8 +27,8 @@ var _owner_ship: Node = null
 var _owner_stats: Node = null
 
 
+## Configure from captain JSON ability data.
 func configure(ability_data: Dictionary, ship: Node, stats: Node) -> void:
-	"""Configure from captain JSON ability data."""
 	ability_id = ability_data.get("id", "")
 	ability_name = ability_data.get("name", "")
 	description = ability_data.get("description", "")
@@ -40,8 +40,8 @@ func configure(ability_data: Dictionary, ship: Node, stats: Node) -> void:
 	_owner_stats = stats
 
 
+## Attempt to activate the ability. Returns true if successful.
 func try_activate() -> bool:
-	"""Attempt to activate the ability. Returns true if successful."""
 	if _is_active:
 		return false
 	if _cooldown_remaining > 0.0:
@@ -87,11 +87,11 @@ func _process(delta: float) -> void:
 
 # --- Override in subclasses ---
 
+## Called when the ability activates. Override in subclasses.
 func _activate() -> void:
-	"""Called when the ability activates. Override in subclasses."""
 	pass
 
 
+## Called when the ability duration ends. Override in subclasses.
 func _on_expire() -> void:
-	"""Called when the ability duration ends. Override in subclasses."""
 	pass

@@ -13,42 +13,42 @@ signal died
 var DataLoader: Node
 
 # --- Stat Names (constants for type safety) ---
-const STAT_MAX_HP := "max_hp"
-const STAT_HP_REGEN := "hp_regen"
-const STAT_SHIELD := "shield"
-const STAT_ARMOR := "armor"
-const STAT_EVASION := "evasion"
-const STAT_LIFESTEAL := "lifesteal"
-const STAT_HULL_SHOCK := "hull_shock"
-const STAT_OVERHEAL := "overheal"
+const STAT_MAX_HP: String = "max_hp"
+const STAT_HP_REGEN: String = "hp_regen"
+const STAT_SHIELD: String = "shield"
+const STAT_ARMOR: String = "armor"
+const STAT_EVASION: String = "evasion"
+const STAT_LIFESTEAL: String = "lifesteal"
+const STAT_HULL_SHOCK: String = "hull_shock"
+const STAT_OVERHEAL: String = "overheal"
 
-const STAT_DAMAGE := "damage"
-const STAT_CRIT_CHANCE := "crit_chance"
-const STAT_CRIT_DAMAGE := "crit_damage"
-const STAT_ATTACK_SPEED := "attack_speed"
-const STAT_PROJECTILE_COUNT := "projectile_count"
-const STAT_PROJECTILE_SPEED := "projectile_speed"
-const STAT_PROJECTILE_BOUNCES := "projectile_bounces"
-const STAT_SIZE := "size"
-const STAT_DURATION := "duration"
-const STAT_KNOCKBACK := "knockback"
+const STAT_DAMAGE: String = "damage"
+const STAT_CRIT_CHANCE: String = "crit_chance"
+const STAT_CRIT_DAMAGE: String = "crit_damage"
+const STAT_ATTACK_SPEED: String = "attack_speed"
+const STAT_PROJECTILE_COUNT: String = "projectile_count"
+const STAT_PROJECTILE_SPEED: String = "projectile_speed"
+const STAT_PROJECTILE_BOUNCES: String = "projectile_bounces"
+const STAT_SIZE: String = "size"
+const STAT_DURATION: String = "duration"
+const STAT_KNOCKBACK: String = "knockback"
 
-const STAT_MOVEMENT_SPEED := "movement_speed"
-const STAT_EXTRA_PHASE_SHIFTS := "extra_phase_shifts"
-const STAT_PHASE_SHIFT_DISTANCE := "phase_shift_distance"
-const STAT_PICKUP_RANGE := "pickup_range"
-const STAT_XP_GAIN := "xp_gain"
-const STAT_CREDITS_GAIN := "credits_gain"
-const STAT_STARDUST_GAIN := "stardust_gain"
-const STAT_LUCK := "luck"
-const STAT_DIFFICULTY := "difficulty"
-const STAT_ELITE_SPAWN_RATE := "elite_spawn_rate"
-const STAT_POWERUP_MULTIPLIER := "powerup_multiplier"
-const STAT_POWERUP_DROP_CHANCE := "powerup_drop_chance"
-const STAT_DAMAGE_TO_ELITES := "damage_to_elites"
+const STAT_MOVEMENT_SPEED: String = "movement_speed"
+const STAT_EXTRA_PHASE_SHIFTS: String = "extra_phase_shifts"
+const STAT_PHASE_SHIFT_DISTANCE: String = "phase_shift_distance"
+const STAT_PICKUP_RANGE: String = "pickup_range"
+const STAT_XP_GAIN: String = "xp_gain"
+const STAT_CREDITS_GAIN: String = "credits_gain"
+const STAT_STARDUST_GAIN: String = "stardust_gain"
+const STAT_LUCK: String = "luck"
+const STAT_DIFFICULTY: String = "difficulty"
+const STAT_ELITE_SPAWN_RATE: String = "elite_spawn_rate"
+const STAT_POWERUP_MULTIPLIER: String = "powerup_multiplier"
+const STAT_POWERUP_DROP_CHANCE: String = "powerup_drop_chance"
+const STAT_DAMAGE_TO_ELITES: String = "damage_to_elites"
 
 # Default base values for player (fallback if base_player_stats.json fails to load)
-const DEFAULT_BASE_STATS := {
+const DEFAULT_BASE_STATS: Dictionary = {
 	STAT_MAX_HP: 100.0,
 	STAT_HP_REGEN: 5.0,  # per minute
 	STAT_OVERHEAL: 0.0,  # extra HP above max_hp
@@ -85,10 +85,10 @@ const DEFAULT_BASE_STATS := {
 }
 
 # Stats that use diminishing returns (armor, evasion)
-const DIMINISHING_STATS := [STAT_ARMOR, STAT_EVASION]
+const DIMINISHING_STATS: Array[String] = [STAT_ARMOR, STAT_EVASION]
 
 # Stats that are capped
-const STAT_CAPS := {
+const STAT_CAPS: Dictionary = {
 	STAT_XP_GAIN: 10.0,
 	STAT_ARMOR: 90.0,
 	STAT_EVASION: 90.0,
@@ -113,8 +113,8 @@ var _cache_dirty: bool = true
 var current_hp: float = 0.0
 var current_shield: float = 0.0
 var shield_recharge_timer: float = 0.0
-const SHIELD_RECHARGE_DELAY := 5.0
-const SHIELD_RECHARGE_RATE := 10.0  # per second
+const SHIELD_RECHARGE_DELAY: float = 5.0
+const SHIELD_RECHARGE_RATE: float = 10.0  # per second
 
 # HP Regen accumulator
 var _regen_accumulator: float = 0.0
@@ -141,8 +141,8 @@ func _ready() -> void:
 	current_hp = get_stat(STAT_MAX_HP)
 	current_shield = get_stat(STAT_SHIELD)
 
+## Apply a single stack of a ship upgrade.
 func apply_ship_upgrade(upgrade_id: String) -> void:
-	"""Apply a single stack of a ship upgrade."""
 	if not DataLoader:
 		push_error("StatsComponent: DataLoader not available")
 		return
@@ -159,8 +159,8 @@ func apply_ship_upgrade(upgrade_id: String) -> void:
 	_apply_effect(stat_name, per_level)
 
 
+## Apply upgrade effects from a level-up option (supports multiple effects).
 func apply_level_up_upgrade(option: Dictionary) -> void:
-	"""Apply upgrade effects from a level-up option (supports multiple effects)."""
 	var effects: Array = option.get("effects", [])
 	if effects.is_empty():
 		# Back-compat: apply by id if no effects were generated.
@@ -183,7 +183,7 @@ func apply_level_up_upgrade(option: Dictionary) -> void:
 
 func _apply_effect(stat_name: String, per_level_raw: float) -> void:
 	# Some data are stored as percent points (e.g. 15 means 15%), while others are flat.
-	var flat_stats := {
+	var flat_stats: Dictionary = {
 		STAT_MAX_HP: true,
 		STAT_HP_REGEN: true,
 		STAT_OVERHEAL: true,
@@ -194,7 +194,7 @@ func _apply_effect(stat_name: String, per_level_raw: float) -> void:
 		STAT_EXTRA_PHASE_SHIFTS: true,
 		STAT_PHASE_SHIFT_DISTANCE: true,
 	}
-	var percent_point_stats := {
+	var percent_point_stats: Dictionary = {
 		STAT_ARMOR: true,
 		STAT_EVASION: true,
 		STAT_CRIT_CHANCE: true,
@@ -208,7 +208,7 @@ func _apply_effect(stat_name: String, per_level_raw: float) -> void:
 		return
 
 	# Multiplier stat: store as fraction. If the data looks like percent points, convert.
-	var amount := per_level_raw
+	var amount: float = per_level_raw
 	if absf(amount) >= 1.0:
 		amount = amount / 100.0
 	add_multiplier_bonus(stat_name, amount)
@@ -230,8 +230,8 @@ func _process(delta: float) -> void:
 
 # --- Initialization ---
 
+## Initialize stats from ship + captain + synergy data.
 func initialize_from_loadout(ship_data: Dictionary, captain_data: Dictionary, synergy_data: Dictionary) -> void:
-	"""Initialize stats from ship + captain + synergy data."""
 	# Layer 1: Ship stat overrides (replace base values)
 	var ship_base_stats: Dictionary = ship_data.get("base_stats", {})
 	for stat_name in ship_base_stats:
@@ -267,8 +267,8 @@ func remove_flat_bonus(stat_name: String, amount: float) -> void:
 	add_flat_bonus(stat_name, -amount)
 
 
+## Add a percentage multiplier (e.g., 0.1 = +10%).
 func add_multiplier_bonus(stat_name: String, amount: float) -> void:
-	"""Add a percentage multiplier (e.g., 0.1 = +10%)."""
 	if not multiplier_bonuses.has(stat_name):
 		multiplier_bonuses[stat_name] = 0.0
 	multiplier_bonuses[stat_name] += amount
@@ -299,7 +299,7 @@ func get_stat_int(stat_name: String) -> int:
 func _recalculate_all() -> void:
 	for stat_name in base_stats:
 		var old_value: float = _cached_stats.get(stat_name, 0.0)
-		var new_value := _calculate_stat(stat_name)
+		var new_value: float = _calculate_stat(stat_name)
 		_cached_stats[stat_name] = new_value
 		
 		if old_value != new_value:
@@ -317,7 +317,7 @@ func _calculate_stat(stat_name: String) -> float:
 	
 	if stat_name in DIMINISHING_STATS:
 		# Diminishing returns formula for armor/evasion
-		var raw := base + flat
+		var raw: float = base + flat
 		result = _apply_diminishing_returns(raw)
 	else:
 		# Standard formula: (base + flat) * (1 + mult)
@@ -330,8 +330,8 @@ func _calculate_stat(stat_name: String) -> float:
 	return result
 
 
+## Apply diminishing returns curve. Higher values become less effective.
 func _apply_diminishing_returns(raw_value: float) -> float:
-	"""Apply diminishing returns curve. Higher values become less effective."""
 	# Formula: effective = raw / (raw + 100)
 	# At 100 raw, you get 50% effective
 	# At 200 raw, you get 66% effective
@@ -346,18 +346,18 @@ func _mark_dirty() -> void:
 
 # --- HP & Damage ---
 
+## Apply damage after armor/evasion. Returns actual damage taken.
 func take_damage(amount: float, source: Node = null) -> float:
-	"""Apply damage after armor/evasion. Returns actual damage taken."""
 	# Check evasion
-	var evasion := get_stat(STAT_EVASION)
+	var evasion: float = get_stat(STAT_EVASION)
 	if randf() * 100.0 < evasion:
 		# Dodged!
 		return 0.0
 	
 	# Apply armor reduction
-	var armor := get_stat(STAT_ARMOR)
-	var damage_mult := 1.0 - (armor / 100.0)
-	var actual_damage := amount * damage_mult
+	var armor: float = get_stat(STAT_ARMOR)
+	var damage_mult: float = 1.0 - (armor / 100.0)
+	var actual_damage: float = amount * damage_mult
 	
 	# Shield absorbs first
 	if current_shield > 0:
@@ -377,7 +377,7 @@ func take_damage(amount: float, source: Node = null) -> float:
 	hp_changed.emit(current_hp, get_stat(STAT_MAX_HP))
 	
 	# Hull Shock damage
-	var hull_shock := get_stat(STAT_HULL_SHOCK)
+	var hull_shock: float = get_stat(STAT_HULL_SHOCK)
 	if hull_shock > 0 and source != null and source.has_method("take_damage"):
 		source.take_damage(hull_shock, self)
 	
@@ -389,15 +389,15 @@ func take_damage(amount: float, source: Node = null) -> float:
 	return actual_damage
 
 
+## Heal HP. Returns actual amount healed. If allow_overheal is true, can exceed max_hp up to max_hp + overheal.
 func heal(amount: float, allow_overheal: bool = false) -> float:
-	"""Heal HP. Returns actual amount healed. If allow_overheal is true, can exceed max_hp up to max_hp + overheal."""
-	var max_hp := get_stat(STAT_MAX_HP)
-	var hp_cap := max_hp
+	var max_hp: float = get_stat(STAT_MAX_HP)
+	var hp_cap: float = max_hp
 	if allow_overheal:
 		hp_cap = max_hp + get_stat(STAT_OVERHEAL)
-	var old_hp := current_hp
+	var old_hp: float = current_hp
 	current_hp = minf(current_hp + amount, hp_cap)
-	var healed := current_hp - old_hp
+	var healed: float = current_hp - old_hp
 	
 	if healed > 0:
 		hp_changed.emit(current_hp, max_hp)
@@ -406,11 +406,11 @@ func heal(amount: float, allow_overheal: bool = false) -> float:
 
 
 func _process_hp_regen(delta: float) -> void:
-	var regen_per_minute := get_stat(STAT_HP_REGEN)
+	var regen_per_minute: float = get_stat(STAT_HP_REGEN)
 	if regen_per_minute <= 0:
 		return
 	
-	var regen_per_second := regen_per_minute / 60.0
+	var regen_per_second: float = regen_per_minute / 60.0
 	_regen_accumulator += regen_per_second * delta
 	
 	if _regen_accumulator >= 1.0:
@@ -420,7 +420,7 @@ func _process_hp_regen(delta: float) -> void:
 
 
 func _process_shield_recharge(delta: float) -> void:
-	var max_shield := get_stat(STAT_SHIELD)
+	var max_shield: float = get_stat(STAT_SHIELD)
 	if max_shield <= 0 or current_shield >= max_shield:
 		return
 	
@@ -434,18 +434,18 @@ func _process_shield_recharge(delta: float) -> void:
 
 # --- Combat Calculations ---
 
+## Calculate final damage with crit. Returns {damage: float, is_crit: bool, is_overcrit: bool}.
 func calculate_damage(base_damage: float, weapon_crit_chance: float = 0.0, weapon_crit_damage: float = 0.0) -> Dictionary:
-	"""Calculate final damage with crit. Returns {damage: float, is_crit: bool, is_overcrit: bool}."""
-	var damage_mult := get_stat(STAT_DAMAGE)
-	var crit_chance := get_stat(STAT_CRIT_CHANCE) + weapon_crit_chance
-	var crit_damage := get_stat(STAT_CRIT_DAMAGE) + weapon_crit_damage
+	var damage_mult: float = get_stat(STAT_DAMAGE)
+	var crit_chance: float = get_stat(STAT_CRIT_CHANCE) + weapon_crit_chance
+	var crit_damage: float = get_stat(STAT_CRIT_DAMAGE) + weapon_crit_damage
 	
-	var final_damage := base_damage * damage_mult
-	var is_crit := false
-	var is_overcrit := false
+	var final_damage: float = base_damage * damage_mult
+	var is_crit: bool = false
+	var is_overcrit: bool = false
 	
 	# Check for crit
-	var roll := randf() * 100.0
+	var roll: float = randf() * 100.0
 	if roll < crit_chance:
 		is_crit = true
 		final_damage *= crit_damage
@@ -462,13 +462,13 @@ func calculate_damage(base_damage: float, weapon_crit_chance: float = 0.0, weapo
 	}
 
 
+## Roll for lifesteal proc. Returns true if should heal 1 HP.
 func roll_lifesteal() -> bool:
-	"""Roll for lifesteal proc. Returns true if should heal 1 HP."""
-	var lifesteal := get_stat(STAT_LIFESTEAL)
+	var lifesteal: float = get_stat(STAT_LIFESTEAL)
 	if lifesteal <= 0:
 		return false
 	
-	var roll := randf() * 100.0
+	var roll: float = randf() * 100.0
 	if roll < lifesteal:
 		heal(1)
 		# Check for double heal (lifesteal > 100%)
@@ -478,9 +478,9 @@ func roll_lifesteal() -> bool:
 	return false
 
 
+## Roll for evasion. Returns true if attack should be dodged.
 func roll_evasion() -> bool:
-	"""Roll for evasion. Returns true if attack should be dodged."""
-	var evasion := get_stat(STAT_EVASION)
+	var evasion: float = get_stat(STAT_EVASION)
 	return randf() * 100.0 < evasion
 
 

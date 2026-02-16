@@ -56,7 +56,7 @@ func get_weapon_level(weapon_id: String) -> int:
 
 
 ## Return [{id: String, level: int}] for all equipped weapons.
-func get_equipped_weapon_summaries() -> Array:
+func get_equipped_weapon_summaries() -> Array[Dictionary]:
 	var out: Array = []
 	for weapon_id in weapons.keys():
 		var state: Dictionary = weapons[weapon_id]

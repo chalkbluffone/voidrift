@@ -6,46 +6,46 @@ extends Node
 # =============================================================================
 # PLAYER
 # =============================================================================
-const PLAYER_BASE_SPEED := 150.0  # Base movement speed (modified by character multiplier)
-const PLAYER_TURN_RATE := 6.0     # Radians/sec. How fast the ship turns (higher = snappier)
+const PLAYER_BASE_SPEED: float = 150.0  # Base movement speed (modified by character multiplier)
+const PLAYER_TURN_RATE: float = 6.0     # Radians/sec. How fast the ship turns (higher = snappier)
 
 # =============================================================================
 # ENEMIES
 # =============================================================================
-const ENEMY_BASE_SPEED := 100.0  # % of player base speed
-const ENEMY_SPEED_PER_LEVEL := 3.5  # Speed increase per player level
-const ENEMY_HP_SCALE_PER_MINUTE := 0.4  # +40% HP per minute
-const ENEMY_DAMAGE_SCALE_PER_MINUTE := 0.2  # +20% damage per minute
-const ENEMY_XP_SCALE_PER_MINUTE := 0.1  # +10% XP value per minute
+const ENEMY_BASE_SPEED: float = 100.0  # % of player base speed
+const ENEMY_SPEED_PER_LEVEL: float = 3.5  # Speed increase per player level
+const ENEMY_HP_SCALE_PER_MINUTE: float = 0.4  # +40% HP per minute
+const ENEMY_DAMAGE_SCALE_PER_MINUTE: float = 0.2  # +20% damage per minute
+const ENEMY_XP_SCALE_PER_MINUTE: float = 0.1  # +10% XP value per minute
 
 # =============================================================================
 # SPAWNING
 # =============================================================================
-const SPAWN_RADIUS_MIN := 400.0
-const SPAWN_RADIUS_MAX := 600.0
-const BASE_SPAWN_RATE := 0.5  # Enemies per second at start
-const SPAWN_RATE_GROWTH := 0.4  # Additional enemies per second per minute
+const SPAWN_RADIUS_MIN: float = 400.0
+const SPAWN_RADIUS_MAX: float = 600.0
+const BASE_SPAWN_RATE: float = 0.5  # Enemies per second at start
+const SPAWN_RATE_GROWTH: float = 0.4  # Additional enemies per second per minute
 
 # =============================================================================
 # PICKUPS
 # =============================================================================
-const PICKUP_MAGNET_RADIUS := 40.0  # How close player needs to be to attract pickups
-const PICKUP_MAGNET_SPEED := 400.0  # Max speed pickups move toward player
-const PICKUP_MAGNET_ACCELERATION := 800.0  # How fast pickups accelerate
+const PICKUP_MAGNET_RADIUS: float = 40.0  # How close player needs to be to attract pickups
+const PICKUP_MAGNET_SPEED: float = 400.0  # Max speed pickups move toward player
+const PICKUP_MAGNET_ACCELERATION: float = 800.0  # How fast pickups accelerate
 
 # =============================================================================
 # CREDITS
 # =============================================================================
-const CREDIT_DROP_CHANCE := 0.30  # 30% chance enemies drop credits
-const CREDIT_SCALE_PER_MINUTE := 0.1  # +10% credit value per minute
+const CREDIT_DROP_CHANCE: float = 0.30  # 30% chance enemies drop credits
+const CREDIT_SCALE_PER_MINUTE: float = 0.1  # +10% credit value per minute
 
 # =============================================================================
 # LEVEL UP
 # =============================================================================
-const LEVEL_UP_REFRESH_COST := 25  # Credits to refresh upgrade cards
+const LEVEL_UP_REFRESH_COST: int = 25  # Credits to refresh upgrade cards
 
 # How many cards appear per level-up.
-const LEVEL_UP_OPTION_COUNT := 3
+const LEVEL_UP_OPTION_COUNT: int = 3
 
 # =============================================================================
 # RARITY / UPGRADE ROLLS
@@ -63,8 +63,8 @@ const RARITY_DEFAULT_WEIGHTS: Dictionary = {
 }
 
 # Luck model for rarity rolls.
-const RARITY_LUCK_MAX := 200.0
-const RARITY_LUCK_FACTOR_DIVISOR := 100.0
+const RARITY_LUCK_MAX: float = 200.0
+const RARITY_LUCK_FACTOR_DIVISOR: float = 100.0
 const RARITY_LUCK_EXPONENT_BY_RARITY: Dictionary = {
 	"uncommon": 1,
 	"rare": 2,
@@ -114,7 +114,7 @@ const WEAPON_EFFECT_COUNT_BY_RARITY: Dictionary = {
 # =============================================================================
 
 # Maximum weapon level (each re-pick at level-up increments the weapon's level).
-const MAX_WEAPON_LEVEL := 40
+const MAX_WEAPON_LEVEL: int = 40
 
 # Rarity factors applied to CSV-derived tier baseline deltas.
 # In "baseline_plus_factor" mode: final_delta = tier_value * rarity_factor.

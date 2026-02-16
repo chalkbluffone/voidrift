@@ -14,24 +14,22 @@ func _init(parent: Node) -> void:
 	_parent_node = parent
 
 
+## Spawn a SpaceNapalm projectile aimed at the densest enemy cluster.
+##
+## Args:
+##     spawn_pos:     World position to spawn at
+##     direction:     Direction vector (will be overridden by cluster targeting)
+##     params:        Flat parameter dictionary from weapon_component flatten
+##     follow_source: Player node
+##
+## Returns:
+##     The spawned SpaceNapalm instance, or null if no enemies or at max instances.
 func spawn(
 	spawn_pos: Vector2,
 	direction: Vector2,
 	params: Dictionary = {},
 	follow_source: Node2D = null
 ) -> Node2D:
-	"""
-	Spawn a SpaceNapalm projectile aimed at the densest enemy cluster.
-
-	Args:
-		spawn_pos:     World position to spawn at
-		direction:     Direction vector (will be overridden by cluster targeting)
-		params:        Flat parameter dictionary from weapon_component flatten
-		follow_source: Player node
-
-	Returns:
-		The spawned SpaceNapalm instance, or null if no enemies or at max instances.
-	"""
 	# Only fire when enemies exist
 	var nearest: Node2D = EffectUtils.find_nearest_enemy(_parent_node.get_tree(), spawn_pos)
 	if nearest == null:
@@ -68,8 +66,8 @@ func spawn(
 	return instance
 
 
+## Destroy all active instances. Called when weapon is unequipped.
 func cleanup() -> void:
-	"""Destroy all active instances. Called when weapon is unequipped."""
 	for inst in _active_instances:
 		if is_instance_valid(inst):
 			inst.queue_free()

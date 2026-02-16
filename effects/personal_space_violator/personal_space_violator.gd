@@ -8,7 +8,7 @@ class_name PersonalSpaceViolator
 ## KEY DESIGN: Uses the existing projectile.tscn scene for each pellet. This
 ## guarantees working collision detection — no dynamic Area2D creation.
 
-const PROJECTILE_SCENE := preload("res://scenes/gameplay/projectile.tscn")
+const PROJECTILE_SCENE: PackedScene = preload("res://scenes/gameplay/projectile.tscn")
 
 # --- Stats ---
 @export var damage: float = 18.0
@@ -74,24 +74,24 @@ func fire_burst(origin: Vector2, direction: Vector2) -> void:
 
 
 func _spawn_pellet(angle: float, speed: float) -> void:
-	var dir := Vector2(cos(angle), sin(angle))
+	var dir: Vector2 = Vector2(cos(angle), sin(angle))
 
 	# Use the PROVEN projectile scene — guaranteed working collision
 	var pellet: Node2D = PROJECTILE_SCENE.instantiate()
 	pellet.z_index = -1
 
 	# Initialize with standard projectile API
-	var style := {"color": color_glow}
+	var style: Dictionary = {"color": color_glow}
 	pellet.initialize(damage, dir, speed, 0, 1.0, null, style)
 	pellet._lifetime = lifetime
 	pellet.global_position = _spawn_origin
 
 	# Hide standard bullet sprite, replace with neon glow
-	var sprite := pellet.get_node_or_null("Sprite2D")
+	var sprite: Node = pellet.get_node_or_null("Sprite2D")
 	if sprite:
 		sprite.visible = false
 
-	var glow := _NeonGlow.new()
+	var glow: _NeonGlow = _NeonGlow.new()
 	glow.pellet_radius = pellet_radius
 	glow.color_core = color_core
 	glow.color_glow = color_glow

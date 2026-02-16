@@ -13,7 +13,7 @@ signal captain_ability_ready
 signal died
 
 # --- Preloads ---
-const StatsComponentScript := preload("res://scripts/core/stats_component.gd")
+const StatsComponentScript: GDScript = preload("res://scripts/core/stats_component.gd")
 
 # --- Components ---
 @onready var stats: Node = $StatsComponent
@@ -28,8 +28,8 @@ const StatsComponentScript := preload("res://scripts/core/stats_component.gd")
 @export var test_mode: bool = false
 
 # --- Phase Shift ---
-const PHASE_SHIFT_DURATION := 0.3  # How long the dash lasts
-const PHASE_SHIFT_COOLDOWN := 0.5  # Min time between phases
+const PHASE_SHIFT_DURATION: float = 0.3  # How long the dash lasts
+const PHASE_SHIFT_COOLDOWN: float = 0.5  # Min time between phases
 
 @export var max_phase_energy: int = 3
 var phase_energy: int = 3
@@ -49,8 +49,8 @@ var _base_speed: float = 100.0  # Will be set from GameConfig in _ready
 var _last_move_direction: Vector2 = Vector2.RIGHT
 var _knockback_velocity: Vector2 = Vector2.ZERO
 var _last_input_device: String = "keyboard" # "keyboard" or "joypad"
-const KNOCKBACK_FRICTION := 10.0
-const DAMAGE_IFRAMES := 0.5  # Brief i-frames after taking damage
+const KNOCKBACK_FRICTION: float = 10.0
+const DAMAGE_IFRAMES: float = 0.5  # Brief i-frames after taking damage
 
 # --- Damage Interceptors ---
 # Callables that receive (amount: float, source: Node) and return modified damage float.
@@ -123,8 +123,8 @@ func _initialize_from_loadout(ship_data: Dictionary, captain_data: Dictionary, s
 	weapons.sync_from_run_data()
 
 
+## Create and configure the captain's active ability from JSON data.
 func _setup_captain_ability(captain_data: Dictionary) -> void:
-	"""Create and configure the captain's active ability from JSON data."""
 	var ability_data: Dictionary = captain_data.get("active_ability", {})
 	if ability_data.is_empty():
 		return
@@ -195,12 +195,12 @@ func _process_movement(delta: float) -> void:
 	# Hybrid movement:
 	# - Keyboard: 8-way digital (snapped)
 	# - Controller: analog (preserve stick magnitude)
-	var move_input := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
-	var desired_dir := Vector2.ZERO
+	var move_input: Vector2 = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+	var desired_dir: Vector2 = Vector2.ZERO
 	if move_input.length() > 0.1:
 		if _last_input_device == "keyboard":
-			var x := 0.0
-			var y := 0.0
+			var x: float = 0.0
+			var y: float = 0.0
 			if absf(move_input.x) > 0.1:
 				x = signf(move_input.x)
 			if absf(move_input.y) > 0.1:
@@ -213,10 +213,10 @@ func _process_movement(delta: float) -> void:
 			desired_dir = move_input
 
 		# Smoothly face the direction we're moving
-		var face_dir := desired_dir
+		var face_dir: Vector2 = desired_dir
 		if face_dir.length() > 0.001:
 			face_dir = face_dir.normalized()
-			var target_angle := face_dir.angle()
+			var target_angle: float = face_dir.angle()
 			rotation = lerp_angle(rotation, target_angle, min(1.0, GameConfig.PLAYER_TURN_RATE * delta))
 	
 	if _is_phasing:
@@ -279,7 +279,7 @@ func _try_phase_shift() -> void:
 	
 	# Visual feedback
 	if sprite:
-		var tween := create_tween()
+		var tween: Tween = create_tween()
 		tween.tween_property(sprite, "modulate:a", 0.3, 0.05)
 	
 	phase_shift_started.emit()
@@ -307,7 +307,7 @@ func _end_phase_shift() -> void:
 	
 	# Visual feedback
 	if sprite:
-		var tween := create_tween()
+		var tween: Tween = create_tween()
 		tween.tween_property(sprite, "modulate:a", 1.0, 0.1)
 	
 	phase_shift_ended.emit()
@@ -390,7 +390,7 @@ func unregister_damage_interceptor(callback: Callable) -> void:
 func _flash_damage() -> void:
 	if sprite:
 		# More dramatic flash - white then red then back
-		var tween := create_tween()
+		var tween: Tween = create_tween()
 		tween.tween_property(sprite, "modulate", Color.WHITE, 0.02)
 		tween.tween_property(sprite, "modulate", Color(1.0, 0.2, 0.2, 1.0), 0.08)
 		tween.tween_property(sprite, "modulate", Color.WHITE, 0.15)
@@ -423,7 +423,7 @@ func _on_died() -> void:
 	
 	# Death flash animation
 	if sprite:
-		var tween := create_tween()
+		var tween: Tween = create_tween()
 		tween.tween_property(sprite, "modulate", Color(1, 0.3, 0.3, 1), 0.1)
 		tween.tween_property(sprite, "modulate", Color(1, 1, 1, 0), 0.4)
 	
@@ -465,19 +465,19 @@ func is_invincible() -> bool:
 
 # --- Test Mode API ---
 
+## Get the WeaponComponent for external control (e.g., test lab).
 func get_weapon_component() -> Node:
-	"""Get the WeaponComponent for external control (e.g., test lab)."""
 	return weapons
 
 
+## Fire a weapon with explicit config (for test lab).
 func fire_weapon_manual(weapon_id: String, config: Dictionary) -> void:
-	"""Fire a weapon with explicit config (for test lab)."""
 	if weapons and weapons.has_method("fire_weapon_with_config"):
 		weapons.fire_weapon_with_config(weapon_id, config, self)
 
 
+## Equip a weapon in test mode (exclusive - clears other weapons first).
 func equip_weapon_for_test(weapon_id: String) -> void:
-	"""Equip a weapon in test mode (exclusive - clears other weapons first)."""
 	if weapons:
 		if weapons.has_method("clear_all_weapons"):
 			weapons.clear_all_weapons()

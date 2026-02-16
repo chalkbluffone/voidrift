@@ -32,16 +32,16 @@ extends CanvasLayer
 
 var _player: Node = null
 var _level_tween: Tween = null
-var _level_base_scale := Vector2.ONE
+var _level_base_scale: Vector2 = Vector2.ONE
 
 # Synthwave colors
-const COLOR_HP := Color(1.0, 0.08, 0.4, 1.0)  # Hot pink/magenta
-const COLOR_XP := Color(0.67, 0.2, 0.95, 1.0)  # Neon purple
-const COLOR_TIMER := Color(0.0, 1.0, 0.9, 1.0)  # Cyan
-const COLOR_LEVEL := Color(1.0, 0.95, 0.2, 1.0)  # Neon yellow
-const COLOR_LEVEL_GLOW := Color(1.0, 0.4, 0.8, 1.0)  # Pink glow for level up
-const COLOR_CREDITS := Color(1.0, 0.85, 0.1, 1.0)  # Gold for credits
-const COLOR_WEAPONS := Color(0.2, 1.0, 0.9, 1.0)  # Cyan-ish
+const COLOR_HP: Color = Color(1.0, 0.08, 0.4, 1.0)  # Hot pink/magenta
+const COLOR_XP: Color = Color(0.67, 0.2, 0.95, 1.0)  # Neon purple
+const COLOR_TIMER: Color = Color(0.0, 1.0, 0.9, 1.0)  # Cyan
+const COLOR_LEVEL: Color = Color(1.0, 0.95, 0.2, 1.0)  # Neon yellow
+const COLOR_LEVEL_GLOW: Color = Color(1.0, 0.4, 0.8, 1.0)  # Pink glow for level up
+const COLOR_CREDITS: Color = Color(1.0, 0.85, 0.1, 1.0)  # Gold for credits
+const COLOR_WEAPONS: Color = Color(0.2, 1.0, 0.9, 1.0)  # Cyan-ish
 
 
 func _ready() -> void:
@@ -68,7 +68,7 @@ func _ready() -> void:
 
 func _apply_synthwave_theme() -> void:
 	# HP Bar - Hot pink
-	var hp_style := StyleBoxFlat.new()
+	var hp_style: StyleBoxFlat = StyleBoxFlat.new()
 	hp_style.bg_color = COLOR_HP
 	hp_style.corner_radius_top_left = 4
 	hp_style.corner_radius_top_right = 4
@@ -76,7 +76,7 @@ func _apply_synthwave_theme() -> void:
 	hp_style.corner_radius_bottom_right = 4
 	hp_bar.add_theme_stylebox_override("fill", hp_style)
 	
-	var hp_bg := StyleBoxFlat.new()
+	var hp_bg: StyleBoxFlat = StyleBoxFlat.new()
 	hp_bg.bg_color = Color(0.15, 0.05, 0.1, 0.8)
 	hp_bg.corner_radius_top_left = 4
 	hp_bg.corner_radius_top_right = 4
@@ -85,7 +85,7 @@ func _apply_synthwave_theme() -> void:
 	hp_bar.add_theme_stylebox_override("background", hp_bg)
 	
 	# XP Bar - Neon purple
-	var xp_style := StyleBoxFlat.new()
+	var xp_style: StyleBoxFlat = StyleBoxFlat.new()
 	xp_style.bg_color = COLOR_XP
 	xp_style.corner_radius_top_left = 0
 	xp_style.corner_radius_top_right = 0
@@ -93,7 +93,7 @@ func _apply_synthwave_theme() -> void:
 	xp_style.corner_radius_bottom_right = 0
 	xp_bar.add_theme_stylebox_override("fill", xp_style)
 	
-	var xp_bg := StyleBoxFlat.new()
+	var xp_bg: StyleBoxFlat = StyleBoxFlat.new()
 	xp_bg.bg_color = Color(0.2, 0.08, 0.3, 0.9)  # Lighter purple background
 	xp_bg.corner_radius_top_left = 0
 	xp_bg.corner_radius_top_right = 0
@@ -143,7 +143,7 @@ func _process(_delta: float) -> void:
 
 
 func _find_player() -> void:
-	var players := get_tree().get_nodes_in_group("player")
+	var players: Array[Node] = get_tree().get_nodes_in_group("player")
 	if players.size() > 0:
 		_player = players[0]
 		FileLogger.log_info("HUD", "Found player: %s" % _player.name)
@@ -199,9 +199,9 @@ func _update_level(level: int) -> void:
 
 
 func _update_timer(time_remaining: float) -> void:
-	var total_seconds := int(max(0, time_remaining))
+	var total_seconds: int = int(max(0, time_remaining))
 	var minutes: int = int(total_seconds / 60.0)
-	var seconds := total_seconds % 60
+	var seconds: int = total_seconds % 60
 	timer_label.text = "%02d:%02d" % [minutes, seconds]
 	
 	# Flash red when low on time
@@ -265,11 +265,11 @@ func _refresh_weapon_list() -> void:
 	for s in summaries:
 		var id: String = String(s.get("id", ""))
 		var level: int = int(s.get("level", 1))
-		var weapon_name := id
+		var weapon_name: String = id
 		if DataLoader:
 			var w: Dictionary = DataLoader.get_weapon(id)
 			weapon_name = String(w.get("name", id))
-		var label := Label.new()
+		var label: Label = Label.new()
 		label.text = "%s  LV %d" % [weapon_name.to_upper(), level]
 		label.add_theme_color_override("font_color", Color(1, 1, 1, 0.95))
 		label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
@@ -315,7 +315,7 @@ func _refresh_modules_list() -> void:
 		if DataLoader:
 			var data: Dictionary = DataLoader.get_ship_upgrade(id)
 			display_name = String(data.get("name", id))
-		var label := Label.new()
+		var label: Label = Label.new()
 		label.text = "%s  LV %d" % [display_name.to_upper(), level]
 		label.add_theme_color_override("font_color", Color(1, 1, 1, 0.90))
 		label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))

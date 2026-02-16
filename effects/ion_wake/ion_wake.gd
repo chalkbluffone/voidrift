@@ -38,27 +38,27 @@ var _current_radius: float = 0.0
 
 
 func load_from_data(data: Dictionary) -> void:
-	var stats = data.get("stats", {})
-	damage = stats.get("damage", damage)
+	var stats: Dictionary = data.get("stats", {})
+	damage = float(stats.get("damage", damage))
 
-	var shape = data.get("shape", {})
-	size = shape.get("size", size)
-	growth_percent = shape.get("growth_percent", growth_percent)
+	var shape: Dictionary = data.get("shape", {})
+	size = float(shape.get("size", size))
+	growth_percent = float(shape.get("growth_percent", growth_percent))
 
-	var motion = data.get("motion", {})
-	hold_time = motion.get("hold_time", hold_time)
+	var motion: Dictionary = data.get("motion", {})
+	hold_time = float(motion.get("hold_time", hold_time))
 	
-	var particles_data = data.get("particles", {})
-	particles_count = particles_data.get("count", particles_count)
-	particles_speed_min = particles_data.get("speed_min", particles_speed_min)
-	particles_speed_max = particles_data.get("speed_max", particles_speed_max)
-	particles_lifetime = particles_data.get("lifetime", particles_lifetime)
-	particles_gravity = particles_data.get("gravity", particles_gravity)
-	particles_excitement = particles_data.get("excitement", particles_excitement)
+	var particles_data: Dictionary = data.get("particles", {})
+	particles_count = int(particles_data.get("count", particles_count))
+	particles_speed_min = float(particles_data.get("speed_min", particles_speed_min))
+	particles_speed_max = float(particles_data.get("speed_max", particles_speed_max))
+	particles_lifetime = float(particles_data.get("lifetime", particles_lifetime))
+	particles_gravity = float(particles_data.get("gravity", particles_gravity))
+	particles_excitement = float(particles_data.get("excitement", particles_excitement))
 
-	var visual = data.get("visual", {})
+	var visual: Dictionary = data.get("visual", {})
 	if visual.has("circle_color"):
-		var color_string = visual.get("circle_color")
+		var color_string: Variant = visual.get("circle_color")
 		if color_string is String:
 			circle_color = Color(color_string)
 		elif color_string is Color:
@@ -71,14 +71,14 @@ func _ready() -> void:
 	add_to_group("weapon_effect")
 	
 	# Sprite: white circle texture
-	var img = Image.create(128, 128, false, Image.FORMAT_RGBA8)
+	var img: Image = Image.create(128, 128, false, Image.FORMAT_RGBA8)
 	img.fill(Color(0, 0, 0, 0))  # Transparent background
 	# Draw a filled circle
-	var center = Vector2(64, 64)
-	var radius = 64.0
+	var center: Vector2 = Vector2(64, 64)
+	var radius: float = 64.0
 	for x in range(128):
 		for y in range(128):
-			var dist = Vector2(x, y).distance_to(center)
+			var dist: float = Vector2(x, y).distance_to(center)
 			if dist <= radius:
 				img.set_pixel(x, y, Color.WHITE)
 	_sprite = Sprite2D.new()
@@ -87,7 +87,7 @@ func _ready() -> void:
 	add_child(_sprite)
 
 	# Initial scale: sprite diameter = size * 2
-	var start_diameter = size * 2.0
+	var start_diameter: float = size * 2.0
 	_sprite.scale = Vector2(start_diameter / 128.0, start_diameter / 128.0)
 	_current_radius = size
 
@@ -100,12 +100,12 @@ func _ready() -> void:
 
 func _start_expansion() -> void:
 	# Calculate max_radius from growth_percent
-	var calculated_max_radius = size * (1.0 + growth_percent)
-	var expand_time = hold_time  # Grow over the hold time
-	var start_diameter = size * 2.0
-	var end_diameter = calculated_max_radius * 2.0
-	var start_scale = start_diameter / 128.0
-	var end_scale = end_diameter / 128.0
+	var calculated_max_radius: float = size * (1.0 + growth_percent)
+	var expand_time: float = hold_time  # Grow over the hold time
+	var start_diameter: float = size * 2.0
+	var end_diameter: float = calculated_max_radius * 2.0
+	var start_scale: float = start_diameter / 128.0
+	var end_scale: float = end_diameter / 128.0
 
 	_tween = create_tween()
 
@@ -135,7 +135,7 @@ func _explode_into_particles() -> void:
 		_hitbox.monitoring = false
 	
 	# Use CPUParticles2D for reliable particle lifecycle (same approach as Radiant Arc)
-	var particles := CPUParticles2D.new()
+	var particles: CPUParticles2D = CPUParticles2D.new()
 	get_parent().add_child(particles)
 	particles.global_position = global_position
 	particles.z_index = -2  # Render below enemies and ship
@@ -175,7 +175,7 @@ func _explode_into_particles() -> void:
 	particles.color = circle_color
 	
 	# Color ramp: fade out
-	var color_ramp := Gradient.new()
+	var color_ramp: Gradient = Gradient.new()
 	color_ramp.set_color(0, Color(1.0, 1.0, 1.0, 1.0))  # Full opacity at start
 	color_ramp.set_color(1, Color(1.0, 1.0, 1.0, 0.0))  # Fully transparent at end
 	particles.color_ramp = color_ramp
@@ -198,7 +198,7 @@ func _create_hitbox() -> void:
 	add_child(_hitbox)
 
 	_hitbox_collision = CollisionShape2D.new()
-	var circle = CircleShape2D.new()
+	var circle: CircleShape2D = CircleShape2D.new()
 	circle.radius = _current_radius
 	_hitbox_collision.shape = circle
 	_hitbox.add_child(_hitbox_collision)

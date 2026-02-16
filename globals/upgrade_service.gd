@@ -38,7 +38,7 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
 
-func generate_level_up_options() -> Array:
+func generate_level_up_options() -> Array[Dictionary]:
 	## Generate 3-4 upgrade options for level up selection.
 	var available_upgrades: Array = DataLoader.get_all_ship_upgrades()
 	var luck: float = _get_player_luck()
@@ -175,7 +175,7 @@ func _build_weapon_candidates(
 	return candidates
 
 
-func _select_from_candidates(candidates: Array[Dictionary], count: int) -> Array:
+func _select_from_candidates(candidates: Array[Dictionary], count: int) -> Array[Dictionary]:
 	## Pick up to count options via weighted sampling without replacement.
 	var options: Array = []
 	var picks: int = mini(count, candidates.size())
@@ -191,13 +191,13 @@ func _select_from_candidates(candidates: Array[Dictionary], count: int) -> Array
 
 
 func _pick_weighted_index(items: Array[Dictionary], rng: RandomNumberGenerator = null) -> int:
-	var total := 0.0
+	var total: float = 0.0
 	for it in items:
 		total += float(it.get("weight", 1.0))
 	if total <= 0.0:
 		return -1
 	var roll: float = rng.randf() * total if rng else randf() * total
-	var acc := 0.0
+	var acc: float = 0.0
 	for i in range(items.size()):
 		acc += float(items[i].get("weight", 1.0))
 		if roll <= acc:
@@ -206,7 +206,7 @@ func _pick_weighted_index(items: Array[Dictionary], rng: RandomNumberGenerator =
 
 
 func _get_weapon_level(weapon_id: String) -> int:
-	var player = RunManager.get_player()
+	var player: Node = RunManager.get_player()
 	if player and player.has_node("WeaponComponent"):
 		var wc: Node = player.get_node("WeaponComponent")
 		if wc and wc.has_method("get_weapon_level"):
@@ -215,7 +215,7 @@ func _get_weapon_level(weapon_id: String) -> int:
 
 
 func _get_player_luck() -> float:
-	var player = RunManager.get_player()
+	var player: Node = RunManager.get_player()
 	if player and player.has_method("get_stat"):
 		return float(player.get_stat("luck"))
 	return 0.0
@@ -236,14 +236,14 @@ func _roll_rarity(weights: Dictionary, luck: float) -> String:
 		var rarity_exp: int = int(GameConfig.RARITY_LUCK_EXPONENT_BY_RARITY.get(rarity_key, 1))
 		w[rarity_key] = float(w.get(rarity_key, 0.0)) * pow(luck_factor, rarity_exp)
 
-	var total := 0.0
+	var total: float = 0.0
 	for key in GameConfig.RARITY_ORDER:
 		total += w.get(key, 0.0)
 	if total <= 0.0:
 		return "common"
 
-	var roll := randf() * total
-	var acc := 0.0
+	var roll: float = randf() * total
+	var acc: float = 0.0
 	for key in GameConfig.RARITY_ORDER:
 		acc += w.get(key, 0.0)
 		if roll <= acc:
@@ -251,7 +251,7 @@ func _roll_rarity(weights: Dictionary, luck: float) -> String:
 	return "common"
 
 
-func _build_upgrade_effects(upgrade_data: Dictionary, rarity: String) -> Array:
+func _build_upgrade_effects(upgrade_data: Dictionary, rarity: String) -> Array[Dictionary]:
 	var effects: Array = []
 	if upgrade_data.has("effects") and upgrade_data["effects"] is Array:
 		for effect in upgrade_data["effects"]:
@@ -284,14 +284,14 @@ func _build_upgrade_effects(upgrade_data: Dictionary, rarity: String) -> Array:
 
 	while effects.size() < desired_count and pool.size() > 0:
 		var extra: Dictionary = pool.pop_back()
-		var extra_scaled := extra.duplicate(true)
+		var extra_scaled: Dictionary = extra.duplicate(true)
 		extra_scaled["amount"] = float(extra_scaled.get("amount", 0.0)) * tier_mult
 		effects.append(extra_scaled)
 
 	return effects
 
 
-func _build_weapon_effects(weapon_id: String, rarity: String, rng: RandomNumberGenerator) -> Array:
+func _build_weapon_effects(weapon_id: String, rarity: String, rng: RandomNumberGenerator) -> Array[Dictionary]:
 	## Build weapon upgrade effects using tier-based data from weapon_upgrades.json.
 	## Reads deterministic per-rarity stat deltas, picks N stats via weighted selection,
 	## and applies rarity factors per the Megabonk hybrid model.

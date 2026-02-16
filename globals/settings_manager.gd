@@ -7,7 +7,7 @@ class_name SettingsManagerClass
 
 signal settings_changed
 
-const SAVE_PATH := "user://settings.cfg"
+const SAVE_PATH: String = "user://settings.cfg"
 
 # Current settings values
 var master_volume: float = 1.0
@@ -76,7 +76,7 @@ func set_vsync(enabled: bool) -> void:
 # --- Persistence ---
 
 func save_settings() -> void:
-	var config = ConfigFile.new()
+	var config: ConfigFile = ConfigFile.new()
 	config.set_value("audio", "master", master_volume)
 	config.set_value("audio", "sfx", sfx_volume)
 	config.set_value("audio", "music", music_volume)
@@ -86,7 +86,7 @@ func save_settings() -> void:
 
 
 func load_settings() -> void:
-	var config = ConfigFile.new()
+	var config: ConfigFile = ConfigFile.new()
 	if config.load(SAVE_PATH) != OK:
 		return
 	

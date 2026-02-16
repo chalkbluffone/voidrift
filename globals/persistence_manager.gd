@@ -3,7 +3,7 @@ extends Node
 ## PersistenceManager - Handles save/load, unlocks, and persistent data storage.
 ## Autoload singleton: PersistenceManager
 
-const SAVE_PATH := "user://savegame.dat"
+const SAVE_PATH: String = "user://savegame.dat"
 
 signal game_saved
 signal game_loaded
@@ -56,7 +56,7 @@ func _ensure_default_unlocks() -> void:
 # --- Persistence ---
 
 func save_game() -> void:
-	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+	var file: FileAccess = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file:
 		file.store_var(persistent_data)
 		file.close()
@@ -65,9 +65,9 @@ func save_game() -> void:
 
 func load_game() -> void:
 	if FileAccess.file_exists(SAVE_PATH):
-		var file := FileAccess.open(SAVE_PATH, FileAccess.READ)
+		var file: FileAccess = FileAccess.open(SAVE_PATH, FileAccess.READ)
 		if file:
-			var data = file.get_var()
+			var data: Variant = file.get_var()
 			if data is Dictionary:
 				# Merge with defaults to handle save format upgrades
 				for key in persistent_data:
@@ -78,8 +78,8 @@ func load_game() -> void:
 			game_loaded.emit()
 
 
+## Reset all persistent data (for testing or player request).
 func reset_save() -> void:
-	"""Reset all persistent data (for testing or player request)."""
 	persistent_data = _get_default_persistent_data()
 	_ensure_default_unlocks()
 	save_game()
@@ -182,7 +182,7 @@ func get_best_time() -> float:
 
 
 func update_best_time(time: float) -> bool:
-	var current_best := get_best_time()
+	var current_best: float = get_best_time()
 	if current_best == 0.0 or time < current_best:
 		persistent_data["best_time"] = time
 		save_game()

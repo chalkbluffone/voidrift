@@ -11,25 +11,23 @@ func _init(parent: Node) -> void:
 	_parent_node = parent
 
 
+## Spawn a PersonalSpaceViolator shotgun blast.
+## Fires multiple pellets in a cone pattern toward the target direction.
+##
+## Args:
+##     spawn_pos:     World position to spawn at
+##     direction:     Direction vector toward target (will be normalized)
+##     params:        Flat parameter dictionary from WeaponDataFlattener
+##     follow_source: Player node (not used for flight, but kept for consistency)
+##
+## Returns:
+##     The spawned PersonalSpaceViolator container node, or null if no enemies.
 func spawn(
 	spawn_pos: Vector2,
 	direction: Vector2,
 	params: Dictionary = {},
 	_follow_source: Node2D = null
 ) -> Node2D:
-	"""
-	Spawn a PersonalSpaceViolator shotgun blast.
-	Fires multiple pellets in a cone pattern toward the target direction.
-
-	Args:
-		spawn_pos:     World position to spawn at
-		direction:     Direction vector toward target (will be normalized)
-		params:        Flat parameter dictionary from WeaponDataFlattener
-		follow_source: Player node (not used for flight, but kept for consistency)
-
-	Returns:
-		The spawned PersonalSpaceViolator container node, or null if no enemies.
-	"""
 	# Only fire when there's an actual enemy target
 	var nearest: Node2D = EffectUtils.find_nearest_enemy(_parent_node.get_tree(), spawn_pos)
 	if nearest == null:
@@ -50,6 +48,6 @@ func spawn(
 	return instance
 
 
+## Called when weapon is unequipped.
 func cleanup() -> void:
-	"""Called when weapon is unequipped."""
 	pass

@@ -9,8 +9,8 @@ signal weapon_changed(weapon_id: String)
 signal config_saved(weapon_id: String)
 
 # --- Preloads ---
-const ShipScene := preload("res://scenes/gameplay/ship.tscn")
-const TestTargetScene := preload("res://tools/weapon_test_lab/test_target.tscn")
+const ShipScene: PackedScene = preload("res://scenes/gameplay/ship.tscn")
+const TestTargetScene: PackedScene = preload("res://tools/weapon_test_lab/test_target.tscn")
 
 # --- Node references ---
 @onready var camera: Camera2D = $Camera2D
@@ -54,14 +54,14 @@ func _ready() -> void:
 	add_child(test_ship)
 	
 	# Disable the ship's camera (we use our own)
-	var ship_camera = test_ship.get_node_or_null("Camera2D")
+	var ship_camera: Node = test_ship.get_node_or_null("Camera2D")
 	if ship_camera:
 		ship_camera.enabled = false
 	
 	# Build weapon list from DataLoader (only enabled weapons)
 	var weapon_list: Array[Dictionary] = []
 	for weapon_id in DataLoader.get_enabled_weapon_ids():
-		var weapon_data = DataLoader.get_weapon(weapon_id)
+		var weapon_data: Dictionary = DataLoader.get_weapon(weapon_id)
 		weapon_list.append({
 			"id": weapon_id,
 			"name": weapon_data.get("display_name", weapon_id),
@@ -102,11 +102,11 @@ func _process_ship_movement(delta: float) -> void:
 		return
 	
 	# Use the same input actions as the main game
-	var move_input := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+	var move_input: Vector2 = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 	
 	if move_input.length() > 0.1:
 		# Normalize for consistent speed in all directions
-		var move_dir = move_input.normalized() if move_input.length() > 1.0 else move_input
+		var move_dir: Vector2 = move_input.normalized() if move_input.length() > 1.0 else move_input
 		test_ship.position += move_dir * _ship_speed * delta
 		_last_move_direction = move_dir.normalized()
 		
@@ -122,7 +122,7 @@ func _process_auto_fire(delta: float) -> void:
 	# Apply projectile_count as a fire rate multiplier
 	var projectile_count: float = float(_current_config.get("projectile_count", 1.0))
 	var effective_fire_rate: float = _base_fire_rate * max(1.0, projectile_count)
-	var interval = 1.0 / max(0.1, effective_fire_rate)
+	var interval: float = 1.0 / max(0.1, effective_fire_rate)
 	
 	if _fire_timer >= interval:
 		_fire_timer = 0.0
@@ -141,7 +141,7 @@ func _process_auto_spawn(delta: float) -> void:
 
 func select_weapon(weapon_id: String) -> void:
 	_current_weapon_id = weapon_id
-	var result := WeaponDataFlattener.flatten(DataLoader.get_weapon(weapon_id))
+	var result: Dictionary = WeaponDataFlattener.flatten(DataLoader.get_weapon(weapon_id))
 	_current_config = result.flat
 	_current_key_map = result.key_map
 	
@@ -164,14 +164,14 @@ func fire_weapon() -> void:
 
 
 func spawn_target_at_random() -> void:
-	var radius = randf_range(200, 400)
-	var angle = randf() * TAU
-	var pos = test_ship.global_position + Vector2(cos(angle), sin(angle)) * radius
+	var radius: float = randf_range(200, 400)
+	var angle: float = randf() * TAU
+	var pos: Vector2 = test_ship.global_position + Vector2(cos(angle), sin(angle)) * radius
 	spawn_target_at(pos)
 
 
 func spawn_target_at(pos: Vector2) -> void:
-	var target = TestTargetScene.instantiate()
+	var target: Node2D = TestTargetScene.instantiate()
 	target.global_position = pos
 	
 	if _spawn_boss_target:
@@ -279,13 +279,13 @@ func _on_boss_target_toggled(enabled: bool) -> void:
 
 # --- Save/Load to weapons.json ---
 
+## Save current config back to weapons.json via DataLoader.
 func save_to_weapons_json() -> void:
-	"""Save current config back to weapons.json via DataLoader."""
 	if _current_weapon_id.is_empty():
 		return
 	
-	var original_data = DataLoader.get_weapon(_current_weapon_id)
-	var updated_data = WeaponDataFlattener.unflatten(_current_config, _current_key_map, original_data)
+	var original_data: Dictionary = DataLoader.get_weapon(_current_weapon_id)
+	var updated_data: Dictionary = WeaponDataFlattener.unflatten(_current_config, _current_key_map, original_data)
 	
 	if DataLoader.save_weapon(_current_weapon_id, updated_data):
 		print("[WeaponTestLab] Saved %s to weapons.json" % _current_weapon_id)
@@ -294,8 +294,8 @@ func save_to_weapons_json() -> void:
 		push_error("[WeaponTestLab] Failed to save %s" % _current_weapon_id)
 
 
+## Reload current weapon config from weapons.json.
 func reload_from_weapons_json() -> void:
-	"""Reload current weapon config from weapons.json."""
 	DataLoader.reload_data()
 	select_weapon(_current_weapon_id)
 	print("[WeaponTestLab] Reloaded %s from weapons.json" % _current_weapon_id)
@@ -332,7 +332,7 @@ func _ensure_debug_overlay(cs: CollisionShape2D) -> void:
 	for child in cs.get_children():
 		if child.has_meta("hitbox_debug_overlay"):
 			return
-	var overlay := HitboxDebugOverlay.new()
+	var overlay: HitboxDebugOverlay = HitboxDebugOverlay.new()
 	overlay.set_meta("hitbox_debug_overlay", true)
 	cs.add_child(overlay)
 
@@ -350,7 +350,7 @@ func _push_live_config_update() -> void:
 	# Search by weapon ID group (e.g., "nope_bubble", "ion_wake", "radiant_arc")
 	var groups_to_check: Array = [_current_weapon_id, "weapon_effect"]
 	for group_name in groups_to_check:
-		var nodes = get_tree().get_nodes_in_group(group_name)
+		var nodes: Array[Node] = get_tree().get_nodes_in_group(group_name)
 		for node in nodes:
 			if not is_instance_valid(node):
 				continue
@@ -366,7 +366,7 @@ class HitboxDebugOverlay extends Node2D:
 		queue_redraw()
 
 	func _draw() -> void:
-		var parent := get_parent()
+		var parent: Node = get_parent()
 		if not parent is CollisionShape2D:
 			return
 		var cs: CollisionShape2D = parent as CollisionShape2D
@@ -378,8 +378,8 @@ class HitboxDebugOverlay extends Node2D:
 			return
 
 		# Pick color based on what the collision shape belongs to
-		var color := Color(0.0, 1.0, 0.0, 0.6)  # Green default
-		var grandparent := cs.get_parent()
+		var color: Color = Color(0.0, 1.0, 0.0, 0.6)  # Green default
+		var grandparent: Node = cs.get_parent()
 		if grandparent:
 			if grandparent.is_in_group("enemies"):
 				color = Color(1.0, 0.2, 0.2, 0.6)  # Red for enemies
@@ -394,7 +394,7 @@ class HitboxDebugOverlay extends Node2D:
 			draw_circle(Vector2.ZERO, r, Color(color.r, color.g, color.b, color.a * 0.15))
 		elif shape is RectangleShape2D:
 			var half: Vector2 = shape.size * 0.5
-			var rect := Rect2(-half, shape.size)
+			var rect: Rect2 = Rect2(-half, shape.size)
 			draw_rect(rect, Color(color.r, color.g, color.b, color.a * 0.15), true)
 			draw_rect(rect, color, false, 1.5)
 		elif shape is CapsuleShape2D:

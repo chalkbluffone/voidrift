@@ -3,9 +3,9 @@ extends Control
 ## Main Menu - Entry point for the game.
 ## Provides navigation to Play, Options, and Weapons Lab.
 
-const GAME_SCENE := "res://scenes/gameplay/world.tscn"
-const OPTIONS_SCENE := "res://scenes/ui/options_menu.tscn"
-const WEAPONS_LAB_SCENE := "res://tools/weapon_test_lab/weapon_test_lab.tscn"
+const GAME_SCENE: String = "res://scenes/gameplay/world.tscn"
+const OPTIONS_SCENE: String = "res://scenes/ui/options_menu.tscn"
+const WEAPONS_LAB_SCENE: String = "res://tools/weapon_test_lab/weapon_test_lab.tscn"
 
 @onready var play_button: Button = $VBoxContainer/PlayButton
 @onready var options_button: Button = $VBoxContainer/OptionsButton

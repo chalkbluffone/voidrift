@@ -26,6 +26,6 @@ func derive_seed(ns: String) -> int:
 	return _fnv1a_32("%s|%s" % [seed_string, ns])
 
 func rng(ns: String) -> RandomNumberGenerator:
-	var r := RandomNumberGenerator.new()
+	var r: RandomNumberGenerator = RandomNumberGenerator.new()
 	r.seed = derive_seed(ns)
 	return r

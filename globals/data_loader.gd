@@ -17,8 +17,8 @@ var base_player_stats: Dictionary = {}
 # Mod info
 var loaded_mods: Array[String] = []
 
-const BASE_DATA_PATH := "res://data/"
-const MOD_DATA_PATH := "user://mods/"
+const BASE_DATA_PATH: String = "res://data/"
+const MOD_DATA_PATH: String = "user://mods/"
 
 func _ready() -> void:
 	_load_all_data()
@@ -47,12 +47,12 @@ func _load_mods() -> void:
 		DirAccess.make_dir_recursive_absolute(MOD_DATA_PATH)
 		return
 	
-	var dir := DirAccess.open(MOD_DATA_PATH)
+	var dir: DirAccess = DirAccess.open(MOD_DATA_PATH)
 	if dir == null:
 		return
 	
 	dir.list_dir_begin()
-	var folder_name := dir.get_next()
+	var folder_name: String = dir.get_next()
 	
 	while folder_name != "":
 		if dir.current_is_dir() and not folder_name.begins_with("."):
@@ -62,12 +62,12 @@ func _load_mods() -> void:
 	dir.list_dir_end()
 
 func _load_mod(mod_path: String) -> void:
-	var mod_info_path := mod_path + "mod.json"
+	var mod_info_path: String = mod_path + "mod.json"
 	if not FileAccess.file_exists(mod_info_path):
 		push_warning("[DataLoader] Mod missing mod.json: " + mod_path)
 		return
 	
-	var mod_info := _load_json_file(mod_info_path)
+	var mod_info: Dictionary = _load_json_file(mod_info_path)
 	var mod_name: String = mod_info.get("name", "Unknown Mod")
 	
 	print("[DataLoader] Loading mod: " + mod_name)
@@ -94,16 +94,16 @@ func _load_json_file(path: String) -> Dictionary:
 	if not FileAccess.file_exists(path):
 		return {}
 	
-	var file := FileAccess.open(path, FileAccess.READ)
+	var file: FileAccess = FileAccess.open(path, FileAccess.READ)
 	if file == null:
 		push_error("[DataLoader] Failed to open: " + path)
 		return {}
 	
-	var json_text := file.get_as_text()
+	var json_text: String = file.get_as_text()
 	file.close()
 	
-	var json := JSON.new()
-	var error := json.parse(json_text)
+	var json: JSON = JSON.new()
+	var error: Error = json.parse(json_text)
 	
 	if error != OK:
 		push_error("[DataLoader] JSON parse error in %s at line %d: %s" % [
@@ -111,10 +111,10 @@ func _load_json_file(path: String) -> Dictionary:
 		])
 		return {}
 	
-	var data = json.get_data()
+	var data: Variant = json.get_data()
 	if data is Dictionary:
 		# Remove schema/comment fields
-		var cleaned := {}
+		var cleaned: Dictionary = {}
 		for key in data:
 			if not key.begins_with("$") and not key.begins_with("_"):
 				cleaned[key] = data[key]
@@ -131,11 +131,15 @@ func get_weapon(id: String) -> Dictionary:
 func get_weapon_upgrade(id: String) -> Dictionary:
 	return weapon_upgrades.get(id, {})
 
-func get_all_weapon_upgrades() -> Array:
-	return weapon_upgrades.values()
+func get_all_weapon_upgrades() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	result.assign(weapon_upgrades.values())
+	return result
 
-func get_weapon_upgrade_ids() -> Array:
-	return weapon_upgrades.keys()
+func get_weapon_upgrade_ids() -> Array[String]:
+	var result: Array[String] = []
+	result.assign(weapon_upgrades.keys())
+	return result
 
 func get_ship(id: String) -> Dictionary:
 	return ships.get(id, {})
@@ -155,45 +159,67 @@ func get_enemy(id: String) -> Dictionary:
 func get_base_player_stats() -> Dictionary:
 	return base_player_stats.duplicate()
 
-func get_all_weapons() -> Array:
-	return weapons.values()
+func get_all_weapons() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	result.assign(weapons.values())
+	return result
 
-func get_all_ships() -> Array:
-	return ships.values()
+func get_all_ships() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	result.assign(ships.values())
+	return result
 
-func get_all_captains() -> Array:
-	return captains.values()
+func get_all_captains() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	result.assign(captains.values())
+	return result
 
-func get_all_ship_upgrades() -> Array:
-	return ship_upgrades.values()
+func get_all_ship_upgrades() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	result.assign(ship_upgrades.values())
+	return result
 
-func get_all_items() -> Array:
-	return items.values()
+func get_all_items() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	result.assign(items.values())
+	return result
 
-func get_all_enemies() -> Array:
-	return enemies.values()
+func get_all_enemies() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	result.assign(enemies.values())
+	return result
 
-func get_weapon_ids() -> Array:
-	return weapons.keys()
+func get_weapon_ids() -> Array[String]:
+	var result: Array[String] = []
+	result.assign(weapons.keys())
+	return result
 
-func get_enabled_weapon_ids() -> Array:
-	"""Return only weapon IDs where enabled != false (defaults to true if key missing)."""
-	return weapons.keys().filter(func(id): return weapons[id].get("enabled", true))
+## Return only weapon IDs where enabled != false (defaults to true if key missing).
+func get_enabled_weapon_ids() -> Array[String]:
+	var result: Array[String] = []
+	result.assign(weapons.keys().filter(func(id: Variant) -> bool: return weapons[id].get("enabled", true)))
+	return result
 
-func get_unlocked_weapons() -> Array:
+func get_unlocked_weapons() -> Array[Dictionary]:
 	# TODO: Filter by player's unlock progress
-	return weapons.values().filter(func(w): return w.get("enabled", true) and w.get("unlock_condition") == "default")
+	var result: Array[Dictionary] = []
+	result.assign(weapons.values().filter(func(w: Variant) -> bool: return w.get("enabled", true) and w.get("unlock_condition") == "default"))
+	return result
 
-func get_unlocked_ships() -> Array:
+func get_unlocked_ships() -> Array[Dictionary]:
 	# TODO: Filter by player's unlock progress
-	return ships.values().filter(func(s): return s.get("unlock_condition") == "default")
+	var result: Array[Dictionary] = []
+	result.assign(ships.values().filter(func(s: Variant) -> bool: return s.get("unlock_condition") == "default"))
+	return result
 
-func get_unlocked_captains() -> Array:
+func get_unlocked_captains() -> Array[Dictionary]:
 	# TODO: Filter by player's unlock progress
-	return captains.values().filter(func(c): return c.get("unlock_condition") == "default")
+	var result: Array[Dictionary] = []
+	result.assign(captains.values().filter(func(c: Variant) -> bool: return c.get("unlock_condition") == "default"))
+	return result
 
+## Return synergy data for a ship+captain combo, or empty dict if none.
 func get_synergy_for_combo(ship_id: String, captain_id: String) -> Dictionary:
-	"""Return synergy data for a ship+captain combo, or empty dict if none."""
 	var key: String = ship_id + "+" + captain_id
 	return synergies.get(key, {})
 
@@ -203,17 +229,17 @@ func reload_data() -> void:
 
 # --- Save API (for tools like Weapon Test Lab) ---
 
+## Save a weapon's data back to weapons.json. Used by Weapon Test Lab.
 func save_weapon(weapon_id: String, weapon_data: Dictionary) -> bool:
-	"""Save a weapon's data back to weapons.json. Used by Weapon Test Lab."""
 	weapons[weapon_id] = weapon_data
 	return _save_json_file(BASE_DATA_PATH + "weapons.json", weapons)
 
 
+## Save a dictionary to a JSON file with pretty formatting.
 func _save_json_file(path: String, data: Dictionary) -> bool:
-	"""Save a dictionary to a JSON file with pretty formatting."""
-	var json_string := JSON.stringify(data, "  ")
+	var json_string: String = JSON.stringify(data, "  ")
 	
-	var file := FileAccess.open(path, FileAccess.WRITE)
+	var file: FileAccess = FileAccess.open(path, FileAccess.WRITE)
 	if file == null:
 		push_error("[DataLoader] Failed to open for writing: " + path)
 		return false

@@ -15,7 +15,7 @@ func _activate() -> void:
 		return
 
 	for key in effects:
-		var value = effects[key]
+		var value: Variant = effects[key]
 
 		if key == "invulnerable" and value == true:
 			_granted_invulnerability = true

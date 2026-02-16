@@ -30,7 +30,7 @@ func _process(delta: float) -> void:
 
 
 func _find_player() -> void:
-	var players := get_tree().get_nodes_in_group("player")
+	var players: Array[Node] = get_tree().get_nodes_in_group("player")
 	if players.size() > 0:
 		_player = players[0]
 
@@ -48,9 +48,9 @@ func _spawn_enemy() -> void:
 	var enemy: CharacterBody2D = BaseEnemyScene.instantiate()
 	
 	# Position at random angle around player
-	var angle := randf() * TAU
-	var distance := randf_range(GameConfig.SPAWN_RADIUS_MIN, GameConfig.SPAWN_RADIUS_MAX)
-	var spawn_pos := _player.global_position + Vector2.from_angle(angle) * distance
+	var angle: float = randf() * TAU
+	var distance: float = randf_range(GameConfig.SPAWN_RADIUS_MIN, GameConfig.SPAWN_RADIUS_MAX)
+	var spawn_pos: Vector2 = _player.global_position + Vector2.from_angle(angle) * distance
 	
 	enemy.global_position = spawn_pos
 	

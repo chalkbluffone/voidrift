@@ -214,7 +214,7 @@ func _fire_projectile_via_spawner(weapon_id: String, data: Dictionary) -> void:
 	config["crit_damage"] = float(config.get("crit_damage", 0.0)) + _inventory.get_weapon_flat(weapon_id, StatsComponentScript.STAT_CRIT_DAMAGE)
 
 	FileLogger.log_info("WeaponComponent", "Spawner config for %s: %d keys" % [weapon_id, config.size()])
-	var spawner = _spawners.get_or_create_spawner(weapon_id, data, get_tree().current_scene)
+	var spawner: Object = _spawners.get_or_create_spawner(weapon_id, data, get_tree().current_scene)
 	if spawner == null:
 		FileLogger.log_warn("WeaponComponent", "No spawner for custom projectile weapon: %s" % weapon_id)
 		return
@@ -225,7 +225,7 @@ func _fire_projectile_via_spawner(weapon_id: String, data: Dictionary) -> void:
 
 	var spawn_arg_count: int = WeaponSpawnerCache.get_spawner_arg_count(spawner, 3)
 	FileLogger.log_info("WeaponComponent", "Firing %s via spawner (%d-arg) at %s" % [weapon_id, spawn_arg_count, str(parent.global_position)])
-	var result = null
+	var result: Variant = null
 	if spawn_arg_count >= 4:
 		var direction: Vector2 = _get_fire_direction(data)
 		result = spawner.spawn(parent.global_position, direction, config, parent)
@@ -274,9 +274,9 @@ func _fire_orbit_weapon(weapon_id: String, data: Dictionary, _level: int) -> voi
 		bonus_proj = stats_component.get_stat_int(StatsComponentScript.STAT_PROJECTILE_COUNT)
 	config["projectile_count"] = maxi(1, base_proj_count + bonus_proj + weapon_bonus_proj)
 
-	var spawner = _spawners.get_or_create_spawner(weapon_id, data, get_tree().current_scene)
+	var spawner: Object = _spawners.get_or_create_spawner(weapon_id, data, get_tree().current_scene)
 	if spawner and spawner.has_method("spawn"):
-		var result = spawner.spawn(parent.global_position, config, parent)
+		var result: Variant = spawner.spawn(parent.global_position, config, parent)
 		if result:
 			weapon_fired.emit(weapon_id, [result])
 	else:
@@ -313,9 +313,9 @@ func _fire_area_weapon(weapon_id: String, data: Dictionary, _level: int) -> void
 		var base_duration: float = float(config.get("duration", 3.0))
 		config["duration"] = maxf(0.15, (base_duration + weapon_duration_flat) * (global_duration_mult * (1.0 + weapon_duration_mult)))
 
-	var spawner = _spawners.get_or_create_spawner(weapon_id, data, get_tree().current_scene)
+	var spawner: Object = _spawners.get_or_create_spawner(weapon_id, data, get_tree().current_scene)
 	if spawner and spawner.has_method("spawn"):
-		var result = spawner.spawn(parent.global_position, config, parent)
+		var result: Variant = spawner.spawn(parent.global_position, config, parent)
 		if result:
 			weapon_fired.emit(weapon_id, [result])
 	else:
@@ -328,9 +328,9 @@ func _fire_beam_weapon(weapon_id: String, data: Dictionary, _level: int) -> void
 		return
 	var config: Dictionary = WeaponDataFlattener.flatten(data).flat
 	var direction: Vector2 = _get_fire_direction(data)
-	var spawner = _spawners.get_or_create_spawner(weapon_id, data, get_tree().current_scene)
+	var spawner: Object = _spawners.get_or_create_spawner(weapon_id, data, get_tree().current_scene)
 	if spawner and spawner.has_method("spawn"):
-		var result = spawner.spawn(parent.global_position, direction, config, parent)
+		var result: Variant = spawner.spawn(parent.global_position, direction, config, parent)
 		if result:
 			weapon_fired.emit(weapon_id, [result])
 	else:
@@ -355,7 +355,7 @@ func _fire_via_spawner(weapon_id: String, config: Dictionary, source: Node2D) ->
 	## Fires any weapon through its spawner. Automatically detects spawn()
 	## signature (3-arg vs 4-arg) and passes direction when supported.
 	var weapon_data: Dictionary = DataLoader.get_weapon(weapon_id)
-	var spawner = _spawners.get_or_create_spawner(weapon_id, weapon_data, get_tree().current_scene)
+	var spawner: Object = _spawners.get_or_create_spawner(weapon_id, weapon_data, get_tree().current_scene)
 	if spawner == null:
 		push_warning("WeaponComponent: No spawner for weapon: " + weapon_id)
 		return
@@ -364,7 +364,7 @@ func _fire_via_spawner(weapon_id: String, config: Dictionary, source: Node2D) ->
 		return
 
 	var spawn_arg_count: int = WeaponSpawnerCache.get_spawner_arg_count(spawner, 4)
-	var result = null
+	var result: Variant = null
 	if spawn_arg_count >= 4:
 		var direction: Vector2 = Vector2.RIGHT.rotated(source.rotation)
 		result = spawner.spawn(source.global_position, direction, config, source)
@@ -553,7 +553,7 @@ func get_weapon_level(weapon_id: String) -> int:
 	return _inventory.get_weapon_level(weapon_id)
 
 
-func get_equipped_weapon_summaries() -> Array:
+func get_equipped_weapon_summaries() -> Array[Dictionary]:
 	return _inventory.get_equipped_weapon_summaries()
 
 

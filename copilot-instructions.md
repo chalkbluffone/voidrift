@@ -5,7 +5,7 @@
 Voidrift is a **top-down 2D sci-fi roguelike survival game** inspired by Megabonk. Players pilot a ship through space, auto-attacking waves of enemies while collecting XP, leveling up, and choosing upgrades during timed survival runs.
 
 **Genre**: Action Roguelike / Bullet Survivor  
-**Engine**: Godot 4.5  
+**Engine**: Godot 4.6  
 **Platform**: Steam (Windows primary, potential Linux/Steam Deck)
 
 ---
@@ -181,6 +181,36 @@ Examples:
 
 If a value is Variant/untyped (e.g. from JSON), cast it immediately with `String(...)`, `int(...)`, `float(...)`, and use `get()` instead of dot-access.
 
+### Doc comments (## not """)
+
+GDScript uses `##` for doc comments. Triple-quoted strings (`"""..."""`) are Python-style and are discarded string literals in GDScript — they generate no documentation.
+
+```gdscript
+# WRONG — Python-style docstring (ignored by GDScript)
+func take_damage(amount: float) -> float:
+    """Apply damage after armor/evasion. Returns actual damage taken."""
+    ...
+
+# RIGHT — GDScript doc comment (above the function)
+## Apply damage after armor/evasion. Returns actual damage taken.
+func take_damage(amount: float) -> float:
+    ...
+```
+
+### JSON value casting (required)
+
+When reading values from `Dictionary.get()` on parsed JSON data, always cast immediately with `float()`, `int()`, or `bool()`. JSON numbers are Variant and may be int or float unpredictably.
+
+```gdscript
+# WRONG — raw JSON value may be int when float is expected
+damage = stats.get("damage", damage)
+
+# RIGHT — explicit cast
+damage = float(stats.get("damage", damage))
+count = int(stats.get("count", count))
+enabled = bool(stats.get("enabled", enabled))
+```
+
 ### Data-Driven Design
 
 All game content defined in **JSON files** under `data/`:
@@ -198,11 +228,18 @@ All game content defined in **JSON files** under `data/`:
 
 ### Autoloads (globals/)
 
-| Autoload      | Purpose                                                    |
-| ------------- | ---------------------------------------------------------- |
-| `GameSeed`    | Deterministic randomness for procedural generation         |
-| `GameManager` | Game state, scene transitions, save/load, meta-progression |
-| `DataLoader`  | Loads and merges JSON data files, mod support              |
+| Autoload             | Purpose                                                                  |
+| -------------------- | ------------------------------------------------------------------------ |
+| `GameConfig`         | Centralized tuning constants (speeds, spawn rates, rarity weights)       |
+| `GameSeed`           | Deterministic randomness for procedural generation                       |
+| `DataLoader`         | Loads and merges JSON data files, mod support                            |
+| `PersistenceManager` | Save/load persistent data (unlocks, best times, synergies)               |
+| `RunManager`         | Run lifecycle, scene transitions, run state (ship, captain, weapons)     |
+| `ProgressionManager` | XP tracking, level-up flow, upgrade application                          |
+| `UpgradeService`     | Level-up option generation, rarity rolling, stat picks                   |
+| `GameManager`        | Legacy compatibility facade (delegates to RunManager/ProgressionManager) |
+| `FileLogger`         | Debug logging to file (debug_log.txt)                                    |
+| `SettingsManager`    | Audio volume, display settings (fullscreen/vsync), persistence           |
 
 ### Scene Structure
 
@@ -212,39 +249,55 @@ scenes/
 ├── gameplay/
 │   ├── world.tscn               # Main gameplay arena
 │   ├── ship.tscn                # Player ship
-│   └── obstacles/
-│       └── minable_asteroid.tscn
+│   └── projectile.tscn          # Projectile instance
 ├── ui/
 │   ├── main_menu.tscn
+│   ├── options_menu.tscn
 │   ├── hud.tscn
 │   ├── pause_menu.tscn
 │   ├── level_up.tscn
 │   └── game_over.tscn
+├── pickups/
+│   ├── xp_pickup.tscn
+│   └── credit_pickup.tscn
 └── enemies/
-    └── (enemy scenes)
+    └── base_enemy.tscn
 ```
 
 ### Script Structure
 
 ```
 scripts/
-├── core/                        # Shared components
-│   ├── stats_component.gd
-│   └── damage_system.gd
+├── core/                        # Shared components & utilities
+│   ├── stats_component.gd       # HP, stats, damage, crit
+│   ├── effect_utils.gd          # Shared helpers (particles, gradients, enemy-find)
+│   └── abilities/
+│       ├── base_ability.gd      # Abstract captain ability base
+│       └── buff_self_ability.gd  # Self-buff ability template
+├── combat/
+│   ├── weapon_component.gd      # Auto-fire orchestration, weapon lifecycle
+│   ├── weapon_inventory.gd      # Equipped weapon tracking, summaries
+│   ├── weapon_spawner_cache.gd  # Lazy spawner instantiation cache
+│   ├── weapon_data_flattener.gd # Flatten/unflatten nested weapon JSON for UI
+│   └── projectile.gd            # Projectile movement, hit detection
 ├── player/
-│   ├── ship.gd
-│   ├── ship_controller.gd
-│   └── phase_shift.gd
+│   └── ship.gd                  # Player movement, Phase Shift, input
 ├── systems/
-│   ├── world.gd
-│   ├── run_manager.gd
-│   ├── wave_spawner.gd
-│   ├── weapon_manager.gd
-│   ├── obstacle_manager.gd
-│   └── xp_system.gd
+│   ├── world.gd                 # Arena setup, starfield shaders
+│   └── enemy_spawner.gd         # Spawn enemies, XP drops
+├── ui/
+│   ├── hud.gd                   # HP/XP bars, timer, credits, weapons list
+│   ├── level_up.gd              # Level-up card UI
+│   ├── main_menu.gd             # Main menu
+│   ├── options_menu.gd          # Options menu (volume, display)
+│   ├── pause_menu.gd            # Pause menu with inline options
+│   └── game_over.gd             # Game over screen
+├── pickups/
+│   ├── base_pickup.gd           # Magnetic attraction base class
+│   ├── xp_pickup.gd             # XP shard pickup
+│   └── credit_pickup.gd         # Credit pickup
 └── enemies/
-    ├── minable_asteroid.gd
-    └── (enemy scripts)
+    └── base_enemy.gd            # Enemy chase, damage, death
 ```
 
 ---
@@ -265,7 +318,7 @@ scripts/
 | ----------- | ----- | --------- | ------------------------- |
 | Ship        | 1     | 8         | Enemies                   |
 | Projectile  | 4     | 8         | Enemies                   |
-| BaseEnemy   | 8     | 1         | Player                    |
+| BaseEnemy   | 8     | 5 (1+4)   | Player + Projectiles      |
 | XPPickup    | 16    | 33 (1+32) | Player body + PickupRange |
 | PickupRange | 32    | 16        | Pickups                   |
 
@@ -297,18 +350,20 @@ Ship (CharacterBody2D) [layer=1, mask=8, group="player"]
 ├── StatsComponent (Node)
 ├── WeaponComponent (Node2D)
 ├── Sprite2D (AnimatedSprite2D)
-├── CollisionShape2D (radius=15)
+├── CollisionShape2D (radius=24.08)
 ├── PickupRange (Area2D) [layer=32, mask=16]
-│   └── PickupRangeShape (CollisionShape2D, radius=80)
+│   └── PickupRangeShape (CollisionShape2D, radius=40)
 └── Camera2D
 ```
 
 ### BaseEnemy (`scenes/enemies/base_enemy.tscn`)
 
 ```
-BaseEnemy (CharacterBody2D) [layer=8, mask=1, group="enemies"]
+BaseEnemy (CharacterBody2D) [layer=8, mask=5, group="enemies"]
 ├── Sprite2D
-└── CollisionShape2D
+├── CollisionShape2D
+└── HitboxArea (Area2D) [layer=8, mask=1]
+    └── HitboxShape (CollisionShape2D)
 ```
 
 ### XPPickup (`scenes/pickups/xp_pickup.tscn`)
@@ -342,11 +397,19 @@ XP magnetically moves to player
     ↓
 XPPickup collides with player body
     ↓
-XPPickup._collect() → GameManager.add_xp()
+XPPickup._collect() → ProgressionManager.add_xp()
     ↓
-GameManager checks if xp >= xp_required
+ProgressionManager checks if xp >= xp_required
     ↓
-GameManager._level_up() → generate options, emit signal
+ProgressionManager._level_up() → UpgradeService.generate_level_up_options()
+    ↓
+UpgradeService rolls rarity, picks stats → returns Array[Dictionary]
+    ↓
+RunManager.on_level_up_triggered() → emits level_up_started signal
+    ↓
+LevelUp UI shows options, player picks one
+    ↓
+ProgressionManager.apply_level_up_option() → applies stat/weapon changes
 ```
 
 ---
@@ -693,24 +756,24 @@ Config toggles in `GameConfig`:
 
 ### Phase 1: Core Foundation
 
-1. [ ] `DataLoader` autoload - JSON loading and mod merging
-2. [ ] `StatsComponent` - Stat tracking with modifiers
-3. [ ] `GameManager` autoload - State management, scene transitions
-4. [ ] Basic enemy with chase behavior
-5. [ ] Damage system (deal/receive damage)
+1. [x] `DataLoader` autoload - JSON loading and mod merging
+2. [x] `StatsComponent` - Stat tracking with modifiers
+3. [x] `GameManager` autoload - State management, scene transitions
+4. [x] Basic enemy with chase behavior
+5. [x] Damage system (deal/receive damage)
 
 ### Phase 2: Combat Loop
 
-6. [ ] Weapon system - Auto-firing weapons from data
-7. [ ] XP system - Collection, level up trigger
-8. [ ] Level-up UI - Choose 1 of 3 upgrades
-9. [ ] Ship upgrades (tomes) implementation
-10. [ ] Phase Shift ability
+6. [x] Weapon system - Auto-firing weapons from data
+7. [x] XP system - Collection, level up trigger
+8. [x] Level-up UI - Choose 1 of 3 upgrades
+9. [x] Ship upgrades (tomes) implementation
+10. [x] Phase Shift ability
 
 ### Phase 3: Run Structure
 
-11. [ ] Run timer and wave manager
-12. [ ] Enemy wave spawning (progressive difficulty)
+11. [x] Run timer and wave manager
+12. [x] Enemy wave spawning (progressive difficulty)
 13. [ ] Miniboss spawning at intervals
 14. [ ] Final boss beacon mechanic
 15. [ ] Final Swarm mode
@@ -934,6 +997,18 @@ This ensures the test lab remains a reliable tool for tuning and testing all wea
   - **Enemy Scaling**: Base speed 100, scales +2.5 per player level. This ensures enemies are slower early on but catch up.
   - **Spawning**: "Slow burn" start (0.5 spawn rate) ramping up (+0.2/min). Makes early game less chaotic.
   - **Pickup Radius**: Reduced magnet range to 40px (50% reduction) requiring closer proximity to loot.
+- **Ship + Captain System**: Ship selection with different base stats/weapons, Captain with passive bonuses and active abilities (buff_self template)
+- **Synergies**: Ship+captain combo bonuses loaded from synergies.json, tracked in PersistenceManager
+- **Weapon Effects (17)**: radiant_arc, snarky_comeback, nikolas_coil, nope_bubble, space_napalm, ion_wake, personal_space_violator, orbit_base, spin_cycle, straight_line_negotiator, timmy_gun, tothian_mines, space_nukes, broken_tractor_beam, aoe_base (+ beam_base, projectile_base stubs)
+- **Weapon Test Lab**: Full editing UI with sliders, save/reload, hitbox debug overlay, target spawning
+- **Options Menu**: Audio volume (master/SFX/music), fullscreen, vsync settings with persistence
+- **Ability System**: Abstract base_ability.gd + buff_self_ability.gd template, data-driven from captains.json
+- **Run Manager**: Run lifecycle (start/end), scene transitions, pause/resume
+- **Progression Manager**: XP tracking, level-up flow, upgrade application delegates
+- **Upgrade Service**: Level-up option generation with rarity rolling, weapon tier stat picks
+- **Persistence Manager**: Save/load system for unlocks, best times, discovered synergies
+- **Settings Manager**: Audio + display settings with ConfigFile persistence
+- **Game Over Screen**: Stats display, restart/menu options
 
 ### 🔄 In Progress
 
@@ -943,9 +1018,10 @@ This ensures the test lab remains a reliable tool for tuning and testing all wea
 
 1. **Camera orbit** - Right stick/mouse rotates camera around ship
 2. **More enemy variety** - Different enemy types with behaviors
-3. **Ship upgrades working** - Apply stat bonuses when upgrades selected
-4. **Sound effects** - Shooting, enemy death, XP pickup, level up
-5. **Visual polish** - Screen shake, particles, damage numbers
+3. **Miniboss spawning** - Boss enemies at timed intervals
+4. **Final boss beacon** - End-game boss mechanic
+5. **Sound effects** - Shooting, enemy death, XP pickup, level up
+6. **Visual polish** - Screen shake, particles, damage numbers
 
 ### 🐛 Known Issues
 
@@ -961,4 +1037,4 @@ This ensures the test lab remains a reliable tool for tuning and testing all wea
 
 ---
 
-_Last updated: January 24, 2026_
+_Last updated: February 14, 2026_

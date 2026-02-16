@@ -20,7 +20,7 @@ func _ready() -> void:
 		RunManager.run_data.time_remaining = RunManager.run_duration
 
 func _set_star_seed(rect_path: NodePath, ns: String) -> void:
-	var rect := get_node(rect_path) as ColorRect
-	var mat := rect.material as ShaderMaterial
+	var rect: ColorRect = get_node(rect_path) as ColorRect
+	var mat: ShaderMaterial = rect.material as ShaderMaterial
 	if mat:
 		mat.set_shader_parameter("seed", GameSeed.derive_seed(ns))

@@ -15,10 +15,10 @@ extends RefCounted
 
 ## Sections of weapon JSON that contain editable parameters.
 ## Order matters for display grouping in the UI.
-const EDITABLE_SECTIONS := ["stats", "base_stats", "shape", "spawn", "motion", "visual", "particles"]
+const EDITABLE_SECTIONS: Array[String] = ["stats", "base_stats", "shape", "spawn", "motion", "visual", "particles"]
 
 ## Metadata keys that should NOT be flattened into editable parameters.
-const METADATA_KEYS := ["description", "display_name", "enabled", "scene", "spawner", "type", "unlock_condition"]
+const METADATA_KEYS: Array[String] = ["description", "display_name", "enabled", "scene", "spawner", "type", "unlock_condition"]
 
 
 ## Flatten nested weapon JSON into a flat dictionary for UI sliders and spawners.
@@ -34,7 +34,7 @@ static func flatten(weapon_data: Dictionary) -> Dictionary:
 			continue
 		
 		for key in section_data:
-			var value = section_data[key]
+			var value: Variant = section_data[key]
 			var flat_key: String = _make_flat_key(section, key)
 			
 			# Convert hex color strings to Color objects for visual/particles sections
@@ -67,7 +67,7 @@ static func unflatten(flat: Dictionary, key_map: Dictionary, original: Dictionar
 		var mapping: Dictionary = key_map[flat_key]
 		var section: String = mapping["section"]
 		var original_key: String = mapping["key"]
-		var value = flat[flat_key]
+		var value: Variant = flat[flat_key]
 		
 		# Ensure section dict exists in result
 		if not result.has(section):

@@ -168,7 +168,7 @@ func _spawn_explosion_flash() -> void:
 	if scene_root == null:
 		return
 
-	var flash := _MineExplosionFlash.new()
+	var flash: _MineExplosionFlash = _MineExplosionFlash.new()
 	flash.global_position = global_position
 	flash.max_radius = maxf(10.0, size)
 	flash.flash_color = explosion_color
@@ -182,7 +182,7 @@ func _play_detonation_sfx() -> void:
 	if scene_root == null:
 		return
 
-	var player := AudioStreamPlayer2D.new()
+	var player: AudioStreamPlayer2D = AudioStreamPlayer2D.new()
 	player.stream = detonation_sfx
 	player.global_position = global_position
 	scene_root.add_child(player)

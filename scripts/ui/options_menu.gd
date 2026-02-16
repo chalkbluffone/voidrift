@@ -3,7 +3,7 @@ extends Control
 ## Options Menu - Game settings and configuration.
 ## Uses SettingsManager autoload for centralized settings management.
 
-const MAIN_MENU_SCENE := "res://scenes/ui/main_menu.tscn"
+const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
 
 @onready var _settings: Node = get_node("/root/SettingsManager")
 @onready var master_slider: HSlider = $Panel/VBoxContainer/MasterVolume/Slider

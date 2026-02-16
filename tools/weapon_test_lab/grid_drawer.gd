@@ -14,22 +14,22 @@ func _ready() -> void:
 
 func _draw() -> void:
 	# Draw grid lines
-	var start = -grid_extent
-	var end = grid_extent
+	var start: float = -grid_extent
+	var end: float = grid_extent
 	
 	# Vertical lines
-	var x = start
+	var x: float = start
 	while x <= end:
-		var color = axis_color if x == 0 else grid_color
-		var width = 2.0 if x == 0 else 1.0
+		var color: Color = axis_color if x == 0 else grid_color
+		var width: float = 2.0 if x == 0 else 1.0
 		draw_line(Vector2(x, start), Vector2(x, end), color, width)
 		x += grid_size
 	
 	# Horizontal lines
-	var y = start
+	var y: float = start
 	while y <= end:
-		var color = axis_color if y == 0 else grid_color
-		var width = 2.0 if y == 0 else 1.0
+		var color: Color = axis_color if y == 0 else grid_color
+		var width: float = 2.0 if y == 0 else 1.0
 		draw_line(Vector2(start, y), Vector2(end, y), color, width)
 		y += grid_size
 	

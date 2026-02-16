@@ -10,12 +10,12 @@ signal stardust_changed(amount: int)
 signal xp_changed(current: float, required: float, level: int)
 
 # --- XP Scaling ---
-const XP_BASE := 100.0
-const XP_GROWTH := 1.15  # Each level needs 15% more XP
+const XP_BASE: float = 100.0
+const XP_GROWTH: float = 1.15  # Each level needs 15% more XP
 
 # --- Loadout Limits ---
-const MAX_WEAPON_SLOTS := 2
-const MAX_MODULE_SLOTS := 2
+const MAX_WEAPON_SLOTS: int = 2
+const MAX_MODULE_SLOTS: int = 2
 
 @onready var RunManager: Node = get_node("/root/RunManager")
 @onready var UpgradeService: Node = get_node("/root/UpgradeService")
@@ -29,14 +29,14 @@ func _ready() -> void:
 
 # --- XP & Leveling ---
 
+## Add XP and check for level up.
 func add_xp(amount: float) -> void:
-	"""Add XP and check for level up."""
-	var player = RunManager.get_player()
-	var xp_mult := 1.0
+	var player: Node = RunManager.get_player()
+	var xp_mult: float = 1.0
 	if player and player.has_method("get_stat"):
 		xp_mult = player.get_stat("xp_gain")
 	
-	var actual_xp := amount * xp_mult
+	var actual_xp: float = amount * xp_mult
 	RunManager.run_data.xp += actual_xp
 	RunManager.run_data.xp_collected += actual_xp
 	
@@ -64,8 +64,8 @@ func _level_up() -> void:
 		FileLogger.log_warn("ProgressionManager", "No upgrades available!")
 
 
+## Apply the selected level up option.
 func select_level_up_option(option: Dictionary) -> void:
-	"""Apply the selected level up option."""
 	var type: String = option.get("type", "")
 	var id: String = option.get("id", "")
 	

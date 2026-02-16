@@ -1,7 +1,7 @@
 extends Node2D
 class_name StraightLineNegotiator
 
-const PROJECTILE_SCENE := preload("res://scenes/gameplay/projectile.tscn")
+const PROJECTILE_SCENE: PackedScene = preload("res://scenes/gameplay/projectile.tscn")
 
 @export var damage: float = 14.0
 @export var projectile_speed: float = 1100.0
@@ -49,7 +49,7 @@ func fire_from(spawn_pos: Vector2, direction: Vector2, stats_component: Node = n
 	if sprite:
 		sprite.visible = false
 
-	var tracer := _NeedleTracer.new()
+	var tracer: _NeedleTracer = _NeedleTracer.new()
 	tracer.color_core = color_core
 	tracer.color_glow = color_glow
 	tracer.glow_strength = glow_strength
@@ -87,7 +87,7 @@ class _NeedleTracer extends Node2D:
 		for i in range(3, 0, -1):
 			var t: float = float(i) / 3.0
 			var glow_w: float = width * (1.0 + t * 2.0)
-			var glow_color := Color(color_glow.r, color_glow.g, color_glow.b, 0.13 * t * glow_strength)
+			var glow_color: Color = Color(color_glow.r, color_glow.g, color_glow.b, 0.13 * t * glow_strength)
 			draw_line(Vector2.ZERO, Vector2.RIGHT * length, glow_color, glow_w, true)
 
 		draw_line(

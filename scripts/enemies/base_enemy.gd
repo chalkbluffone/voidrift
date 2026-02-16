@@ -83,7 +83,7 @@ func _process_contact_damage(delta: float) -> void:
 
 func _find_player() -> void:
 	# Find player in scene
-	var players := get_tree().get_nodes_in_group("player")
+	var players: Array[Node] = get_tree().get_nodes_in_group("player")
 	if players.size() > 0:
 		_target = players[0]
 
@@ -94,8 +94,8 @@ func _process_movement(_delta: float) -> void:
 		return
 	
 	# Chase player
-	var direction := (_target.global_position - global_position).normalized()
-	var chase_velocity := direction * move_speed
+	var direction: Vector2 = (_target.global_position - global_position).normalized()
+	var chase_velocity: Vector2 = direction * move_speed
 	
 	# Combine with knockback
 	velocity = chase_velocity + _knockback_velocity
@@ -120,9 +120,9 @@ func take_damage(amount: float, _source: Node = null) -> void:
 
 
 func _flash_damage() -> void:
-	var sprite := get_node_or_null("Sprite2D")
+	var sprite: Node = get_node_or_null("Sprite2D")
 	if sprite:
-		var tween := create_tween()
+		var tween: Tween = create_tween()
 		tween.tween_property(sprite, "modulate", Color.RED, 0.05)
 		tween.tween_property(sprite, "modulate", Color.WHITE, 0.1)
 

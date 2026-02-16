@@ -13,26 +13,24 @@ func _init(parent: Node) -> void:
 	_parent_node = parent
 
 
+## Spawn a SnarkyComeback boomerang effect.
+## Only fires if there is at least one enemy in range.
+##
+## Args:
+##     spawn_pos:     World position to spawn at
+##     direction:     Direction vector toward target (will be normalized)
+##     params:        Flat parameter dictionary from weapon_component flatten
+##     follow_source: Player node — the boomerang returns here
+##
+## Returns:
+##     The spawned SnarkyComeback instance, or null if no enemies in range
+##     or if already at max active instances.
 func spawn(
 	spawn_pos: Vector2,
 	direction: Vector2,
 	params: Dictionary = {},
 	follow_source: Node2D = null
 ) -> SnarkyComeback:
-	"""
-	Spawn a SnarkyComeback boomerang effect.
-	Only fires if there is at least one enemy in range.
-
-	Args:
-		spawn_pos:     World position to spawn at
-		direction:     Direction vector toward target (will be normalized)
-		params:        Flat parameter dictionary from weapon_component flatten
-		follow_source: Player node — the boomerang returns here
-	
-	Returns:
-		The spawned SnarkyComeback instance, or null if no enemies in range
-		or if already at max active instances.
-	"""
 	# Only fire when there's an actual enemy target — and aim at the nearest one
 	var nearest: Node2D = EffectUtils.find_nearest_enemy(_parent_node.get_tree(), spawn_pos)
 	if nearest == null:
@@ -65,8 +63,8 @@ func spawn(
 	return instance
 
 
+## Destroy all active boomerangs. Called when weapon is unequipped.
 func cleanup() -> void:
-	"""Destroy all active boomerangs. Called when weapon is unequipped."""
 	for inst in _active_instances:
 		if is_instance_valid(inst):
 			inst.queue_free()

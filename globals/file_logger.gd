@@ -3,9 +3,9 @@ extends Node
 ## FileLogger - Writes log output to a file for debugging.
 ## Autoload as "FileLogger" in project settings.
 
-const LOG_FILE_PATH_EDITOR := "res://debug_log.txt"
-const LOG_FILE_PATH_EXPORT := "user://debug_log.txt"
-const MAX_LOG_SIZE := 1024 * 1024  # 1MB max before truncating
+const LOG_FILE_PATH_EDITOR: String = "res://debug_log.txt"
+const LOG_FILE_PATH_EXPORT: String = "user://debug_log.txt"
+const MAX_LOG_SIZE: int = 1024 * 1024  # 1MB max before truncating
 
 var _file: FileAccess = null
 var _log_path: String = ""
@@ -28,7 +28,7 @@ func _ready() -> void:
 		return
 	
 	# Write header
-	var header := "=== Voidrift Debug Log ===\n"
+	var header: String = "=== Voidrift Debug Log ===\n"
 	header += "Started: %s\n" % Time.get_datetime_string_from_system()
 	header += "Log path: %s\n" % _log_path
 	header += "=" .repeat(40) + "\n\n"
@@ -46,28 +46,28 @@ func _exit_tree() -> void:
 
 func _write(text: String) -> void:
 	if _file:
-		var timestamp := Time.get_time_string_from_system()
+		var timestamp: String = Time.get_time_string_from_system()
 		_file.store_string("[%s] %s\n" % [timestamp, text])
 		_file.flush()  # Flush immediately so we don't lose data on crash
 
 
 ## Log an info message
 func log_info(source: String, message: String) -> void:
-	var text := "[INFO][%s] %s" % [source, message]
+	var text: String = "[INFO][%s] %s" % [source, message]
 	_write(text)
 	print(text)
 
 
 ## Log a warning message
 func log_warn(source: String, message: String) -> void:
-	var text := "[WARN][%s] %s" % [source, message]
+	var text: String = "[WARN][%s] %s" % [source, message]
 	_write(text)
 	push_warning(text)
 
 
 ## Log an error message
 func log_error(source: String, message: String) -> void:
-	var text := "[ERROR][%s] %s" % [source, message]
+	var text: String = "[ERROR][%s] %s" % [source, message]
 	_write(text)
 	push_error(text)
 
@@ -75,21 +75,21 @@ func log_error(source: String, message: String) -> void:
 ## Log a debug message (only in debug builds)
 func log_debug(source: String, message: String) -> void:
 	if OS.is_debug_build():
-		var text := "[DEBUG][%s] %s" % [source, message]
+		var text: String = "[DEBUG][%s] %s" % [source, message]
 		_write(text)
 		print(text)
 
 
 ## Log with custom level
 func log_custom(level: String, source: String, message: String) -> void:
-	var text := "[%s][%s] %s" % [level, source, message]
+	var text: String = "[%s][%s] %s" % [level, source, message]
 	_write(text)
 	print(text)
 
 
 ## Log a dictionary or array nicely formatted
 func log_data(source: String, label: String, data: Variant) -> void:
-	var text := "[DATA][%s] %s: %s" % [source, label, JSON.stringify(data, "  ")]
+	var text: String = "[DATA][%s] %s: %s" % [source, label, JSON.stringify(data, "  ")]
 	_write(text)
 	print(text)
 

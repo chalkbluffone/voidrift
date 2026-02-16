@@ -7,25 +7,23 @@ func _init(parent: Node) -> void:
 	_parent_node = parent
 
 
+## Spawn a RadiantArc effect with inline parameters.
+##
+## Args:
+##     spawn_pos: World position to spawn at
+##     direction: Direction vector (will be normalized)
+##     params: Dictionary of parameter overrides
+##     follow_source: Optional Node2D to track movement direction (e.g., player ship)
+##
+## Returns:
+##     The spawned RadiantArc instance
 func spawn(
 	spawn_pos: Vector2,
 	direction: Vector2,
 	params: Dictionary = {},
 	follow_source: Node2D = null
 ) -> RadiantArc:
-	"""
-	Spawn a RadiantArc effect with inline parameters.
-	
-	Args:
-		spawn_pos: World position to spawn at
-		direction: Direction vector (will be normalized)
-		params: Dictionary of parameter overrides
-		follow_source: Optional Node2D to track movement direction (e.g., player ship)
-	
-	Returns:
-		The spawned RadiantArc instance
-	"""
-	var arc = load("res://effects/radiant_arc/RadiantArc.tscn").instantiate()
+	var arc: Node = load("res://effects/radiant_arc/RadiantArc.tscn").instantiate()
 	arc.z_index = -1
 	_parent_node.add_child(arc)
 	

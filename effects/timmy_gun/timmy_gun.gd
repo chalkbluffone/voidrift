@@ -6,7 +6,7 @@ class_name TimmyGun
 ## Uses the proven projectile.tscn for collision; replaces the sprite with
 ## a custom neon glow visual.
 
-const PROJECTILE_SCENE := preload("res://scenes/gameplay/projectile.tscn")
+const PROJECTILE_SCENE: PackedScene = preload("res://scenes/gameplay/projectile.tscn")
 
 # --- Stats ---
 @export var damage: float = 8.0

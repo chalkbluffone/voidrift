@@ -196,7 +196,7 @@ func _spawn_explosion_flash(origin: Vector2) -> void:
 	if not scene_root:
 		return
 
-	var flash := _ExplosionFlash.new()
+	var flash: _ExplosionFlash = _ExplosionFlash.new()
 	flash.global_position = origin
 	flash.max_radius = explosion_radius * size_mult
 	flash.flash_color = explosion_color

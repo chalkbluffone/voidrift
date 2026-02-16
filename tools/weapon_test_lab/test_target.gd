@@ -37,11 +37,11 @@ func _process(delta: float) -> void:
 		_knockback_velocity = Vector2.ZERO
 	
 	if target_node and move_speed > 0:
-		var direction = (target_node.global_position - global_position).normalized()
+		var direction: Vector2 = (target_node.global_position - global_position).normalized()
 		global_position += direction * move_speed * delta
 		
 		# Check if we reached the ship
-		var distance_to_target = global_position.distance_to(target_node.global_position)
+		var distance_to_target: float = global_position.distance_to(target_node.global_position)
 		if distance_to_target < _target_radius + 20.0:  # 20 is our radius
 			_on_reached_ship()
 
@@ -49,10 +49,10 @@ func _process(delta: float) -> void:
 func _on_area_entered(area: Area2D) -> void:
 	# Check if hit by radiant arc or other weapon
 	if area.has_method("get_damage"):
-		var dmg = area.get_damage()
+		var dmg: float = area.get_damage()
 		take_damage(dmg, area)
 	elif area.get_parent() and area.get_parent().has_method("get_damage"):
-		var dmg = area.get_parent().get_damage()
+		var dmg: float = area.get_parent().get_damage()
 		take_damage(dmg, area.get_parent())
 
 
@@ -91,7 +91,7 @@ func _flash_hit() -> void:
 
 func _restore_color() -> void:
 	if is_instance_valid(visual):
-		var hp_ratio = clamp(current_hp / max_hp, 0.0, 1.0)
+		var hp_ratio: float = clamp(current_hp / max_hp, 0.0, 1.0)
 		visual.color = Color(1.0, hp_ratio * 0.3, hp_ratio * 0.3, 0.8)
 
 
@@ -100,7 +100,7 @@ func _update_visual() -> void:
 		hp_label.text = str(int(max(0, current_hp)))
 	
 	if visual:
-		var hp_ratio = clamp(current_hp / max_hp, 0.0, 1.0)
+		var hp_ratio: float = clamp(current_hp / max_hp, 0.0, 1.0)
 		visual.color = Color(1.0, hp_ratio * 0.3, hp_ratio * 0.3, 0.8)
 
 

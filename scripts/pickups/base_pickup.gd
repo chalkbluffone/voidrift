@@ -29,7 +29,7 @@ func _on_pickup_ready() -> void:
 func _process(delta: float) -> void:
 	if _is_attracted and _target:
 		_current_speed = minf(_current_speed + GameConfig.PICKUP_MAGNET_ACCELERATION * delta, GameConfig.PICKUP_MAGNET_SPEED)
-		var direction := (_target.global_position - global_position).normalized()
+		var direction: Vector2 = (_target.global_position - global_position).normalized()
 		position += direction * _current_speed * delta
 
 
@@ -53,7 +53,7 @@ func _on_area_entered(area: Area2D) -> void:
 	# Standard pickups use player's PickupRange area for attraction
 	if _get_fixed_magnet_radius() <= 0.0:
 		if area.name == "PickupRange":
-			var player := area.get_parent()
+			var player: Node = area.get_parent()
 			if player and player.is_in_group("player"):
 				attract_to(player)
 
@@ -62,9 +62,9 @@ func _on_area_entered(area: Area2D) -> void:
 func _check_fixed_radius_attraction(player: Node2D) -> void:
 	if _is_attracted:
 		return
-	var fixed_radius := _get_fixed_magnet_radius()
+	var fixed_radius: float = _get_fixed_magnet_radius()
 	if fixed_radius > 0.0:
-		var distance := global_position.distance_to(player.global_position)
+		var distance: float = global_position.distance_to(player.global_position)
 		if distance <= fixed_radius:
 			attract_to(player)
 

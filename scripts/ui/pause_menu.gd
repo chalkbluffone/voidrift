@@ -6,8 +6,8 @@ extends CanvasLayer
 
 signal resumed
 
-const MAIN_MENU_SCENE := "res://scenes/ui/main_menu.tscn"
-const GAME_SCENE := "res://scenes/gameplay/world.tscn"
+const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
+const GAME_SCENE: String = "res://scenes/gameplay/world.tscn"
 
 @onready var _settings: Node = get_node("/root/SettingsManager")
 @onready var resume_button: Button = $Panel/VBoxContainer/ResumeButton
@@ -93,7 +93,7 @@ func _show_options() -> void:
 	_sync_ui_from_settings()
 	
 	# Focus back button in options
-	var back_btn = options_container.get_node_or_null("Panel/VBoxContainer/BackButton")
+	var back_btn: Node = options_container.get_node_or_null("Panel/VBoxContainer/BackButton")
 	if back_btn:
 		back_btn.grab_focus()
 
@@ -112,11 +112,11 @@ func _on_options_back_pressed() -> void:
 # --- Options UI Sync ---
 
 func _sync_ui_from_settings() -> void:
-	var master_slider = options_container.get_node_or_null("Panel/VBoxContainer/MasterVolume/Slider")
-	var sfx_slider = options_container.get_node_or_null("Panel/VBoxContainer/SFXVolume/Slider")
-	var music_slider = options_container.get_node_or_null("Panel/VBoxContainer/MusicVolume/Slider")
-	var fullscreen_check = options_container.get_node_or_null("Panel/VBoxContainer/Fullscreen/CheckButton")
-	var vsync_check = options_container.get_node_or_null("Panel/VBoxContainer/VSync/CheckButton")
+	var master_slider: Node = options_container.get_node_or_null("Panel/VBoxContainer/MasterVolume/Slider")
+	var sfx_slider: Node = options_container.get_node_or_null("Panel/VBoxContainer/SFXVolume/Slider")
+	var music_slider: Node = options_container.get_node_or_null("Panel/VBoxContainer/MusicVolume/Slider")
+	var fullscreen_check: Node = options_container.get_node_or_null("Panel/VBoxContainer/Fullscreen/CheckButton")
+	var vsync_check: Node = options_container.get_node_or_null("Panel/VBoxContainer/VSync/CheckButton")
 	
 	if master_slider:
 		master_slider.value = _settings.master_volume
@@ -131,12 +131,12 @@ func _sync_ui_from_settings() -> void:
 
 
 func _connect_options_signals() -> void:
-	var master_slider = options_container.get_node_or_null("Panel/VBoxContainer/MasterVolume/Slider")
-	var sfx_slider = options_container.get_node_or_null("Panel/VBoxContainer/SFXVolume/Slider")
-	var music_slider = options_container.get_node_or_null("Panel/VBoxContainer/MusicVolume/Slider")
-	var fullscreen_check = options_container.get_node_or_null("Panel/VBoxContainer/Fullscreen/CheckButton")
-	var vsync_check = options_container.get_node_or_null("Panel/VBoxContainer/VSync/CheckButton")
-	var back_btn = options_container.get_node_or_null("Panel/VBoxContainer/BackButton")
+	var master_slider: Node = options_container.get_node_or_null("Panel/VBoxContainer/MasterVolume/Slider")
+	var sfx_slider: Node = options_container.get_node_or_null("Panel/VBoxContainer/SFXVolume/Slider")
+	var music_slider: Node = options_container.get_node_or_null("Panel/VBoxContainer/MusicVolume/Slider")
+	var fullscreen_check: Node = options_container.get_node_or_null("Panel/VBoxContainer/Fullscreen/CheckButton")
+	var vsync_check: Node = options_container.get_node_or_null("Panel/VBoxContainer/VSync/CheckButton")
+	var back_btn: Node = options_container.get_node_or_null("Panel/VBoxContainer/BackButton")
 
 	if master_slider and not master_slider.value_changed.is_connected(_settings.set_master_volume):
 		master_slider.value_changed.connect(_settings.set_master_volume)
