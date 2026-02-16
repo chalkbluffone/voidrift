@@ -118,6 +118,7 @@ var _blade_debug: Node2D = null
 var _particles: CPUParticles2D = null
 
 var _elapsed: float = 0.0
+@warning_ignore("unused_private_class_variable")
 var _is_active: bool = true
 var _mesh_instance: MeshInstance2D = null
 var _shader_material: ShaderMaterial = null
