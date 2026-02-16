@@ -11,7 +11,7 @@
 			"name": "Combat Focus",
 			"description": "+5% crit chance, +10% damage",
 			"effects": {
-				"crit_chance": 5,
+				"crit_chance": 5.0,
 				"damage": 0.1
 			}
 		},
@@ -39,8 +39,8 @@
 			"name": "Hardened Hull",
 			"description": "+10 armor, +20 shield",
 			"effects": {
-				"armor": 10,
-				"shield": 20
+				"armor": 10.0,
+				"shield": 20.0
 			}
 		},
 		"active_ability": {
@@ -68,7 +68,7 @@
 			"name": "Resourceful",
 			"description": "+10% luck, +15% XP gain",
 			"effects": {
-				"luck": 10,
+				"luck": 10.0,
 				"xp_gain": 0.15
 			}
 		},
@@ -80,14 +80,14 @@
 			"cooldown": 75.0,
 			"duration": 8.0,
 			"effects": {
-				"convert_enemies": 3
+				"convert_enemies": 3.0
 			},
-			"radius": 300,
+			"radius": 300.0,
 			"vfx": "subjugation"
 		},
 		"unlock_condition": {
 			"type": "complete_run",
-			"difficulty": 1
+			"difficulty": 1.0
 		}
 	}
 }

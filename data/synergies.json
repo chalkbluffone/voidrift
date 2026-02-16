@@ -1,185 +1,170 @@
 {
-  "$schema": "voidrift-synergies-schema",
-  "_comment": "Ship + Captain combo synergies. Hidden from UI until discovered in-game. Effects are small stat nudges (applied as flat bonuses). Keys are 'ship_id+captain_id'.",
-
-  "starchaser+captain_nightmare": {
-	"ship_id": "starchaser",
-	"captain_id": "captain_nightmare",
-	"name": "Precision Strike",
-	"description": "Nimble frame lets overdrive target weak points.",
-	"discovered_text": "Something clicks between the scout's agile frame and your combat instincts...",
-	"effects": {
-	  "crit_chance": 3,
-	  "crit_damage": 0.05
+	"$schema": "voidrift-synergies-schema",
+	"_comment": "Ship + Captain combo synergies. Hidden from UI until discovered in-game. Effects are small stat nudges (applied as flat bonuses). Keys are 'ship_id+captain_id'.",
+	"starchaser+captain_nightmare": {
+		"ship_id": "starchaser",
+		"captain_id": "captain_nightmare",
+		"name": "Precision Strike",
+		"description": "Nimble frame lets overdrive target weak points.",
+		"discovered_text": "Something clicks between the scout's agile frame and your combat instincts...",
+		"effects": {
+			"crit_chance": 3.0,
+			"crit_damage": 0.05
+		}
+	},
+	"starchaser+captain_finswick": {
+		"ship_id": "starchaser",
+		"captain_id": "captain_finswick",
+		"name": "Evasive Maneuvers",
+		"description": "Light hull makes the most of defensive reflexes.",
+		"discovered_text": "The scout weaves naturally around incoming fire under your careful hand...",
+		"effects": {
+			"evasion": 5.0
+		}
+	},
+	"starchaser+captain_zoltan": {
+		"ship_id": "starchaser",
+		"captain_id": "captain_zoltan",
+		"name": "Scavenger's Eye",
+		"description": "A fast ship with a keen eye misses nothing.",
+		"discovered_text": "At these speeds, your trained eye catches every glint of salvage...",
+		"effects": {
+			"pickup_range": 0.15,
+			"stardust_gain": 0.05
+		}
+	},
+	"phantom+captain_nightmare": {
+		"ship_id": "phantom",
+		"captain_id": "captain_nightmare",
+		"name": "Blitz Protocol",
+		"description": "Maximum speed meets maximum firepower.",
+		"discovered_text": "The interceptor's speed turns your attacks into a relentless barrage...",
+		"effects": {
+			"attack_speed": 0.05,
+			"damage": 0.05
+		}
+	},
+	"phantom+captain_finswick": {
+		"ship_id": "phantom",
+		"captain_id": "captain_finswick",
+		"name": "Crash Barrier",
+		"description": "Reckless speed backed by unbreakable defense.",
+		"discovered_text": "The interceptor's shields flare brighter when flying at full throttle...",
+		"effects": {
+			"shield": 10.0,
+			"hull_shock": 3.0
+		}
+	},
+	"phantom+captain_zoltan": {
+		"ship_id": "phantom",
+		"captain_id": "captain_zoltan",
+		"name": "Hyperscanner",
+		"description": "Superior sensors at superior speeds.",
+		"discovered_text": "At interceptor speeds, your scanner array covers twice the ground...",
+		"effects": {
+			"xp_gain": 0.08,
+			"luck": 5.0
+		}
+	},
+	"dreadnought+captain_nightmare": {
+		"ship_id": "dreadnought",
+		"captain_id": "captain_nightmare",
+		"name": "Siege Mode",
+		"description": "A heavy platform makes every shot count.",
+		"discovered_text": "The fortress's massive frame absorbs recoil, letting you fire with devastating precision...",
+		"effects": {
+			"damage": 0.08,
+			"projectile_count": 1.0
+		}
+	},
+	"dreadnought+captain_finswick": {
+		"ship_id": "dreadnought",
+		"captain_id": "captain_finswick",
+		"name": "Immovable Object",
+		"description": "Maximum armor on maximum hull. Nothing gets through.",
+		"discovered_text": "The fortress becomes nearly indestructible under your defensive mastery...",
+		"effects": {
+			"armor": 8.0,
+			"hp_regen": 2.0
+		}
+	},
+	"dreadnought+captain_zoltan": {
+		"ship_id": "dreadnought",
+		"captain_id": "captain_zoltan",
+		"name": "Command Center",
+		"description": "A floating base of operations with unmatched tactical awareness.",
+		"discovered_text": "With this much room to work, your command center pulls in resources from every direction...",
+		"effects": {
+			"pickup_range": 0.1,
+			"xp_gain": 0.05,
+			"stardust_gain": 0.05
+		}
+	},
+	"viper+captain_nightmare": {
+		"ship_id": "viper",
+		"captain_id": "captain_nightmare",
+		"name": "Gun Run",
+		"description": "A born killer in a cockpit built to kill. Every pass is lethal.",
+		"discovered_text": "The Viper's guns sing under your reckless trigger discipline...",
+		"effects": {
+			"attack_speed": 0.08,
+			"crit_chance": 3.0
+		}
+	},
+	"viper+captain_finswick": {
+		"ship_id": "viper",
+		"captain_id": "captain_finswick",
+		"name": "Calculated Risk",
+		"description": "Insurance-grade evasion in a frame that was never meant to survive.",
+		"discovered_text": "Finswick's risk assessment somehow keeps this fragile ship in one piece...",
+		"effects": {
+			"evasion": 8.0,
+			"hp_regen": 3.0
+		}
+	},
+	"viper+captain_zoltan": {
+		"ship_id": "viper",
+		"captain_id": "captain_zoltan",
+		"name": "Strafing Run",
+		"description": "Fast passes over the battlefield yield maximum salvage.",
+		"discovered_text": "At these speeds, Zoltan's tentacles scoop up every piece of debris in the sector...",
+		"effects": {
+			"pickup_range": 0.15,
+			"luck": 5.0
+		}
+	},
+	"prometheus+captain_nightmare": {
+		"ship_id": "prometheus",
+		"captain_id": "captain_nightmare",
+		"name": "Weapons Lab",
+		"description": "Science division repurposed for maximum destruction. R&D stands for Ruin & Demolish.",
+		"discovered_text": "The Prometheus's labs hum with barely-contained energy as Nightmare reroutes power to weapons...",
+		"effects": {
+			"damage": 0.08,
+			"size": 0.05
+		}
+	},
+	"prometheus+captain_finswick": {
+		"ship_id": "prometheus",
+		"captain_id": "captain_finswick",
+		"name": "Full Coverage",
+		"description": "Every system insured, every shield redundant. Finswick finally has a ship worthy of his paperwork.",
+		"discovered_text": "Finswick files a satisfied smile alongside the Prometheus's third backup shield generator...",
+		"effects": {
+			"shield": 15.0,
+			"armor": 5.0
+		}
+	},
+	"prometheus+captain_zoltan": {
+		"ship_id": "prometheus",
+		"captain_id": "captain_zoltan",
+		"name": "Deep Scan",
+		"description": "Advanced sensors paired with a resourceful commander. Nothing escapes the net.",
+		"discovered_text": "Zoltan's tentacles dance across the Prometheus's sensor arrays, pulling in everything within range...",
+		"effects": {
+			"xp_gain": 0.1,
+			"stardust_gain": 0.08,
+			"pickup_range": 0.1
+		}
 	}
-  },
-
-  "starchaser+captain_finswick": {
-	"ship_id": "starchaser",
-	"captain_id": "captain_finswick",
-	"name": "Evasive Maneuvers",
-	"description": "Light hull makes the most of defensive reflexes.",
-	"discovered_text": "The scout weaves naturally around incoming fire under your careful hand...",
-	"effects": {
-	  "evasion": 5
-	}
-  },
-
-  "starchaser+captain_zoltan": {
-	"ship_id": "starchaser",
-	"captain_id": "captain_zoltan",
-	"name": "Scavenger's Eye",
-	"description": "A fast ship with a keen eye misses nothing.",
-	"discovered_text": "At these speeds, your trained eye catches every glint of salvage...",
-	"effects": {
-	  "pickup_range": 0.15,
-	  "stardust_gain": 0.05
-	}
-  },
-
-  "phantom+captain_nightmare": {
-	"ship_id": "phantom",
-	"captain_id": "captain_nightmare",
-	"name": "Blitz Protocol",
-	"description": "Maximum speed meets maximum firepower.",
-	"discovered_text": "The interceptor's speed turns your attacks into a relentless barrage...",
-	"effects": {
-	  "attack_speed": 0.05,
-	  "damage": 0.05
-	}
-  },
-
-  "phantom+captain_finswick": {
-	"ship_id": "phantom",
-	"captain_id": "captain_finswick",
-	"name": "Crash Barrier",
-	"description": "Reckless speed backed by unbreakable defense.",
-	"discovered_text": "The interceptor's shields flare brighter when flying at full throttle...",
-	"effects": {
-	  "shield": 10,
-	  "hull_shock": 3
-	}
-  },
-
-  "phantom+captain_zoltan": {
-	"ship_id": "phantom",
-	"captain_id": "captain_zoltan",
-	"name": "Hyperscanner",
-	"description": "Superior sensors at superior speeds.",
-	"discovered_text": "At interceptor speeds, your scanner array covers twice the ground...",
-	"effects": {
-	  "xp_gain": 0.08,
-	  "luck": 5
-	}
-  },
-
-  "dreadnought+captain_nightmare": {
-	"ship_id": "dreadnought",
-	"captain_id": "captain_nightmare",
-	"name": "Siege Mode",
-	"description": "A heavy platform makes every shot count.",
-	"discovered_text": "The fortress's massive frame absorbs recoil, letting you fire with devastating precision...",
-	"effects": {
-	  "damage": 0.08,
-	  "projectile_count": 1
-	}
-  },
-
-  "dreadnought+captain_finswick": {
-	"ship_id": "dreadnought",
-	"captain_id": "captain_finswick",
-	"name": "Immovable Object",
-	"description": "Maximum armor on maximum hull. Nothing gets through.",
-	"discovered_text": "The fortress becomes nearly indestructible under your defensive mastery...",
-	"effects": {
-	  "armor": 8,
-	  "hp_regen": 2
-	}
-  },
-
-  "dreadnought+captain_zoltan": {
-	"ship_id": "dreadnought",
-	"captain_id": "captain_zoltan",
-	"name": "Command Center",
-	"description": "A floating base of operations with unmatched tactical awareness.",
-	"discovered_text": "With this much room to work, your command center pulls in resources from every direction...",
-	"effects": {
-	  "pickup_range": 0.1,
-	  "xp_gain": 0.05,
-	  "stardust_gain": 0.05
-	}
-  },
-
-  "viper+captain_nightmare": {
-	"ship_id": "viper",
-	"captain_id": "captain_nightmare",
-	"name": "Gun Run",
-	"description": "A born killer in a cockpit built to kill. Every pass is lethal.",
-	"discovered_text": "The Viper's guns sing under your reckless trigger discipline...",
-	"effects": {
-	  "attack_speed": 0.08,
-	  "crit_chance": 3
-	}
-  },
-
-  "viper+captain_finswick": {
-	"ship_id": "viper",
-	"captain_id": "captain_finswick",
-	"name": "Calculated Risk",
-	"description": "Insurance-grade evasion in a frame that was never meant to survive.",
-	"discovered_text": "Finswick's risk assessment somehow keeps this fragile ship in one piece...",
-	"effects": {
-	  "evasion": 8,
-	  "hp_regen": 3
-	}
-  },
-
-  "viper+captain_zoltan": {
-	"ship_id": "viper",
-	"captain_id": "captain_zoltan",
-	"name": "Strafing Run",
-	"description": "Fast passes over the battlefield yield maximum salvage.",
-	"discovered_text": "At these speeds, Zoltan's tentacles scoop up every piece of debris in the sector...",
-	"effects": {
-	  "pickup_range": 0.15,
-	  "luck": 5
-	}
-  },
-
-  "prometheus+captain_nightmare": {
-	"ship_id": "prometheus",
-	"captain_id": "captain_nightmare",
-	"name": "Weapons Lab",
-	"description": "Science division repurposed for maximum destruction. R&D stands for Ruin & Demolish.",
-	"discovered_text": "The Prometheus's labs hum with barely-contained energy as Nightmare reroutes power to weapons...",
-	"effects": {
-	  "damage": 0.08,
-	  "size": 0.05
-	}
-  },
-
-  "prometheus+captain_finswick": {
-	"ship_id": "prometheus",
-	"captain_id": "captain_finswick",
-	"name": "Full Coverage",
-	"description": "Every system insured, every shield redundant. Finswick finally has a ship worthy of his paperwork.",
-	"discovered_text": "Finswick files a satisfied smile alongside the Prometheus's third backup shield generator...",
-	"effects": {
-	  "shield": 15,
-	  "armor": 5
-	}
-  },
-
-  "prometheus+captain_zoltan": {
-	"ship_id": "prometheus",
-	"captain_id": "captain_zoltan",
-	"name": "Deep Scan",
-	"description": "Advanced sensors paired with a resourceful commander. Nothing escapes the net.",
-	"discovered_text": "Zoltan's tentacles dance across the Prometheus's sensor arrays, pulling in everything within range...",
-	"effects": {
-	  "xp_gain": 0.1,
-	  "stardust_gain": 0.08,
-	  "pickup_range": 0.1
-	}
-  }
 }

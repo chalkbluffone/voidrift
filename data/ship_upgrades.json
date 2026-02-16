@@ -1,425 +1,403 @@
 {
-  "$schema": "voidrift-ship-upgrades-schema",
-  "_comment": "Ship upgrades (equivalent to Megabonk tomes). Passive stat bonuses that level up.",
-  
-  "damage_module": {
-	"id": "damage_module",
-	"name": "Damage Module",
-	"description": "Enhances weapon output systems",
-	"icon": "res://assets/icons/upgrades/damage_module.png",
-	"stat": "damage",
-	"per_level": 0.08,
-	"max_level": 99,
-	"unlock_condition": "default",
-	"rarity_weights": {
-	  "common": 60,
-	  "uncommon": 25,
-	  "rare": 10,
-	  "epic": 4,
-	  "legendary": 1
-	}
-  },
-  
-  "cooldown_matrix": {
-	"id": "cooldown_matrix",
-	"name": "Cooldown Matrix",
-	"description": "Accelerates weapon cycling",
-	"icon": "res://assets/icons/upgrades/cooldown_matrix.png",
-	"stat": "attack_speed",
-	"per_level": 0.075,
-	"max_level": 99,
-	"unlock_condition": "default",
-	"rarity_weights": {
-	  "common": 60,
-	  "uncommon": 25,
-	  "rare": 10,
-	  "epic": 4,
-	  "legendary": 1
-	}
-  },
-  
-  "hull_plating": {
-	"id": "hull_plating",
-	"name": "Hull Plating",
-	"description": "Reinforces ship structure",
-	"icon": "res://assets/icons/upgrades/hull_plating.png",
-	"stat": "max_hp",
-	"per_level": 25,
-	"max_level": 99,
-	"unlock_condition": "default",
-	"rarity_weights": {
-	  "common": 60,
-	  "uncommon": 25,
-	  "rare": 10,
-	  "epic": 4,
-	  "legendary": 1
-	}
-  },
-  
-  "repair_nanites": {
-	"id": "repair_nanites",
-	"name": "Repair Nanites",
-	"description": "Self-repairing hull systems",
-	"icon": "res://assets/icons/upgrades/repair_nanites.png",
-	"stat": "hp_regen",
-	"per_level": 8,
-	"max_level": 99,
-	"unlock_condition": "default",
-	"rarity_weights": {
-	  "common": 60,
-	  "uncommon": 25,
-	  "rare": 10,
-	  "epic": 4,
-	  "legendary": 1
-	}
-  },
-  
-  "shield_capacitor": {
-	"id": "shield_capacitor",
-	"name": "Shield Capacitor",
-	"description": "Enhances energy shields",
-	"icon": "res://assets/icons/upgrades/shield_capacitor.png",
-	"stat": "shield",
-	"per_level": 25,
-	"max_level": 99,
-	"unlock_condition": "default",
-	"rarity_weights": {
-	  "common": 60,
-	  "uncommon": 25,
-	  "rare": 10,
-	  "epic": 4,
-	  "legendary": 1
-	}
-  },
-  
-  "armor_weave": {
-	"id": "armor_weave",
-	"name": "Armor Weave",
-	"description": "Reduces incoming damage",
-	"icon": "res://assets/icons/upgrades/armor_weave.png",
-	"stat": "armor",
-	"per_level": 12,
-	"max_level": 99,
-	"unlock_condition": {
-	  "type": "play_character",
-	  "character": "dreadnought",
-	  "runs": 5
+	"$schema": "voidrift-ship-upgrades-schema",
+	"_comment": "Ship upgrades (equivalent to Megabonk tomes). Passive stat bonuses that level up.",
+	"damage_module": {
+		"id": "damage_module",
+		"name": "Damage Module",
+		"description": "Enhances weapon output systems",
+		"icon": "res://assets/icons/upgrades/damage_module.png",
+		"stat": "damage",
+		"per_level": 0.08,
+		"max_level": 99.0,
+		"unlock_condition": "default",
+		"rarity_weights": {
+			"common": 60.0,
+			"uncommon": 25.0,
+			"rare": 10.0,
+			"epic": 4.0,
+			"legendary": 1.0
+		}
 	},
-	"rarity_weights": {
-	  "common": 55,
-	  "uncommon": 28,
-	  "rare": 12,
-	  "epic": 4,
-	  "legendary": 1
-	}
-  },
-  
-  "evasion_thrusters": {
-	"id": "evasion_thrusters",
-	"name": "Evasion Thrusters",
-	"description": "Automated dodge systems",
-	"icon": "res://assets/icons/upgrades/evasion_thrusters.png",
-	"stat": "evasion",
-	"per_level": 10,
-	"max_level": 99,
-	"unlock_condition": "default",
-	"rarity_weights": {
-	  "common": 55,
-	  "uncommon": 28,
-	  "rare": 12,
-	  "epic": 4,
-	  "legendary": 1
-	}
-  },
-  
-  "targeting_computer": {
-	"id": "targeting_computer",
-	"name": "Targeting Computer",
-	"description": "Improves critical hit systems",
-	"icon": "res://assets/icons/upgrades/targeting_computer.png",
-	"stat": "crit_chance",
-	"per_level": 7,
-	"max_level": 99,
-	"unlock_condition": "default",
-	"rarity_weights": {
-	  "common": 60,
-	  "uncommon": 25,
-	  "rare": 10,
-	  "epic": 4,
-	  "legendary": 1
-	}
-  },
-  
-  "amplification_core": {
-	"id": "amplification_core",
-	"name": "Amplification Core",
-	"description": "Increases projectile size",
-	"icon": "res://assets/icons/upgrades/amplification_core.png",
-	"stat": "size",
-	"per_level": 10,
-	"max_level": 99,
-	"unlock_condition": "default",
-	"rarity_weights": {
-	  "common": 60,
-	  "uncommon": 25,
-	  "rare": 10,
-	  "epic": 4,
-	  "legendary": 1
-	}
-  },
-  
-  "thruster_upgrade": {
-	"id": "thruster_upgrade",
-	"name": "Thruster Upgrade",
-	"description": "Increases movement speed",
-	"icon": "res://assets/icons/upgrades/thruster_upgrade.png",
-	"stat": "movement_speed",
-	"per_level": 15,
-	"max_level": 99,
-	"unlock_condition": "default",
-	"rarity_weights": {
-	  "common": 60,
-	  "uncommon": 25,
-	  "rare": 10,
-	  "epic": 4,
-	  "legendary": 1
-	}
-  },
-  
-  "tractor_beam": {
-	"id": "tractor_beam",
-	"name": "Tractor Beam",
-	"description": "Increases pickup range",
-	"icon": "res://assets/icons/upgrades/tractor_beam.png",
-	"stat": "pickup_range",
-	"per_level": 15,
-	"max_level": 99,
-	"unlock_condition": {
-	  "type": "use_gas_station",
-	  "count": 8
+	"cooldown_matrix": {
+		"id": "cooldown_matrix",
+		"name": "Cooldown Matrix",
+		"description": "Accelerates weapon cycling",
+		"icon": "res://assets/icons/upgrades/cooldown_matrix.png",
+		"stat": "attack_speed",
+		"per_level": 0.075,
+		"max_level": 99.0,
+		"unlock_condition": "default",
+		"rarity_weights": {
+			"common": 60.0,
+			"uncommon": 25.0,
+			"rare": 10.0,
+			"epic": 4.0,
+			"legendary": 1.0
+		}
 	},
-	"rarity_weights": {
-	  "common": 55,
-	  "uncommon": 28,
-	  "rare": 12,
-	  "epic": 4,
-	  "legendary": 1
-	}
-  },
-  
-  "xp_scanner": {
-	"id": "xp_scanner",
-	"name": "XP Scanner",
-	"description": "Increases experience gain",
-	"icon": "res://assets/icons/upgrades/xp_scanner.png",
-	"stat": "xp_gain",
-	"per_level": 9,
-	"max_level": 99,
-	"unlock_condition": {
-	  "type": "mine_asteroids",
-	  "count": 20
+	"hull_plating": {
+		"id": "hull_plating",
+		"name": "Hull Plating",
+		"description": "Reinforces ship structure",
+		"icon": "res://assets/icons/upgrades/hull_plating.png",
+		"stat": "max_hp",
+		"per_level": 25.0,
+		"max_level": 99.0,
+		"unlock_condition": "default",
+		"rarity_weights": {
+			"common": 60.0,
+			"uncommon": 25.0,
+			"rare": 10.0,
+			"epic": 4.0,
+			"legendary": 1.0
+		}
 	},
-	"rarity_weights": {
-	  "common": 55,
-	  "uncommon": 28,
-	  "rare": 12,
-	  "epic": 4,
-	  "legendary": 1
-	}
-  },
-  
-  "credit_processor": {
-	"id": "credit_processor",
-	"name": "Credit Processor",
-	"description": "Increases credit drops",
-	"icon": "res://assets/icons/upgrades/credit_processor.png",
-	"stat": "credits_gain",
-	"per_level": 12,
-	"max_level": 99,
-	"unlock_condition": "default",
-	"rarity_weights": {
-	  "common": 60,
-	  "uncommon": 25,
-	  "rare": 10,
-	  "epic": 4,
-	  "legendary": 1
-	}
-  },
-  
-  "stardust_collector": {
-	"id": "stardust_collector",
-	"name": "Stardust Collector",
-	"description": "Increases stardust gain",
-	"icon": "res://assets/icons/upgrades/stardust_collector.png",
-	"stat": "stardust_gain",
-	"per_level": 12,
-	"max_level": 99,
-	"unlock_condition": "default",
-	"rarity_weights": {
-	  "common": 60,
-	  "uncommon": 25,
-	  "rare": 10,
-	  "epic": 4,
-	  "legendary": 1
-	}
-  },
-  
-  "fortune_drive": {
-	"id": "fortune_drive",
-	"name": "Fortune Drive",
-	"description": "Increases luck",
-	"icon": "res://assets/icons/upgrades/fortune_drive.png",
-	"stat": "luck",
-	"per_level": 7,
-	"max_level": 99,
-	"unlock_condition": {
-	  "type": "random_drop",
-	  "chance": 0.0001
+	"repair_nanites": {
+		"id": "repair_nanites",
+		"name": "Repair Nanites",
+		"description": "Self-repairing hull systems",
+		"icon": "res://assets/icons/upgrades/repair_nanites.png",
+		"stat": "hp_regen",
+		"per_level": 8.0,
+		"max_level": 99.0,
+		"unlock_condition": "default",
+		"rarity_weights": {
+			"common": 60.0,
+			"uncommon": 25.0,
+			"rare": 10.0,
+			"epic": 4.0,
+			"legendary": 1.0
+		}
 	},
-	"rarity_weights": {
-	  "common": 50,
-	  "uncommon": 30,
-	  "rare": 14,
-	  "epic": 5,
-	  "legendary": 1
-	}
-  },
-  
-  "hazard_amplifier": {
-	"id": "hazard_amplifier",
-	"name": "Hazard Amplifier",
-	"description": "Increases difficulty (more enemies, stronger)",
-	"icon": "res://assets/icons/upgrades/hazard_amplifier.png",
-	"stat": "difficulty",
-	"per_level": 3.5,
-	"max_level": 99,
-	"unlock_condition": {
-	  "type": "defeat_boss",
-	  "time_limit": 300
+	"shield_capacitor": {
+		"id": "shield_capacitor",
+		"name": "Shield Capacitor",
+		"description": "Enhances energy shields",
+		"icon": "res://assets/icons/upgrades/shield_capacitor.png",
+		"stat": "shield",
+		"per_level": 25.0,
+		"max_level": 99.0,
+		"unlock_condition": "default",
+		"rarity_weights": {
+			"common": 60.0,
+			"uncommon": 25.0,
+			"rare": 10.0,
+			"epic": 4.0,
+			"legendary": 1.0
+		}
 	},
-	"rarity_weights": {
-	  "common": 60,
-	  "uncommon": 25,
-	  "rare": 10,
-	  "epic": 4,
-	  "legendary": 1
-	}
-  },
-  
-  "critical_amplifier": {
-	"id": "critical_amplifier",
-	"name": "Critical Amplifier",
-	"description": "Boosts critical hit damage multiplier",
-	"icon": "res://assets/icons/upgrades/critical_amplifier.png",
-	"stat": "crit_damage",
-	"per_level": 0.15,
-	"max_level": 99,
-	"unlock_condition": "default",
-	"rarity_weights": {
-	  "common": 60,
-	  "uncommon": 25,
-	  "rare": 10,
-	  "epic": 4,
-	  "legendary": 1
-	}
-  },
-  
-  "temporal_extender": {
-	"id": "temporal_extender",
-	"name": "Temporal Extender",
-	"description": "Extends weapon effect durations",
-	"icon": "res://assets/icons/upgrades/temporal_extender.png",
-	"stat": "duration",
-	"per_level": 8,
-	"max_level": 99,
-	"unlock_condition": "default",
-	"rarity_weights": {
-	  "common": 60,
-	  "uncommon": 25,
-	  "rare": 10,
-	  "epic": 4,
-	  "legendary": 1
-	}
-  },
-  
-  "velocity_booster": {
-	"id": "velocity_booster",
-	"name": "Velocity Booster",
-	"description": "Increases projectile travel speed",
-	"icon": "res://assets/icons/upgrades/velocity_booster.png",
-	"stat": "projectile_speed",
-	"per_level": 10,
-	"max_level": 99,
-	"unlock_condition": "default",
-	"rarity_weights": {
-	  "common": 60,
-	  "uncommon": 25,
-	  "rare": 10,
-	  "epic": 4,
-	  "legendary": 1
-	}
-  },
-  
-  "parasitic_hull": {
-	"id": "parasitic_hull",
-	"name": "Parasitic Hull",
-	"description": "Drains enemy life force on hit",
-	"icon": "res://assets/icons/upgrades/parasitic_hull.png",
-	"stat": "lifesteal",
-	"per_level": 3,
-	"max_level": 99,
-	"unlock_condition": {
-	  "type": "survive_time",
-	  "seconds": 480
+	"armor_weave": {
+		"id": "armor_weave",
+		"name": "Armor Weave",
+		"description": "Reduces incoming damage",
+		"icon": "res://assets/icons/upgrades/armor_weave.png",
+		"stat": "armor",
+		"per_level": 12.0,
+		"max_level": 99.0,
+		"unlock_condition": {
+			"type": "play_character",
+			"character": "dreadnought",
+			"runs": 5.0
+		},
+		"rarity_weights": {
+			"common": 55.0,
+			"uncommon": 28.0,
+			"rare": 12.0,
+			"epic": 4.0,
+			"legendary": 1.0
+		}
 	},
-	"rarity_weights": {
-	  "common": 55,
-	  "uncommon": 28,
-	  "rare": 12,
-	  "epic": 4,
-	  "legendary": 1
-	}
-  },
-  
-  "elite_hunter": {
-	"id": "elite_hunter",
-	"name": "Elite Hunter",
-	"description": "Deals bonus damage to elite and boss enemies",
-	"icon": "res://assets/icons/upgrades/elite_hunter.png",
-	"stat": "damage_to_elites",
-	"per_level": 8,
-	"max_level": 99,
-	"unlock_condition": {
-	  "type": "defeat_elites",
-	  "count": 50
+	"evasion_thrusters": {
+		"id": "evasion_thrusters",
+		"name": "Evasion Thrusters",
+		"description": "Automated dodge systems",
+		"icon": "res://assets/icons/upgrades/evasion_thrusters.png",
+		"stat": "evasion",
+		"per_level": 10.0,
+		"max_level": 99.0,
+		"unlock_condition": "default",
+		"rarity_weights": {
+			"common": 55.0,
+			"uncommon": 28.0,
+			"rare": 12.0,
+			"epic": 4.0,
+			"legendary": 1.0
+		}
 	},
-	"rarity_weights": {
-	  "common": 60,
-	  "uncommon": 25,
-	  "rare": 10,
-	  "epic": 4,
-	  "legendary": 1
-	}
-  },
-  
-  "phase_coils": {
-	"id": "phase_coils",
-	"name": "Phase Coils",
-	"description": "Grants additional phase shift charges",
-	"icon": "res://assets/icons/upgrades/phase_coils.png",
-	"stat": "extra_phase_shifts",
-	"per_level": 1,
-	"max_level": 3,
-	"unlock_condition": {
-	  "type": "use_phase_shift",
-	  "count": 200
+	"targeting_computer": {
+		"id": "targeting_computer",
+		"name": "Targeting Computer",
+		"description": "Improves critical hit systems",
+		"icon": "res://assets/icons/upgrades/targeting_computer.png",
+		"stat": "crit_chance",
+		"per_level": 7.0,
+		"max_level": 99.0,
+		"unlock_condition": "default",
+		"rarity_weights": {
+			"common": 60.0,
+			"uncommon": 25.0,
+			"rare": 10.0,
+			"epic": 4.0,
+			"legendary": 1.0
+		}
 	},
-	"rarity_weights": {
-	  "common": 55,
-	  "uncommon": 28,
-	  "rare": 12,
-	  "epic": 4,
-	  "legendary": 1
+	"amplification_core": {
+		"id": "amplification_core",
+		"name": "Amplification Core",
+		"description": "Increases projectile size",
+		"icon": "res://assets/icons/upgrades/amplification_core.png",
+		"stat": "size",
+		"per_level": 10.0,
+		"max_level": 99.0,
+		"unlock_condition": "default",
+		"rarity_weights": {
+			"common": 60.0,
+			"uncommon": 25.0,
+			"rare": 10.0,
+			"epic": 4.0,
+			"legendary": 1.0
+		}
+	},
+	"thruster_upgrade": {
+		"id": "thruster_upgrade",
+		"name": "Thruster Upgrade",
+		"description": "Increases movement speed",
+		"icon": "res://assets/icons/upgrades/thruster_upgrade.png",
+		"stat": "movement_speed",
+		"per_level": 15.0,
+		"max_level": 99.0,
+		"unlock_condition": "default",
+		"rarity_weights": {
+			"common": 60.0,
+			"uncommon": 25.0,
+			"rare": 10.0,
+			"epic": 4.0,
+			"legendary": 1.0
+		}
+	},
+	"tractor_beam": {
+		"id": "tractor_beam",
+		"name": "Tractor Beam",
+		"description": "Increases pickup range",
+		"icon": "res://assets/icons/upgrades/tractor_beam.png",
+		"stat": "pickup_range",
+		"per_level": 15.0,
+		"max_level": 99.0,
+		"unlock_condition": {
+			"type": "use_gas_station",
+			"count": 8.0
+		},
+		"rarity_weights": {
+			"common": 55.0,
+			"uncommon": 28.0,
+			"rare": 12.0,
+			"epic": 4.0,
+			"legendary": 1.0
+		}
+	},
+	"xp_scanner": {
+		"id": "xp_scanner",
+		"name": "XP Scanner",
+		"description": "Increases experience gain",
+		"icon": "res://assets/icons/upgrades/xp_scanner.png",
+		"stat": "xp_gain",
+		"per_level": 9.0,
+		"max_level": 99.0,
+		"unlock_condition": {
+			"type": "mine_asteroids",
+			"count": 20.0
+		},
+		"rarity_weights": {
+			"common": 55.0,
+			"uncommon": 28.0,
+			"rare": 12.0,
+			"epic": 4.0,
+			"legendary": 1.0
+		}
+	},
+	"credit_processor": {
+		"id": "credit_processor",
+		"name": "Credit Processor",
+		"description": "Increases credit drops",
+		"icon": "res://assets/icons/upgrades/credit_processor.png",
+		"stat": "credits_gain",
+		"per_level": 12.0,
+		"max_level": 99.0,
+		"unlock_condition": "default",
+		"rarity_weights": {
+			"common": 60.0,
+			"uncommon": 25.0,
+			"rare": 10.0,
+			"epic": 4.0,
+			"legendary": 1.0
+		}
+	},
+	"stardust_collector": {
+		"id": "stardust_collector",
+		"name": "Stardust Collector",
+		"description": "Increases stardust gain",
+		"icon": "res://assets/icons/upgrades/stardust_collector.png",
+		"stat": "stardust_gain",
+		"per_level": 12.0,
+		"max_level": 99.0,
+		"unlock_condition": "default",
+		"rarity_weights": {
+			"common": 60.0,
+			"uncommon": 25.0,
+			"rare": 10.0,
+			"epic": 4.0,
+			"legendary": 1.0
+		}
+	},
+	"fortune_drive": {
+		"id": "fortune_drive",
+		"name": "Fortune Drive",
+		"description": "Increases luck",
+		"icon": "res://assets/icons/upgrades/fortune_drive.png",
+		"stat": "luck",
+		"per_level": 7.0,
+		"max_level": 99.0,
+		"unlock_condition": {
+			"type": "random_drop",
+			"chance": 0.0001
+		},
+		"rarity_weights": {
+			"common": 50.0,
+			"uncommon": 30.0,
+			"rare": 14.0,
+			"epic": 5.0,
+			"legendary": 1.0
+		}
+	},
+	"hazard_amplifier": {
+		"id": "hazard_amplifier",
+		"name": "Hazard Amplifier",
+		"description": "Increases difficulty (more enemies, stronger)",
+		"icon": "res://assets/icons/upgrades/hazard_amplifier.png",
+		"stat": "difficulty",
+		"per_level": 3.5,
+		"max_level": 99.0,
+		"unlock_condition": {
+			"type": "defeat_boss",
+			"time_limit": 300.0
+		},
+		"rarity_weights": {
+			"common": 60.0,
+			"uncommon": 25.0,
+			"rare": 10.0,
+			"epic": 4.0,
+			"legendary": 1.0
+		}
+	},
+	"critical_amplifier": {
+		"id": "critical_amplifier",
+		"name": "Critical Amplifier",
+		"description": "Boosts critical hit damage multiplier",
+		"icon": "res://assets/icons/upgrades/critical_amplifier.png",
+		"stat": "crit_damage",
+		"per_level": 0.15,
+		"max_level": 99.0,
+		"unlock_condition": "default",
+		"rarity_weights": {
+			"common": 60.0,
+			"uncommon": 25.0,
+			"rare": 10.0,
+			"epic": 4.0,
+			"legendary": 1.0
+		}
+	},
+	"temporal_extender": {
+		"id": "temporal_extender",
+		"name": "Temporal Extender",
+		"description": "Extends weapon effect durations",
+		"icon": "res://assets/icons/upgrades/temporal_extender.png",
+		"stat": "duration",
+		"per_level": 8.0,
+		"max_level": 99.0,
+		"unlock_condition": "default",
+		"rarity_weights": {
+			"common": 60.0,
+			"uncommon": 25.0,
+			"rare": 10.0,
+			"epic": 4.0,
+			"legendary": 1.0
+		}
+	},
+	"velocity_booster": {
+		"id": "velocity_booster",
+		"name": "Velocity Booster",
+		"description": "Increases projectile travel speed",
+		"icon": "res://assets/icons/upgrades/velocity_booster.png",
+		"stat": "projectile_speed",
+		"per_level": 10.0,
+		"max_level": 99.0,
+		"unlock_condition": "default",
+		"rarity_weights": {
+			"common": 60.0,
+			"uncommon": 25.0,
+			"rare": 10.0,
+			"epic": 4.0,
+			"legendary": 1.0
+		}
+	},
+	"parasitic_hull": {
+		"id": "parasitic_hull",
+		"name": "Parasitic Hull",
+		"description": "Drains enemy life force on hit",
+		"icon": "res://assets/icons/upgrades/parasitic_hull.png",
+		"stat": "lifesteal",
+		"per_level": 3.0,
+		"max_level": 99.0,
+		"unlock_condition": {
+			"type": "survive_time",
+			"seconds": 480.0
+		},
+		"rarity_weights": {
+			"common": 55.0,
+			"uncommon": 28.0,
+			"rare": 12.0,
+			"epic": 4.0,
+			"legendary": 1.0
+		}
+	},
+	"elite_hunter": {
+		"id": "elite_hunter",
+		"name": "Elite Hunter",
+		"description": "Deals bonus damage to elite and boss enemies",
+		"icon": "res://assets/icons/upgrades/elite_hunter.png",
+		"stat": "damage_to_elites",
+		"per_level": 8.0,
+		"max_level": 99.0,
+		"unlock_condition": {
+			"type": "defeat_elites",
+			"count": 50.0
+		},
+		"rarity_weights": {
+			"common": 60.0,
+			"uncommon": 25.0,
+			"rare": 10.0,
+			"epic": 4.0,
+			"legendary": 1.0
+		}
+	},
+	"phase_coils": {
+		"id": "phase_coils",
+		"name": "Phase Coils",
+		"description": "Grants additional phase shift charges",
+		"icon": "res://assets/icons/upgrades/phase_coils.png",
+		"stat": "extra_phase_shifts",
+		"per_level": 1.0,
+		"max_level": 3.0,
+		"unlock_condition": {
+			"type": "use_phase_shift",
+			"count": 200.0
+		},
+		"rarity_weights": {
+			"common": 55.0,
+			"uncommon": 28.0,
+			"rare": 12.0,
+			"epic": 4.0,
+			"legendary": 1.0
+		}
 	}
-  }
 }
