@@ -3,94 +3,94 @@
   "_comment": "Captain definitions. Each captain has a passive (stat bonuses) and an active ability (template-based). Passive effects are applied as flat bonuses at run start.",
 
   "captain_1": {
-    "id": "captain_1",
-    "name": "Captain 1",
-    "description": "Offense-focused captain. Specializes in maximizing damage output with a devastating burst ability.",
-    "sprite": "res://assets/captains/captain_1.png",
-    "passive": {
-      "id": "combat_focus",
-      "name": "Combat Focus",
-      "description": "+5% crit chance, +10% damage",
-      "effects": {
-        "crit_chance": 5,
-        "damage": 0.1
-      }
-    },
-    "active_ability": {
-      "id": "overdrive",
-      "name": "Overdrive",
-      "description": "Weapons deal 2x damage for 5 seconds.",
-      "template": "buff_self",
-      "cooldown": 75.0,
-      "duration": 5.0,
-      "effects": {
-        "damage": 1.0
-      },
-      "vfx": "overdrive"
-    },
-    "unlock_condition": "default"
+	"id": "captain_1",
+	"name": "Captain 1",
+	"description": "Offense-focused captain. Specializes in maximizing damage output with a devastating burst ability.",
+	"sprite": "res://assets/captains/captain_1.png",
+	"passive": {
+	  "id": "combat_focus",
+	  "name": "Combat Focus",
+	  "description": "+5% crit chance, +10% damage",
+	  "effects": {
+		"crit_chance": 5,
+		"damage": 0.1
+	  }
+	},
+	"active_ability": {
+	  "id": "overdrive",
+	  "name": "Overdrive",
+	  "description": "Weapons deal 2x damage for 5 seconds.",
+	  "template": "buff_self",
+	  "cooldown": 75.0,
+	  "duration": 5.0,
+	  "effects": {
+		"damage": 1.0
+	  },
+	  "vfx": "overdrive"
+	},
+	"unlock_condition": "default"
   },
 
   "captain_2": {
-    "id": "captain_2",
-    "name": "Captain 2",
-    "description": "Defense-focused captain. Specializes in survival with an emergency shield ability.",
-    "sprite": "res://assets/captains/captain_2.png",
-    "passive": {
-      "id": "hardened_hull",
-      "name": "Hardened Hull",
-      "description": "+10 armor, +20 shield",
-      "effects": {
-        "armor": 10,
-        "shield": 20
-      }
-    },
-    "active_ability": {
-      "id": "emergency_shields",
-      "name": "Emergency Shields",
-      "description": "Become invulnerable for 3 seconds and restore 30% max HP.",
-      "template": "buff_self",
-      "cooldown": 75.0,
-      "duration": 3.0,
-      "effects": {
-        "invulnerable": true,
-        "heal_percent": 0.3
-      },
-      "vfx": "emergency_shields"
-    },
-    "unlock_condition": "default"
+	"id": "captain_2",
+	"name": "Captain 2",
+	"description": "Defense-focused captain. Specializes in survival with an emergency shield ability.",
+	"sprite": "res://assets/captains/captain_2.png",
+	"passive": {
+	  "id": "hardened_hull",
+	  "name": "Hardened Hull",
+	  "description": "+10 armor, +20 shield",
+	  "effects": {
+		"armor": 10,
+		"shield": 20
+	  }
+	},
+	"active_ability": {
+	  "id": "emergency_shields",
+	  "name": "Emergency Shields",
+	  "description": "Become invulnerable for 3 seconds and restore 30% max HP.",
+	  "template": "buff_self",
+	  "cooldown": 75.0,
+	  "duration": 3.0,
+	  "effects": {
+		"invulnerable": true,
+		"heal_percent": 0.3
+	  },
+	  "vfx": "emergency_shields"
+	},
+	"unlock_condition": "default"
   },
 
   "captain_3": {
-    "id": "captain_3",
-    "name": "Captain 3",
-    "description": "Utility-focused captain. Specializes in economy and control with a powerful crowd control ability.",
-    "sprite": "res://assets/captains/captain_3.png",
-    "passive": {
-      "id": "resourceful",
-      "name": "Resourceful",
-      "description": "+10% luck, +15% XP gain",
-      "effects": {
-        "luck": 10,
-        "xp_gain": 0.15
-      }
-    },
-    "active_ability": {
-      "id": "gravity_well",
-      "name": "Gravity Well",
-      "description": "Slow all enemies on screen by 50% for 6 seconds.",
-      "template": "area_effect",
-      "cooldown": 75.0,
-      "duration": 6.0,
-      "effects": {
-        "enemy_slow": 0.5
-      },
-      "radius": 0,
-      "vfx": "gravity_well"
-    },
-    "unlock_condition": {
-      "type": "complete_run",
-      "difficulty": 1
-    }
+	"id": "captain_3",
+	"name": "Captain 3",
+	"description": "Utility-focused captain. Specializes in economy and control with a powerful crowd control ability.",
+	"sprite": "res://assets/captains/captain_3.png",
+	"passive": {
+	  "id": "resourceful",
+	  "name": "Resourceful",
+	  "description": "+10% luck, +15% XP gain",
+	  "effects": {
+		"luck": 10,
+		"xp_gain": 0.15
+	  }
+	},
+	"active_ability": {
+	  "id": "gravity_well",
+	  "name": "Gravity Well",
+	  "description": "Slow all enemies on screen by 50% for 6 seconds.",
+	  "template": "area_effect",
+	  "cooldown": 75.0,
+	  "duration": 6.0,
+	  "effects": {
+		"enemy_slow": 0.5
+	  },
+	  "radius": 0,
+	  "vfx": "gravity_well"
+	},
+	"unlock_condition": {
+	  "type": "complete_run",
+	  "difficulty": 1
+	}
   }
 }

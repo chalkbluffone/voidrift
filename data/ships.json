@@ -3,92 +3,92 @@
   "_comment": "Ship definitions. Each ship has unique stats, phase shift config, and starting weapon. Stats only listed here override base_player_stats.json defaults.",
 
   "scout": {
-    "id": "scout",
-    "name": "Scout",
-    "description": "Fast and agile reconnaissance vessel. Perfect for beginners.",
-    "sprite": "res://assets/ships/scout.png",
-    "base_speed": 100.0,
-    "base_stats": {
-      "evasion": 5,
-      "phase_shift_distance": 200
-    },
-    "starting_weapon": "radiant_arc",
-    "phase_shift": {
-      "id": "standard_shift",
-      "name": "Phase Shift",
-      "description": "Standard phase shift with moderate range",
-      "duration": 0.3,
-      "charges": 3,
-      "recharge_time": 4.0,
-      "leaves_trail": true,
-      "trail_damage": 0
-    },
-    "unlock_condition": "default"
+	"id": "scout",
+	"name": "Scout",
+	"description": "Fast and agile reconnaissance vessel. Perfect for beginners.",
+	"sprite": "res://assets/ships/scout.png",
+	"base_speed": 100.0,
+	"base_stats": {
+	  "evasion": 5,
+	  "phase_shift_distance": 200
+	},
+	"starting_weapon": "radiant_arc",
+	"phase_shift": {
+	  "id": "standard_shift",
+	  "name": "Phase Shift",
+	  "description": "Standard phase shift with moderate range",
+	  "duration": 0.3,
+	  "charges": 3,
+	  "recharge_time": 4.0,
+	  "leaves_trail": true,
+	  "trail_damage": 0
+	},
+	"unlock_condition": "default"
   },
 
   "interceptor": {
-    "id": "interceptor",
-    "name": "Interceptor",
-    "description": "Lightning fast strike craft. High risk, high reward.",
-    "sprite": "res://assets/ships/interceptor.png",
-    "base_speed": 120.0,
-    "base_stats": {
-      "max_hp": 70,
-      "hp_regen": 3,
-      "evasion": 15,
-      "pickup_range": 1.2,
-      "luck": 5,
-      "extra_phase_shifts": 1,
-      "phase_shift_distance": 150
-    },
-    "starting_weapon": "straight_line_negotiator",
-    "phase_shift": {
-      "id": "blink",
-      "name": "Blink",
-      "description": "Instant teleport with no trail, shorter range but faster recharge",
-      "duration": 0.0,
-      "charges": 4,
-      "recharge_time": 2.5,
-      "leaves_trail": false,
-      "trail_damage": 0
-    },
-    "unlock_condition": {
-      "type": "complete_run",
-      "ship": "scout",
-      "difficulty": 1
-    }
+	"id": "interceptor",
+	"name": "Interceptor",
+	"description": "Lightning fast strike craft. High risk, high reward.",
+	"sprite": "res://assets/ships/interceptor.png",
+	"base_speed": 120.0,
+	"base_stats": {
+	  "max_hp": 70,
+	  "hp_regen": 3,
+	  "evasion": 15,
+	  "pickup_range": 1.2,
+	  "luck": 5,
+	  "extra_phase_shifts": 1,
+	  "phase_shift_distance": 150
+	},
+	"starting_weapon": "straight_line_negotiator",
+	"phase_shift": {
+	  "id": "blink",
+	  "name": "Blink",
+	  "description": "Instant teleport with no trail, shorter range but faster recharge",
+	  "duration": 0.0,
+	  "charges": 4,
+	  "recharge_time": 2.5,
+	  "leaves_trail": false,
+	  "trail_damage": 0
+	},
+	"unlock_condition": {
+	  "type": "complete_run",
+	  "ship": "scout",
+	  "difficulty": 1
+	}
   },
 
   "fortress": {
-    "id": "fortress",
-    "name": "Fortress",
-    "description": "Heavy armored vessel. Slow but incredibly durable.",
-    "sprite": "res://assets/ships/fortress.png",
-    "base_speed": 80.0,
-    "base_stats": {
-      "max_hp": 180,
-      "hp_regen": 10,
-      "shield": 50,
-      "armor": 15,
-      "hull_shock": 5,
-      "pickup_range": 0.8,
-      "phase_shift_distance": 180
-    },
-    "starting_weapon": "proximity_tax",
-    "phase_shift": {
-      "id": "ram_shift",
-      "name": "Ram Shift",
-      "description": "Slower shift but damages and knocks back enemies in path",
-      "duration": 0.4,
-      "charges": 2,
-      "recharge_time": 6.0,
-      "leaves_trail": true,
-      "trail_damage": 30,
-      "knockback": 2.0
-    },
-    "unlock_condition": {
-      "type": "kill_count",
-      "count": 10000
-    }
+	"id": "fortress",
+	"name": "Fortress",
+	"description": "Heavy armored vessel. Slow but incredibly durable.",
+	"sprite": "res://assets/ships/fortress.png",
+	"base_speed": 80.0,
+	"base_stats": {
+	  "max_hp": 180,
+	  "hp_regen": 10,
+	  "shield": 50,
+	  "armor": 15,
+	  "hull_shock": 5,
+	  "pickup_range": 0.8,
+	  "phase_shift_distance": 180
+	},
+	"starting_weapon": "proximity_tax",
+	"phase_shift": {
+	  "id": "ram_shift",
+	  "name": "Ram Shift",
+	  "description": "Slower shift but damages and knocks back enemies in path",
+	  "duration": 0.4,
+	  "charges": 2,
+	  "recharge_time": 6.0,
+	  "leaves_trail": true,
+	  "trail_damage": 30,
+	  "knockback": 2.0
+	},
+	"unlock_condition": {
+	  "type": "kill_count",
+	  "count": 10000
+	}
   }
 }
