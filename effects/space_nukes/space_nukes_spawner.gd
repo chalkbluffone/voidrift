@@ -23,7 +23,7 @@ func spawn(
 	follow_source: Node2D = null
 ) -> Node2D:
 	_active_instances = _active_instances.filter(
-		func(inst: Node) -> bool: return is_instance_valid(inst) and inst.is_inside_tree()
+		func(inst: Variant) -> bool: return is_instance_valid(inst) and inst.is_inside_tree()
 	)
 
 	var targeting_center: Vector2 = spawn_pos

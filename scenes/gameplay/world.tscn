@@ -1,6 +1,6 @@
 [gd_scene load_steps=12 format=3 uid="uid://bvjgoos8oxons"]
 
-[ext_resource type="Script" uid="uid://cev0tcmrresu0" path="res://scripts/systems/world.gd" id="1_71j4m"]
+[ext_resource type="Script" uid="uid://bkh4um5paqfvd" path="res://scripts/systems/world.gd" id="1_71j4m"]
 [ext_resource type="PackedScene" uid="uid://b5txwryijy5id" path="res://scenes/gameplay/ship.tscn" id="1_rwgxs"]
 [ext_resource type="Texture2D" uid="uid://bfbdw3w7mpnbq" path="res://assets/backgrounds/Green Nebula/Green_Nebula_05-1024x1024.png" id="2_4mrxx"]
 [ext_resource type="Material" uid="uid://bc1yjbx4pki81" path="res://materials/stars_near.tres" id="2_i7141"]

@@ -214,16 +214,19 @@ func get_equipped_weapons() -> Array[String]:
 
 
 func get_ship_upgrades() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
 	if RunManager:
-		return RunManager.run_data.ship_upgrades.duplicate()
-	return []
+		var raw: Array = RunManager.run_data.ship_upgrades.duplicate()
+		for item: Dictionary in raw:
+			result.append(item)
+	return result
 
 
 # --- Constants for backwards compatibility ---
 const MAX_WEAPON_SLOTS: int = 2
 const MAX_MODULE_SLOTS: int = 2
-const XP_BASE: float = 100.0
-const XP_GROWTH: float = 1.15
+const XP_BASE: float = 8.0
+const XP_GROWTH: float = 2.0
 
 enum GameState {
 	MAIN_MENU,

@@ -140,7 +140,7 @@ func is_module_unlocked(module_id: String) -> bool:
 	if module_data.is_empty():
 		return false
 	var condition: Variant = module_data.get("unlock_condition", "default")
-	if condition == "default":
+	if condition is String and condition == "default":
 		return true
 	return module_id in persistent_data.get("unlocked_modules", [])
 

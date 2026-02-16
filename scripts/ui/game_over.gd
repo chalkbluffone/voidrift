@@ -83,9 +83,15 @@ func _apply_synthwave_theme() -> void:
 func _on_retry_pressed() -> void:
 	visible = false
 	get_tree().paused = false
-	# Match pause menu restart: reset state then reload scene
-	RunManager.current_state = RunManager.GameState.MAIN_MENU
-	get_tree().change_scene_to_file("res://scenes/gameplay/world.tscn")
+	# Re-launch with the same ship and captain from the current run
+	var ship_id: String = String(RunManager.run_data.get("ship_id", ""))
+	var captain_id: String = String(RunManager.run_data.get("captain_id", ""))
+	if ship_id != "" and captain_id != "":
+		RunManager.start_run(ship_id, captain_id)
+	else:
+		# Fallback: send to selection screen if no loadout stored
+		RunManager.current_state = RunManager.GameState.MAIN_MENU
+		get_tree().change_scene_to_file("res://scenes/ui/ship_select.tscn")
 
 
 func _on_main_menu_pressed() -> void:

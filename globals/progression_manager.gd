@@ -10,8 +10,8 @@ signal stardust_changed(amount: int)
 signal xp_changed(current: float, required: float, level: int)
 
 # --- XP Scaling ---
-const XP_BASE: float = 100.0
-const XP_GROWTH: float = 1.15  # Each level needs 15% more XP
+const XP_BASE: float = 8.0
+const XP_GROWTH: float = 2.0  # Each level needs 2x more XP (8, 16, 32, …)
 
 # --- Loadout Limits ---
 const MAX_WEAPON_SLOTS: int = 2

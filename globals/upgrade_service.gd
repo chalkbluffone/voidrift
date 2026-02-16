@@ -181,7 +181,7 @@ func _build_weapon_candidates(
 
 func _select_from_candidates(candidates: Array[Dictionary], count: int) -> Array[Dictionary]:
 	## Pick up to count options via weighted sampling without replacement.
-	var options: Array = []
+	var options: Array[Dictionary] = []
 	var picks: int = mini(count, candidates.size())
 	for _i in range(picks):
 		var idx: int = _pick_weighted_index(candidates)
@@ -256,7 +256,7 @@ func _roll_rarity(weights: Dictionary, luck: float) -> String:
 
 
 func _build_upgrade_effects(upgrade_data: Dictionary, rarity: String) -> Array[Dictionary]:
-	var effects: Array = []
+	var effects: Array[Dictionary] = []
 	if upgrade_data.has("effects") and upgrade_data["effects"] is Array:
 		for effect in upgrade_data["effects"]:
 			if effect is Dictionary:
@@ -299,7 +299,7 @@ func _build_weapon_effects(weapon_id: String, rarity: String, rng: RandomNumberG
 	## Build weapon upgrade effects using tier-based data from weapon_upgrades.json.
 	## Reads deterministic per-rarity stat deltas, picks N stats via weighted selection,
 	## and applies rarity factors per the Megabonk hybrid model.
-	var effects: Array = []
+	var effects: Array[Dictionary] = []
 
 	# Load tier data from weapon_upgrades.json
 	var upgrade_data: Dictionary = DataLoader.get_weapon_upgrade(weapon_id)

@@ -3,7 +3,7 @@ extends Control
 ## Main Menu - Entry point for the game.
 ## Provides navigation to Play, Options, and Weapons Lab.
 
-const GAME_SCENE: String = "res://scenes/gameplay/world.tscn"
+const SHIP_SELECT_SCENE: String = "res://scenes/ui/ship_select.tscn"
 const OPTIONS_SCENE: String = "res://scenes/ui/options_menu.tscn"
 const WEAPONS_LAB_SCENE: String = "res://tools/weapon_test_lab/weapon_test_lab.tscn"
 
@@ -25,7 +25,7 @@ func _ready() -> void:
 
 
 func _on_play_pressed() -> void:
-	get_tree().change_scene_to_file(GAME_SCENE)
+	get_tree().change_scene_to_file(SHIP_SELECT_SCENE)
 
 
 func _on_options_pressed() -> void:

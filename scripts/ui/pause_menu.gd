@@ -10,6 +10,7 @@ const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
 const GAME_SCENE: String = "res://scenes/gameplay/world.tscn"
 
 @onready var _settings: Node = get_node("/root/SettingsManager")
+@onready var RunManager: Node = get_node("/root/RunManager")
 @onready var resume_button: Button = $Panel/VBoxContainer/ResumeButton
 @onready var restart_button: Button = $Panel/VBoxContainer/RestartButton
 @onready var options_button: Button = $Panel/VBoxContainer/OptionsButton
@@ -66,9 +67,15 @@ func _on_resume_pressed() -> void:
 
 func _on_restart_pressed() -> void:
 	get_tree().paused = false
-	# Reset run state so world.gd reinitializes properly
-	RunManager.current_state = RunManager.GameState.MAIN_MENU
-	get_tree().change_scene_to_file(GAME_SCENE)
+	# Re-launch with the same ship and captain from the current run
+	var ship_id: String = String(RunManager.run_data.get("ship_id", ""))
+	var captain_id: String = String(RunManager.run_data.get("captain_id", ""))
+	if ship_id != "" and captain_id != "":
+		RunManager.start_run(ship_id, captain_id)
+	else:
+		# Fallback: send to selection screen if no loadout stored
+		RunManager.current_state = RunManager.GameState.MAIN_MENU
+		get_tree().change_scene_to_file("res://scenes/ui/ship_select.tscn")
 
 
 func _on_options_pressed() -> void:
