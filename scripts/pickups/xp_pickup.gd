@@ -7,7 +7,7 @@ extends BasePickup
 
 
 func _on_pickup_ready() -> void:
-	FileLogger.log_debug("XPPickup", "Spawned at %s" % global_position)
+	pass
 
 
 func initialize(amount: float) -> void:

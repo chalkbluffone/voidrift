@@ -93,6 +93,10 @@ captain_ability={
 ]
 }
 
+[network]
+
+limits/debugger/max_queued_messages=4096
+
 [rendering]
 
 environment/defaults/default_clear_color=Color(0, 0, 0, 1)

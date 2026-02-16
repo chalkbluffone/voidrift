@@ -89,7 +89,6 @@ func _spawn_enemy() -> void:
 
 
 func _on_enemy_died(enemy: Node, death_position: Vector2) -> void:
-	FileLogger.log_info("EnemySpawner", "Enemy died at %s" % str(death_position))
 	_spawn_xp(death_position, enemy.get_xp_value())
 	
 	# Random chance to drop credits

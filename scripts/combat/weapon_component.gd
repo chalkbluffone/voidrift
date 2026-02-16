@@ -224,7 +224,6 @@ func _fire_projectile_via_spawner(weapon_id: String, data: Dictionary) -> void:
 		return
 
 	var spawn_arg_count: int = WeaponSpawnerCache.get_spawner_arg_count(spawner, 3)
-	FileLogger.log_info("WeaponComponent", "Firing %s via spawner (%d-arg) at %s" % [weapon_id, spawn_arg_count, str(parent.global_position)])
 	var result: Variant = null
 	if spawn_arg_count >= 4:
 		var direction: Vector2 = _get_fire_direction(data)
@@ -233,10 +232,7 @@ func _fire_projectile_via_spawner(weapon_id: String, data: Dictionary) -> void:
 		result = spawner.spawn(parent.global_position, config, parent)
 
 	if result:
-		FileLogger.log_info("WeaponComponent", "Spawner produced result for %s" % weapon_id)
 		weapon_fired.emit(weapon_id, [result])
-	else:
-		FileLogger.log_info("WeaponComponent", "Spawner returned null for %s (no targets?)" % weapon_id)
 
 
 func _fire_orbit_weapon(weapon_id: String, data: Dictionary, _level: int) -> void:
@@ -437,8 +433,6 @@ func _spawn_projectile(_weapon_id: String, direction: Vector2, damage: float, sp
 
 	projectile.global_position = global_position
 	get_tree().current_scene.add_child(projectile)
-
-	FileLogger.log_debug("WeaponComponent", "Spawned projectile at %s dir: %s dmg: %.1f spd: %.1f" % [global_position, direction, damage, speed])
 	return projectile
 
 

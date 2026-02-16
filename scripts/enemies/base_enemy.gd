@@ -40,7 +40,7 @@ func _ready() -> void:
 	if _hitbox:
 		_hitbox.monitoring = true
 		_hitbox.monitorable = true
-		FileLogger.log_debug("BaseEnemy", "HitboxArea ready: layer=%d mask=%d" % [_hitbox.collision_layer, _hitbox.collision_mask])
+
 
 
 func _physics_process(delta: float) -> void:
@@ -65,7 +65,6 @@ func _process_contact_damage(delta: float) -> void:
 			if body.is_in_group("player") and body.has_method("take_damage"):
 				var damage_dealt: float = body.take_damage(contact_damage, self)
 				if damage_dealt > 0:
-					FileLogger.log_info("BaseEnemy", "Contact damage via collision: %.0f" % damage_dealt)
 					_damage_cooldown = DAMAGE_INTERVAL
 				return
 	
@@ -76,7 +75,6 @@ func _process_contact_damage(delta: float) -> void:
 			if body.is_in_group("player") and body.has_method("take_damage"):
 				var damage_dealt: float = body.take_damage(contact_damage, self)
 				if damage_dealt > 0:
-					FileLogger.log_info("BaseEnemy", "Contact damage via area: %.0f" % damage_dealt)
 					_damage_cooldown = DAMAGE_INTERVAL
 				return
 

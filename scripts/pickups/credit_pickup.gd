@@ -7,7 +7,7 @@ extends BasePickup
 
 
 func _on_pickup_ready() -> void:
-	FileLogger.log_debug("CreditPickup", "Spawned at %s with %d credits" % [global_position, credit_amount])
+	pass
 
 
 func initialize(amount: int) -> void:
@@ -15,5 +15,4 @@ func initialize(amount: int) -> void:
 
 
 func _apply_effect() -> void:
-	FileLogger.log_info("CreditPickup", "Collected %d credits!" % credit_amount)
 	GameManager.add_credits(credit_amount)
