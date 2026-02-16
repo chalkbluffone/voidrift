@@ -551,210 +551,139 @@ func _create_impact_effect(impact_pos: Vector2, incoming_dir: Vector2) -> Dictio
 	## Create a multi-layer impact effect that looks like molten material spraying off.
 	## Returns dict with all particle systems and the light.
 	var result: Dictionary = {}
+	var spray_dir: Vector2 = -incoming_dir  # Away from bolt source
 
 	# --- Layer 1: Molten spray (fast, bright, directional) ---
-	var molten: CPUParticles2D = CPUParticles2D.new()
-	molten.global_position = impact_pos
-	molten.amount = sparks_amount * 2
-	molten.lifetime = sparks_lifetime * 3.0
-	molten.one_shot = true
-	molten.explosiveness = 0.85
-	molten.randomness = 0.7
-	molten.emitting = false
-
-	# Spray outward from impact, biased away from bolt direction
-	var spray_dir: Vector2 = -incoming_dir  # Away from bolt source
-	molten.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE
-	molten.emission_sphere_radius = arc_width * 0.3
-	molten.direction = spray_dir
-	molten.spread = 70.0  # Cone
-
-	molten.initial_velocity_min = sparks_speed * 0.8
-	molten.initial_velocity_max = sparks_speed * 2.5
-	molten.damping_min = 100.0
-	molten.damping_max = 250.0
-	molten.gravity = Vector2(0, 40.0)  # Slight downward pull for molten drip feel
-
-	molten.scale_amount_min = sparks_size * 0.6
-	molten.scale_amount_max = sparks_size * 2.0
-
-	var molten_scale_curve: Curve = Curve.new()
-	molten_scale_curve.add_point(Vector2(0.0, 0.5))
-	molten_scale_curve.add_point(Vector2(0.15, 1.0))
-	molten_scale_curve.add_point(Vector2(0.5, 0.7))
-	molten_scale_curve.add_point(Vector2(1.0, 0.0))
-	molten.scale_amount_curve = molten_scale_curve
-
-	# Color: white flash → bright yellow → orange → dark red → gone
-	var molten_ramp: Gradient = Gradient.new()
-	molten_ramp.set_color(0, Color(1.0, 1.0, 1.0, 1.0))
-	molten_ramp.add_point(0.1, Color(1.0, 0.95, 0.6, 1.0))   # Hot white-yellow
-	molten_ramp.add_point(0.3, Color(1.0, 0.7, 0.15, 1.0))    # Bright orange
-	molten_ramp.add_point(0.6, Color(0.9, 0.35, 0.05, 0.8))   # Deep orange-red
-	molten_ramp.set_color(1, Color(0.3, 0.08, 0.02, 0.0))     # Dark ember fade
-	molten.color_ramp = molten_ramp
-
-	molten.texture = EffectUtils.get_white_pixel_texture()
-
-	add_child(molten)
-	result["molten"] = molten
+	result["molten"] = EffectUtils.create_cpu_particles(self, {
+		"global_position": impact_pos,
+		"emitting": false,
+		"one_shot": true,
+		"amount": sparks_amount * 2,
+		"lifetime": sparks_lifetime * 3.0,
+		"explosiveness": 0.85,
+		"randomness": 0.7,
+		"emission_shape": CPUParticles2D.EMISSION_SHAPE_SPHERE,
+		"emission_sphere_radius": arc_width * 0.3,
+		"direction": spray_dir,
+		"spread": 70.0,
+		"initial_velocity_min": sparks_speed * 0.8,
+		"initial_velocity_max": sparks_speed * 2.5,
+		"damping_min": 100.0,
+		"damping_max": 250.0,
+		"gravity": Vector2(0, 40.0),
+		"scale_amount_min": sparks_size * 0.6,
+		"scale_amount_max": sparks_size * 2.0,
+		"scale_amount_curve": EffectUtils.make_curve([Vector2(0, 0.5), Vector2(0.15, 1), Vector2(0.5, 0.7), Vector2(1, 0)]),
+		"color_ramp": EffectUtils.make_gradient([
+			[0.0, Color(1.0, 1.0, 1.0, 1.0)],
+			[0.1, Color(1.0, 0.95, 0.6, 1.0)],
+			[0.3, Color(1.0, 0.7, 0.15, 1.0)],
+			[0.6, Color(0.9, 0.35, 0.05, 0.8)],
+			[1.0, Color(0.3, 0.08, 0.02, 0.0)],
+		]),
+		"texture": EffectUtils.get_white_pixel_texture(),
+	})
 
 	# --- Layer 2: Slow ember drops (heavier, fall with gravity) ---
-	var embers: CPUParticles2D = CPUParticles2D.new()
-	embers.global_position = impact_pos
-	embers.amount = int(sparks_amount * 0.8)
-	embers.lifetime = sparks_lifetime * 5.0  # Longer lived
-	embers.one_shot = true
-	embers.explosiveness = 0.6
-	embers.randomness = 0.9
-	embers.emitting = false
-
-	embers.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE
-	embers.emission_sphere_radius = arc_width * 0.8
-	embers.direction = Vector2.ZERO
-	embers.spread = 180.0
-
-	embers.initial_velocity_min = sparks_speed * 0.2
-	embers.initial_velocity_max = sparks_speed * 0.8
-	embers.damping_min = 80.0
-	embers.damping_max = 200.0
-	embers.gravity = Vector2(0, 80.0)  # Heavier drip
-
-	embers.scale_amount_min = sparks_size * 0.3
-	embers.scale_amount_max = sparks_size * 1.2
-
-	var ember_scale_curve: Curve = Curve.new()
-	ember_scale_curve.add_point(Vector2(0.0, 1.0))
-	ember_scale_curve.add_point(Vector2(0.3, 0.8))
-	ember_scale_curve.add_point(Vector2(0.7, 0.4))
-	ember_scale_curve.add_point(Vector2(1.0, 0.0))
-	embers.scale_amount_curve = ember_scale_curve
-
-	# Color: orange → deep red → dark
-	var ember_ramp: Gradient = Gradient.new()
-	ember_ramp.set_color(0, Color(1.0, 0.6, 0.1, 1.0))       # Bright orange
-	ember_ramp.add_point(0.3, Color(0.95, 0.4, 0.05, 0.9))    # Orange-red
-	ember_ramp.add_point(0.6, Color(0.6, 0.15, 0.02, 0.6))    # Deep red
-	ember_ramp.set_color(1, Color(0.2, 0.05, 0.01, 0.0))      # Dark
-	embers.color_ramp = ember_ramp
-	embers.texture = EffectUtils.get_white_pixel_texture()
-
-	add_child(embers)
-	result["embers"] = embers
+	result["embers"] = EffectUtils.create_cpu_particles(self, {
+		"global_position": impact_pos,
+		"emitting": false,
+		"one_shot": true,
+		"amount": int(sparks_amount * 0.8),
+		"lifetime": sparks_lifetime * 5.0,
+		"explosiveness": 0.6,
+		"randomness": 0.9,
+		"emission_shape": CPUParticles2D.EMISSION_SHAPE_SPHERE,
+		"emission_sphere_radius": arc_width * 0.8,
+		"direction": Vector2.ZERO,
+		"spread": 180.0,
+		"initial_velocity_min": sparks_speed * 0.2,
+		"initial_velocity_max": sparks_speed * 0.8,
+		"damping_min": 80.0,
+		"damping_max": 200.0,
+		"gravity": Vector2(0, 80.0),
+		"scale_amount_min": sparks_size * 0.3,
+		"scale_amount_max": sparks_size * 1.2,
+		"scale_amount_curve": EffectUtils.make_curve([Vector2(0, 1), Vector2(0.3, 0.8), Vector2(0.7, 0.4), Vector2(1, 0)]),
+		"color_ramp": EffectUtils.make_gradient([
+			[0.0, Color(1.0, 0.6, 0.1, 1.0)],
+			[0.3, Color(0.95, 0.4, 0.05, 0.9)],
+			[0.6, Color(0.6, 0.15, 0.02, 0.6)],
+			[1.0, Color(0.2, 0.05, 0.01, 0.0)],
+		]),
+		"texture": EffectUtils.get_white_pixel_texture(),
+	})
 
 	# --- Layer 3: Hot glow burst (few large soft particles at center) ---
-	var glow_p: CPUParticles2D = CPUParticles2D.new()
-	glow_p.global_position = impact_pos
-	glow_p.amount = 4
-	glow_p.lifetime = sparks_lifetime * 2.5
-	glow_p.one_shot = true
-	glow_p.explosiveness = 1.0
-	glow_p.randomness = 0.3
-	glow_p.emitting = false
-
-	glow_p.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE
-	glow_p.emission_sphere_radius = 2.0
-	glow_p.direction = Vector2.ZERO
-	glow_p.spread = 180.0
-	glow_p.initial_velocity_min = 5.0
-	glow_p.initial_velocity_max = 20.0
-	glow_p.damping_min = 50.0
-	glow_p.damping_max = 100.0
-	glow_p.gravity = Vector2.ZERO
-
-	glow_p.scale_amount_min = sparks_size * 4.0
-	glow_p.scale_amount_max = sparks_size * 8.0
-
-	var glow_scale_curve: Curve = Curve.new()
-	glow_scale_curve.add_point(Vector2(0.0, 0.3))
-	glow_scale_curve.add_point(Vector2(0.1, 1.0))
-	glow_scale_curve.add_point(Vector2(0.4, 0.6))
-	glow_scale_curve.add_point(Vector2(1.0, 0.0))
-	glow_p.scale_amount_curve = glow_scale_curve
-
-	var glow_ramp: Gradient = Gradient.new()
-	glow_ramp.set_color(0, Color(1.0, 1.0, 1.0, 0.6))
-	glow_ramp.add_point(0.2, Color(1.0, 0.85, 0.4, 0.5))     # Hot yellow
-	glow_ramp.add_point(0.5, Color(0.9, 0.5, 0.1, 0.25))      # Warm orange
-	glow_ramp.set_color(1, Color(0.5, 0.15, 0.03, 0.0))       # Fade
-	glow_p.color_ramp = glow_ramp
-
-	# Soft circular texture for glow blobs
-	var glow_img: Image = Image.create(16, 16, false, Image.FORMAT_RGBA8)
-	for y in range(16):
-		for x in range(16):
-			var dx: float = (float(x) - 7.5) / 7.5
-			var dy: float = (float(y) - 7.5) / 7.5
-			var d: float = sqrt(dx * dx + dy * dy)
-			var a: float = clampf(1.0 - d, 0.0, 1.0)
-			a = a * a  # Quadratic falloff for soft edge
-			glow_img.set_pixel(x, y, Color(1, 1, 1, a))
-	glow_p.texture = ImageTexture.create_from_image(glow_img)
-
-	add_child(glow_p)
-	result["glow_particles"] = glow_p
+	result["glow_particles"] = EffectUtils.create_cpu_particles(self, {
+		"global_position": impact_pos,
+		"emitting": false,
+		"one_shot": true,
+		"amount": 4,
+		"lifetime": sparks_lifetime * 2.5,
+		"explosiveness": 1.0,
+		"randomness": 0.3,
+		"emission_shape": CPUParticles2D.EMISSION_SHAPE_SPHERE,
+		"emission_sphere_radius": 2.0,
+		"direction": Vector2.ZERO,
+		"spread": 180.0,
+		"initial_velocity_min": 5.0,
+		"initial_velocity_max": 20.0,
+		"damping_min": 50.0,
+		"damping_max": 100.0,
+		"gravity": Vector2.ZERO,
+		"scale_amount_min": sparks_size * 4.0,
+		"scale_amount_max": sparks_size * 8.0,
+		"scale_amount_curve": EffectUtils.make_curve([Vector2(0, 0.3), Vector2(0.1, 1), Vector2(0.4, 0.6), Vector2(1, 0)]),
+		"color_ramp": EffectUtils.make_gradient([
+			[0.0, Color(1.0, 1.0, 1.0, 0.6)],
+			[0.2, Color(1.0, 0.85, 0.4, 0.5)],
+			[0.5, Color(0.9, 0.5, 0.1, 0.25)],
+			[1.0, Color(0.5, 0.15, 0.03, 0.0)],
+		]),
+		"texture": EffectUtils.make_radial_texture(16, 2.0),
+	})
 
 	# --- Layer 4: Flash particles (tiny bright white sparks, very fast) ---
-	var flash: CPUParticles2D = CPUParticles2D.new()
-	flash.global_position = impact_pos
-	flash.amount = sparks_amount
-	flash.lifetime = sparks_lifetime * 0.6
-	flash.one_shot = true
-	flash.explosiveness = 1.0
-	flash.randomness = 0.5
-	flash.emitting = false
-
-	flash.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE
-	flash.emission_sphere_radius = arc_width * 0.2
-	flash.direction = Vector2.ZERO
-	flash.spread = 180.0
-	flash.initial_velocity_min = sparks_speed * 1.5
-	flash.initial_velocity_max = sparks_speed * 4.0
-	flash.damping_min = 300.0
-	flash.damping_max = 600.0
-	flash.gravity = Vector2.ZERO
-
-	flash.scale_amount_min = sparks_size * 0.15
-	flash.scale_amount_max = sparks_size * 0.5
-
-	var flash_scale_curve: Curve = Curve.new()
-	flash_scale_curve.add_point(Vector2(0.0, 1.0))
-	flash_scale_curve.add_point(Vector2(0.3, 0.5))
-	flash_scale_curve.add_point(Vector2(1.0, 0.0))
-	flash.scale_amount_curve = flash_scale_curve
-
-	var flash_ramp: Gradient = Gradient.new()
-	flash_ramp.set_color(0, Color(1.0, 1.0, 1.0, 1.0))
-	flash_ramp.add_point(0.3, Color(color_glow.r, color_glow.g, color_glow.b, 0.8))
-	flash_ramp.set_color(1, Color(color_glow.r * 0.5, color_glow.g * 0.5, color_glow.b * 0.5, 0.0))
-	flash.color_ramp = flash_ramp
-	flash.texture = EffectUtils.get_white_pixel_texture()
-
-	add_child(flash)
-	result["flash"] = flash
+	result["flash"] = EffectUtils.create_cpu_particles(self, {
+		"global_position": impact_pos,
+		"emitting": false,
+		"one_shot": true,
+		"amount": sparks_amount,
+		"lifetime": sparks_lifetime * 0.6,
+		"explosiveness": 1.0,
+		"randomness": 0.5,
+		"emission_shape": CPUParticles2D.EMISSION_SHAPE_SPHERE,
+		"emission_sphere_radius": arc_width * 0.2,
+		"direction": Vector2.ZERO,
+		"spread": 180.0,
+		"initial_velocity_min": sparks_speed * 1.5,
+		"initial_velocity_max": sparks_speed * 4.0,
+		"damping_min": 300.0,
+		"damping_max": 600.0,
+		"gravity": Vector2.ZERO,
+		"scale_amount_min": sparks_size * 0.15,
+		"scale_amount_max": sparks_size * 0.5,
+		"scale_amount_curve": EffectUtils.make_curve([Vector2(0, 1), Vector2(0.3, 0.5), Vector2(1, 0)]),
+		"color_ramp": EffectUtils.make_gradient([
+			[0.0, Color(1.0, 1.0, 1.0, 1.0)],
+			[0.3, Color(color_glow.r, color_glow.g, color_glow.b, 0.8)],
+			[1.0, Color(color_glow.r * 0.5, color_glow.g * 0.5, color_glow.b * 0.5, 0.0)],
+		]),
+		"texture": EffectUtils.get_white_pixel_texture(),
+	})
 
 	# --- PointLight2D for impact glow (warm orange) ---
 	var light: PointLight2D = PointLight2D.new()
 	light.global_position = impact_pos
-	light.color = Color(1.0, 0.7, 0.2, 1.0)  # Warm orange-yellow
-	light.energy = 0.0  # Will brighten on reveal
+	light.color = Color(1.0, 0.7, 0.2, 1.0)
+	light.energy = 0.0
 	light.texture_scale = 0.8
 	light.shadow_enabled = false
-	# Create a soft radial gradient texture for the light
-	var light_img: Image = Image.create(64, 64, false, Image.FORMAT_RGBA8)
-	for y in range(64):
-		for x in range(64):
-			var dx: float = (float(x) - 31.5) / 31.5
-			var dy: float = (float(y) - 31.5) / 31.5
-			var d: float = sqrt(dx * dx + dy * dy)
-			var a: float = clampf(1.0 - d, 0.0, 1.0)
-			a = a * a * a  # Cubic falloff
-			light_img.set_pixel(x, y, Color(1, 1, 1, a))
-	light.texture = ImageTexture.create_from_image(light_img)
-
+	light.texture = EffectUtils.make_radial_texture(64, 3.0)
 	add_child(light)
 	result["light"] = light
-	result["light_energy"] = 2.5  # Target energy on reveal
+	result["light_energy"] = 2.5
 	result["light_timer"] = 0.0
 	result["activated"] = false
 

@@ -1,11 +1,5 @@
 # Voidrift Project Scan Report
 
-## REFACTORING OPPORTUNITIES
-
-| #   | Location       | Issue                                                                                                                                                                                            |
-| --- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 29  | 3 effect files | `nikolas_coil.gd` (831), `nope_bubble.gd` (699), `space_napalm.gd` (799) — all 700-830 lines. Particle/visual setup is 300-500 lines of procedural config that could use shared builder helpers. |
-
 ## UNUSED CODE
 
 | #   | Location                                                   | Item                                                                                                                                                                                                                                                                                                 |

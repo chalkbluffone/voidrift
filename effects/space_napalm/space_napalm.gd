@@ -83,7 +83,7 @@ var _aoe_collision: CollisionShape2D = null
 # ══════════════════════════════════════════════════════════════════════════
 
 func setup(params: Dictionary) -> SpaceNapalm:
-	"""Configure from a flat parameter dictionary (from weapon_component flatten)."""
+	## Configure from a flat parameter dictionary (from weapon_component flatten).
 	for key in params:
 		if key in self:
 			set(key, params[key])
@@ -325,7 +325,7 @@ func _cleanup() -> void:
 # ══════════════════════════════════════════════════════════════════════════
 
 func _deal_impact_damage() -> void:
-	"""Deal impact damage to enemies near the detonation point."""
+	## Deal impact damage to enemies near the detonation point.
 	# Distance-based check — generous radius for the initial blast
 	var enemies: Array = get_tree().get_nodes_in_group("enemies")
 	var effective_radius: float = aoe_radius * size_mult * 0.7
@@ -339,7 +339,7 @@ func _deal_impact_damage() -> void:
 
 
 func _deal_aoe_damage() -> void:
-	"""Deal DoT damage to all enemies currently inside the fire zone."""
+	## Deal DoT damage to all enemies currently inside the fire zone.
 	if not _aoe_hitbox or not _aoe_hitbox.monitoring:
 		return
 
@@ -428,7 +428,7 @@ func _create_fire_mesh() -> void:
 
 
 func _regenerate_fire_disc() -> void:
-	"""Generate a disc mesh matching the full AoE radius for the fire shader."""
+	## Generate a disc mesh matching the full AoE radius for the fire shader.
 	var effective_radius: float = aoe_radius * size_mult
 	var segments: int = 48
 	var arrays: Array = []
@@ -486,45 +486,32 @@ func _update_fire_shader(radius_frac: float, burn_intensity: float) -> void:
 # ══════════════════════════════════════════════════════════════════════════
 
 func _create_trail_particles() -> void:
-	_trail_particles = CPUParticles2D.new()
-	add_child(_trail_particles)
-
-	_trail_particles.emitting = true
-	_trail_particles.amount = 35
-	_trail_particles.lifetime = 0.35
-	_trail_particles.one_shot = false
-	_trail_particles.explosiveness = 0.0
-	_trail_particles.local_coords = false
-
-	# Emission
-	_trail_particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE
-	_trail_particles.emission_sphere_radius = proj_size * 0.3
-
-	# Motion — particles lag behind the projectile
-	_trail_particles.direction = Vector2(-1, 0)  # Backward
-	_trail_particles.spread = 25.0
-	_trail_particles.initial_velocity_min = 40.0
-	_trail_particles.initial_velocity_max = 80.0
-	_trail_particles.gravity = Vector2.ZERO
-	_trail_particles.damping_min = 30.0
-	_trail_particles.damping_max = 50.0
-
-	# Scale: start normal, shrink away
-	_trail_particles.scale_amount_min = 2.5
-	_trail_particles.scale_amount_max = 4.0
-	var scale_curve: Curve = Curve.new()
-	scale_curve.add_point(Vector2(0.0, 1.0))
-	scale_curve.add_point(Vector2(0.4, 0.7))
-	scale_curve.add_point(Vector2(1.0, 0.0))
-	_trail_particles.scale_amount_curve = scale_curve
-
-	# Color ramp: bright yellow → orange → red → transparent
-	var gradient: Gradient = Gradient.new()
-	gradient.set_color(0, Color(1.0, 0.95, 0.5, 1.0))
-	gradient.add_point(0.25, Color(1.0, 0.6, 0.1, 0.9))
-	gradient.add_point(0.6, Color(0.9, 0.2, 0.0, 0.6))
-	gradient.set_color(1, Color(0.3, 0.05, 0.0, 0.0))
-	_trail_particles.color_ramp = gradient
+	_trail_particles = EffectUtils.create_cpu_particles(self, {
+		"emitting": true,
+		"amount": 35,
+		"lifetime": 0.35,
+		"one_shot": false,
+		"explosiveness": 0.0,
+		"local_coords": false,
+		"emission_shape": CPUParticles2D.EMISSION_SHAPE_SPHERE,
+		"emission_sphere_radius": proj_size * 0.3,
+		"direction": Vector2(-1, 0),
+		"spread": 25.0,
+		"initial_velocity_min": 40.0,
+		"initial_velocity_max": 80.0,
+		"gravity": Vector2.ZERO,
+		"damping_min": 30.0,
+		"damping_max": 50.0,
+		"scale_amount_min": 2.5,
+		"scale_amount_max": 4.0,
+		"scale_amount_curve": EffectUtils.make_curve([Vector2(0, 1), Vector2(0.4, 0.7), Vector2(1, 0)]),
+		"color_ramp": EffectUtils.make_gradient([
+			[0.0, Color(1.0, 0.95, 0.5, 1.0)],
+			[0.25, Color(1.0, 0.6, 0.1, 0.9)],
+			[0.6, Color(0.9, 0.2, 0.0, 0.6)],
+			[1.0, Color(0.3, 0.05, 0.0, 0.0)],
+		]),
+	})
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -532,46 +519,34 @@ func _create_trail_particles() -> void:
 # ══════════════════════════════════════════════════════════════════════════
 
 func _create_burst_particles() -> void:
-	_burst_particles = CPUParticles2D.new()
-	add_child(_burst_particles)
-
-	_burst_particles.emitting = false
-	_burst_particles.amount = 80
-	_burst_particles.lifetime = 0.5
-	_burst_particles.one_shot = true
-	_burst_particles.explosiveness = 0.95
-	_burst_particles.local_coords = false
-
-	# Radial burst
-	_burst_particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE
-	_burst_particles.emission_sphere_radius = 8.0
-	_burst_particles.direction = Vector2(0, 0)
-	_burst_particles.spread = 180.0
-	_burst_particles.initial_velocity_min = 80.0
-	_burst_particles.initial_velocity_max = 250.0
-	_burst_particles.gravity = Vector2.ZERO
-	_burst_particles.damping_min = 60.0
-	_burst_particles.damping_max = 150.0
-
-	# Scale — big billowing burst
-	_burst_particles.scale_amount_min = 4.0
-	_burst_particles.scale_amount_max = 8.0
-	var scale_curve: Curve = Curve.new()
-	scale_curve.add_point(Vector2(0.0, 0.5))
-	scale_curve.add_point(Vector2(0.15, 1.0))
-	scale_curve.add_point(Vector2(0.5, 0.8))
-	scale_curve.add_point(Vector2(1.0, 0.0))
-	_burst_particles.scale_amount_curve = scale_curve
-
-	# Color: white flash → bright orange → deep red → dark smoke → gone
-	var gradient: Gradient = Gradient.new()
-	gradient.set_color(0, Color(1.0, 0.95, 0.7, 1.0))
-	gradient.add_point(0.1, Color(1.0, 0.7, 0.15, 1.0))
-	gradient.add_point(0.3, Color(0.95, 0.4, 0.02, 0.9))
-	gradient.add_point(0.55, Color(0.6, 0.12, 0.0, 0.7))
-	gradient.add_point(0.8, Color(0.15, 0.06, 0.02, 0.4))
-	gradient.set_color(1, Color(0.05, 0.02, 0.01, 0.0))
-	_burst_particles.color_ramp = gradient
+	_burst_particles = EffectUtils.create_cpu_particles(self, {
+		"emitting": false,
+		"amount": 80,
+		"lifetime": 0.5,
+		"one_shot": true,
+		"explosiveness": 0.95,
+		"local_coords": false,
+		"emission_shape": CPUParticles2D.EMISSION_SHAPE_SPHERE,
+		"emission_sphere_radius": 8.0,
+		"direction": Vector2(0, 0),
+		"spread": 180.0,
+		"initial_velocity_min": 80.0,
+		"initial_velocity_max": 250.0,
+		"gravity": Vector2.ZERO,
+		"damping_min": 60.0,
+		"damping_max": 150.0,
+		"scale_amount_min": 4.0,
+		"scale_amount_max": 8.0,
+		"scale_amount_curve": EffectUtils.make_curve([Vector2(0, 0.5), Vector2(0.15, 1), Vector2(0.5, 0.8), Vector2(1, 0)]),
+		"color_ramp": EffectUtils.make_gradient([
+			[0.0, Color(1.0, 0.95, 0.7, 1.0)],
+			[0.1, Color(1.0, 0.7, 0.15, 1.0)],
+			[0.3, Color(0.95, 0.4, 0.02, 0.9)],
+			[0.55, Color(0.6, 0.12, 0.0, 0.7)],
+			[0.8, Color(0.15, 0.06, 0.02, 0.4)],
+			[1.0, Color(0.05, 0.02, 0.01, 0.0)],
+		]),
+	})
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -579,49 +554,35 @@ func _create_burst_particles() -> void:
 # ══════════════════════════════════════════════════════════════════════════
 
 func _create_flame_particles() -> void:
-	_flame_particles = CPUParticles2D.new()
-	add_child(_flame_particles)
-
-	_flame_particles.emitting = false
-	_flame_particles.amount = 70
-	_flame_particles.lifetime = 0.8
-	_flame_particles.one_shot = false
-	_flame_particles.explosiveness = 0.0
-	_flame_particles.local_coords = false
-
-	# Emit from ring matching AoE area
-	_flame_particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE
-	_flame_particles.emission_sphere_radius = aoe_radius * size_mult * 0.5
-
-	# Slight upward drift (heat rise)
-	_flame_particles.direction = Vector2(0, -1)
-	_flame_particles.spread = 40.0
-	_flame_particles.initial_velocity_min = 20.0
-	_flame_particles.initial_velocity_max = 50.0
-	_flame_particles.gravity = Vector2(0, -25)  # Upward for heat
-	_flame_particles.damping_min = 8.0
-	_flame_particles.damping_max = 20.0
-	_flame_particles.angular_velocity_min = -120.0
-	_flame_particles.angular_velocity_max = 120.0
-
-	# Scale: grow then shrink — bigger billowy flames
-	_flame_particles.scale_amount_min = 5.0
-	_flame_particles.scale_amount_max = 9.0
-	var scale_curve: Curve = Curve.new()
-	scale_curve.add_point(Vector2(0.0, 0.3))
-	scale_curve.add_point(Vector2(0.25, 1.0))
-	scale_curve.add_point(Vector2(0.7, 0.6))
-	scale_curve.add_point(Vector2(1.0, 0.0))
-	_flame_particles.scale_amount_curve = scale_curve
-
-	# Color: yellow → deep orange → red → dark smoke → gone
-	var gradient: Gradient = Gradient.new()
-	gradient.set_color(0, Color(1.0, 0.85, 0.2, 0.95))
-	gradient.add_point(0.2, Color(1.0, 0.5, 0.05, 0.9))
-	gradient.add_point(0.45, Color(0.85, 0.2, 0.0, 0.7))
-	gradient.add_point(0.7, Color(0.3, 0.08, 0.02, 0.4))
-	gradient.set_color(1, Color(0.08, 0.04, 0.02, 0.0))
-	_flame_particles.color_ramp = gradient
+	_flame_particles = EffectUtils.create_cpu_particles(self, {
+		"emitting": false,
+		"amount": 70,
+		"lifetime": 0.8,
+		"one_shot": false,
+		"explosiveness": 0.0,
+		"local_coords": false,
+		"emission_shape": CPUParticles2D.EMISSION_SHAPE_SPHERE,
+		"emission_sphere_radius": aoe_radius * size_mult * 0.5,
+		"direction": Vector2(0, -1),
+		"spread": 40.0,
+		"initial_velocity_min": 20.0,
+		"initial_velocity_max": 50.0,
+		"gravity": Vector2(0, -25),
+		"damping_min": 8.0,
+		"damping_max": 20.0,
+		"angular_velocity_min": -120.0,
+		"angular_velocity_max": 120.0,
+		"scale_amount_min": 5.0,
+		"scale_amount_max": 9.0,
+		"scale_amount_curve": EffectUtils.make_curve([Vector2(0, 0.3), Vector2(0.25, 1), Vector2(0.7, 0.6), Vector2(1, 0)]),
+		"color_ramp": EffectUtils.make_gradient([
+			[0.0, Color(1.0, 0.85, 0.2, 0.95)],
+			[0.2, Color(1.0, 0.5, 0.05, 0.9)],
+			[0.45, Color(0.85, 0.2, 0.0, 0.7)],
+			[0.7, Color(0.3, 0.08, 0.02, 0.4)],
+			[1.0, Color(0.08, 0.04, 0.02, 0.0)],
+		]),
+	})
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -629,46 +590,34 @@ func _create_flame_particles() -> void:
 # ══════════════════════════════════════════════════════════════════════════
 
 func _create_ember_particles() -> void:
-	_ember_particles = CPUParticles2D.new()
-	add_child(_ember_particles)
-
-	_ember_particles.emitting = false
-	_ember_particles.amount = 35
-	_ember_particles.lifetime = 0.6
-	_ember_particles.one_shot = false
-	_ember_particles.explosiveness = 0.0
-	_ember_particles.local_coords = false
-
-	_ember_particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE
-	_ember_particles.emission_sphere_radius = aoe_radius * size_mult * 0.4
-
-	# Embers fly outward and up
-	_ember_particles.direction = Vector2(0, -1)
-	_ember_particles.spread = 75.0
-	_ember_particles.initial_velocity_min = 70.0
-	_ember_particles.initial_velocity_max = 180.0
-	_ember_particles.gravity = Vector2(0, -20)
-	_ember_particles.damping_min = 25.0
-	_ember_particles.damping_max = 50.0
-	_ember_particles.angular_velocity_min = -360.0
-	_ember_particles.angular_velocity_max = 360.0
-
-	# Small bright dots
-	_ember_particles.scale_amount_min = 1.0
-	_ember_particles.scale_amount_max = 2.0
-	var scale_curve: Curve = Curve.new()
-	scale_curve.add_point(Vector2(0.0, 1.0))
-	scale_curve.add_point(Vector2(0.5, 0.8))
-	scale_curve.add_point(Vector2(1.0, 0.0))
-	_ember_particles.scale_amount_curve = scale_curve
-
-	# Color: bright white/yellow → orange → gone
-	var gradient: Gradient = Gradient.new()
-	gradient.set_color(0, Color(1.0, 1.0, 0.8, 1.0))
-	gradient.add_point(0.3, Color(1.0, 0.7, 0.2, 0.9))
-	gradient.add_point(0.7, Color(1.0, 0.3, 0.0, 0.5))
-	gradient.set_color(1, Color(0.5, 0.1, 0.0, 0.0))
-	_ember_particles.color_ramp = gradient
+	_ember_particles = EffectUtils.create_cpu_particles(self, {
+		"emitting": false,
+		"amount": 35,
+		"lifetime": 0.6,
+		"one_shot": false,
+		"explosiveness": 0.0,
+		"local_coords": false,
+		"emission_shape": CPUParticles2D.EMISSION_SHAPE_SPHERE,
+		"emission_sphere_radius": aoe_radius * size_mult * 0.4,
+		"direction": Vector2(0, -1),
+		"spread": 75.0,
+		"initial_velocity_min": 70.0,
+		"initial_velocity_max": 180.0,
+		"gravity": Vector2(0, -20),
+		"damping_min": 25.0,
+		"damping_max": 50.0,
+		"angular_velocity_min": -360.0,
+		"angular_velocity_max": 360.0,
+		"scale_amount_min": 1.0,
+		"scale_amount_max": 2.0,
+		"scale_amount_curve": EffectUtils.make_curve([Vector2(0, 1), Vector2(0.5, 0.8), Vector2(1, 0)]),
+		"color_ramp": EffectUtils.make_gradient([
+			[0.0, Color(1.0, 1.0, 0.8, 1.0)],
+			[0.3, Color(1.0, 0.7, 0.2, 0.9)],
+			[0.7, Color(1.0, 0.3, 0.0, 0.5)],
+			[1.0, Color(0.5, 0.1, 0.0, 0.0)],
+		]),
+	})
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -676,44 +625,32 @@ func _create_ember_particles() -> void:
 # ══════════════════════════════════════════════════════════════════════════
 
 func _create_smoke_particles() -> void:
-	_smoke_particles = CPUParticles2D.new()
-	add_child(_smoke_particles)
-
-	_smoke_particles.emitting = false
-	_smoke_particles.amount = 20
-	_smoke_particles.lifetime = 1.5
-	_smoke_particles.one_shot = false
-	_smoke_particles.explosiveness = 0.0
-	_smoke_particles.local_coords = false
-
-	_smoke_particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE
-	_smoke_particles.emission_sphere_radius = aoe_radius * size_mult * 0.3
-
-	# Slow upward drift
-	_smoke_particles.direction = Vector2(0, -1)
-	_smoke_particles.spread = 30.0
-	_smoke_particles.initial_velocity_min = 12.0
-	_smoke_particles.initial_velocity_max = 30.0
-	_smoke_particles.gravity = Vector2(0, -18)
-	_smoke_particles.damping_min = 3.0
-	_smoke_particles.damping_max = 10.0
-
-	# Large, fading puffs
-	_smoke_particles.scale_amount_min = 6.0
-	_smoke_particles.scale_amount_max = 12.0
-	var scale_curve: Curve = Curve.new()
-	scale_curve.add_point(Vector2(0.0, 0.4))
-	scale_curve.add_point(Vector2(0.3, 1.0))
-	scale_curve.add_point(Vector2(1.0, 1.2))
-	_smoke_particles.scale_amount_curve = scale_curve
-
-	# Color: dark semi-transparent smoke with warm tint
-	var gradient: Gradient = Gradient.new()
-	gradient.set_color(0, Color(0.25, 0.12, 0.05, 0.35))
-	gradient.add_point(0.3, Color(0.18, 0.1, 0.06, 0.3))
-	gradient.add_point(0.7, Color(0.12, 0.08, 0.04, 0.18))
-	gradient.set_color(1, Color(0.06, 0.04, 0.02, 0.0))
-	_smoke_particles.color_ramp = gradient
+	_smoke_particles = EffectUtils.create_cpu_particles(self, {
+		"emitting": false,
+		"amount": 20,
+		"lifetime": 1.5,
+		"one_shot": false,
+		"explosiveness": 0.0,
+		"local_coords": false,
+		"emission_shape": CPUParticles2D.EMISSION_SHAPE_SPHERE,
+		"emission_sphere_radius": aoe_radius * size_mult * 0.3,
+		"direction": Vector2(0, -1),
+		"spread": 30.0,
+		"initial_velocity_min": 12.0,
+		"initial_velocity_max": 30.0,
+		"gravity": Vector2(0, -18),
+		"damping_min": 3.0,
+		"damping_max": 10.0,
+		"scale_amount_min": 6.0,
+		"scale_amount_max": 12.0,
+		"scale_amount_curve": EffectUtils.make_curve([Vector2(0, 0.4), Vector2(0.3, 1), Vector2(1, 1.2)]),
+		"color_ramp": EffectUtils.make_gradient([
+			[0.0, Color(0.25, 0.12, 0.05, 0.35)],
+			[0.3, Color(0.18, 0.1, 0.06, 0.3)],
+			[0.7, Color(0.12, 0.08, 0.04, 0.18)],
+			[1.0, Color(0.06, 0.04, 0.02, 0.0)],
+		]),
+	})
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -721,7 +658,7 @@ func _create_smoke_particles() -> void:
 # ══════════════════════════════════════════════════════════════════════════
 
 func _create_proj_hitbox() -> void:
-	"""Small hitbox that travels with the projectile for impact detection."""
+	## Small hitbox that travels with the projectile for impact detection.
 	_proj_hitbox = Area2D.new()
 	_proj_hitbox.collision_layer = 4  # Player weapons
 	_proj_hitbox.collision_mask = 8   # Enemies
@@ -740,7 +677,7 @@ func _create_proj_hitbox() -> void:
 
 
 func _create_aoe_hitbox() -> void:
-	"""Circular hitbox for the fire zone — radius grows during spread phase."""
+	## Circular hitbox for the fire zone — radius grows during spread phase.
 	_aoe_hitbox = Area2D.new()
 	_aoe_hitbox.collision_layer = 4  # Player weapons
 	_aoe_hitbox.collision_mask = 8   # Enemies
@@ -761,7 +698,7 @@ func _update_aoe_radius(new_radius: float) -> void:
 
 
 func _update_particle_emission_radius(pixel_radius: float) -> void:
-	"""Update all fire particle emitters to match the current fire spread."""
+	## Update all fire particle emitters to match the current fire spread.
 	if _flame_particles:
 		_flame_particles.emission_sphere_radius = pixel_radius * 0.7
 	if _ember_particles:
@@ -775,7 +712,7 @@ func _update_particle_emission_radius(pixel_radius: float) -> void:
 # ══════════════════════════════════════════════════════════════════════════
 
 func _on_proj_body_entered(body: Node2D) -> void:
-	"""Projectile hit an enemy body — detonate early."""
+	## Projectile hit an enemy body — detonate early.
 	if _phase != Phase.PROJECTILE:
 		return
 	if body.is_in_group("enemies"):
@@ -785,7 +722,7 @@ func _on_proj_body_entered(body: Node2D) -> void:
 
 
 func _on_proj_area_entered(area: Area2D) -> void:
-	"""Projectile hit an enemy area — detonate early."""
+	## Projectile hit an enemy area — detonate early.
 	if _phase != Phase.PROJECTILE:
 		return
 	var parent_node: Node = area.get_parent()

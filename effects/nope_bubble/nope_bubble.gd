@@ -65,7 +65,7 @@ func setup(params: Dictionary) -> void:
 		if key in self:
 			set(key, params[key])
 	# Ensure max layers matches projectile_count
-	var old_max := _max_layers
+	var old_max: int = _max_layers
 	_max_layers = projectile_count
 	if old_max == 0:
 		# First-time init
@@ -246,98 +246,69 @@ func _create_visuals() -> void:
 	_shield_area.body_entered.connect(_on_enemy_body_entered_bubble)
 
 	# --- Ambient flow particles (persistent swirling motes inside the bubble) ---
-	_ambient_particles = CPUParticles2D.new()
-	_ambient_particles.emitting = true
-	_ambient_particles.one_shot = false
-	_ambient_particles.amount = ambient_particle_count
-	_ambient_particles.lifetime = 2.5
-	_ambient_particles.explosiveness = 0.0  # Steady stream, not burst
-	_ambient_particles.randomness = 0.4
-
-	# Emit from a ring matching the inner shell area
-	_ambient_particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_RING
-	_ambient_particles.emission_ring_radius = size * 0.85
-	_ambient_particles.emission_ring_inner_radius = size * 0.2
-
-	# Slow drift — direction animated in _process for orbital swirl
-	_ambient_particles.direction = Vector2(1, 0)
-	_ambient_particles.spread = 90.0
-	_ambient_particles.initial_velocity_min = 8.0
-	_ambient_particles.initial_velocity_max = 25.0
-	_ambient_particles.gravity = Vector2.ZERO
-	_ambient_particles.damping_min = 5.0
-	_ambient_particles.damping_max = 15.0
-
-	# Tiny glowing motes
-	_ambient_particles.scale_amount_min = 0.8
-	_ambient_particles.scale_amount_max = 1.8
-
-	# Synthwave flow colors — soft glow cycling through the palette
-	var flow_ramp: Gradient = Gradient.new()
-	flow_ramp.offsets = PackedFloat32Array([0.0, 0.3, 0.7, 1.0])
-	flow_ramp.colors = PackedColorArray([
-		Color(0.0, 0.8, 0.9, 0.0),      # Cyan (fade in)
-		Color(0.6, 0.1, 0.95, 0.7),     # Neon purple (visible)
-		Color(0.85, 0.1, 0.5, 0.5),     # Hot pink (fading)
-		Color(0.3, 0.7, 1.0, 0.0),      # Electric blue (invisible)
-	])
-	_ambient_particles.color_ramp = flow_ramp
-
-	# Initial color variation so particles aren't all the same
-	var flow_initial: Gradient = Gradient.new()
-	flow_initial.offsets = PackedFloat32Array([0.0, 0.33, 0.66, 1.0])
-	flow_initial.colors = PackedColorArray([
-		Color(0.0, 0.9, 0.9, 1.0),      # Cyan
-		Color(0.74, 0.07, 0.99, 1.0),   # Neon purple
-		Color(1.0, 0.08, 0.58, 1.0),    # Hot pink
-		Color(0.49, 0.98, 1.0, 1.0),    # Electric blue
-	])
-	_ambient_particles.color_initial_ramp = flow_initial
-
-	_ambient_particles.z_index = 1  # Above shield mesh, below UI
-	add_child(_ambient_particles)
+	var swirl_radius: float = size * 1.05
+	_ambient_particles = EffectUtils.create_cpu_particles(self, {
+		"emitting": true,
+		"one_shot": false,
+		"amount": ambient_particle_count,
+		"lifetime": 2.5,
+		"explosiveness": 0.0,
+		"randomness": 0.4,
+		"emission_shape": CPUParticles2D.EMISSION_SHAPE_RING,
+		"emission_ring_radius": size * 0.85,
+		"emission_ring_inner_radius": size * 0.2,
+		"direction": Vector2(1, 0),
+		"spread": 90.0,
+		"initial_velocity_min": 8.0,
+		"initial_velocity_max": 25.0,
+		"gravity": Vector2.ZERO,
+		"damping_min": 5.0,
+		"damping_max": 15.0,
+		"scale_amount_min": 0.8,
+		"scale_amount_max": 1.8,
+		"color_ramp": EffectUtils.make_gradient([
+			[0.0, Color(0.0, 0.8, 0.9, 0.0)],
+			[0.3, Color(0.6, 0.1, 0.95, 0.7)],
+			[0.7, Color(0.85, 0.1, 0.5, 0.5)],
+			[1.0, Color(0.3, 0.7, 1.0, 0.0)],
+		]),
+		"color_initial_ramp": EffectUtils.make_gradient([
+			[0.0, Color(0.0, 0.9, 0.9, 1.0)],
+			[0.33, Color(0.74, 0.07, 0.99, 1.0)],
+			[0.66, Color(1.0, 0.08, 0.58, 1.0)],
+			[1.0, Color(0.49, 0.98, 1.0, 1.0)],
+		]),
+		"z_index": 1,
+	})
 
 	# --- Swirl particles (tiny 1px motes orbiting tightly around the shell edge) ---
-	_swirl_particles = CPUParticles2D.new()
-	_swirl_particles.emitting = true
-	_swirl_particles.one_shot = false
-	_swirl_particles.amount = 40
-	_swirl_particles.lifetime = 3.0
-	_swirl_particles.explosiveness = 0.0
-	_swirl_particles.randomness = 0.2
-
-	# Emit from a tight ring hugging the shell edge
-	var swirl_radius: float = size * 1.05
-	_swirl_particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_RING
-	_swirl_particles.emission_ring_radius = swirl_radius
-	_swirl_particles.emission_ring_inner_radius = swirl_radius * 0.98
-
-	# Fast tangential drift — direction animated in _process for orbital swirl
-	_swirl_particles.direction = Vector2(1, 0)
-	_swirl_particles.spread = 15.0
-	_swirl_particles.initial_velocity_min = 30.0
-	_swirl_particles.initial_velocity_max = 55.0
-	_swirl_particles.gravity = Vector2.ZERO
-	_swirl_particles.damping_min = 2.0
-	_swirl_particles.damping_max = 8.0
-
-	# Tiny 1px motes
-	_swirl_particles.scale_amount_min = 0.4
-	_swirl_particles.scale_amount_max = 0.8
-
-	# Color ramp — bright sparkle that fades
-	var swirl_ramp: Gradient = Gradient.new()
-	swirl_ramp.offsets = PackedFloat32Array([0.0, 0.2, 0.8, 1.0])
-	swirl_ramp.colors = PackedColorArray([
-		Color(0.8, 0.5, 1.0, 0.0),      # Fade in
-		Color(0.9, 0.7, 1.0, 0.9),      # Bright lilac
-		Color(0.6, 0.2, 0.95, 0.6),     # Neon purple
-		Color(0.4, 0.1, 0.8, 0.0),      # Fade out
-	])
-	_swirl_particles.color_ramp = swirl_ramp
-
-	_swirl_particles.z_index = 2  # Above ambient particles
-	add_child(_swirl_particles)
+	_swirl_particles = EffectUtils.create_cpu_particles(self, {
+		"emitting": true,
+		"one_shot": false,
+		"amount": 40,
+		"lifetime": 3.0,
+		"explosiveness": 0.0,
+		"randomness": 0.2,
+		"emission_shape": CPUParticles2D.EMISSION_SHAPE_RING,
+		"emission_ring_radius": swirl_radius,
+		"emission_ring_inner_radius": swirl_radius * 0.98,
+		"direction": Vector2(1, 0),
+		"spread": 15.0,
+		"initial_velocity_min": 30.0,
+		"initial_velocity_max": 55.0,
+		"gravity": Vector2.ZERO,
+		"damping_min": 2.0,
+		"damping_max": 8.0,
+		"scale_amount_min": 0.4,
+		"scale_amount_max": 0.8,
+		"color_ramp": EffectUtils.make_gradient([
+			[0.0, Color(0.8, 0.5, 1.0, 0.0)],
+			[0.2, Color(0.9, 0.7, 1.0, 0.9)],
+			[0.8, Color(0.6, 0.2, 0.95, 0.6)],
+			[1.0, Color(0.4, 0.1, 0.8, 0.0)],
+		]),
+		"z_index": 2,
+	})
 
 
 func _update_visuals() -> void:
@@ -488,51 +459,43 @@ const SYNTHWAVE_COLORS: Array[Color] = [
 
 ## Spawn a directional burst of particles when a layer is hit (not broken)
 func _spawn_hit_particles(source: Node2D) -> void:
-	var particles: CPUParticles2D = CPUParticles2D.new()
-	particles.emitting = true
-	particles.one_shot = true
-	particles.explosiveness = 0.9
-	particles.amount = maxi(particle_count / 3, 4)
-	particles.lifetime = 0.4
-
-	# Emit from the ring where the hit occurred
-	particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_RING
-	particles.emission_ring_radius = size * 1.0
-	particles.emission_ring_inner_radius = size * 0.7
-
-	# Scatter outward from hit direction
 	var hit_dir: Vector2 = Vector2.ZERO
 	if source:
 		hit_dir = (source.global_position - global_position).normalized()
 	if hit_dir == Vector2.ZERO:
 		hit_dir = Vector2.RIGHT
-	particles.direction = hit_dir
-	particles.spread = 45.0
-	particles.initial_velocity_min = 80.0
-	particles.initial_velocity_max = 200.0
-	particles.gravity = Vector2.ZERO
-	particles.damping_min = 100.0
-	particles.damping_max = 160.0
 
-	# Tiny 1px scale
-	particles.scale_amount_min = 1.0
-	particles.scale_amount_max = 2.5
-
-	# Synthwave color ramp: pick 2 random synthwave colors for the gradient
 	var c1: Color = SYNTHWAVE_COLORS[randi() % SYNTHWAVE_COLORS.size()]
 	var c2: Color = SYNTHWAVE_COLORS[randi() % SYNTHWAVE_COLORS.size()]
-	var gradient: Gradient = Gradient.new()
-	gradient.set_color(0, c1)
-	gradient.set_color(1, Color(c2.r, c2.g, c2.b, 0.0))
-	particles.color_ramp = gradient
 
-	# Initial color ramp: random from palette for each particle
-	particles.color_initial_ramp = Gradient.new()
-	particles.color_initial_ramp.set_color(0, SYNTHWAVE_COLORS[randi() % SYNTHWAVE_COLORS.size()])
-	particles.color_initial_ramp.set_color(1, SYNTHWAVE_COLORS[randi() % SYNTHWAVE_COLORS.size()])
-
-	particles.z_index = 1
-	add_child(particles)
+	var particles: CPUParticles2D = EffectUtils.create_cpu_particles(self, {
+		"emitting": true,
+		"one_shot": true,
+		"explosiveness": 0.9,
+		"amount": maxi(particle_count / 3, 4),
+		"lifetime": 0.4,
+		"emission_shape": CPUParticles2D.EMISSION_SHAPE_RING,
+		"emission_ring_radius": size * 1.0,
+		"emission_ring_inner_radius": size * 0.7,
+		"direction": hit_dir,
+		"spread": 45.0,
+		"initial_velocity_min": 80.0,
+		"initial_velocity_max": 200.0,
+		"gravity": Vector2.ZERO,
+		"damping_min": 100.0,
+		"damping_max": 160.0,
+		"scale_amount_min": 1.0,
+		"scale_amount_max": 2.5,
+		"color_ramp": EffectUtils.make_gradient([
+			[0.0, c1],
+			[1.0, Color(c2.r, c2.g, c2.b, 0.0)],
+		]),
+		"color_initial_ramp": EffectUtils.make_gradient([
+			[0.0, SYNTHWAVE_COLORS[randi() % SYNTHWAVE_COLORS.size()]],
+			[1.0, SYNTHWAVE_COLORS[randi() % SYNTHWAVE_COLORS.size()]],
+		]),
+		"z_index": 1,
+	})
 
 	var timer: SceneTreeTimer = get_tree().create_timer(particles.lifetime + 0.1)
 	timer.timeout.connect(particles.queue_free)
@@ -540,57 +503,40 @@ func _spawn_hit_particles(source: Node2D) -> void:
 
 ## Spawn a burst of particles when the shield fully breaks
 func _spawn_break_particles() -> void:
-	var particles: CPUParticles2D = CPUParticles2D.new()
-	particles.emitting = true
-	particles.one_shot = true
-	particles.explosiveness = 1.0
-	particles.amount = particle_count
-	particles.lifetime = 0.6
-	
-	# Ring emission at the shield perimeter
-	particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_RING
-	particles.emission_ring_radius = size * 1.2
-	particles.emission_ring_inner_radius = size * 0.8
-	
-	# Scatter outward in all directions
-	particles.direction = Vector2(0, -1)
-	particles.spread = 180.0
-	particles.initial_velocity_min = 60.0
-	particles.initial_velocity_max = 180.0
-	particles.gravity = Vector2.ZERO
-	particles.damping_min = 80.0
-	particles.damping_max = 120.0
-	
-	# Tiny 1px scale
-	particles.scale_amount_min = 1.0
-	particles.scale_amount_max = 2.0
-	
-	# Synthwave gradient: cycle through multiple colors for a dramatic break
-	var gradient: Gradient = Gradient.new()
-	gradient.offsets = PackedFloat32Array([0.0, 0.25, 0.5, 0.75, 1.0])
-	gradient.colors = PackedColorArray([
-		Color(0.0, 1.0, 1.0, 1.0),     # Cyan
-		Color(1.0, 0.08, 0.58, 1.0),    # Hot pink
-		Color(0.74, 0.07, 0.99, 1.0),   # Neon purple
-		Color(0.49, 0.98, 1.0, 0.6),    # Electric blue (fading)
-		Color(1.0, 0.0, 0.4, 0.0),      # Magenta-red (invisible)
-	])
-	particles.color_ramp = gradient
-	
-	# Initial ramp: random synthwave start color per particle
-	var initial_ramp: Gradient = Gradient.new()
-	initial_ramp.offsets = PackedFloat32Array([0.0, 0.33, 0.66, 1.0])
-	initial_ramp.colors = PackedColorArray([
-		Color(0.0, 1.0, 1.0, 1.0),     # Cyan
-		Color(1.0, 0.08, 0.58, 1.0),    # Hot pink
-		Color(0.74, 0.07, 0.99, 1.0),   # Neon purple
-		Color(0.49, 0.98, 1.0, 1.0),    # Electric blue
-	])
-	particles.color_initial_ramp = initial_ramp
-	
-	particles.z_index = 1
-	add_child(particles)
-	
+	var particles: CPUParticles2D = EffectUtils.create_cpu_particles(self, {
+		"emitting": true,
+		"one_shot": true,
+		"explosiveness": 1.0,
+		"amount": particle_count,
+		"lifetime": 0.6,
+		"emission_shape": CPUParticles2D.EMISSION_SHAPE_RING,
+		"emission_ring_radius": size * 1.2,
+		"emission_ring_inner_radius": size * 0.8,
+		"direction": Vector2(0, -1),
+		"spread": 180.0,
+		"initial_velocity_min": 60.0,
+		"initial_velocity_max": 180.0,
+		"gravity": Vector2.ZERO,
+		"damping_min": 80.0,
+		"damping_max": 120.0,
+		"scale_amount_min": 1.0,
+		"scale_amount_max": 2.0,
+		"color_ramp": EffectUtils.make_gradient([
+			[0.0, Color(0.0, 1.0, 1.0, 1.0)],
+			[0.25, Color(1.0, 0.08, 0.58, 1.0)],
+			[0.5, Color(0.74, 0.07, 0.99, 1.0)],
+			[0.75, Color(0.49, 0.98, 1.0, 0.6)],
+			[1.0, Color(1.0, 0.0, 0.4, 0.0)],
+		]),
+		"color_initial_ramp": EffectUtils.make_gradient([
+			[0.0, Color(0.0, 1.0, 1.0, 1.0)],
+			[0.33, Color(1.0, 0.08, 0.58, 1.0)],
+			[0.66, Color(0.74, 0.07, 0.99, 1.0)],
+			[1.0, Color(0.49, 0.98, 1.0, 1.0)],
+		]),
+		"z_index": 1,
+	})
+
 	# Auto-cleanup after particles finish
 	var timer: SceneTreeTimer = get_tree().create_timer(particles.lifetime + 0.1)
 	timer.timeout.connect(particles.queue_free)

@@ -78,3 +78,58 @@ static func parse_color(hex_string: String, fallback: Color) -> Color:
 		# RGBA format
 		return Color.from_string(hex_string, fallback)
 	return fallback
+
+
+## Create a Gradient from an array of [offset, Color] stop pairs.
+## Example: make_gradient([[0.0, Color.WHITE], [0.5, Color.RED], [1.0, Color(0,0,0,0)]])
+static func make_gradient(stops: Array) -> Gradient:
+	var g: Gradient = Gradient.new()
+	var off: PackedFloat32Array = PackedFloat32Array()
+	var cols: PackedColorArray = PackedColorArray()
+	for stop in stops:
+		off.append(float(stop[0]))
+		cols.append(stop[1] as Color)
+	g.offsets = off
+	g.colors = cols
+	return g
+
+
+## Create a Curve from an array of Vector2 points (x = time 0..1, y = value).
+static func make_curve(points: Array) -> Curve:
+	var c: Curve = Curve.new()
+	for pt in points:
+		c.add_point(pt as Vector2)
+	return c
+
+
+## Create a CPUParticles2D node, add it to [param parent], and apply all
+## key-value pairs from [param config] as properties.
+## Returns the configured CPUParticles2D for further customisation.
+static func create_cpu_particles(parent: Node, config: Dictionary) -> CPUParticles2D:
+	var p: CPUParticles2D = CPUParticles2D.new()
+	parent.add_child(p)
+	for key in config:
+		p.set(key, config[key])
+	return p
+
+
+## Create a cached radial-gradient ImageTexture with configurable falloff.
+## Used for soft glow blobs and point-light textures.
+static var _radial_tex_cache: Dictionary = {}
+
+static func make_radial_texture(size: int, falloff_power: float = 2.0) -> ImageTexture:
+	var cache_key: String = "%d_%.1f" % [size, falloff_power]
+	if _radial_tex_cache.has(cache_key):
+		return _radial_tex_cache[cache_key]
+	var img: Image = Image.create(size, size, false, Image.FORMAT_RGBA8)
+	var half: float = float(size - 1) / 2.0
+	for y in range(size):
+		for x in range(size):
+			var dx: float = (float(x) - half) / half
+			var dy: float = (float(y) - half) / half
+			var d: float = sqrt(dx * dx + dy * dy)
+			var a: float = pow(clampf(1.0 - d, 0.0, 1.0), falloff_power)
+			img.set_pixel(x, y, Color(1, 1, 1, a))
+	var tex: ImageTexture = ImageTexture.create_from_image(img)
+	_radial_tex_cache[cache_key] = tex
+	return tex
