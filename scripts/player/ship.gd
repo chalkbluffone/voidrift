@@ -1,12 +1,15 @@
 extends CharacterBody2D
 
-## Player ship controller with StatsComponent, Phase Shift, and i-frames.
+## Player ship controller with StatsComponent, Phase Shift, captain ability, and i-frames.
 ## Tank controls: W thrusts forward, A/D turns, S moves down.
 ## Can be used in test mode (weapon test lab) by setting test_mode = true before _ready.
 
 signal phase_shift_started
 signal phase_shift_ended
 signal phase_energy_changed(current: int, maximum: int)
+signal captain_ability_activated
+signal captain_ability_expired
+signal captain_ability_ready
 signal died
 
 # --- Preloads ---
@@ -27,7 +30,6 @@ const StatsComponentScript := preload("res://scripts/core/stats_component.gd")
 # --- Phase Shift ---
 const PHASE_SHIFT_DURATION := 0.3  # How long the dash lasts
 const PHASE_SHIFT_COOLDOWN := 0.5  # Min time between phases
-const PHASE_SHIFT_DISTANCE := 250.0  # How far we dash
 
 @export var max_phase_energy: int = 3
 var phase_energy: int = 3
@@ -54,6 +56,9 @@ const DAMAGE_IFRAMES := 0.5  # Brief i-frames after taking damage
 # Callables that receive (amount: float, source: Node) and return modified damage float.
 # Used by Nope Bubble and similar defensive weapons to block/reduce incoming damage.
 var _damage_interceptors: Array[Callable] = []
+
+# --- Captain Ability ---
+var _captain_ability: Node = null
 
 
 func _ready() -> void:
@@ -98,31 +103,76 @@ func _ready() -> void:
 		call_deferred("_deferred_init")
 
 
-func _initialize_from_character(character_data: Dictionary) -> void:
-	stats.initialize_from_character(character_data)
+func _initialize_from_loadout(ship_data: Dictionary, captain_data: Dictionary, synergy_data: Dictionary) -> void:
+	stats.initialize_from_loadout(ship_data, captain_data, synergy_data)
 	
-	# Set phase shift variant
-	var phase_shift: Dictionary = character_data.get("phase_shift", {})
-	max_phase_energy = phase_shift.get("energy_charges", 3)
+	# Set phase shift from ship data
+	var phase_shift: Dictionary = ship_data.get("phase_shift", {})
+	var base_charges: int = phase_shift.get("charges", 3)
+	var extra_shifts: int = stats.get_stat_int(StatsComponentScript.STAT_EXTRA_PHASE_SHIFTS)
+	max_phase_energy = base_charges + extra_shifts
 	phase_energy = max_phase_energy
 	
-	# Get base speed from character
-	var base_stats: Dictionary = character_data.get("base_stats", {})
-	_base_speed = base_stats.get("base_speed", 450.0)
+	# Get base speed from ship
+	_base_speed = float(ship_data.get("base_speed", 100.0))
+	
+	# Instantiate captain ability
+	_setup_captain_ability(captain_data)
 	
 	# Equip weapons from run data
 	weapons.sync_from_run_data()
 
 
+func _setup_captain_ability(captain_data: Dictionary) -> void:
+	"""Create and configure the captain's active ability from JSON data."""
+	var ability_data: Dictionary = captain_data.get("active_ability", {})
+	if ability_data.is_empty():
+		return
+	
+	var template: String = ability_data.get("template", "")
+	var ability: Node = null
+	
+	var ability_script: GDScript = null
+	match template:
+		"buff_self":
+			ability_script = load("res://scripts/core/abilities/buff_self_ability.gd") as GDScript
+		"area_effect":
+			ability_script = load("res://scripts/core/abilities/area_effect_ability.gd") as GDScript
+		_:
+			push_warning("Ship: Unknown ability template: " + template)
+			return
+	
+	if ability_script == null:
+		push_warning("Ship: Failed to load ability script for template: " + template)
+		return
+	
+	ability = ability_script.new()
+	
+	ability.name = "CaptainAbility"
+	add_child(ability)
+	ability.configure(ability_data, self, stats)
+	
+	# Forward signals
+	ability.ability_activated.connect(func(): captain_ability_activated.emit())
+	ability.ability_expired.connect(func(): captain_ability_expired.emit())
+	ability.ability_ready.connect(func(): captain_ability_ready.emit())
+	
+	_captain_ability = ability
+
+
 func _deferred_init() -> void:
 	FileLogger.log_info("Ship", "Running deferred init...")
-	# Initialize from character data (deferred to ensure @onready vars ready)
-	if not GameManager.run_data.character_data.is_empty():
-		FileLogger.log_info("Ship", "Initializing from character data")
-		_initialize_from_character(GameManager.run_data.character_data)
+	# Initialize from loadout data (deferred to ensure @onready vars ready)
+	if not GameManager.run_data.ship_data.is_empty():
+		FileLogger.log_info("Ship", "Initializing from loadout data")
+		_initialize_from_loadout(
+			GameManager.run_data.ship_data,
+			GameManager.run_data.captain_data,
+			GameManager.run_data.synergy_data
+		)
 	else:
 		# Default setup for testing without full run
-		FileLogger.log_info("Ship", "No character data, setting up default weapons")
+		FileLogger.log_info("Ship", "No loadout data, setting up default weapons")
 		_setup_default_weapons()
 
 
@@ -171,7 +221,8 @@ func _process_movement(delta: float) -> void:
 	
 	if _is_phasing:
 		# During phase shift, move in phase direction at high speed
-		velocity = _phase_direction * (PHASE_SHIFT_DISTANCE / PHASE_SHIFT_DURATION)
+		var phase_distance: float = stats.get_stat(StatsComponentScript.STAT_PHASE_SHIFT_DISTANCE)
+		velocity = _phase_direction * (phase_distance / PHASE_SHIFT_DURATION)
 	else:
 		# Normal movement + knockback
 		var speed_mult: float = stats.get_stat(StatsComponentScript.STAT_MOVEMENT_SPEED)
@@ -192,6 +243,15 @@ func _input(event: InputEvent) -> void:
 
 	if event.is_action_pressed("phase_shift"):
 		_try_phase_shift()
+	
+	if event.is_action_pressed("captain_ability"):
+		_try_captain_ability()
+
+
+func _try_captain_ability() -> void:
+	if _captain_ability and _captain_ability.try_activate():
+		if FileLogger:
+			FileLogger.log_info("Ship", "Captain ability activated: " + _captain_ability.ability_name)
 
 
 func _try_phase_shift() -> void:

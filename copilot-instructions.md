@@ -75,15 +75,16 @@ Replaces Megabonk's jump mechanic. Ship briefly phases into another dimension:
 
 ### Ship Stats (Defensive)
 
-| Stat      | Description                                             |
-| --------- | ------------------------------------------------------- |
-| Max HP    | Maximum health pool                                     |
-| HP Regen  | Health regenerated per minute                           |
-| Shield    | Regenerating barrier, absorbs damage before HP          |
-| Armor     | % damage reduction (diminishing returns)                |
-| Evasion   | % chance to avoid damage entirely (diminishing returns) |
-| Lifesteal | % chance to heal 1 HP on hit                            |
-| Thorns    | Damage reflected to attackers                           |
+| Stat       | Description                                             |
+| ---------- | ------------------------------------------------------- |
+| Max HP     | Maximum health pool                                     |
+| HP Regen   | Health regenerated per minute                           |
+| Overheal   | Extra HP allowed above Max HP (from healing/lifesteal)  |
+| Shield     | Regenerating barrier, absorbs damage before HP          |
+| Armor      | % damage reduction (diminishing returns)                |
+| Evasion    | % chance to avoid damage entirely (diminishing returns) |
+| Lifesteal  | % chance to heal 1 HP on hit                            |
+| Hull Shock | Damage reflected to attackers on contact                |
 
 ### Weapon Stats (Offensive)
 
@@ -100,12 +101,19 @@ Replaces Megabonk's jump mechanic. Ship briefly phases into another dimension:
 | Duration           | How long effects/projectiles last                       |
 | Knockback          | Push force on hit                                       |
 
-### Misc Stats
+### Movement & Phase Shift Stats
+
+| Stat                 | Description                                         |
+| -------------------- | --------------------------------------------------- |
+| Movement Speed       | Ship speed multiplier                               |
+| Extra Phase Shifts   | Bonus phase shift charges (added to character base) |
+| Phase Shift Distance | Dash distance in pixels                             |
+
+### Meta & Economy Stats
 
 | Stat                | Description                         |
 | ------------------- | ----------------------------------- |
-| Movement Speed      | Ship speed multiplier               |
-| Pickup Range        | XP/item collection radius           |
+| Pickup Range        | XP/item collection radius (flat)    |
 | XP Gain             | XP multiplier (capped at 10x)       |
 | Credits Gain        | In-run currency multiplier          |
 | Stardust Gain       | Meta currency multiplier            |
@@ -117,19 +125,40 @@ Replaces Megabonk's jump mechanic. Ship briefly phases into another dimension:
 
 ---
 
-## Character Differentiation
+## Ship + Captain System
 
-Each character (ship) has three unique aspects:
+Players select a **Ship** (vessel hardware) and a **Captain** (pilot) independently before each run. Ships and captains are defined in separate JSON files.
 
-1. **Starting Weapon** — Unique weapon only they begin with
-2. **Passive Ability** — Permanent buff/mechanic unique to them
-3. **Phase Shift Variant** — Modified dash behavior
+### Ship (vessel)
 
-### Example Characters (Future)
+Owns the physical frame:
 
-- **Scout**: Fast, Plasma Cannon, +20% speed/+10% evasion, Blink (instant teleport)
-- **Tank**: Slow, Shield Bash, +50% HP/-20% speed, Ramming Shift (damage on contact)
-- **Glass Cannon**: Fragile, Railgun, +30% damage/-30% HP, Overcharge (leaves damage trail)
+1. **Starting Weapon** — Unique weapon only this ship begins with
+2. **Phase Shift Variant** — Modified dash behavior (charges, distance, cooldown)
+3. **Base Speed** — Movement speed in pixels/sec (Scout 100, Interceptor 120, Fortress 80)
+4. **Stat Overrides** — Override base_player_stats defaults (e.g. max_hp, armor)
+5. **Sprite / Visual** — Ship art
+
+### Captain (pilot)
+
+Owns combat bonuses and one active ability:
+
+1. **Passive** — Permanent stat bonuses applied as flat bonuses at run start
+2. **Active Ability** — Powerful cooldown-based ability (Q key / LB button, 60-90s cooldown)
+
+Active abilities use a **template system** (data-driven JSON + shared GDScript classes):
+
+- `buff_self` — Temporary stat buffs, invulnerability, % heal
+- `area_effect` — Screen-wide or radius-based enemy effects (slow, damage)
+
+### Synergies
+
+Hidden ship+captain combo bonuses, discovered in-game. Small stat nudges (5-8%). Tracked in PersistenceManager.discovered_synergies. Synergy key format: `"ship_id+captain_id"`.
+
+### Archetypes (3 of each)
+
+**Ships**: Scout (fast, fragile), Interceptor (balanced, fast), Fortress (slow, tanky)
+**Captains**: Offense (crit/damage), Defense (armor/shield), Utility (luck/xp)
 
 ---
 
@@ -156,8 +185,11 @@ If a value is Variant/untyped (e.g. from JSON), cast it immediately with `String
 
 All game content defined in **JSON files** under `data/`:
 
+- `base_player_stats.json` — Universal default player stats (single source of truth)
 - `weapons.json` — Weapon definitions, stats, upgrade paths
-- `characters.json` — Character stats, abilities, starting loadouts
+- `ships.json` — Ship definitions: base_speed, stat overrides, phase shift, starting weapon
+- `captains.json` — Captain definitions: passive bonuses, active ability (template-based)
+- `synergies.json` — Ship+Captain combo synergy bonuses (hidden, discoverable)
 - `ship_upgrades.json` — Passive upgrade definitions (like Megabonk's tomes)
 - `items.json` — Pickup items and their effects
 - `enemies.json` — Enemy types, stats, behaviors
@@ -528,7 +560,7 @@ Config toggles in `GameConfig`:
 - `WEAPON_RARITY_FACTORS`: multiplier per rarity tier
 - `WEAPON_MIN_POSITIVE_DELTA`: floor for positive deltas
 
-### characters.json
+### ships.json
 
 ```json
 {
@@ -537,33 +569,62 @@ Config toggles in `GameConfig`:
     "name": "Scout",
     "description": "Fast and agile reconnaissance vessel",
     "sprite": "res://assets/ships/scout.png",
+    "base_speed": 100,
     "base_stats": {
       "max_hp": 80,
-      "hp_regen": 1,
-      "movement_speed": 1.2,
-      "armor": 0,
-      "evasion": 10,
-      "pickup_range": 1.0
+      "evasion": 10
     },
     "starting_weapon": "plasma_cannon",
-    "passive": {
-      "id": "afterburner",
-      "name": "Afterburner",
-      "description": "+20% movement speed, +10% evasion",
-      "effects": {
-        "movement_speed": 0.2,
-        "evasion": 10
-      }
-    },
-    "phase_shift_variant": {
-      "id": "blink",
-      "name": "Blink",
-      "description": "Instant teleport, no trail, shorter range",
-      "distance": 150,
-      "duration": 0,
-      "leaves_trail": false
+    "phase_shift": {
+      "charges": 3,
+      "variant": "blink"
     },
     "unlock_condition": "default"
+  }
+}
+```
+
+### captains.json
+
+```json
+{
+  "captain_1": {
+    "id": "captain_1",
+    "name": "Captain 1",
+    "description": "Offense-focused captain",
+    "sprite": "res://assets/captains/captain_1.png",
+    "passive": {
+      "id": "combat_focus",
+      "name": "Combat Focus",
+      "description": "+5% crit chance, +10% damage",
+      "effects": { "crit_chance": 5, "damage": 0.1 }
+    },
+    "active_ability": {
+      "id": "overdrive",
+      "name": "Overdrive",
+      "description": "Weapons deal 2x damage for 5 seconds.",
+      "template": "buff_self",
+      "cooldown": 75.0,
+      "duration": 5.0,
+      "effects": { "damage": 1.0 },
+      "vfx": "overdrive"
+    },
+    "unlock_condition": "default"
+  }
+}
+```
+
+### synergies.json
+
+```json
+{
+  "scout+captain_1": {
+    "ship_id": "scout",
+    "captain_id": "captain_1",
+    "name": "Precision Strike",
+    "description": "Nimble frame lets overdrive target weak points.",
+    "discovered_text": "Something clicks between the scout's agile frame and your combat instincts...",
+    "effects": { "crit_chance": 3, "crit_damage": 0.05 }
   }
 }
 ```

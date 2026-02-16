@@ -58,21 +58,33 @@ func go_to_main_menu() -> void:
 	get_tree().change_scene_to_file(MAIN_MENU_SCENE)
 
 
-func start_run(character_id: String) -> void:
-	"""Begin a new run with the specified character."""
+func start_run(ship_id: String, captain_id: String) -> void:
+	"""Begin a new run with the specified ship and captain."""
 	_reset_run_data()
 	
-	# Load character
-	var character: Dictionary = DataLoader.get_character(character_id)
-	if character.is_empty():
-		push_error("RunManager: Invalid character ID: " + character_id)
+	# Load ship
+	var ship: Dictionary = DataLoader.get_ship(ship_id)
+	if ship.is_empty():
+		push_error("RunManager: Invalid ship ID: " + ship_id)
 		return
 	
-	run_data.character_id = character_id
-	run_data.character_data = character
+	# Load captain
+	var captain: Dictionary = DataLoader.get_captain(captain_id)
+	if captain.is_empty():
+		push_error("RunManager: Invalid captain ID: " + captain_id)
+		return
 	
-	# Add starting weapon
-	var starting_weapon: String = character.get("starting_weapon", "plasma_cannon")
+	# Load synergy (may be empty if no combo exists)
+	var synergy: Dictionary = DataLoader.get_synergy_for_combo(ship_id, captain_id)
+	
+	run_data.ship_id = ship_id
+	run_data.ship_data = ship
+	run_data.captain_id = captain_id
+	run_data.captain_data = captain
+	run_data.synergy_data = synergy
+	
+	# Add starting weapon from ship
+	var starting_weapon: String = ship.get("starting_weapon", "plasma_cannon")
 	run_data.weapons.append(starting_weapon)
 	
 	current_state = GameState.PLAYING
@@ -89,9 +101,12 @@ func end_run(victory: bool) -> void:
 
 func _reset_run_data() -> void:
 	run_data = {
-		# Character
-		"character_id": "",
-		"character_data": {},
+		# Loadout
+		"ship_id": "",
+		"ship_data": {},
+		"captain_id": "",
+		"captain_data": {},
+		"synergy_data": {},
 		
 		# Progression (managed by ProgressionManager but stored here)
 		"level": 1,

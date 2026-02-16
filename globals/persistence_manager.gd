@@ -14,7 +14,9 @@ var persistent_data: Dictionary = {
 	"total_runs": 0,
 	"total_wins": 0,
 	"total_time_played": 0.0,
-	"unlocked_characters": ["scout"],
+	"unlocked_ships": ["scout"],
+	"unlocked_captains": ["captain_1", "captain_2"],
+	"discovered_synergies": [],
 	"unlocked_weapons": ["plasma_cannon", "laser_array", "ion_orbit", "proximity_tax", "psp_9000", "space_nukes", "tothian_mines", "timmy_gun"],
 	"high_score": 0,
 	"best_time": 0.0,
@@ -79,7 +81,9 @@ func reset_save() -> void:
 		"total_runs": 0,
 		"total_wins": 0,
 		"total_time_played": 0.0,
-		"unlocked_characters": ["scout"],
+		"unlocked_ships": ["scout"],
+		"unlocked_captains": ["captain_1", "captain_2"],
+		"discovered_synergies": [],
 		"unlocked_weapons": ["plasma_cannon", "laser_array", "ion_orbit", "proximity_tax", "psp_9000", "space_nukes", "tothian_mines"],
 		"high_score": 0,
 		"best_time": 0.0,
@@ -98,10 +102,26 @@ func reset_save() -> void:
 
 # --- Unlocks ---
 
-func unlock_character(character_id: String) -> void:
-	if character_id not in persistent_data.unlocked_characters:
-		persistent_data.unlocked_characters.append(character_id)
+func unlock_ship(ship_id: String) -> void:
+	if ship_id not in persistent_data.unlocked_ships:
+		persistent_data.unlocked_ships.append(ship_id)
 		save_game()
+
+
+func unlock_captain(captain_id: String) -> void:
+	if captain_id not in persistent_data.unlocked_captains:
+		persistent_data.unlocked_captains.append(captain_id)
+		save_game()
+
+
+func discover_synergy(synergy_key: String) -> void:
+	if synergy_key not in persistent_data.discovered_synergies:
+		persistent_data.discovered_synergies.append(synergy_key)
+		save_game()
+
+
+func is_synergy_discovered(synergy_key: String) -> bool:
+	return synergy_key in persistent_data.discovered_synergies
 
 
 func unlock_weapon(weapon_id: String) -> void:
@@ -110,8 +130,12 @@ func unlock_weapon(weapon_id: String) -> void:
 		save_game()
 
 
-func is_character_unlocked(character_id: String) -> bool:
-	return character_id in persistent_data.unlocked_characters
+func is_ship_unlocked(ship_id: String) -> bool:
+	return ship_id in persistent_data.unlocked_ships
+
+
+func is_captain_unlocked(captain_id: String) -> bool:
+	return captain_id in persistent_data.unlocked_captains
 
 
 func is_weapon_unlocked(weapon_id: String) -> bool:

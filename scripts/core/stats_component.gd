@@ -19,7 +19,8 @@ const STAT_SHIELD := "shield"
 const STAT_ARMOR := "armor"
 const STAT_EVASION := "evasion"
 const STAT_LIFESTEAL := "lifesteal"
-const STAT_THORNS := "thorns"
+const STAT_HULL_SHOCK := "hull_shock"
+const STAT_OVERHEAL := "overheal"
 
 const STAT_DAMAGE := "damage"
 const STAT_CRIT_CHANCE := "crit_chance"
@@ -33,6 +34,8 @@ const STAT_DURATION := "duration"
 const STAT_KNOCKBACK := "knockback"
 
 const STAT_MOVEMENT_SPEED := "movement_speed"
+const STAT_EXTRA_PHASE_SHIFTS := "extra_phase_shifts"
+const STAT_PHASE_SHIFT_DISTANCE := "phase_shift_distance"
 const STAT_PICKUP_RANGE := "pickup_range"
 const STAT_XP_GAIN := "xp_gain"
 const STAT_CREDITS_GAIN := "credits_gain"
@@ -44,19 +47,20 @@ const STAT_POWERUP_MULTIPLIER := "powerup_multiplier"
 const STAT_POWERUP_DROP_CHANCE := "powerup_drop_chance"
 const STAT_DAMAGE_TO_ELITES := "damage_to_elites"
 
-# Default base values for player
+# Default base values for player (fallback if base_player_stats.json fails to load)
 const DEFAULT_BASE_STATS := {
 	STAT_MAX_HP: 100.0,
 	STAT_HP_REGEN: 5.0,  # per minute
+	STAT_OVERHEAL: 0.0,  # extra HP above max_hp
 	STAT_SHIELD: 0.0,
 	STAT_ARMOR: 0.0,  # percentage
 	STAT_EVASION: 0.0,  # percentage
 	STAT_LIFESTEAL: 0.0,  # percentage
-	STAT_THORNS: 0.0,
+	STAT_HULL_SHOCK: 0.0,  # damage reflected to attackers
 	
 	STAT_DAMAGE: 1.0,  # multiplier
-	STAT_CRIT_CHANCE: 5.0,  # percentage
-	STAT_CRIT_DAMAGE: 1.5,  # multiplier
+	STAT_CRIT_CHANCE: 1.0,  # percentage
+	STAT_CRIT_DAMAGE: 2.0,  # multiplier
 	STAT_ATTACK_SPEED: 1.0,  # multiplier
 	STAT_PROJECTILE_COUNT: 0.0,  # bonus (added to weapon base)
 	STAT_PROJECTILE_SPEED: 1.0,  # multiplier
@@ -66,6 +70,8 @@ const DEFAULT_BASE_STATS := {
 	STAT_KNOCKBACK: 1.0,  # multiplier
 	
 	STAT_MOVEMENT_SPEED: 1.0,  # multiplier
+	STAT_EXTRA_PHASE_SHIFTS: 0.0,  # bonus charges added to character base
+	STAT_PHASE_SHIFT_DISTANCE: 250.0,  # pixels
 	STAT_PICKUP_RANGE: 1.0,  # multiplier
 	STAT_XP_GAIN: 1.0,  # multiplier (capped at 10x)
 	STAT_CREDITS_GAIN: 1.0,  # multiplier
@@ -118,11 +124,18 @@ func _ready() -> void:
 	# Get autoload references
 	DataLoader = get_node_or_null("/root/DataLoader")
 	
-	# Initialize with defaults
+	# Start with hardcoded defaults as fallback
 	for stat_name in DEFAULT_BASE_STATS:
 		base_stats[stat_name] = DEFAULT_BASE_STATS[stat_name]
 		flat_bonuses[stat_name] = 0.0
 		multiplier_bonuses[stat_name] = 0.0
+	
+	# Override with data-driven base stats from JSON (single source of truth)
+	if DataLoader:
+		var json_stats: Dictionary = DataLoader.get_base_player_stats()
+		for stat_name in json_stats:
+			if base_stats.has(stat_name):
+				base_stats[stat_name] = float(json_stats[stat_name])
 	
 	_recalculate_all()
 	current_hp = get_stat(STAT_MAX_HP)
@@ -173,10 +186,13 @@ func _apply_effect(stat_name: String, per_level_raw: float) -> void:
 	var flat_stats := {
 		STAT_MAX_HP: true,
 		STAT_HP_REGEN: true,
+		STAT_OVERHEAL: true,
 		STAT_SHIELD: true,
-		STAT_THORNS: true,
+		STAT_HULL_SHOCK: true,
 		STAT_PROJECTILE_COUNT: true,
 		STAT_PROJECTILE_BOUNCES: true,
+		STAT_EXTRA_PHASE_SHIFTS: true,
+		STAT_PHASE_SHIFT_DISTANCE: true,
 	}
 	var percent_point_stats := {
 		STAT_ARMOR: true,
@@ -214,20 +230,24 @@ func _process(delta: float) -> void:
 
 # --- Initialization ---
 
-func initialize_from_character(character_data: Dictionary) -> void:
-	"""Initialize stats from character JSON data."""
-	var char_base_stats: Dictionary = character_data.get("base_stats", {})
-	
-	for stat_name in char_base_stats:
+func initialize_from_loadout(ship_data: Dictionary, captain_data: Dictionary, synergy_data: Dictionary) -> void:
+	"""Initialize stats from ship + captain + synergy data."""
+	# Layer 1: Ship stat overrides (replace base values)
+	var ship_base_stats: Dictionary = ship_data.get("base_stats", {})
+	for stat_name in ship_base_stats:
 		if base_stats.has(stat_name):
-			base_stats[stat_name] = float(char_base_stats[stat_name])
+			base_stats[stat_name] = float(ship_base_stats[stat_name])
 	
-	# Apply passive effects
-	var passive: Dictionary = character_data.get("passive", {})
+	# Layer 2: Captain passive effects (flat bonuses)
+	var passive: Dictionary = captain_data.get("passive", {})
 	var passive_effects: Dictionary = passive.get("effects", {})
-	
 	for stat_name in passive_effects:
 		add_flat_bonus(stat_name, float(passive_effects[stat_name]))
+	
+	# Layer 3: Synergy effects (flat bonuses, small nudges)
+	var synergy_effects: Dictionary = synergy_data.get("effects", {})
+	for stat_name in synergy_effects:
+		add_flat_bonus(stat_name, float(synergy_effects[stat_name]))
 	
 	_recalculate_all()
 	current_hp = get_stat(STAT_MAX_HP)
@@ -356,10 +376,10 @@ func take_damage(amount: float, source: Node = null) -> float:
 	current_hp -= actual_damage
 	hp_changed.emit(current_hp, get_stat(STAT_MAX_HP))
 	
-	# Thorns damage
-	var thorns := get_stat(STAT_THORNS)
-	if thorns > 0 and source != null and source.has_method("take_damage"):
-		source.take_damage(thorns, self)
+	# Hull Shock damage
+	var hull_shock := get_stat(STAT_HULL_SHOCK)
+	if hull_shock > 0 and source != null and source.has_method("take_damage"):
+		source.take_damage(hull_shock, self)
 	
 	# Check death
 	if current_hp <= 0:
@@ -369,11 +389,14 @@ func take_damage(amount: float, source: Node = null) -> float:
 	return actual_damage
 
 
-func heal(amount: float) -> float:
-	"""Heal HP. Returns actual amount healed."""
+func heal(amount: float, allow_overheal: bool = false) -> float:
+	"""Heal HP. Returns actual amount healed. If allow_overheal is true, can exceed max_hp up to max_hp + overheal."""
 	var max_hp := get_stat(STAT_MAX_HP)
+	var hp_cap := max_hp
+	if allow_overheal:
+		hp_cap = max_hp + get_stat(STAT_OVERHEAL)
 	var old_hp := current_hp
-	current_hp = minf(current_hp + amount, max_hp)
+	current_hp = minf(current_hp + amount, hp_cap)
 	var healed := current_hp - old_hp
 	
 	if healed > 0:

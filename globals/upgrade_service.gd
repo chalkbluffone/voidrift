@@ -16,10 +16,13 @@ const PERCENT_POINT_STATS: Dictionary = {
 const FLAT_STATS: Dictionary = {
 	"max_hp": true,
 	"hp_regen": true,
+	"overheal": true,
 	"shield": true,
-	"thorns": true,
+	"hull_shock": true,
 	"projectile_count": true,
 	"projectile_bounces": true,
+	"extra_phase_shifts": true,
+	"phase_shift_distance": true,
 }
 
 @onready var DataLoader: Node = get_node("/root/DataLoader")

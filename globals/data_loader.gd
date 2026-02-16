@@ -6,10 +6,13 @@ extends Node
 # Loaded data dictionaries
 var weapons: Dictionary = {}
 var weapon_upgrades: Dictionary = {}
-var characters: Dictionary = {}
+var ships: Dictionary = {}
+var captains: Dictionary = {}
+var synergies: Dictionary = {}
 var ship_upgrades: Dictionary = {}
 var items: Dictionary = {}
 var enemies: Dictionary = {}
+var base_player_stats: Dictionary = {}
 
 # Mod info
 var loaded_mods: Array[String] = []
@@ -24,16 +27,19 @@ func _load_all_data() -> void:
 	# Load base game data
 	weapons = _load_json_file(BASE_DATA_PATH + "weapons.json")
 	weapon_upgrades = _load_json_file(BASE_DATA_PATH + "weapon_upgrades.json")
-	characters = _load_json_file(BASE_DATA_PATH + "characters.json")
+	ships = _load_json_file(BASE_DATA_PATH + "ships.json")
+	captains = _load_json_file(BASE_DATA_PATH + "captains.json")
+	synergies = _load_json_file(BASE_DATA_PATH + "synergies.json")
 	ship_upgrades = _load_json_file(BASE_DATA_PATH + "ship_upgrades.json")
 	items = _load_json_file(BASE_DATA_PATH + "items.json")
 	enemies = _load_json_file(BASE_DATA_PATH + "enemies.json")
+	base_player_stats = _load_json_file(BASE_DATA_PATH + "base_player_stats.json")
 	
 	# Load and merge mods
 	_load_mods()
 	
-	print("[DataLoader] Loaded %d weapons, %d weapon_upgrades, %d characters, %d ship_upgrades, %d items, %d enemies" % [
-		weapons.size(), weapon_upgrades.size(), characters.size(), ship_upgrades.size(), items.size(), enemies.size()
+	print("[DataLoader] Loaded %d weapons, %d weapon_upgrades, %d ships, %d captains, %d synergies, %d ship_upgrades, %d items, %d enemies, %d base_player_stats" % [
+		weapons.size(), weapon_upgrades.size(), ships.size(), captains.size(), synergies.size(), ship_upgrades.size(), items.size(), enemies.size(), base_player_stats.size()
 	])
 
 func _load_mods() -> void:
@@ -70,10 +76,13 @@ func _load_mod(mod_path: String) -> void:
 	# Merge mod data into base data
 	_merge_data(weapons, _load_json_file(mod_path + "weapons.json"))
 	_merge_data(weapon_upgrades, _load_json_file(mod_path + "weapon_upgrades.json"))
-	_merge_data(characters, _load_json_file(mod_path + "characters.json"))
+	_merge_data(ships, _load_json_file(mod_path + "ships.json"))
+	_merge_data(captains, _load_json_file(mod_path + "captains.json"))
+	_merge_data(synergies, _load_json_file(mod_path + "synergies.json"))
 	_merge_data(ship_upgrades, _load_json_file(mod_path + "ship_upgrades.json"))
 	_merge_data(items, _load_json_file(mod_path + "items.json"))
 	_merge_data(enemies, _load_json_file(mod_path + "enemies.json"))
+	_merge_data(base_player_stats, _load_json_file(mod_path + "base_player_stats.json"))
 
 func _merge_data(base: Dictionary, mod_data: Dictionary) -> void:
 	for key in mod_data:
@@ -128,8 +137,11 @@ func get_all_weapon_upgrades() -> Array:
 func get_weapon_upgrade_ids() -> Array:
 	return weapon_upgrades.keys()
 
-func get_character(id: String) -> Dictionary:
-	return characters.get(id, {})
+func get_ship(id: String) -> Dictionary:
+	return ships.get(id, {})
+
+func get_captain(id: String) -> Dictionary:
+	return captains.get(id, {})
 
 func get_ship_upgrade(id: String) -> Dictionary:
 	return ship_upgrades.get(id, {})
@@ -140,11 +152,17 @@ func get_item(id: String) -> Dictionary:
 func get_enemy(id: String) -> Dictionary:
 	return enemies.get(id, {})
 
+func get_base_player_stats() -> Dictionary:
+	return base_player_stats.duplicate()
+
 func get_all_weapons() -> Array:
 	return weapons.values()
 
-func get_all_characters() -> Array:
-	return characters.values()
+func get_all_ships() -> Array:
+	return ships.values()
+
+func get_all_captains() -> Array:
+	return captains.values()
 
 func get_all_ship_upgrades() -> Array:
 	return ship_upgrades.values()
@@ -166,9 +184,18 @@ func get_unlocked_weapons() -> Array:
 	# TODO: Filter by player's unlock progress
 	return weapons.values().filter(func(w): return w.get("enabled", true) and w.get("unlock_condition") == "default")
 
-func get_unlocked_characters() -> Array:
+func get_unlocked_ships() -> Array:
 	# TODO: Filter by player's unlock progress
-	return characters.values().filter(func(c): return c.get("unlock_condition") == "default")
+	return ships.values().filter(func(s): return s.get("unlock_condition") == "default")
+
+func get_unlocked_captains() -> Array:
+	# TODO: Filter by player's unlock progress
+	return captains.values().filter(func(c): return c.get("unlock_condition") == "default")
+
+func get_synergy_for_combo(ship_id: String, captain_id: String) -> Dictionary:
+	"""Return synergy data for a ship+captain combo, or empty dict if none."""
+	var key: String = ship_id + "+" + captain_id
+	return synergies.get(key, {})
 
 func reload_data() -> void:
 	_load_all_data()

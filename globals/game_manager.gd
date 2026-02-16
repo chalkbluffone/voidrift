@@ -70,9 +70,9 @@ func go_to_main_menu() -> void:
 		RunManager.go_to_main_menu()
 
 
-func start_run(character_id: String) -> void:
+func start_run(ship_id: String, captain_id: String) -> void:
 	if RunManager:
-		RunManager.start_run(character_id)
+		RunManager.start_run(ship_id, captain_id)
 
 
 func end_run(victory: bool) -> void:
@@ -162,9 +162,14 @@ func reset_save() -> void:
 		PersistenceManager.reset_save()
 
 
-func unlock_character(character_id: String) -> void:
+func unlock_ship(ship_id: String) -> void:
 	if PersistenceManager:
-		PersistenceManager.unlock_character(character_id)
+		PersistenceManager.unlock_ship(ship_id)
+
+
+func unlock_captain(captain_id: String) -> void:
+	if PersistenceManager:
+		PersistenceManager.unlock_captain(captain_id)
 
 
 func unlock_weapon(weapon_id: String) -> void:
@@ -172,9 +177,15 @@ func unlock_weapon(weapon_id: String) -> void:
 		PersistenceManager.unlock_weapon(weapon_id)
 
 
-func is_character_unlocked(character_id: String) -> bool:
+func is_ship_unlocked(ship_id: String) -> bool:
 	if PersistenceManager:
-		return PersistenceManager.is_character_unlocked(character_id)
+		return PersistenceManager.is_ship_unlocked(ship_id)
+	return false
+
+
+func is_captain_unlocked(captain_id: String) -> bool:
+	if PersistenceManager:
+		return PersistenceManager.is_captain_unlocked(captain_id)
 	return false
 
 
