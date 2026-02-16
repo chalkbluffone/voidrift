@@ -70,13 +70,11 @@ func _ready() -> void:
 	if config:
 		_base_speed = config.PLAYER_BASE_SPEED
 	
-	# Set pickup range from config (skip in test mode)
+	# Set pickup range from config * pickup_range stat (skip in test mode)
 	if not test_mode:
-		var pickup_range: Area2D = get_node_or_null("PickupRange")
-		if pickup_range and config:
-			var shape: CollisionShape2D = pickup_range.get_node_or_null("PickupRangeShape")
-			if shape and shape.shape is CircleShape2D:
-				(shape.shape as CircleShape2D).radius = config.PICKUP_MAGNET_RADIUS
+		_update_pickup_range()
+		if stats:
+			stats.stat_changed.connect(_on_stat_changed)
 	
 	# Register with GameManager (skip in test mode)
 	if not test_mode and GameManager:
@@ -179,6 +177,33 @@ func _deferred_init() -> void:
 func _setup_default_weapons() -> void:
 	# Default weapon for testing (when running world scene directly)
 	weapons.equip_weapon("radiant_arc")
+
+
+## Recalculate the PickupRange collision shape radius from config base * stat multiplier.
+func _update_pickup_range() -> void:
+	var config: Node = get_node_or_null("/root/GameConfig")
+	var pickup_area: Area2D = get_node_or_null("PickupRange")
+	if not pickup_area or not config:
+		if FileLogger:
+			FileLogger.log_warn("Ship", "_update_pickup_range: missing config or PickupRange node")
+		return
+	var shape: CollisionShape2D = pickup_area.get_node_or_null("PickupRangeShape")
+	if not shape or not shape.shape is CircleShape2D:
+		if FileLogger:
+			FileLogger.log_warn("Ship", "_update_pickup_range: missing PickupRangeShape or not CircleShape2D")
+		return
+	var multiplier: float = 1.0
+	if stats:
+		multiplier = stats.get_stat(StatsComponentScript.STAT_PICKUP_RANGE)
+	var new_radius: float = config.PICKUP_MAGNET_RADIUS * multiplier
+	(shape.shape as CircleShape2D).radius = new_radius
+	if FileLogger:
+		FileLogger.log_info("Ship", "PickupRange radius set to %.1f (base=%.1f * mult=%.2f)" % [new_radius, config.PICKUP_MAGNET_RADIUS, multiplier])
+
+
+func _on_stat_changed(stat_name: String, _old_value: float, _new_value: float) -> void:
+	if stat_name == StatsComponentScript.STAT_PICKUP_RANGE:
+		_update_pickup_range()
 
 
 func _physics_process(delta: float) -> void:

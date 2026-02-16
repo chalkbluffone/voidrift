@@ -12,24 +12,35 @@ const PLAYER_TURN_RATE: float = 6.0     # Radians/sec. How fast the ship turns (
 # =============================================================================
 # ENEMIES
 # =============================================================================
-const ENEMY_BASE_SPEED: float = 100.0  # % of player base speed
-const ENEMY_SPEED_PER_LEVEL: float = 3.5  # Speed increase per player level
-const ENEMY_HP_SCALE_PER_MINUTE: float = 0.4  # +40% HP per minute
-const ENEMY_DAMAGE_SCALE_PER_MINUTE: float = 0.2  # +20% damage per minute
-const ENEMY_XP_SCALE_PER_MINUTE: float = 0.1  # +10% XP value per minute
+const ENEMY_BASE_SPEED: float = 120.0  # Base movement speed
+const ENEMY_SPEED_PER_LEVEL: float = 4.0  # Speed increase per player level
+
+# Enemy damage scales linearly — manageable with HP/armor/evasion upgrades
+const ENEMY_DAMAGE_SCALE_PER_MINUTE: float = 0.35  # +35% damage per minute (linear)
+
+# Enemy HP scales exponentially — forces multiplicative damage stacking
+# Formula: hp_mult = ENEMY_HP_BASE_MULT * pow(ENEMY_HP_GROWTH_RATE, minutes)
+# At 1min ≈ 1.7x, 3min ≈ 4.9x, 6min ≈ 24x, 9min ≈ 118x, 12min ≈ 580x
+const ENEMY_HP_BASE_MULT: float = 1.0
+const ENEMY_HP_GROWTH_RATE: float = 1.7  # Exponential base per minute
+
+# XP/credit rewards scale to match difficulty
+const ENEMY_XP_SCALE_PER_MINUTE: float = 0.35  # +35% XP value per minute
 
 # =============================================================================
 # SPAWNING
 # =============================================================================
 const SPAWN_RADIUS_MIN: float = 400.0
 const SPAWN_RADIUS_MAX: float = 600.0
-const BASE_SPAWN_RATE: float = 0.5  # Enemies per second at start
-const SPAWN_RATE_GROWTH: float = 0.4  # Additional enemies per second per minute
+const BASE_SPAWN_RATE: float = 1.5  # Enemies per second at start
+const SPAWN_RATE_GROWTH: float = 0.6  # Additional enemies/sec per minute
+const SPAWN_BATCH_MIN_MINUTE: float = 1.5  # Minutes before batch spawns begin
+const SPAWN_BATCH_SIZE_PER_MINUTE: float = 0.75  # Extra enemies per batch per minute
 
 # =============================================================================
 # PICKUPS
 # =============================================================================
-const PICKUP_MAGNET_RADIUS: float = 40.0  # How close player needs to be to attract pickups
+const PICKUP_MAGNET_RADIUS: float = 150.0  # Base pixel radius to attract pickups (multiplied by pickup_range stat)
 const PICKUP_MAGNET_SPEED: float = 400.0  # Max speed pickups move toward player
 const PICKUP_MAGNET_ACCELERATION: float = 800.0  # How fast pickups accelerate
 

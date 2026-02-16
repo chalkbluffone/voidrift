@@ -9,9 +9,10 @@ signal credits_changed(amount: int)
 signal stardust_changed(amount: int)
 signal xp_changed(current: float, required: float, level: int)
 
-# --- XP Scaling ---
-const XP_BASE: float = 8.0
-const XP_GROWTH: float = 2.0  # Each level needs 2x more XP (8, 16, 32, …)
+# --- XP Scaling (logarithmic cumulative) ---
+# Level = floor(2 + log(Exp / BaseLevelCost) / log(Multiplier))
+const XP_BASE: float = 8.0       ## Cumulative XP cost to reach level 2
+const XP_GROWTH: float = 1.2     ## Multiplier between successive level thresholds
 
 # --- Loadout Limits ---
 const MAX_WEAPON_SLOTS: int = 4
@@ -29,7 +30,24 @@ func _ready() -> void:
 
 # --- XP & Leveling ---
 
-## Add XP and check for level up.
+## Cumulative XP threshold to reach a given level.
+## Level 1 = 0, level 2 = XP_BASE, level 3 = XP_BASE * XP_GROWTH, etc.
+func _xp_threshold(level: int) -> float:
+	if level <= 1:
+		return 0.0
+	return XP_BASE * pow(XP_GROWTH, float(level - 2))
+
+
+## Emit XP progress relative to current level boundaries (for HUD bar).
+func _emit_xp_changed() -> void:
+	var current_threshold: float = _xp_threshold(RunManager.run_data.level)
+	var next_threshold: float = _xp_threshold(RunManager.run_data.level + 1)
+	var xp_in_level: float = RunManager.run_data.xp - current_threshold
+	var xp_for_level: float = next_threshold - current_threshold
+	xp_changed.emit(xp_in_level, xp_for_level, RunManager.run_data.level)
+
+
+## Add XP (cumulative) and check for level ups.
 func add_xp(amount: float) -> void:
 	var player: Node = RunManager.get_player()
 	var xp_mult: float = 1.0
@@ -40,19 +58,18 @@ func add_xp(amount: float) -> void:
 	RunManager.run_data.xp += actual_xp
 	RunManager.run_data.xp_collected += actual_xp
 	
-	xp_changed.emit(RunManager.run_data.xp, RunManager.run_data.xp_required, RunManager.run_data.level)
-	
-	# Check level up
-	while RunManager.run_data.xp >= RunManager.run_data.xp_required:
+	# Check for level ups based on cumulative XP thresholds
+	while RunManager.run_data.xp >= _xp_threshold(RunManager.run_data.level + 1):
 		_level_up()
+	
+	_emit_xp_changed()
 
 
 func _level_up() -> void:
-	RunManager.run_data.xp -= RunManager.run_data.xp_required
 	RunManager.run_data.level += 1
-	RunManager.run_data.xp_required = XP_BASE * pow(XP_GROWTH, RunManager.run_data.level - 1)
+	RunManager.run_data.xp_required = _xp_threshold(RunManager.run_data.level + 1)
 	
-	FileLogger.log_info("ProgressionManager", "LEVEL UP! Now level %d" % RunManager.run_data.level)
+	FileLogger.log_info("ProgressionManager", "LEVEL UP! Now level %d (next threshold: %.0f)" % [RunManager.run_data.level, RunManager.run_data.xp_required])
 	
 	# Generate upgrade options via UpgradeService
 	var upgrades: Array = UpgradeService.generate_level_up_options()

@@ -1,22 +1,23 @@
 {
-  "$schema": "voidrift-enemies-schema",
-  "_comment": "Enemy definitions. Spawn weights determine frequency in waves. Only enemies with existing scenes are listed here.",
-  
-  "drone": {
-	"id": "drone",
-	"name": "Drone",
-	"description": "Basic enemy that chases the player",
-	"scene": "res://scenes/enemies/base_enemy.tscn",
-	"base_stats": {
-	  "hp": 10,
-	  "damage": 5,
-	  "speed": 100,
-	  "xp_value": 1,
-	  "credits_value": 1
-	},
-	"behavior": "chase",
-	"spawn_weight": 100,
-	"min_difficulty": 0,
-	"tags": ["basic"]
-  }
+	"$schema": "voidrift-enemies-schema",
+	"_comment": "Enemy definitions. Spawn weights determine frequency in waves. Only enemies with existing scenes are listed here.",
+	"drone": {
+		"id": "drone",
+		"name": "Drone",
+		"description": "Basic enemy that chases the player",
+		"scene": "res://scenes/enemies/base_enemy.tscn",
+		"base_stats": {
+			"hp": 25.0,
+			"damage": 8.0,
+			"speed": 120.0,
+			"xp_value": 1.0,
+			"credits_value": 1.0
+		},
+		"behavior": "chase",
+		"spawn_weight": 100.0,
+		"min_difficulty": 0.0,
+		"tags": [
+			"basic"
+		]
+	}
 }

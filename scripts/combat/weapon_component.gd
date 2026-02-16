@@ -289,29 +289,32 @@ func _fire_area_weapon(weapon_id: String, data: Dictionary, _level: int) -> void
 		return
 	var config: Dictionary = WeaponDataFlattener.flatten(data).flat
 
+	# --- Stat scaling (applies to ALL area weapons) ---
+	var global_size_mult: float = 1.0
+	var global_duration_mult: float = 1.0
+	if stats_component:
+		global_size_mult = stats_component.get_stat(StatsComponentScript.STAT_SIZE)
+		global_duration_mult = stats_component.get_stat(StatsComponentScript.STAT_DURATION)
+
+	var weapon_damage_flat: float = _inventory.get_weapon_flat(weapon_id, StatsComponentScript.STAT_DAMAGE)
+	var weapon_damage_mult: float = _inventory.get_weapon_mult(weapon_id, StatsComponentScript.STAT_DAMAGE)
+	var base_damage: float = float(config.get("damage", 10.0))
+	config["damage"] = (base_damage + weapon_damage_flat) * (1.0 + weapon_damage_mult)
+
+	var weapon_size_mult: float = _inventory.get_weapon_mult(weapon_id, StatsComponentScript.STAT_SIZE)
+	var base_size: float = float(config.get("size", 90.0))
+	config["size"] = maxf(8.0, base_size * global_size_mult * (1.0 + weapon_size_mult))
+
+	var weapon_duration_flat: float = _inventory.get_weapon_flat(weapon_id, StatsComponentScript.STAT_DURATION)
+	var weapon_duration_mult: float = _inventory.get_weapon_mult(weapon_id, StatsComponentScript.STAT_DURATION)
+	var base_duration: float = float(config.get("duration", 3.0))
+	if base_duration > 0.0:
+		config["duration"] = maxf(0.15, (base_duration + weapon_duration_flat) * (global_duration_mult * (1.0 + weapon_duration_mult)))
+
+	# Tothian Mines: also scale trigger_radius
 	if weapon_id == "tothian_mines":
-		var global_size_mult: float = 1.0
-		var global_duration_mult: float = 1.0
-		if stats_component:
-			global_size_mult = stats_component.get_stat(StatsComponentScript.STAT_SIZE)
-			global_duration_mult = stats_component.get_stat(StatsComponentScript.STAT_DURATION)
-
-		var weapon_damage_flat: float = _inventory.get_weapon_flat(weapon_id, StatsComponentScript.STAT_DAMAGE)
-		var weapon_damage_mult: float = _inventory.get_weapon_mult(weapon_id, StatsComponentScript.STAT_DAMAGE)
-		var base_damage: float = float(config.get("damage", 10.0))
-		config["damage"] = (base_damage + weapon_damage_flat) * (1.0 + weapon_damage_mult)
-
-		var weapon_size_mult: float = _inventory.get_weapon_mult(weapon_id, StatsComponentScript.STAT_SIZE)
-		var base_size: float = float(config.get("size", 92.0))
-		config["size"] = maxf(8.0, base_size * global_size_mult * (1.0 + weapon_size_mult))
-
 		var base_trigger_radius: float = float(config.get("trigger_radius", 52.0))
 		config["trigger_radius"] = maxf(8.0, base_trigger_radius * global_size_mult * (1.0 + weapon_size_mult))
-
-		var weapon_duration_flat: float = _inventory.get_weapon_flat(weapon_id, StatsComponentScript.STAT_DURATION)
-		var weapon_duration_mult: float = _inventory.get_weapon_mult(weapon_id, StatsComponentScript.STAT_DURATION)
-		var base_duration: float = float(config.get("duration", 3.0))
-		config["duration"] = maxf(0.15, (base_duration + weapon_duration_flat) * (global_duration_mult * (1.0 + weapon_duration_mult)))
 
 	var spawner: Object = _spawners.get_or_create_spawner(weapon_id, data, get_tree().current_scene)
 	if spawner and spawner.has_method("spawn"):

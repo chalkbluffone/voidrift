@@ -25,7 +25,9 @@ func _process(delta: float) -> void:
 	
 	_spawn_timer -= delta
 	if _spawn_timer <= 0:
-		_spawn_enemy()
+		var batch_size: int = _get_batch_size()
+		for i: int in range(batch_size):
+			_spawn_enemy()
 		_spawn_timer = _get_spawn_interval()
 
 
@@ -38,7 +40,16 @@ func _find_player() -> void:
 func _get_spawn_interval() -> float:
 	var time_minutes: float = GameManager.run_data.time_elapsed / 60.0
 	var current_rate: float = GameConfig.BASE_SPAWN_RATE + (GameConfig.SPAWN_RATE_GROWTH * time_minutes)
-	return 1.0 / current_rate
+	return 1.0 / maxf(current_rate, 0.1)
+
+
+## How many enemies spawn per tick. Starts at 1, grows after SPAWN_BATCH_MIN_MINUTE.
+func _get_batch_size() -> int:
+	var time_minutes: float = GameManager.run_data.time_elapsed / 60.0
+	if time_minutes < GameConfig.SPAWN_BATCH_MIN_MINUTE:
+		return 1
+	var extra_minutes: float = time_minutes - GameConfig.SPAWN_BATCH_MIN_MINUTE
+	return 1 + int(extra_minutes * GameConfig.SPAWN_BATCH_SIZE_PER_MINUTE)
 
 
 func _spawn_enemy() -> void:
@@ -56,7 +67,10 @@ func _spawn_enemy() -> void:
 	
 	# Scale enemy stats based on time
 	var time_minutes: float = GameManager.run_data.time_elapsed / 60.0
-	var hp_mult: float = 1.0 + (time_minutes * GameConfig.ENEMY_HP_SCALE_PER_MINUTE)
+	
+	# HP scales exponentially — requires multiplicative damage stacking to keep up
+	var hp_mult: float = GameConfig.ENEMY_HP_BASE_MULT * pow(GameConfig.ENEMY_HP_GROWTH_RATE, time_minutes)
+	# Damage scales linearly — manageable with defensive stats
 	var damage_mult: float = 1.0 + (time_minutes * GameConfig.ENEMY_DAMAGE_SCALE_PER_MINUTE)
 	
 	enemy.max_hp *= hp_mult

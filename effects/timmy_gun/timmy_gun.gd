@@ -159,8 +159,8 @@ func _on_bullet_hit(enemy: Node2D, _damage_info: Dictionary, source_projectile: 
 	if bounce_dir.is_zero_approx():
 		bounce_dir = Vector2.RIGHT
 
-	# Spawn a new bounced bullet
-	_spawn_bullet(hit_pos, bounce_dir, bounces_remaining - 1)
+	# Defer spawn to avoid modifying physics state during query flush
+	call_deferred("_spawn_bullet", hit_pos, bounce_dir, bounces_remaining - 1)
 
 
 class _NeonBullet extends Node2D:

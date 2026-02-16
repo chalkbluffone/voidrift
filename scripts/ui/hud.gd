@@ -199,16 +199,34 @@ func _update_level(level: int) -> void:
 
 
 func _update_timer(time_remaining: float) -> void:
-	var total_seconds: int = int(max(0, time_remaining))
-	var minutes: int = int(total_seconds / 60.0)
-	var seconds: int = total_seconds % 60
-	timer_label.text = "%02d:%02d" % [minutes, seconds]
-	
-	# Flash red when low on time
-	if time_remaining <= 60.0:
-		timer_label.modulate = Color(1.0, 0.3, 0.3, 1.0)
+	if time_remaining > 0.0:
+		# Normal countdown
+		var total_seconds: int = int(time_remaining)
+		var minutes: int = int(total_seconds / 60.0)
+		var seconds: int = total_seconds % 60
+		timer_label.text = "%02d:%02d" % [minutes, seconds]
+
+		# Flash red when low on time (last 60s)
+		if time_remaining <= 60.0:
+			timer_label.modulate = Color(1.0, 0.3, 0.3, 1.0)
+		else:
+			timer_label.modulate = Color.WHITE
 	else:
-		timer_label.modulate = Color.WHITE
+		# Overtime: count up from 0
+		var overtime: float = absf(time_remaining)
+		var total_seconds: int = int(overtime)
+		var minutes: int = int(total_seconds / 60.0)
+		var seconds: int = total_seconds % 60
+		timer_label.text = "+%02d:%02d" % [minutes, seconds]
+
+		if overtime >= 120.0:
+			# 2+ minutes overtime → red
+			timer_label.modulate = Color(1.0, 0.3, 0.3, 1.0)
+		elif overtime >= 60.0:
+			# 1+ minute overtime → orange
+			timer_label.modulate = Color(1.0, 0.6, 0.1, 1.0)
+		else:
+			timer_label.modulate = Color.WHITE
 
 
 # --- Signal Handlers ---
