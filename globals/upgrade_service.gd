@@ -39,8 +39,7 @@ func _ready() -> void:
 
 
 func generate_level_up_options() -> Array:
-	"""Generate 3-4 upgrade options for level up selection."""
-	var options: Array = []
+	## Generate 3-4 upgrade options for level up selection.
 	var available_upgrades: Array = DataLoader.get_all_ship_upgrades()
 	var luck: float = _get_player_luck()
 	var weapon_rng: RandomNumberGenerator = GameSeed.rng("weapon_upgrade")
@@ -49,7 +48,7 @@ func generate_level_up_options() -> Array:
 	var owned_modules: Array = []
 	for u in RunManager.run_data.ship_upgrades:
 		if u is Dictionary:
-			var uid := String(u.get("id", ""))
+			var uid: String = String(u.get("id", ""))
 			if uid != "":
 				owned_modules.append(uid)
 
@@ -83,8 +82,24 @@ func generate_level_up_options() -> Array:
 		w_new_module = 5.0
 
 	var candidates: Array[Dictionary] = []
+	candidates.append_array(_build_module_candidates(
+		available_upgrades, owned_modules, module_slots_full, luck,
+		w_existing_module, w_new_module
+	))
+	candidates.append_array(_build_weapon_candidates(
+		owned_weapons, weapon_slots_full, luck, weapon_rng,
+		w_existing_weapon, w_new_weapon
+	))
 
-	# --- Modules (ship upgrades) ---
+	return _select_from_candidates(candidates, int(GameConfig.LEVEL_UP_OPTION_COUNT))
+
+
+func _build_module_candidates(
+	available_upgrades: Array, owned_modules: Array, module_slots_full: bool,
+	luck: float, w_existing: float, w_new: float
+) -> Array[Dictionary]:
+	## Build candidate entries for ship-upgrade (module) options.
+	var candidates: Array[Dictionary] = []
 	for upgrade in available_upgrades:
 		var upgrade_id: String = upgrade.get("id", "")
 		if upgrade_id == "":
@@ -93,21 +108,29 @@ func generate_level_up_options() -> Array:
 		var max_level: int = int(upgrade.get("max_level", 99))
 		if current_stacks >= max_level:
 			continue
-		var is_owned := upgrade_id in owned_modules
+		var is_owned: bool = upgrade_id in owned_modules
 		if (not is_owned) and module_slots_full:
 			continue
 		var rarity: String = _roll_rarity(upgrade.get("rarity_weights", {}), luck)
 		var effects: Array = _build_upgrade_effects(upgrade, rarity)
 		candidates.append({
-			"weight": w_existing_module if is_owned else w_new_module,
+			"weight": w_existing if is_owned else w_new,
 			"type": "upgrade",
 			"id": upgrade_id,
 			"rarity": rarity,
 			"effects": effects,
 			"data": upgrade,
 		})
+	return candidates
 
-	# --- Weapons ---
+
+func _build_weapon_candidates(
+	owned_weapons: Array, weapon_slots_full: bool, luck: float,
+	weapon_rng: RandomNumberGenerator, w_existing: float, w_new: float
+) -> Array[Dictionary]:
+	## Build candidate entries for weapon options (upgrades to existing + new unlocks).
+	var candidates: Array[Dictionary] = []
+
 	# Existing weapons (level up)
 	for weapon_id_any in owned_weapons:
 		var weapon_id: String = String(weapon_id_any)
@@ -121,7 +144,7 @@ func generate_level_up_options() -> Array:
 		var weapon_rarity: String = _roll_rarity({}, luck)
 		var weapon_effects: Array = _build_weapon_effects(weapon_id, weapon_rarity, weapon_rng)
 		candidates.append({
-			"weight": w_existing_weapon,
+			"weight": w_existing,
 			"type": "weapon",
 			"id": weapon_id,
 			"rarity": weapon_rarity,
@@ -132,9 +155,7 @@ func generate_level_up_options() -> Array:
 		})
 
 	# New weapons (only if slots available)
-	# Iterate over the weapons dict directly to access keys as weapon IDs
-	# (get_all_weapons() returns .values() which lack the key).
-	if not weapon_slots_full and w_new_weapon > 0.0:
+	if not weapon_slots_full and w_new > 0.0:
 		for wid in DataLoader.weapons.keys():
 			if wid in owned_weapons:
 				continue
@@ -142,7 +163,7 @@ func generate_level_up_options() -> Array:
 				continue
 			var w_data: Dictionary = DataLoader.weapons[wid]
 			candidates.append({
-				"weight": w_new_weapon,
+				"weight": w_new,
 				"type": "weapon",
 				"id": wid,
 				"rarity": String(w_data.get("rarity", "common")),
@@ -151,8 +172,13 @@ func generate_level_up_options() -> Array:
 				"current_level": 0,
 			})
 
-	# Pick N options via weighted sampling without replacement
-	var picks: int = mini(int(GameConfig.LEVEL_UP_OPTION_COUNT), candidates.size())
+	return candidates
+
+
+func _select_from_candidates(candidates: Array[Dictionary], count: int) -> Array:
+	## Pick up to count options via weighted sampling without replacement.
+	var options: Array = []
+	var picks: int = mini(count, candidates.size())
 	for _i in range(picks):
 		var idx: int = _pick_weighted_index(candidates)
 		if idx < 0:
@@ -161,7 +187,6 @@ func generate_level_up_options() -> Array:
 		chosen.erase("weight")
 		options.append(chosen)
 		candidates.remove_at(idx)
-
 	return options
 
 
@@ -267,9 +292,9 @@ func _build_upgrade_effects(upgrade_data: Dictionary, rarity: String) -> Array:
 
 
 func _build_weapon_effects(weapon_id: String, rarity: String, rng: RandomNumberGenerator) -> Array:
-	"""Build weapon upgrade effects using tier-based data from weapon_upgrades.json.
-	   Reads deterministic per-rarity stat deltas, picks N stats via weighted selection,
-	   and applies rarity factors per the Megabonk hybrid model."""
+	## Build weapon upgrade effects using tier-based data from weapon_upgrades.json.
+	## Reads deterministic per-rarity stat deltas, picks N stats via weighted selection,
+	## and applies rarity factors per the Megabonk hybrid model.
 	var effects: Array = []
 
 	# Load tier data from weapon_upgrades.json

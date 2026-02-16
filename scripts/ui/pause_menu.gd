@@ -130,28 +130,6 @@ func _sync_ui_from_settings() -> void:
 		vsync_check.button_pressed = _settings.vsync
 
 
-# --- Options handlers ---
-
-func _on_master_volume_changed(value: float) -> void:
-	_settings.set_master_volume(value)
-
-
-func _on_sfx_volume_changed(value: float) -> void:
-	_settings.set_sfx_volume(value)
-
-
-func _on_music_volume_changed(value: float) -> void:
-	_settings.set_music_volume(value)
-
-
-func _on_fullscreen_toggled(pressed: bool) -> void:
-	_settings.set_fullscreen(pressed)
-
-
-func _on_vsync_toggled(pressed: bool) -> void:
-	_settings.set_vsync(pressed)
-
-
 func _connect_options_signals() -> void:
 	var master_slider = options_container.get_node_or_null("Panel/VBoxContainer/MasterVolume/Slider")
 	var sfx_slider = options_container.get_node_or_null("Panel/VBoxContainer/SFXVolume/Slider")
@@ -159,17 +137,17 @@ func _connect_options_signals() -> void:
 	var fullscreen_check = options_container.get_node_or_null("Panel/VBoxContainer/Fullscreen/CheckButton")
 	var vsync_check = options_container.get_node_or_null("Panel/VBoxContainer/VSync/CheckButton")
 	var back_btn = options_container.get_node_or_null("Panel/VBoxContainer/BackButton")
-	
-	if master_slider and not master_slider.value_changed.is_connected(_on_master_volume_changed):
-		master_slider.value_changed.connect(_on_master_volume_changed)
-	if sfx_slider and not sfx_slider.value_changed.is_connected(_on_sfx_volume_changed):
-		sfx_slider.value_changed.connect(_on_sfx_volume_changed)
-	if music_slider and not music_slider.value_changed.is_connected(_on_music_volume_changed):
-		music_slider.value_changed.connect(_on_music_volume_changed)
-	if fullscreen_check and not fullscreen_check.toggled.is_connected(_on_fullscreen_toggled):
-		fullscreen_check.toggled.connect(_on_fullscreen_toggled)
-	if vsync_check and not vsync_check.toggled.is_connected(_on_vsync_toggled):
-		vsync_check.toggled.connect(_on_vsync_toggled)
+
+	if master_slider and not master_slider.value_changed.is_connected(_settings.set_master_volume):
+		master_slider.value_changed.connect(_settings.set_master_volume)
+	if sfx_slider and not sfx_slider.value_changed.is_connected(_settings.set_sfx_volume):
+		sfx_slider.value_changed.connect(_settings.set_sfx_volume)
+	if music_slider and not music_slider.value_changed.is_connected(_settings.set_music_volume):
+		music_slider.value_changed.connect(_settings.set_music_volume)
+	if fullscreen_check and not fullscreen_check.toggled.is_connected(_settings.set_fullscreen):
+		fullscreen_check.toggled.connect(_settings.set_fullscreen)
+	if vsync_check and not vsync_check.toggled.is_connected(_settings.set_vsync):
+		vsync_check.toggled.connect(_settings.set_vsync)
 	if back_btn and not back_btn.pressed.is_connected(_on_options_back_pressed):
 		back_btn.pressed.connect(_on_options_back_pressed)
 

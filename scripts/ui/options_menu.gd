@@ -29,32 +29,12 @@ func _sync_ui_from_settings() -> void:
 
 
 func _connect_signals() -> void:
-	master_slider.value_changed.connect(_on_master_volume_changed)
-	sfx_slider.value_changed.connect(_on_sfx_volume_changed)
-	music_slider.value_changed.connect(_on_music_volume_changed)
-	fullscreen_check.toggled.connect(_on_fullscreen_toggled)
-	vsync_check.toggled.connect(_on_vsync_toggled)
+	master_slider.value_changed.connect(_settings.set_master_volume)
+	sfx_slider.value_changed.connect(_settings.set_sfx_volume)
+	music_slider.value_changed.connect(_settings.set_music_volume)
+	fullscreen_check.toggled.connect(_settings.set_fullscreen)
+	vsync_check.toggled.connect(_settings.set_vsync)
 	back_button.pressed.connect(_on_back_pressed)
-
-
-func _on_master_volume_changed(value: float) -> void:
-	_settings.set_master_volume(value)
-
-
-func _on_sfx_volume_changed(value: float) -> void:
-	_settings.set_sfx_volume(value)
-
-
-func _on_music_volume_changed(value: float) -> void:
-	_settings.set_music_volume(value)
-
-
-func _on_fullscreen_toggled(pressed: bool) -> void:
-	_settings.set_fullscreen(pressed)
-
-
-func _on_vsync_toggled(pressed: bool) -> void:
-	_settings.set_vsync(pressed)
 
 
 func _on_back_pressed() -> void:

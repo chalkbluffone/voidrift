@@ -2,13 +2,9 @@
 
 ## REFACTORING OPPORTUNITIES
 
-| #   | Location                        | Issue                                                                                                                                                                                            |
-| --- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 24  | pause_menu.gd + options_menu.gd | **Duplicated options handlers** — identical `_on_master_volume_changed`, `_on_sfx_volume_changed`, etc. in both files. Extract a shared options controller.                                      |
-| 25  | settings_manager.gd             | `set_sfx_volume()` and `set_music_volume()` are nearly identical — extract `_set_bus_volume()`. Also `apply_all_settings()` duplicates setter logic.                                             |
-| 26  | progression_manager.gd          | `add_credits()` and `add_stardust()` follow identical patterns. Extract shared helper.                                                                                                           |
-| 28  | upgrade_service.gd              | `generate_level_up_options()` is 115 lines. Decompose into `_build_module_candidates()`, `_build_weapon_candidates()`, `_select_from_candidates()`.                                              |
-| 29  | 3 effect files                  | `nikolas_coil.gd` (831), `nope_bubble.gd` (699), `space_napalm.gd` (799) — all 700-830 lines. Particle/visual setup is 300-500 lines of procedural config that could use shared builder helpers. |
+| #   | Location       | Issue                                                                                                                                                                                            |
+| --- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 29  | 3 effect files | `nikolas_coil.gd` (831), `nope_bubble.gd` (699), `space_napalm.gd` (799) — all 700-830 lines. Particle/visual setup is 300-500 lines of procedural config that could use shared builder helpers. |
 
 ## UNUSED CODE
 

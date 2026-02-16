@@ -120,12 +120,7 @@ func _add_ship_upgrade(upgrade_id: String) -> void:
 # --- Currency ---
 
 func add_credits(amount: int) -> void:
-	var player = RunManager.get_player()
-	var credit_mult := 1.0
-	if player and player.has_method("get_stat"):
-		credit_mult = player.get_stat("credits_gain")
-	
-	var actual := int(amount * credit_mult)
+	var actual: int = _apply_currency_mult(amount, "credits_gain")
 	RunManager.run_data.credits += actual
 	RunManager.run_data.credits_collected += actual
 	credits_changed.emit(RunManager.run_data.credits)
@@ -140,15 +135,18 @@ func spend_credits(amount: int) -> bool:
 
 
 func add_stardust(amount: int) -> void:
-	var player = RunManager.get_player()
-	var stardust_mult := 1.0
-	if player and player.has_method("get_stat"):
-		stardust_mult = player.get_stat("stardust_gain")
-	
-	var actual := int(amount * stardust_mult)
+	var actual: int = _apply_currency_mult(amount, "stardust_gain")
 	PersistenceManager.persistent_data.stardust += actual
 	stardust_changed.emit(PersistenceManager.persistent_data.stardust)
 	PersistenceManager.save_game()
+
+
+func _apply_currency_mult(amount: int, stat_name: String) -> int:
+	var player: Node = RunManager.get_player()
+	var mult: float = 1.0
+	if player and player.has_method("get_stat"):
+		mult = float(player.get_stat(stat_name))
+	return int(amount * mult)
 
 
 func spend_stardust(amount: int) -> bool:
