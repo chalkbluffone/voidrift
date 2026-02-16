@@ -17,6 +17,11 @@ func spawn(
 	if nearest == null:
 		return null
 
+	var dist: float = nearest.global_position.distance_to(spawn_pos)
+	var max_range: float = float(params.get("size", 0.0))
+	if max_range > 0.0 and dist > max_range:
+		return null
+
 	var direction: Vector2 = (nearest.global_position - spawn_pos).normalized()
 	if direction.is_zero_approx():
 		direction = Vector2.RIGHT

@@ -8,6 +8,7 @@ const PROJECTILE_SCENE: PackedScene = preload("res://scenes/gameplay/projectile.
 @export var piercing: int = 3
 @export var lifetime: float = 1.1
 @export var size_mult: float = 1.0
+@export var size: float = 550.0
 @export var crit_chance: float = 0.0
 @export var crit_damage: float = 0.0
 
@@ -19,6 +20,7 @@ const PROJECTILE_SCENE: PackedScene = preload("res://scenes/gameplay/projectile.
 @export var trail_alpha: float = 0.35
 
 var _projectile: Node2D = null
+var _spawn_pos: Vector2 = Vector2.ZERO
 
 
 func setup(params: Dictionary) -> StraightLineNegotiator:
@@ -60,6 +62,7 @@ func fire_from(spawn_pos: Vector2, direction: Vector2, stats_component: Node = n
 
 	get_tree().current_scene.add_child(projectile)
 	_projectile = projectile
+	_spawn_pos = spawn_pos
 
 
 func _process(_delta: float) -> void:
@@ -67,6 +70,9 @@ func _process(_delta: float) -> void:
 		return
 	if not is_instance_valid(_projectile):
 		queue_free()
+		return
+	if size > 0.0 and _projectile.global_position.distance_to(_spawn_pos) >= size:
+		_projectile.queue_free()
 
 
 class _NeedleTracer extends Node2D:
