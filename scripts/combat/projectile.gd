@@ -28,8 +28,11 @@ func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 	area_entered.connect(_on_area_entered)
 	
-	# Apply size
-	scale = Vector2.ONE * size_mult
+	# Apply size to collision reach only (not visual scale)
+	if collision_shape and collision_shape.shape is CircleShape2D:
+		var base_radius: float = collision_shape.shape.radius
+		collision_shape.shape = collision_shape.shape.duplicate()
+		collision_shape.shape.radius = base_radius * size_mult
 	
 	# Set rotation to match direction
 	rotation = direction.angle()

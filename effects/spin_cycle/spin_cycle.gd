@@ -29,7 +29,16 @@ func _ready() -> void:
 
 
 func setup(params: Dictionary) -> void:
+	# Consume size_mult as our size multiplier instead of the generic area
+	# weapon "size" key (which is a pixel radius for other area weapons).
+	if params.has("size_mult"):
+		size = maxf(0.1, float(params["size_mult"]))
+
 	for key in params:
+		# Skip "size" and "size_mult" — size_mult is handled above and
+		# the generic area-weapon "size" is a pixel radius, not our multiplier.
+		if key == "size" or key == "size_mult":
+			continue
 		if key in self:
 			var value: Variant = params[key]
 			# Handle Color properties that arrive as Color objects from the flattener

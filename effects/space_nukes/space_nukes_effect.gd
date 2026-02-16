@@ -61,7 +61,7 @@ func launch(spawn_pos: Vector2, direction: Vector2, target: Node2D, target_pos: 
 		_missile_visual = _MissileVisual.new()
 		add_child(_missile_visual)
 	_missile_visual.body_color = projectile_color
-	_missile_visual.scale = Vector2.ONE * maxf(0.8, size_mult)
+	_missile_visual.scale = Vector2.ONE  # Visual stays fixed; size_mult affects blast radius
 
 
 func _process(delta: float) -> void:

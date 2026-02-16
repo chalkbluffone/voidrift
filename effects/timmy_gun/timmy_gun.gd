@@ -113,7 +113,7 @@ func _spawn_bullet(origin: Vector2, direction: Vector2, bounces_remaining: int) 
 		sprite.visible = false
 
 	var glow: _NeonBullet = _NeonBullet.new()
-	glow.bullet_radius = bullet_radius * size_mult
+	glow.bullet_radius = bullet_radius  # Visual stays fixed; size_mult affects hitbox reach
 	glow.color_core = color_core
 	glow.color_glow = color_glow
 	glow.glow_strength = glow_strength

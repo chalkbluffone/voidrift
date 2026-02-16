@@ -14,7 +14,7 @@
 	"spawner": "res://effects/broken_tractor_beam/broken_tractor_beam_spawner.gd",
 	"stats": {
 	  "cooldown": 2.5,
-	  "damage": 10.0,
+	  "damage": 15.0,
 	  "dot_interval": 0.5,
 	  "duration": 2.0
 	},
@@ -23,8 +23,8 @@
 	"unlock_condition": "default",
 	"visual": {
 	  "beam_width": 12.0,
-	  "color_core": "#88CCFF",
-	  "color_glow": "#4488FF",
+	  "color_core": "#88ccff",
+	  "color_glow": "#4488ff",
 	  "glow_strength": 1.5,
 	  "particle_count": 30.0,
 	  "particle_lifetime": 0.4,
@@ -58,7 +58,7 @@
 	"spawner": "res://effects/ion_wake/ion_wake_spawner.gd",
 	"stats": {
 	  "cooldown": 2.5,
-	  "damage": 13.0,
+	  "damage": 15.0,
 	  "projectile_count": 1.0
 	},
 	"type": "melee",
@@ -85,7 +85,7 @@
 	"spawner": "res://effects/nikolas_coil/nikolas_coil_spawner.gd",
 	"stats": {
 	  "cooldown": 1.2,
-	  "damage": 10.0,
+	  "damage": 15.0,
 	  "duration": 0.6
 	},
 	"type": "projectile",
@@ -119,10 +119,10 @@
 	  "ambient_particle_count": 24.0,
 	  "boss_damage_reduction": 0.5,
 	  "cooldown": 3.0,
-	  "damage": 10.0,
+	  "damage": 15.0,
 	  "knockback": 200.0,
 	  "particle_count": 25.0,
-	  "projectile_count": 10.0
+	  "projectile_count": 3.0
 	},
 	"type": "area",
 	"unlock_condition": "default",
@@ -143,12 +143,12 @@
 	},
 	"spawner": "res://effects/personal_space_violator/personal_space_violator_spawner.gd",
 	"stats": {
-	  "cooldown": 1.2,
-	  "damage": 6.0,
+	  "cooldown": 2.85,
+	  "damage": 15.0,
 	  "falloff_end": 350.0,
 	  "falloff_start": 80.0,
 	  "lifetime": 0.8,
-	  "projectile_count": 7.0,
+	  "projectile_count": 3.0,
 	  "projectile_speed": 600.0
 	},
 	"targeting": "nearest",
@@ -176,7 +176,7 @@
 	"spawner": "res://effects/aoe_base/aoe_base_spawner.gd",
 	"stats": {
 	  "cooldown": 0.5,
-	  "damage": 5.0,
+	  "damage": 15.0,
 	  "size": 90.0
 	},
 	"type": "area",
@@ -204,7 +204,7 @@
 	  "hit_cooldown": 0.35,
 	  "knockback": 280.0,
 	  "projectile_count": 3.0,
-	  "projectile_speed": 2.2
+	  "projectile_speed": 1.0
 	},
 	"type": "orbit",
 	"unlock_condition": "default",
@@ -241,14 +241,14 @@
 	  "arc_angle_deg": 310.0,
 	  "distance": 25.0,
 	  "length_scale": 1.0,
-	  "radius": 156.0,
+	  "radius": 72.0,
 	  "taper": 0.0,
-	  "thickness": 65.0
+	  "thickness": 24.0
 	},
 	"spawner": "res://effects/radiant_arc/radiant_arc_spawner.gd",
 	"stats": {
 	  "cooldown": 1.0,
-	  "damage": 10.0,
+	  "damage": 15.0,
 	  "duration": 1.0
 	},
 	"type": "melee",
@@ -310,7 +310,7 @@
 	"spawner": "res://effects/snarky_comeback/snarky_comeback_spawner.gd",
 	"stats": {
 	  "cooldown": 1.0,
-	  "damage": 10.0,
+	  "damage": 15.0,
 	  "duration": 1.45,
 	  "projectile_count": 1.0
 	},
@@ -364,7 +364,7 @@
 	  "burn_damage": 5.0,
 	  "burn_duration": 3.5,
 	  "cooldown": 1.5,
-	  "damage": 12.0,
+	  "damage": 15.0,
 	  "dot_interval": 0.5,
 	  "projectile_count": 1.0
 	},
@@ -404,7 +404,7 @@
 	"stats": {
 	  "cooldown": 1.8,
 	  "crit_chance": 0.0,
-	  "damage": 12.0,
+	  "damage": 15.0,
 	  "projectile_count": 1.0,
 	  "projectile_speed": 520.0
 	},
@@ -430,7 +430,7 @@
 	"stats": {
 	  "base_radius": 150.0,
 	  "cooldown": 2.0,
-	  "damage": 8.0,
+	  "damage": 15.0,
 	  "hit_cooldown": 0.25,
 	  "rotation_speed": 3.14159
 	},
@@ -455,7 +455,7 @@
 	"spawner": "res://effects/straight_line_negotiator/straight_line_negotiator_spawner.gd",
 	"stats": {
 	  "cooldown": 1.0,
-	  "damage": 5.0,
+	  "damage": 15.0,
 	  "lifetime": 1.1,
 	  "piercing": 3.0,
 	  "projectile_count": 1.0,
@@ -488,7 +488,7 @@
 	"spawner": "res://effects/timmy_gun/timmy_gun_spawner.gd",
 	"stats": {
 	  "cooldown": 0.6,
-	  "damage": 8.0,
+	  "damage": 3.0,
 	  "lifetime": 1.5,
 	  "projectile_bounces": 1.0,
 	  "projectile_count": 5.0,
@@ -499,8 +499,8 @@
 	"unlock_condition": "default",
 	"visual": {
 	  "bullet_radius": 2.5,
-	  "color_core": "#CCDDFF",
-	  "color_glow": "#00BBFF",
+	  "color_core": "#ccddff",
+	  "color_glow": "#00bbff",
 	  "glow_strength": 2.0
 	}
   },
@@ -519,7 +519,7 @@
 	"stats": {
 	  "cooldown": 2.5,
 	  "damage": 15.0,
-	  "duration": 3.0,
+	  "duration": 10.0,
 	  "projectile_count": 1.0,
 	  "size": 92.0
 	},

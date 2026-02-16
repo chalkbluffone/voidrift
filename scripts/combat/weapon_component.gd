@@ -300,6 +300,7 @@ func _fire_area_weapon(weapon_id: String, data: Dictionary, _level: int) -> void
 	var weapon_size_mult: float = _inventory.get_weapon_mult(weapon_id, StatsComponentScript.STAT_SIZE)
 	var base_size: float = float(config.get("size", 90.0))
 	config["size"] = maxf(8.0, base_size * global_size_mult * (1.0 + weapon_size_mult))
+	config["size_mult"] = global_size_mult * (1.0 + weapon_size_mult)
 
 	var weapon_duration_flat: float = _inventory.get_weapon_flat(weapon_id, StatsComponentScript.STAT_DURATION)
 	var weapon_duration_mult: float = _inventory.get_weapon_mult(weapon_id, StatsComponentScript.STAT_DURATION)

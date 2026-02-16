@@ -70,10 +70,11 @@ func _rebuild_drones() -> void:
 
 		var triangle: Polygon2D = Polygon2D.new()
 		triangle.color = Color(0.65, 0.9, 1.0, 0.95)
+		# Drone visual size is fixed — size stat only affects orbit radius/reach
 		triangle.polygon = PackedVector2Array([
-			Vector2(drone_size * 1.2 * size, 0.0),
-			Vector2(-drone_size * 0.9 * size, drone_size * 0.7 * size),
-			Vector2(-drone_size * 0.9 * size, -drone_size * 0.7 * size),
+			Vector2(drone_size * 1.2, 0.0),
+			Vector2(-drone_size * 0.9, drone_size * 0.7),
+			Vector2(-drone_size * 0.9, -drone_size * 0.7),
 		])
 		drone.add_child(triangle)
 
