@@ -1,96 +1,93 @@
 {
-  "$schema": "voidrift-captains-schema",
-  "_comment": "Captain definitions. Each captain has a passive (stat bonuses) and an active ability (template-based). Passive effects are applied as flat bonuses at run start.",
-
-  "captain_1": {
-	"id": "captain_1",
-	"name": "Captain 1",
-	"description": "Offense-focused captain. Specializes in maximizing damage output with a devastating burst ability.",
-	"sprite": "res://assets/captains/captain_1.png",
-	"passive": {
-	  "id": "combat_focus",
-	  "name": "Combat Focus",
-	  "description": "+5% crit chance, +10% damage",
-	  "effects": {
-		"crit_chance": 5,
-		"damage": 0.1
-	  }
+	"$schema": "voidrift-captains-schema",
+	"_comment": "Captain definitions. Each captain has a passive (stat bonuses) and an active ability (template-based). Passive effects are applied as flat bonuses at run start.",
+	"captain_nightmare": {
+		"id": "captain_nightmare",
+		"name": "Captain Nightmare",
+		"description": "Self-proclaimed 'most dangerous pilot in the sector,' Captain Nightmare talks a bigger game than his brain can cash. He charges headfirst into every engagement with reckless enthusiasm and questionable tactical awareness, fueled by the promise of cold drinks and zero responsibilities back at Starbase Recreatia-7. What he lacks in intellect he makes up for in sheer, unearned confidence — and honestly, it kind of works. Offense-focused captain specializing in maximizing damage output with a devastating burst ability.",
+		"sprite": "res://assets/captains/captain_1.png",
+		"passive": {
+			"id": "combat_focus",
+			"name": "Combat Focus",
+			"description": "+5% crit chance, +10% damage",
+			"effects": {
+				"crit_chance": 5,
+				"damage": 0.1
+			}
+		},
+		"active_ability": {
+			"id": "overdrive",
+			"name": "Overdrive",
+			"description": "Weapons deal 2x damage for 5 seconds.",
+			"template": "buff_self",
+			"cooldown": 75.0,
+			"duration": 5.0,
+			"effects": {
+				"damage": 1.0
+			},
+			"vfx": "overdrive"
+		},
+		"unlock_condition": "default"
 	},
-	"active_ability": {
-	  "id": "overdrive",
-	  "name": "Overdrive",
-	  "description": "Weapons deal 2x damage for 5 seconds.",
-	  "template": "buff_self",
-	  "cooldown": 75.0,
-	  "duration": 5.0,
-	  "effects": {
-		"damage": 1.0
-	  },
-	  "vfx": "overdrive"
+	"captain_finswick": {
+		"id": "captain_finswick",
+		"name": "Gerald \"The Hedge\" Finswick",
+		"description": "Former risk assessor for Galactic Mutual Insurance, Gerald quit his desk job after calculating a 99.7% chance that 'someone more competent should be out there.' He was wrong about the competent part, but his obsessive need to mitigate liability has made him nearly unkillable. Every shield upgrade is filed in triplicate, every hull repair comes with a warranty, and his pre-combat checklist has 47 items. His crew calls him 'The Hedge' because he never takes a position without covering the downside. Defense-focused captain specializing in survival with an emergency shield ability.",
+		"sprite": "res://assets/captains/captain_2.png",
+		"passive": {
+			"id": "hardened_hull",
+			"name": "Hardened Hull",
+			"description": "+10 armor, +20 shield",
+			"effects": {
+				"armor": 10,
+				"shield": 20
+			}
+		},
+		"active_ability": {
+			"id": "emergency_shields",
+			"name": "Emergency Shields",
+			"description": "Become invulnerable for 3 seconds and restore 30% max HP.",
+			"template": "buff_self",
+			"cooldown": 75.0,
+			"duration": 3.0,
+			"effects": {
+				"invulnerable": true,
+				"heal_percent": 0.3
+			},
+			"vfx": "emergency_shields"
+		},
+		"unlock_condition": "default"
 	},
-	"unlock_condition": "default"
-  },
-
-  "captain_2": {
-	"id": "captain_2",
-	"name": "Captain 2",
-	"description": "Defense-focused captain. Specializes in survival with an emergency shield ability.",
-	"sprite": "res://assets/captains/captain_2.png",
-	"passive": {
-	  "id": "hardened_hull",
-	  "name": "Hardened Hull",
-	  "description": "+10 armor, +20 shield",
-	  "effects": {
-		"armor": 10,
-		"shield": 20
-	  }
-	},
-	"active_ability": {
-	  "id": "emergency_shields",
-	  "name": "Emergency Shields",
-	  "description": "Become invulnerable for 3 seconds and restore 30% max HP.",
-	  "template": "buff_self",
-	  "cooldown": 75.0,
-	  "duration": 3.0,
-	  "effects": {
-		"invulnerable": true,
-		"heal_percent": 0.3
-	  },
-	  "vfx": "emergency_shields"
-	},
-	"unlock_condition": "default"
-  },
-
-  "captain_3": {
-	"id": "captain_3",
-	"name": "Captain 3",
-	"description": "Utility-focused captain. Specializes in economy and control with a powerful crowd control ability.",
-	"sprite": "res://assets/captains/captain_3.png",
-	"passive": {
-	  "id": "resourceful",
-	  "name": "Resourceful",
-	  "description": "+10% luck, +15% XP gain",
-	  "effects": {
-		"luck": 10,
-		"xp_gain": 0.15
-	  }
-	},
-	"active_ability": {
-	  "id": "gravity_well",
-	  "name": "Gravity Well",
-	  "description": "Slow all enemies on screen by 50% for 6 seconds.",
-	  "template": "area_effect",
-	  "cooldown": 75.0,
-	  "duration": 6.0,
-	  "effects": {
-		"enemy_slow": 0.5
-	  },
-	  "radius": 0,
-	  "vfx": "gravity_well"
-	},
-	"unlock_condition": {
-	  "type": "complete_run",
-	  "difficulty": 1
+	"captain_zoltan": {
+		"id": "captain_zoltan",
+		"name": "Zoltan the Destroyer",
+		"description": "A.K.A. The Prime Ruler. A.K.A. The Hero of the Battle of Treskelia. At 378 Earth-years old, Zoltan has conquered worlds, crushed rebellions, and still can't figure out how to file a docking permit. A Balsurpian who breathes Xenon and keeps his delicate Balnarg tucked safely under three layers of ceremonial armor, Zoltan rules the battlefield with five thrashing tentacles while the sixth — the ingestion one — is perpetually wrapped around a canister of Synthetic Bload. Without it he goes docile, which he insists has never happened and anyone who says otherwise was vaporized at Treskelia. His greatest talent has always been turning foes into loyal minions — most of his conquests were won not by destroying armies but by convincing them to switch sides mid-battle. Utility-focused captain specializing in economy and control with a devastating minion-conversion ability.",
+		"sprite": "res://assets/captains/captain_3.png",
+		"passive": {
+			"id": "resourceful",
+			"name": "Resourceful",
+			"description": "+10% luck, +15% XP gain",
+			"effects": {
+				"luck": 10,
+				"xp_gain": 0.15
+			}
+		},
+		"active_ability": {
+			"id": "subjugation",
+			"name": "Subjugation",
+			"description": "Convert nearby enemies into loyal minions for 8 seconds. Converted enemies attack their former allies.",
+			"template": "area_effect",
+			"cooldown": 75.0,
+			"duration": 8.0,
+			"effects": {
+				"convert_enemies": 3
+			},
+			"radius": 300,
+			"vfx": "subjugation"
+		},
+		"unlock_condition": {
+			"type": "complete_run",
+			"difficulty": 1
+		}
 	}
-  }
 }

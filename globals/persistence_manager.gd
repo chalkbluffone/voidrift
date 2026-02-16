@@ -19,7 +19,7 @@ static func _get_default_persistent_data() -> Dictionary:
 		"total_wins": 0,
 		"total_time_played": 0.0,
 		"unlocked_ships": ["scout"],
-		"unlocked_captains": ["captain_1", "captain_2"],
+		"unlocked_captains": ["captain_nightmare", "captain_finswick"],
 		"discovered_synergies": [],
 		"unlocked_weapons": ["plasma_cannon", "laser_array", "ion_orbit", "proximity_tax", "psp_9000", "space_nukes", "tothian_mines", "timmy_gun"],
 		"high_score": 0,
