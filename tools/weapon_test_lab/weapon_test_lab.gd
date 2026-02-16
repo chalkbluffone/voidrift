@@ -49,7 +49,7 @@ var _last_move_direction: Vector2 = Vector2.RIGHT
 func _ready() -> void:
 	# Instantiate the real Ship scene in test mode
 	test_ship = ShipScene.instantiate()
-	test_ship.test_mode = true  # Disable GameManager integration
+	test_ship.test_mode = true  # Disable run manager integration
 	test_ship.position = Vector2.ZERO
 	add_child(test_ship)
 	

@@ -3,7 +3,7 @@ extends BasePickup
 ## XPPickup - Dropped by enemies, magnetically attracted to player.
 ## Uses player's pickup_radius stat for magnet range.
 
-@export var xp_amount: float = 10.0
+@export var xp_amount: float = 1.0
 
 
 func _on_pickup_ready() -> void:
@@ -15,4 +15,4 @@ func initialize(amount: float) -> void:
 
 
 func _apply_effect() -> void:
-	GameManager.add_xp(xp_amount)
+	ProgressionManager.add_xp(xp_amount)

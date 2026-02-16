@@ -26,7 +26,7 @@ var _inventory: WeaponInventory = WeaponInventory.new()
 var _spawners: WeaponSpawnerCache = WeaponSpawnerCache.new()
 
 @onready var DataLoader: Node = get_node_or_null("/root/DataLoader")
-@onready var GameManager: Node = get_node_or_null("/root/GameManager")
+@onready var RunManager: Node = get_node_or_null("/root/RunManager")
 @onready var FileLogger: Node = get_node_or_null("/root/FileLogger")
 
 
@@ -555,9 +555,9 @@ func get_equipped_weapon_summaries() -> Array[Dictionary]:
 
 
 func sync_from_run_data() -> void:
-	## Sync equipped weapons from GameManager run data.
-	FileLogger.log_info("WeaponComponent", "sync_from_run_data called, weapons: %s" % str(GameManager.run_data.weapons))
-	for weapon_id in GameManager.run_data.weapons:
+	## Sync equipped weapons from run data.
+	FileLogger.log_info("WeaponComponent", "sync_from_run_data called, weapons: %s" % str(RunManager.run_data.weapons))
+	for weapon_id in RunManager.run_data.weapons:
 		if not has_weapon(weapon_id):
 			FileLogger.log_info("WeaponComponent", "Equipping weapon from run_data: %s" % weapon_id)
 			equip_weapon(weapon_id)

@@ -8,8 +8,8 @@
 		"scene": "res://scenes/enemies/base_enemy.tscn",
 		"base_stats": {
 			"hp": 25.0,
-			"damage": 8.0,
-			"speed": 120.0,
+			"damage": 4.0,
+			"speed": 70.0,
 			"xp_value": 1.0,
 			"credits_value": 1.0
 		},

@@ -28,7 +28,6 @@ PersistenceManager="*res://globals/persistence_manager.gd"
 RunManager="*res://globals/run_manager.gd"
 ProgressionManager="*res://globals/progression_manager.gd"
 UpgradeService="*res://globals/upgrade_service.gd"
-GameManager="*res://globals/game_manager.gd"
 FileLogger="*res://globals/file_logger.gd"
 SettingsManager="*res://globals/settings_manager.gd"
 

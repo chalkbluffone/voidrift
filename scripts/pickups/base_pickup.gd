@@ -9,7 +9,7 @@ var _target: Node2D = null
 var _current_speed: float = 0.0
 var _is_attracted: bool = false
 
-@onready var GameManager: Node = get_node("/root/GameManager")
+@onready var ProgressionManager: Node = get_node("/root/ProgressionManager")
 @onready var GameConfig: Node = get_node("/root/GameConfig")
 @onready var FileLogger: Node = get_node("/root/FileLogger")
 

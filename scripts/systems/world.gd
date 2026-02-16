@@ -3,8 +3,6 @@ extends Node2D
 @export var stars_far_rect_path: NodePath
 @export var stars_near_rect_path: NodePath
 
-@onready var GameManager: Node = get_node("/root/GameManager")
-
 func _enter_tree() -> void:
 	randomize()
 	GameSeed.set_seed_from_int(randi())

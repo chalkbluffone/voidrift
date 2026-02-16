@@ -6,7 +6,7 @@ signal hit_enemy(enemy: Node2D, damage_info: Dictionary)
 
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 @onready var sprite: Sprite2D = $Sprite2D
-@onready var GameManager: Node = get_node("/root/GameManager")
+@onready var RunManager: Node = get_node("/root/RunManager")
 @onready var FileLogger: Node = get_node("/root/FileLogger")
 
 var damage: float = 10.0
@@ -113,7 +113,7 @@ func _hit_enemy(enemy: Node2D) -> void:
 	# Apply damage to enemy
 	if enemy.has_method("take_damage"):
 		enemy.take_damage(damage_info.damage, self)
-		GameManager.record_damage_dealt(damage_info.damage)
+		RunManager.record_damage_dealt(damage_info.damage)
 	
 	hit_enemy.emit(enemy, damage_info)
 	

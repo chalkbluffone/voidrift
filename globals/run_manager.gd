@@ -111,7 +111,7 @@ func _reset_run_data() -> void:
 		# Progression (managed by ProgressionManager but stored here)
 		"level": 1,
 		"xp": 0.0,
-		"xp_required": 8.0,
+		"xp_required": 7.0,
 		"time_elapsed": 0.0,
 		"time_remaining": run_duration,
 		

@@ -126,6 +126,17 @@ func is_captain_unlocked(captain_id: String) -> bool:
 
 
 func is_weapon_unlocked(weapon_id: String) -> bool:
+	## Weapons with unlock_condition "default" are always available.
+	## Other weapons must be explicitly unlocked via unlock_weapon().
+	var DataLoader: Node = get_node_or_null("/root/DataLoader")
+	if DataLoader == null:
+		return weapon_id in persistent_data.unlocked_weapons
+	var weapon_data: Dictionary = DataLoader.get_weapon(weapon_id)
+	if weapon_data.is_empty():
+		return false
+	var condition: Variant = weapon_data.get("unlock_condition", "default")
+	if condition is String and condition == "default":
+		return true
 	return weapon_id in persistent_data.unlocked_weapons
 
 

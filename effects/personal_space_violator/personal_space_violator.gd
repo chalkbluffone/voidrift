@@ -37,7 +37,6 @@ var _pellets: Array = []  # Array of projectile node refs
 var _spawn_origin: Vector2 = Vector2.ZERO
 
 @onready var FileLogger: Node = get_node_or_null("/root/FileLogger")
-@onready var GameManager: Node = get_node_or_null("/root/GameManager")
 
 
 func setup(params: Dictionary) -> PersonalSpaceViolator:

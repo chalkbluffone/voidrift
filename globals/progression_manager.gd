@@ -11,7 +11,7 @@ signal xp_changed(current: float, required: float, level: int)
 
 # --- XP Scaling (logarithmic cumulative) ---
 # Level = floor(2 + log(Exp / BaseLevelCost) / log(Multiplier))
-const XP_BASE: float = 8.0       ## Cumulative XP cost to reach level 2
+const XP_BASE: float = 7.0       ## Cumulative XP cost to reach level 2 (~7 enemy kills)
 const XP_GROWTH: float = 1.2     ## Multiplier between successive level thresholds
 
 # --- Loadout Limits ---

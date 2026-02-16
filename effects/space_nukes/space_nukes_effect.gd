@@ -1,7 +1,7 @@
 extends Node2D
 class_name SpaceNukesEffect
 
-@onready var GameManager: Node = get_node_or_null("/root/GameManager")
+@onready var RunManager: Node = get_node_or_null("/root/RunManager")
 
 @export var damage: float = 12.0
 @export var projectile_speed: float = 520.0
@@ -187,8 +187,8 @@ func _apply_burst_damage(origin: Vector2) -> void:
 
 		if enemy.has_method("take_damage"):
 			enemy.take_damage(final_damage, self)
-			if GameManager and GameManager.has_method("record_damage_dealt"):
-				GameManager.record_damage_dealt(final_damage)
+			if RunManager and RunManager.has_method("record_damage_dealt"):
+				RunManager.record_damage_dealt(final_damage)
 
 
 func _spawn_explosion_flash(origin: Vector2) -> void:

@@ -6,19 +6,20 @@ extends CharacterBody2D
 signal died(enemy: BaseEnemy, position: Vector2)
 
 # --- Stats ---
-@export var max_hp: float = 20.0
-@export var move_speed: float = 100.0
-@export var contact_damage: float = 10.0
-@export var xp_value: float = 10.0
+@export var max_hp: float = 25.0
+@export var move_speed: float = 70.0
+@export var contact_damage: float = 4.0
+@export var xp_value: float = 1.0
 @export var credit_value: int = 1
 
-var current_hp: float = 20.0
+var current_hp: float = 25.0
+var _is_dying: bool = false
 var enemy_type: String = "normal"  # "normal", "elite", "boss"
 
 # --- References ---
 var _target: Node2D = null
 var _hitbox: Area2D = null
-@onready var GameManager: Node = get_node("/root/GameManager")
+@onready var RunManager: Node = get_node("/root/RunManager")
 @onready var FileLogger: Node = get_node("/root/FileLogger")
 
 # --- Knockback ---
@@ -108,6 +109,8 @@ func _process_knockback(delta: float) -> void:
 
 
 func take_damage(amount: float, _source: Node = null) -> void:
+	if _is_dying:
+		return
 	current_hp -= amount
 	
 	# Visual feedback
@@ -126,8 +129,10 @@ func _flash_damage() -> void:
 
 
 func _die() -> void:
+	_is_dying = true
+	
 	# Record kill
-	GameManager.record_kill(enemy_type)
+	RunManager.record_kill(enemy_type)
 	
 	# Emit signal for XP spawning
 	died.emit(self, global_position)

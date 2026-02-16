@@ -26,7 +26,8 @@ extends CanvasLayer
 @onready var modules_title: Label = $LeftWeapons/VBox/ModulesTitle
 @onready var modules_list: VBoxContainer = $LeftWeapons/VBox/ModulesList
 
-@onready var GameManager: Node = get_node("/root/GameManager")
+@onready var RunManager: Node = get_node("/root/RunManager")
+@onready var ProgressionManager: Node = get_node("/root/ProgressionManager")
 @onready var DataLoader: Node = get_node("/root/DataLoader")
 @onready var FileLogger: Node = get_node("/root/FileLogger")
 
@@ -50,11 +51,11 @@ func _ready() -> void:
 	# Apply synthwave colors
 	_apply_synthwave_theme()
 	
-	# Connect to GameManager signals
-	GameManager.xp_changed.connect(_on_xp_changed)
-	GameManager.credits_changed.connect(_on_credits_changed)
-	GameManager.level_up_completed.connect(_on_level_up_completed)
-	GameManager.run_started.connect(_on_run_started)
+	# Connect to service signals
+	ProgressionManager.xp_changed.connect(_on_xp_changed)
+	ProgressionManager.credits_changed.connect(_on_credits_changed)
+	ProgressionManager.level_up_completed.connect(_on_level_up_completed)
+	RunManager.run_started.connect(_on_run_started)
 	
 	# Wait a frame then find player
 	await get_tree().process_frame
@@ -308,7 +309,7 @@ func _on_level_up_completed(_chosen_upgrade: Dictionary) -> void:
 
 
 func _refresh_modules_list() -> void:
-	if not GameManager:
+	if not RunManager:
 		return
 	left_weapons.visible = true
 
@@ -316,10 +317,10 @@ func _refresh_modules_list() -> void:
 		child.queue_free()
 
 	var upgrades: Array = []
-	if GameManager.has_method("get_ship_upgrades"):
-		upgrades = GameManager.get_ship_upgrades()
-	else:
-		upgrades = GameManager.run_data.get("ship_upgrades", [])
+	var raw: Array = RunManager.run_data.get("ship_upgrades", [])
+	for item: Variant in raw:
+		if item is Dictionary:
+			upgrades.append(item)
 
 	# Normalize + sort
 	upgrades.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:

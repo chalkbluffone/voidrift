@@ -12,30 +12,30 @@ const PLAYER_TURN_RATE: float = 6.0     # Radians/sec. How fast the ship turns (
 # =============================================================================
 # ENEMIES
 # =============================================================================
-const ENEMY_BASE_SPEED: float = 120.0  # Base movement speed
-const ENEMY_SPEED_PER_LEVEL: float = 4.0  # Speed increase per player level
+const ENEMY_BASE_SPEED: float = 70.0  # Base movement speed (slower than player's 150)
+const ENEMY_SPEED_PER_LEVEL: float = 6.0  # Speed increase per player level
 
 # Enemy damage scales linearly — manageable with HP/armor/evasion upgrades
-const ENEMY_DAMAGE_SCALE_PER_MINUTE: float = 0.35  # +35% damage per minute (linear)
+const ENEMY_DAMAGE_SCALE_PER_MINUTE: float = 0.25  # +25% damage per minute (linear)
 
 # Enemy HP scales exponentially — forces multiplicative damage stacking
 # Formula: hp_mult = ENEMY_HP_BASE_MULT * pow(ENEMY_HP_GROWTH_RATE, minutes)
-# At 1min ≈ 1.7x, 3min ≈ 4.9x, 6min ≈ 24x, 9min ≈ 118x, 12min ≈ 580x
+# At 1min ≈ 1.45x, 3min ≈ 3.0x, 6min ≈ 9.3x, 9min ≈ 28x, 12min ≈ 85x
 const ENEMY_HP_BASE_MULT: float = 1.0
-const ENEMY_HP_GROWTH_RATE: float = 1.7  # Exponential base per minute
+const ENEMY_HP_GROWTH_RATE: float = 1.45  # Exponential base per minute
 
 # XP/credit rewards scale to match difficulty
-const ENEMY_XP_SCALE_PER_MINUTE: float = 0.35  # +35% XP value per minute
+const ENEMY_XP_SCALE_PER_MINUTE: float = 0.15  # +15% XP value per minute
 
 # =============================================================================
 # SPAWNING
 # =============================================================================
 const SPAWN_RADIUS_MIN: float = 400.0
 const SPAWN_RADIUS_MAX: float = 600.0
-const BASE_SPAWN_RATE: float = 1.5  # Enemies per second at start
-const SPAWN_RATE_GROWTH: float = 0.6  # Additional enemies/sec per minute
-const SPAWN_BATCH_MIN_MINUTE: float = 1.5  # Minutes before batch spawns begin
-const SPAWN_BATCH_SIZE_PER_MINUTE: float = 0.75  # Extra enemies per batch per minute
+const BASE_SPAWN_RATE: float = 0.4  # Enemies per second at start (slow burn)
+const SPAWN_RATE_GROWTH: float = 0.3  # Additional enemies/sec per minute
+const SPAWN_BATCH_MIN_MINUTE: float = 3.0  # Minutes before batch spawns begin
+const SPAWN_BATCH_SIZE_PER_MINUTE: float = 0.5  # Extra enemies per batch per minute
 
 # =============================================================================
 # PICKUPS

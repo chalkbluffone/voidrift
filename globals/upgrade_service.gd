@@ -63,13 +63,12 @@ func generate_level_up_options() -> Array[Dictionary]:
 	var w_new_module: float = 1.2
 
 	if weapon_slots_full:
+		# All weapon slots occupied — only offer upgrades for owned weapons.
 		w_existing_weapon = 8.0
 		w_new_weapon = 0.0
-	elif owned_weapons.size() > 0:
-		w_existing_weapon = 4.0
-		w_new_weapon = 1.5
 	else:
-		w_existing_weapon = 1.0
+		# Slots still open — only offer new weapons until loadout is full.
+		w_existing_weapon = 0.0
 		w_new_weapon = 6.0
 
 	if module_slots_full:

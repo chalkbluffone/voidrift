@@ -20,11 +20,12 @@ const StatsComponentScript: GDScript = preload("res://scripts/core/stats_compone
 @onready var weapons: Node = $WeaponComponent
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 @onready var sprite: AnimatedSprite2D = $Sprite2D
-@onready var GameManager: Node = get_node_or_null("/root/GameManager")
+@onready var RunManager: Node = get_node_or_null("/root/RunManager")
+@onready var ProgressionManager: Node = get_node_or_null("/root/ProgressionManager")
 @onready var FileLogger: Node = get_node_or_null("/root/FileLogger")
 
 # --- Test Mode ---
-## When true, skips GameManager registration and auto-weapon equip
+## When true, skips run registration and auto-weapon equip
 @export var test_mode: bool = false
 
 # --- Phase Shift ---
@@ -57,6 +58,13 @@ const DAMAGE_IFRAMES: float = 0.5  # Brief i-frames after taking damage
 # Used by Nope Bubble and similar defensive weapons to block/reduce incoming damage.
 var _damage_interceptors: Array[Callable] = []
 
+# --- Camera Dynamic Zoom ---
+const CAMERA_BASE_ZOOM: float = 1.2
+const CAMERA_SPEED_ZOOM_FACTOR: float = 0.08  ## How much zoom decreases per 1.0 speed multiplier above baseline
+const CAMERA_MIN_ZOOM: float = 0.7  ## Floor so camera never zooms too far out
+const CAMERA_ZOOM_LERP: float = 3.0  ## Smoothing speed for zoom transitions
+var _camera: Camera2D = null
+
 # --- Captain Ability ---
 var _captain_ability: Node = null
 
@@ -76,13 +84,13 @@ func _ready() -> void:
 		if stats:
 			stats.stat_changed.connect(_on_stat_changed)
 	
-	# Register with GameManager (skip in test mode)
-	if not test_mode and GameManager:
-		GameManager.register_player(self)
+	# Register with RunManager (skip in test mode)
+	if not test_mode and RunManager:
+		RunManager.register_player(self)
 		
 		# Listen for level ups
-		if not GameManager.level_up_completed.is_connected(_on_level_up_completed):
-			GameManager.level_up_completed.connect(_on_level_up_completed)
+		if not ProgressionManager.level_up_completed.is_connected(_on_level_up_completed):
+			ProgressionManager.level_up_completed.connect(_on_level_up_completed)
 	
 	# Connect stats signals
 	if stats:
@@ -91,6 +99,9 @@ func _ready() -> void:
 	
 	phase_energy = max_phase_energy
 	phase_energy_changed.emit(phase_energy, max_phase_energy)
+	
+	# Cache camera reference
+	_camera = get_node_or_null("Camera2D") as Camera2D
 	
 	# In test mode, disable auto-fire so test lab controls firing manually
 	if test_mode and weapons:
@@ -161,12 +172,12 @@ func _setup_captain_ability(captain_data: Dictionary) -> void:
 func _deferred_init() -> void:
 	FileLogger.log_info("Ship", "Running deferred init...")
 	# Initialize from loadout data (deferred to ensure @onready vars ready)
-	if not GameManager.run_data.ship_data.is_empty():
+	if not RunManager.run_data.ship_data.is_empty():
 		FileLogger.log_info("Ship", "Initializing from loadout data")
 		_initialize_from_loadout(
-			GameManager.run_data.ship_data,
-			GameManager.run_data.captain_data,
-			GameManager.run_data.synergy_data
+			RunManager.run_data.ship_data,
+			RunManager.run_data.captain_data,
+			RunManager.run_data.synergy_data
 		)
 	else:
 		# Default setup for testing without full run
@@ -211,6 +222,7 @@ func _physics_process(delta: float) -> void:
 	_process_phase_recharge(delta)
 	_process_iframes(delta)
 	_process_movement(delta)
+	_process_camera_zoom(delta)
 
 
 func _process_movement(delta: float) -> void:
@@ -258,6 +270,18 @@ func _process_movement(delta: float) -> void:
 	# Track last move direction for phase shift
 	if desired_dir.length() > 0.1:
 		_last_move_direction = desired_dir.normalized()
+
+
+func _process_camera_zoom(delta: float) -> void:
+	if _camera == null:
+		return
+	var speed_mult: float = stats.get_stat(StatsComponentScript.STAT_MOVEMENT_SPEED)
+	# Extra speed above baseline (1.0) pulls the camera back
+	var speed_excess: float = maxf(speed_mult - 1.0, 0.0)
+	var target_zoom: float = maxf(CAMERA_BASE_ZOOM - speed_excess * CAMERA_SPEED_ZOOM_FACTOR, CAMERA_MIN_ZOOM)
+	var current_zoom: float = _camera.zoom.x
+	var new_zoom: float = lerpf(current_zoom, target_zoom, minf(1.0, CAMERA_ZOOM_LERP * delta))
+	_camera.zoom = Vector2(new_zoom, new_zoom)
 
 
 func _input(event: InputEvent) -> void:
@@ -308,7 +332,7 @@ func _try_phase_shift() -> void:
 		tween.tween_property(sprite, "modulate:a", 0.3, 0.05)
 	
 	phase_shift_started.emit()
-	GameManager.record_phase()
+	RunManager.record_phase()
 
 
 func _process_phase_shift(delta: float) -> void:
@@ -383,7 +407,7 @@ func take_damage(amount: float, source: Node = null) -> float:
 	var actual_damage: float = stats.take_damage(amount, source)
 	
 	if actual_damage > 0:
-		GameManager.record_damage_taken(actual_damage)
+		RunManager.record_damage_taken(actual_damage)
 		_flash_damage()
 		
 		# Apply knockback away from source

@@ -1,7 +1,7 @@
 extends Node2D
 class_name TothianMine
 
-@onready var GameManager: Node = get_node_or_null("/root/GameManager")
+@onready var RunManager: Node = get_node_or_null("/root/RunManager")
 
 @export var damage: float = 15.0
 @export var duration: float = 3.0
@@ -159,8 +159,8 @@ func _apply_aoe_damage() -> void:
 			continue
 		if enemy.has_method("take_damage"):
 			enemy.take_damage(damage, self)
-			if GameManager and GameManager.has_method("record_damage_dealt"):
-				GameManager.record_damage_dealt(damage)
+			if RunManager and RunManager.has_method("record_damage_dealt"):
+				RunManager.record_damage_dealt(damage)
 
 
 func _spawn_explosion_flash() -> void:

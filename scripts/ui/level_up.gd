@@ -19,7 +19,8 @@ const COLOR_BUTTON: Color = Color(0.67, 0.2, 0.95, 1.0)       # Neon purple
 const COLOR_BUTTON_HOVER: Color = Color(1.0, 0.08, 0.4, 1.0)  # Hot pink
 
 @onready var GameConfig: Node = get_node("/root/GameConfig")
-
+@onready var RunManager: Node = get_node("/root/RunManager")
+@onready var ProgressionManager: Node = get_node("/root/ProgressionManager")
 @onready var level_up_label: Label = $VBoxContainer/LevelUpLabel
 @onready var choose_label: Label = $VBoxContainer/ChooseLabel
 @onready var choices_container: HBoxContainer = $VBoxContainer/ChoicesContainer
@@ -29,7 +30,7 @@ const COLOR_BUTTON_HOVER: Color = Color(1.0, 0.08, 0.4, 1.0)  # Hot pink
 @onready var background: ColorRect = $ColorRect
 @onready var root_container: Control = $VBoxContainer
 
-@onready var GameManager: Node = get_node("/root/GameManager")
+@onready var UpgradeService: Node = get_node("/root/UpgradeService")
 @onready var FileLogger: Node = get_node("/root/FileLogger")
 
 # Card references (3 cards)
@@ -61,8 +62,8 @@ func _ready() -> void:
 	refresh_button.pressed.connect(_on_refresh_pressed)
 	skip_button.pressed.connect(_on_skip_pressed)
 	
-	# Connect to GameManager signals
-	GameManager.level_up_triggered.connect(_on_level_up_triggered)
+	# Connect to ProgressionManager signals
+	ProgressionManager.level_up_triggered.connect(_on_level_up_triggered)
 	
 	# Apply synthwave styling
 	_apply_synthwave_theme()
@@ -281,7 +282,7 @@ func _get_rarity_color(rarity: String) -> Color:
 
 
 func _get_current_stacks(upgrade_id: String) -> int:
-	for upgrade in GameManager.run_data.ship_upgrades:
+	for upgrade in RunManager.run_data.ship_upgrades:
 		if upgrade.id == upgrade_id:
 			return upgrade.stacks
 	return 0
@@ -326,7 +327,7 @@ func _format_weapon_effects_line(effects: Array) -> String:
 
 
 func _update_refresh_button() -> void:
-	var current_credits: int = GameManager.run_data.credits
+	var current_credits: int = RunManager.run_data.credits
 	refresh_button.text = "Refresh (%d)" % GameConfig.LEVEL_UP_REFRESH_COST
 	refresh_button.disabled = current_credits < GameConfig.LEVEL_UP_REFRESH_COST
 	
@@ -358,11 +359,11 @@ func _on_card_selected(index: int) -> void:
 	FileLogger.log_info("LevelUpUI", "Selected option %d: %s" % [index, selected_option.get("id", "unknown")])
 	
 	_hide_ui()
-	GameManager.select_level_up_option(selected_option)
+	ProgressionManager.select_level_up_option(selected_option)
 
 
 func _on_refresh_pressed() -> void:
-	if GameManager.spend_credits(GameConfig.LEVEL_UP_REFRESH_COST):
+	if ProgressionManager.spend_credits(GameConfig.LEVEL_UP_REFRESH_COST):
 		FileLogger.log_info("LevelUpUI", "Refreshing options (spent %d credits)" % GameConfig.LEVEL_UP_REFRESH_COST)
 		
 		# Generate new options
@@ -377,7 +378,7 @@ func _on_refresh_pressed() -> void:
 func _on_skip_pressed() -> void:
 	FileLogger.log_info("LevelUpUI", "Skipping level up")
 	_hide_ui()
-	GameManager.resume_game()
+	RunManager.resume_game()
 
 
 func _hide_ui() -> void:

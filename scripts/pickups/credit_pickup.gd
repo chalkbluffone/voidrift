@@ -15,4 +15,4 @@ func initialize(amount: int) -> void:
 
 
 func _apply_effect() -> void:
-	GameManager.add_credits(credit_amount)
+	ProgressionManager.add_credits(credit_amount)

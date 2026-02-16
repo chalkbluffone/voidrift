@@ -13,7 +13,6 @@ extends CanvasLayer
 @onready var main_menu_button: Button = $VBoxContainer/ButtonsContainer/MainMenuButton
 
 @onready var RunManager: Node = get_node("/root/RunManager")
-@onready var GameManager: Node = get_node("/root/GameManager")
 @onready var FileLogger: Node = get_node_or_null("/root/FileLogger")
 
 
