@@ -45,6 +45,8 @@ const COLOR_LEVEL_GLOW: Color = Color(1.0, 0.4, 0.8, 1.0)  # Pink glow for level
 const COLOR_CREDITS: Color = Color(1.0, 0.85, 0.1, 1.0)  # Gold for credits
 const COLOR_WEAPONS: Color = Color(0.2, 1.0, 0.9, 1.0)  # Cyan-ish
 
+const FONT_HEADER: Font = preload("res://assets/fonts/Orbitron-Bold.ttf")
+
 
 func _ready() -> void:
 	FileLogger.log_info("HUD", "Initializing HUD...")
@@ -107,6 +109,7 @@ func _apply_synthwave_theme() -> void:
 	xp_bar.add_theme_stylebox_override("background", xp_bg)
 	
 	# Timer - Cyan
+	timer_label.add_theme_font_override("font", FONT_HEADER)
 	timer_label.add_theme_color_override("font_color", COLOR_TIMER)
 	timer_label.add_theme_color_override("font_outline_color", Color(0, 0.3, 0.4, 1.0))
 	timer_label.add_theme_constant_override("outline_size", 2)
@@ -115,18 +118,22 @@ func _apply_synthwave_theme() -> void:
 	fps_label.add_theme_color_override("font_color", Color(0.0, 0.7, 0.6, 0.7))
 	
 	# Level - Neon yellow with glow effect
+	level_label.add_theme_font_override("font", FONT_HEADER)
 	level_label.add_theme_color_override("font_color", COLOR_LEVEL)
 	level_label.add_theme_color_override("font_outline_color", Color(1.0, 0.5, 0.0, 0.8))
 	level_label.add_theme_constant_override("outline_size", 3)
 	_level_base_scale = level_label.scale
 	
 	# Credits - Gold
+	credits_label.add_theme_font_override("font", FONT_HEADER)
 	credits_label.add_theme_color_override("font_color", COLOR_CREDITS)
 
 	# Weapons panel
+	weapons_title.add_theme_font_override("font", FONT_HEADER)
 	weapons_title.add_theme_color_override("font_color", COLOR_WEAPONS)
 	weapons_title.add_theme_color_override("font_outline_color", Color(0, 0.25, 0.3, 1.0))
 	weapons_title.add_theme_constant_override("outline_size", 2)
+	modules_title.add_theme_font_override("font", FONT_HEADER)
 	modules_title.add_theme_color_override("font_color", COLOR_WEAPONS)
 	modules_title.add_theme_color_override("font_outline_color", Color(0, 0.25, 0.3, 1.0))
 	modules_title.add_theme_constant_override("outline_size", 2)
@@ -396,6 +403,7 @@ func _refresh_weapon_list() -> void:
 		label.add_theme_color_override("font_color", Color(1, 1, 1, 0.95))
 		label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
 		label.add_theme_constant_override("outline_size", 2)
+		label.add_theme_font_override("font", FONT_HEADER)
 		label.add_theme_font_size_override("font_size", 14)
 		label.tooltip_text = "%s (LV %d)" % [id, level]
 		weapons_list.add_child(label)
@@ -442,6 +450,7 @@ func _refresh_modules_list() -> void:
 		label.add_theme_color_override("font_color", Color(1, 1, 1, 0.90))
 		label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
 		label.add_theme_constant_override("outline_size", 2)
+		label.add_theme_font_override("font", FONT_HEADER)
 		label.add_theme_font_size_override("font_size", 13)
 		label.tooltip_text = "%s (LV %d)" % [id, level]
 		modules_list.add_child(label)

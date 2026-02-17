@@ -39,6 +39,10 @@ window/size/initial_position_type=3
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 
+[gui]
+
+theme/custom="res://assets/default_theme.tres"
+
 [input]
 
 ui_left={

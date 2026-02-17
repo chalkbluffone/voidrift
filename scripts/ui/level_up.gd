@@ -18,6 +18,8 @@ const COLOR_PANEL_BORDER: Color = Color(1.0, 0.08, 0.4, 1.0)  # Hot pink
 const COLOR_BUTTON: Color = Color(0.67, 0.2, 0.95, 1.0)       # Neon purple
 const COLOR_BUTTON_HOVER: Color = Color(1.0, 0.08, 0.4, 1.0)  # Hot pink
 
+const FONT_HEADER: Font = preload("res://assets/fonts/Orbitron-Bold.ttf")
+
 @onready var GameConfig: Node = get_node("/root/GameConfig")
 @onready var RunManager: Node = get_node("/root/RunManager")
 @onready var ProgressionManager: Node = get_node("/root/ProgressionManager")
@@ -79,10 +81,12 @@ func _apply_synthwave_theme() -> void:
 	
 	# Level up label - big neon yellow
 	level_up_label.add_theme_color_override("font_color", Color(1.0, 0.95, 0.2, 1.0))
+	level_up_label.add_theme_font_override("font", FONT_HEADER)
 	level_up_label.add_theme_font_size_override("font_size", 72)
 	
 	# Choose label - cyan
 	choose_label.add_theme_color_override("font_color", Color(0.0, 1.0, 0.9, 1.0))
+	choose_label.add_theme_font_override("font", FONT_HEADER)
 	choose_label.add_theme_font_size_override("font_size", 32)
 	
 	# Style the cards
@@ -92,7 +96,9 @@ func _apply_synthwave_theme() -> void:
 	# Style action buttons
 	_style_button(refresh_button, COLOR_BUTTON)
 	_style_button(skip_button, Color(0.5, 0.5, 0.5, 1.0))
+	refresh_button.add_theme_font_override("font", FONT_HEADER)
 	refresh_button.add_theme_font_size_override("font_size", 22)
+	skip_button.add_theme_font_override("font", FONT_HEADER)
 	skip_button.add_theme_font_size_override("font_size", 22)
 
 
@@ -245,10 +251,12 @@ func _update_card(index: int, option: Dictionary) -> void:
 	desc_label.add_theme_font_size_override("font_size", 20)
 	
 	# Style name label font size
+	name_label.add_theme_font_override("font", FONT_HEADER)
 	name_label.add_theme_font_size_override("font_size", 28)
 	
 	# Style select button
 	_style_button(button, COLOR_BUTTON)
+	button.add_theme_font_override("font", FONT_HEADER)
 	button.add_theme_font_size_override("font_size", 22)
 
 

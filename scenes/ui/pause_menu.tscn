@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://dpausemenu00001"]
+[gd_scene load_steps=3 format=3 uid="uid://dpausemenu00001"]
 
 [ext_resource type="Script" path="res://scripts/ui/pause_menu.gd" id="1_pause"]
+[ext_resource type="FontFile" path="res://assets/fonts/Orbitron-Bold.ttf" id="2_orbitron"]
 
 [node name="PauseMenu" type="CanvasLayer"]
 layer = 100
@@ -34,6 +35,7 @@ theme_override_constants/separation = 12
 
 [node name="PausedLabel" type="Label" parent="Panel/VBoxContainer"]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("2_orbitron")
 theme_override_font_sizes/font_size = 32
 text = "PAUSED"
 horizontal_alignment = 1
@@ -96,6 +98,7 @@ theme_override_constants/separation = 12
 
 [node name="Title" type="Label" parent="OptionsContainer/Panel/VBoxContainer"]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("2_orbitron")
 theme_override_font_sizes/font_size = 24
 text = "OPTIONS"
 horizontal_alignment = 1

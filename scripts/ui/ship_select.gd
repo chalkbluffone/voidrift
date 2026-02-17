@@ -25,6 +25,8 @@ const CARD_CORNER_RADIUS: int = 8
 const CARD_BORDER_WIDTH: int = 2
 const BUTTON_CORNER_RADIUS: int = 4
 
+const FONT_HEADER: Font = preload("res://assets/fonts/Orbitron-Bold.ttf")
+
 @onready var DataLoader: Node = get_node("/root/DataLoader")
 @onready var RunManager: Node = get_node("/root/RunManager")
 @onready var FileLogger: Node = get_node_or_null("/root/FileLogger")
@@ -218,6 +220,7 @@ func _build_ship_card(data: Dictionary) -> PanelContainer:
 	# Name
 	var name_label: Label = Label.new()
 	name_label.text = String(data.get("name", ship_id))
+	name_label.add_theme_font_override("font", FONT_HEADER)
 	name_label.add_theme_font_size_override("font_size", 22)
 	name_label.add_theme_color_override("font_color", COLOR_NAME)
 	vbox.add_child(name_label)
@@ -331,6 +334,7 @@ func _build_captain_card(data: Dictionary) -> PanelContainer:
 	# Name
 	var name_label: Label = Label.new()
 	name_label.text = String(data.get("name", captain_id))
+	name_label.add_theme_font_override("font", FONT_HEADER)
 	name_label.add_theme_font_size_override("font_size", 22)
 	name_label.add_theme_color_override("font_color", COLOR_NAME)
 	vbox.add_child(name_label)
@@ -378,12 +382,14 @@ func _add_stat_pair(parent: HBoxContainer, label_text: String, value_text: Strin
 
 	var lbl: Label = Label.new()
 	lbl.text = label_text + ":"
+	lbl.add_theme_font_override("font", FONT_HEADER)
 	lbl.add_theme_font_size_override("font_size", 13)
 	lbl.add_theme_color_override("font_color", COLOR_STAT_LABEL)
 	pair.add_child(lbl)
 
 	var val: Label = Label.new()
 	val.text = value_text
+	val.add_theme_font_override("font", FONT_HEADER)
 	val.add_theme_font_size_override("font_size", 13)
 	val.add_theme_color_override("font_color", COLOR_STAT_VALUE)
 	pair.add_child(val)

@@ -12,6 +12,8 @@ extends CanvasLayer
 @onready var retry_button: Button = $VBoxContainer/ButtonsContainer/RetryButton
 @onready var main_menu_button: Button = $VBoxContainer/ButtonsContainer/MainMenuButton
 
+const FONT_HEADER: Font = preload("res://assets/fonts/Orbitron-Bold.ttf")
+
 @onready var RunManager: Node = get_node("/root/RunManager")
 @onready var FileLogger: Node = get_node_or_null("/root/FileLogger")
 
@@ -65,6 +67,7 @@ func _on_run_ended(victory: bool, stats: Dictionary) -> void:
 
 func _apply_synthwave_theme() -> void:
 	# Title
+	game_over_label.add_theme_font_override("font", FONT_HEADER)
 	game_over_label.add_theme_font_size_override("font_size", 48)
 	game_over_label.add_theme_color_override("font_outline_color", Color(0.4, 0, 0.1, 1.0))
 	game_over_label.add_theme_constant_override("outline_size", 4)
@@ -76,6 +79,7 @@ func _apply_synthwave_theme() -> void:
 
 	# Buttons - synthwave style
 	for button: Button in [retry_button, main_menu_button]:
+		button.add_theme_font_override("font", FONT_HEADER)
 		button.add_theme_font_size_override("font_size", 22)
 
 

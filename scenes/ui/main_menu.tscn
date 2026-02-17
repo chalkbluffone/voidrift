@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://dmainmenu00001"]
+[gd_scene load_steps=3 format=3 uid="uid://dmainmenu00001"]
 
 [ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_menu"]
+[ext_resource type="FontFile" path="res://assets/fonts/Orbitron-Bold.ttf" id="2_orbitron"]
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -37,6 +38,7 @@ theme_override_constants/separation = 15
 
 [node name="TitleLabel" type="Label" parent="VBoxContainer"]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("2_orbitron")
 theme_override_font_sizes/font_size = 48
 text = "VOIDRIFT"
 horizontal_alignment = 1
@@ -49,24 +51,28 @@ layout_mode = 2
 custom_minimum_size = Vector2(200, 40)
 layout_mode = 2
 size_flags_horizontal = 4
+theme_override_fonts/font = ExtResource("2_orbitron")
 text = "▶ Play"
 
 [node name="OptionsButton" type="Button" parent="VBoxContainer"]
 custom_minimum_size = Vector2(200, 40)
 layout_mode = 2
 size_flags_horizontal = 4
+theme_override_fonts/font = ExtResource("2_orbitron")
 text = "⚙ Options"
 
 [node name="WeaponsLabButton" type="Button" parent="VBoxContainer"]
 custom_minimum_size = Vector2(200, 40)
 layout_mode = 2
 size_flags_horizontal = 4
+theme_override_fonts/font = ExtResource("2_orbitron")
 text = "🔧 Weapons Lab"
 
 [node name="QuitButton" type="Button" parent="VBoxContainer"]
 custom_minimum_size = Vector2(200, 40)
 layout_mode = 2
 size_flags_horizontal = 4
+theme_override_fonts/font = ExtResource("2_orbitron")
 text = "✕ Quit"
 
 [node name="VersionLabel" type="Label" parent="."]
