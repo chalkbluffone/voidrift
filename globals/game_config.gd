@@ -13,7 +13,9 @@ const PLAYER_TURN_RATE: float = 6.0     # Radians/sec. How fast the ship turns (
 # ENEMIES
 # =============================================================================
 const ENEMY_BASE_SPEED: float = 70.0  # Base movement speed (slower than player's 150)
-const ENEMY_SPEED_PER_LEVEL: float = 6.0  # Speed increase per player level
+
+# Overtime speed scaling — only activates after the countdown hits zero
+const ENEMY_OVERTIME_SPEED_PER_MINUTE: float = 8.0  # +8 speed per overtime minute
 
 # Enemy damage scales linearly — manageable with HP/armor/evasion upgrades
 const ENEMY_DAMAGE_SCALE_PER_MINUTE: float = 0.25  # +25% damage per minute (linear)
@@ -33,9 +35,12 @@ const ENEMY_XP_SCALE_PER_MINUTE: float = 0.15  # +15% XP value per minute
 const SPAWN_RADIUS_MIN: float = 400.0
 const SPAWN_RADIUS_MAX: float = 600.0
 const BASE_SPAWN_RATE: float = 0.4  # Enemies per second at start (slow burn)
-const SPAWN_RATE_GROWTH: float = 0.3  # Additional enemies/sec per minute
+const SPAWN_RATE_GROWTH: float = 0.3  # Additional enemies/sec per minute (during countdown)
 const SPAWN_BATCH_MIN_MINUTE: float = 3.0  # Minutes before batch spawns begin
 const SPAWN_BATCH_SIZE_PER_MINUTE: float = 0.5  # Extra enemies per batch per minute
+
+# Overtime spawn scaling — additional ramp after the countdown hits zero
+const OVERTIME_SPAWN_RATE_GROWTH: float = 0.8  # Extra enemies/sec per overtime minute
 
 # =============================================================================
 # PICKUPS

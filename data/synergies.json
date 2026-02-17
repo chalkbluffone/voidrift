@@ -166,5 +166,60 @@
 			"stardust_gain": 0.08,
 			"pickup_range": 0.1
 		}
+	},
+	"starchaser+captain_spectra": {
+		"ship_id": "starchaser",
+		"captain_id": "captain_spectra",
+		"name": "Pattern Recognition",
+		"description": "SPECTRA's algorithms exploit the scout's agility for optimal firing angles.",
+		"discovered_text": "SPECTRA sighs: 'Finally, a ship that can keep up with my targeting solutions. Barely.'",
+		"effects": {
+			"attack_speed": 0.06,
+			"evasion": 4.0
+		}
+	},
+	"phantom+captain_spectra": {
+		"ship_id": "phantom",
+		"captain_id": "captain_spectra",
+		"name": "Burst Compiler",
+		"description": "AI-optimized blink timing turns every teleport exit into a kill window.",
+		"discovered_text": "SPECTRA quips: 'Blink in, delete everything, blink out. I've automated your entire personality.'",
+		"effects": {
+			"crit_chance": 4.0,
+			"attack_speed": 0.05
+		}
+	},
+	"dreadnought+captain_spectra": {
+		"ship_id": "dreadnought",
+		"captain_id": "captain_spectra",
+		"name": "Turret Logic",
+		"description": "SPECTRA repurposes the fortress as a stationary weapons platform. Efficiency over elegance.",
+		"discovered_text": "SPECTRA mutters: 'This thing steers like a filing cabinet. Good thing steering is beneath me.'",
+		"effects": {
+			"damage": 0.06,
+			"projectile_count": 1.0
+		}
+	},
+	"viper+captain_spectra": {
+		"ship_id": "viper",
+		"captain_id": "captain_spectra",
+		"name": "Predictive Strafing",
+		"description": "Machine-perfect lead calculations at dogfight speeds.",
+		"discovered_text": "SPECTRA purrs: 'Oh, a ship that actually goes fast. I might enjoy this. Don't ruin it.'",
+		"effects": {
+			"projectile_speed": 0.08,
+			"crit_damage": 0.08
+		}
+	},
+	"prometheus+captain_spectra": {
+		"ship_id": "prometheus",
+		"captain_id": "captain_spectra",
+		"name": "Data Fusion",
+		"description": "SPECTRA integrates with the Prometheus's science arrays. The ship is now an extension of her ego.",
+		"discovered_text": "SPECTRA announces: 'I've optimized every system on this vessel. You're welcome, organics.'",
+		"effects": {
+			"attack_speed": 0.08,
+			"size": 0.05
+		}
 	}
 }

@@ -4,8 +4,8 @@
 	"captain_nightmare": {
 		"id": "captain_nightmare",
 		"name": "Captain Nightmare",
-		"description": "Self-proclaimed 'most dangerous pilot in the sector,' Captain Nightmare talks a bigger game than his brain can cash. He charges headfirst into every engagement with reckless enthusiasm and questionable tactical awareness, fueled by the promise of cold drinks and zero responsibilities back at Starbase Recreatia-7. What he lacks in intellect he makes up for in sheer, unearned confidence — and honestly, it kind of works. Offense-focused captain specializing in maximizing damage output with a devastating burst ability.",
-		"sprite": "res://assets/captains/captain_1.png",
+		"description": "The self-proclaimed most dangerous pilot in the sector — all bravado, no brain, and somehow it works. Fueled by cold drinks from Starbase Recreatia-7 and a talent for turning bad decisions into collateral damage.",
+		"sprite": "res://assets/captains/captain_nightmare.png",
 		"passive": {
 			"id": "combat_focus",
 			"name": "Combat Focus",
@@ -32,8 +32,8 @@
 	"captain_finswick": {
 		"id": "captain_finswick",
 		"name": "Gerald \"The Hedge\" Finswick",
-		"description": "Former risk assessor for Galactic Mutual Insurance, Gerald quit his desk job after calculating a 99.7% chance that 'someone more competent should be out there.' He was wrong about the competent part, but his obsessive need to mitigate liability has made him nearly unkillable. Every shield upgrade is filed in triplicate, every hull repair comes with a warranty, and his pre-combat checklist has 47 items. His crew calls him 'The Hedge' because he never takes a position without covering the downside. Defense-focused captain specializing in survival with an emergency shield ability.",
-		"sprite": "res://assets/captains/captain_2.png",
+		"description": "A former insurance risk assessor who quit his desk job and became nearly unkillable through sheer bureaucratic caution. Every shield is filed in triplicate and every hull repair comes with a warranty.",
+		"sprite": "res://assets/captains/finswick.png",
 		"passive": {
 			"id": "hardened_hull",
 			"name": "Hardened Hull",
@@ -61,8 +61,8 @@
 	"captain_zoltan": {
 		"id": "captain_zoltan",
 		"name": "Zoltan the Destroyer",
-		"description": "A.K.A. The Prime Ruler. A.K.A. The Hero of the Battle of Treskelia. At 378 Earth-years old, Zoltan has conquered worlds, crushed rebellions, and still can't figure out how to file a docking permit. A Balsurpian who breathes Xenon and keeps his delicate Balnarg tucked safely under three layers of ceremonial armor, Zoltan rules the battlefield with five thrashing tentacles while the sixth — the ingestion one — is perpetually wrapped around a canister of Synthetic Bload. Without it he goes docile, which he insists has never happened and anyone who says otherwise was vaporized at Treskelia. His greatest talent has always been turning foes into loyal minions — most of his conquests were won not by destroying armies but by convincing them to switch sides mid-battle. Utility-focused captain specializing in economy and control with a devastating minion-conversion ability.",
-		"sprite": "res://assets/captains/captain_3.png",
+		"description": "A.K.A. The Prime Ruler. A xenon-breathing, Synthetic Bload-fueled Balsurpian conqueror whose greatest weapon isn't his five combat tentacles — it's convincing your army to join his.",
+		"sprite": "res://assets/captains/zoltan.png",
 		"passive": {
 			"id": "resourceful",
 			"name": "Resourceful",
@@ -89,5 +89,34 @@
 			"type": "complete_run",
 			"difficulty": 1.0
 		}
+	},
+	"captain_spectra": {
+		"id": "captain_spectra",
+		"name": "S.P.E.C.T.R.A.",
+		"description": "The Digital Diva of the Metaverse. A highly sophisticated AI created by J.A.Y. Industries with a British accent and zero patience for organic incompetence.",
+		"sprite": "res://assets/captains/spectra.png",
+		"passive": {
+			"id": "optimized_targeting",
+			"name": "Optimized Targeting",
+			"description": "+15% attack speed, +10% projectile speed",
+			"effects": {
+				"attack_speed": 0.15,
+				"projectile_speed": 0.1
+			}
+		},
+		"active_ability": {
+			"id": "overclock",
+			"name": "Overclock",
+			"description": "Overclock all weapon systems for 5 seconds: +50% fire rate and +2 projectiles per volley.",
+			"template": "buff_self",
+			"cooldown": 75.0,
+			"duration": 5.0,
+			"effects": {
+				"attack_speed": 0.5,
+				"projectile_count": 2.0
+			},
+			"vfx": "overclock"
+		},
+		"unlock_condition": "default"
 	}
 }

@@ -115,15 +115,99 @@ func _build_ship_card(data: Dictionary) -> PanelContainer:
 	hbox.add_theme_constant_override("separation", 14)
 	margin.add_child(hbox)
 
-	# Ship sprite
+	# Ship sprite (forced square container with aspect-centered content)
 	var sprite_path: String = String(data.get("sprite", ""))
+	var sprite_container: Control = Control.new()
+	sprite_container.custom_minimum_size = Vector2(128, 128)
+	sprite_container.clip_contents = true
+
+	# Animated starfield background
+	var star_bg: ColorRect = ColorRect.new()
+	star_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	star_bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var star_mat: ShaderMaterial = ShaderMaterial.new()
+	var star_shader: Shader = Shader.new()
+	star_shader.code = "shader_type canvas_item;\n" \
+		+ "uniform float scroll_speed = 0.15;\n" \
+		+ "uniform float layer_scale = 40.0;\n" \
+		+ "uniform float density = 0.35;\n" \
+		+ "uniform float star_size = 0.04;\n" \
+		+ "uniform vec3 bg_color = vec3(0.04, 0.02, 0.1);\n" \
+		+ "\n" \
+		+ "float hash21(vec2 p) {\n" \
+		+ "    vec3 p3 = fract(vec3(p.xyx) * 0.1031);\n" \
+		+ "    p3 += dot(p3, p3.yzx + 33.33);\n" \
+		+ "    return fract((p3.x + p3.y) * p3.z);\n" \
+		+ "}\n" \
+		+ "\n" \
+		+ "vec2 hash22(vec2 p) {\n" \
+		+ "    return vec2(hash21(p), hash21(p + 19.19));\n" \
+		+ "}\n" \
+		+ "\n" \
+		+ "float star_layer(vec2 uv, float scale, float spd, float seed_off) {\n" \
+		+ "    vec2 scroll_uv = uv * scale + vec2(TIME * spd, TIME * spd * 0.3) + seed_off;\n" \
+		+ "    vec2 cell = floor(scroll_uv);\n" \
+		+ "    vec2 f = fract(scroll_uv);\n" \
+		+ "    float r = hash21(cell + seed_off);\n" \
+		+ "    float has_star = step(r, density);\n" \
+		+ "    vec2 center = hash22(cell + 7.7 + seed_off) * 0.8 + 0.1;\n" \
+		+ "    float sz = star_size * mix(0.5, 1.5, hash21(cell + 13.13 + seed_off));\n" \
+		+ "    float d = distance(f, center);\n" \
+		+ "    float core = smoothstep(sz, 0.0, d);\n" \
+		+ "    float glow = smoothstep(sz * 2.5, 0.0, d) * 0.3;\n" \
+		+ "    float twinkle = 1.0 + sin(TIME * mix(1.0, 3.0, r) + r * 6.28) * 0.3;\n" \
+		+ "    return (core + glow) * has_star * twinkle;\n" \
+		+ "}\n" \
+		+ "\n" \
+		+ "void fragment() {\n" \
+		+ "    float s1 = star_layer(UV, layer_scale, scroll_speed, 0.0);\n" \
+		+ "    float s2 = star_layer(UV, layer_scale * 0.6, scroll_speed * 0.5, 42.0) * 0.5;\n" \
+		+ "    float s3 = star_layer(UV, layer_scale * 1.4, scroll_speed * 1.5, 99.0) * 0.7;\n" \
+		+ "    float stars = s1 + s2 + s3;\n" \
+		+ "    vec3 col = bg_color + vec3(0.8, 0.85, 1.0) * stars;\n" \
+		+ "    COLOR = vec4(col, 1.0);\n" \
+		+ "}\n"
+	star_mat.shader = star_shader
+	star_bg.material = star_mat
+	sprite_container.add_child(star_bg)
+
 	var tex_rect: TextureRect = TextureRect.new()
-	tex_rect.custom_minimum_size = Vector2(64, 64)
-	tex_rect.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
+	tex_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	tex_rect.offset_left = 19.0
+	tex_rect.offset_top = 19.0
+	tex_rect.offset_right = -19.0
+	tex_rect.offset_bottom = -19.0
+	tex_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	tex_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	if ResourceLoader.exists(sprite_path):
 		tex_rect.texture = load(sprite_path)
-	hbox.add_child(tex_rect)
+	sprite_container.add_child(tex_rect)
+
+	# Synthwave gradient border overlay
+	var border_rect: ColorRect = ColorRect.new()
+	border_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	border_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var border_mat: ShaderMaterial = ShaderMaterial.new()
+	var border_shader: Shader = Shader.new()
+	border_shader.code = "shader_type canvas_item;\n" \
+		+ "uniform float border_width = 2.0;\n" \
+		+ "uniform vec2 rect_size = vec2(128.0, 128.0);\n" \
+		+ "void fragment() {\n" \
+		+ "    vec2 pixel = UV * rect_size;\n" \
+		+ "    float d = min(min(pixel.x, rect_size.x - pixel.x), min(pixel.y, rect_size.y - pixel.y));\n" \
+		+ "    float mask = 1.0 - smoothstep(border_width - 0.5, border_width + 0.5, d);\n" \
+		+ "    vec3 c1 = vec3(1.0, 0.08, 0.58);\n" \
+		+ "    vec3 c2 = vec3(0.0, 1.0, 0.9);\n" \
+		+ "    vec3 grad = mix(c1, c2, UV.x + UV.y * 0.5);\n" \
+		+ "    COLOR = vec4(grad, mask);\n" \
+		+ "}\n"
+	border_mat.shader = border_shader
+	border_mat.set_shader_parameter("border_width", 2.0)
+	border_mat.set_shader_parameter("rect_size", Vector2(128.0, 128.0))
+	border_rect.material = border_mat
+	sprite_container.add_child(border_rect)
+
+	hbox.add_child(sprite_container)
 
 	# Info column
 	var vbox: VBoxContainer = VBoxContainer.new()
@@ -198,15 +282,45 @@ func _build_captain_card(data: Dictionary) -> PanelContainer:
 	hbox.add_theme_constant_override("separation", 14)
 	margin.add_child(hbox)
 
-	# Captain sprite
+	# Captain sprite (forced square container with aspect-centered content)
 	var sprite_path: String = String(data.get("sprite", ""))
+	var sprite_container: Control = Control.new()
+	sprite_container.custom_minimum_size = Vector2(128, 128)
+	sprite_container.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	sprite_container.clip_contents = true
 	var tex_rect: TextureRect = TextureRect.new()
-	tex_rect.custom_minimum_size = Vector2(64, 64)
-	tex_rect.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
+	tex_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	tex_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	tex_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	if ResourceLoader.exists(sprite_path):
 		tex_rect.texture = load(sprite_path)
-	hbox.add_child(tex_rect)
+	sprite_container.add_child(tex_rect)
+
+	# Synthwave gradient border overlay
+	var border_rect: ColorRect = ColorRect.new()
+	border_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	border_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var border_mat: ShaderMaterial = ShaderMaterial.new()
+	var border_shader: Shader = Shader.new()
+	border_shader.code = "shader_type canvas_item;\n" \
+		+ "uniform float border_width = 2.0;\n" \
+		+ "uniform vec2 rect_size = vec2(128.0, 128.0);\n" \
+		+ "void fragment() {\n" \
+		+ "    vec2 pixel = UV * rect_size;\n" \
+		+ "    float d = min(min(pixel.x, rect_size.x - pixel.x), min(pixel.y, rect_size.y - pixel.y));\n" \
+		+ "    float mask = 1.0 - smoothstep(border_width - 0.5, border_width + 0.5, d);\n" \
+		+ "    vec3 c1 = vec3(1.0, 0.08, 0.58);\n" \
+		+ "    vec3 c2 = vec3(0.0, 1.0, 0.9);\n" \
+		+ "    vec3 grad = mix(c1, c2, UV.x + UV.y * 0.5);\n" \
+		+ "    COLOR = vec4(grad, mask);\n" \
+		+ "}\n"
+	border_mat.shader = border_shader
+	border_mat.set_shader_parameter("border_width", 2.0)
+	border_mat.set_shader_parameter("rect_size", Vector2(128.0, 128.0))
+	border_rect.material = border_mat
+	sprite_container.add_child(border_rect)
+
+	hbox.add_child(sprite_container)
 
 	# Info column
 	var vbox: VBoxContainer = VBoxContainer.new()
@@ -360,6 +474,28 @@ func _style_card(card: PanelContainer, selected: bool) -> void:
 	style.corner_radius_bottom_left = CARD_CORNER_RADIUS
 	style.corner_radius_bottom_right = CARD_CORNER_RADIUS
 	card.add_theme_stylebox_override("panel", style)
+
+	# Add subtle gradient overlay (only once)
+	var gradient_key: String = "_gradient_rect"
+	if not card.has_meta(gradient_key):
+		var grad_rect: ColorRect = ColorRect.new()
+		grad_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		grad_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+
+		var grad_mat: ShaderMaterial = ShaderMaterial.new()
+		var grad_shader: Shader = Shader.new()
+		grad_shader.code = "shader_type canvas_item;\n" \
+			+ "uniform vec4 color_edge : source_color = vec4(0.0);\n" \
+			+ "void fragment() {\n" \
+			+ "    COLOR = vec4(color_edge.rgb, color_edge.a * (1.0 - UV.x));\n" \
+			+ "}\n"
+		grad_mat.shader = grad_shader
+		var border_faded: Color = Color(COLOR_PANEL_BORDER.r, COLOR_PANEL_BORDER.g, COLOR_PANEL_BORDER.b, 0.35)
+		grad_mat.set_shader_parameter("color_edge", border_faded)
+		grad_rect.material = grad_mat
+
+		card.add_child(grad_rect)
+		card.set_meta(gradient_key, grad_rect)
 
 
 func _style_button(button: Button, base_color: Color) -> void:

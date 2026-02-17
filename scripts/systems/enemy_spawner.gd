@@ -41,6 +41,10 @@ func _find_player() -> void:
 func _get_spawn_interval() -> float:
 	var time_minutes: float = RunManager.run_data.time_elapsed / 60.0
 	var current_rate: float = GameConfig.BASE_SPAWN_RATE + (GameConfig.SPAWN_RATE_GROWTH * time_minutes)
+	# Overtime: extra spawn ramp after countdown hits zero
+	var overtime_seconds: float = maxf(0.0, -RunManager.run_data.time_remaining)
+	if overtime_seconds > 0.0:
+		current_rate += GameConfig.OVERTIME_SPAWN_RATE_GROWTH * (overtime_seconds / 60.0)
 	return 1.0 / maxf(current_rate, 0.1)
 
 
@@ -88,9 +92,12 @@ func _spawn_enemy() -> void:
 	enemy.contact_damage *= damage_mult
 	enemy.xp_value *= (1.0 + time_minutes * GameConfig.ENEMY_XP_SCALE_PER_MINUTE)
 	
-	# Scale enemy speed: use JSON base + time-based scaling per player level
-	var player_level: int = RunManager.run_data.level
-	enemy.move_speed += GameConfig.ENEMY_SPEED_PER_LEVEL * player_level
+	# Speed only increases in overtime (after countdown hits zero)
+	var overtime_seconds: float = maxf(0.0, -RunManager.run_data.time_remaining)
+	if overtime_seconds > 0.0:
+		enemy.move_speed += GameConfig.ENEMY_OVERTIME_SPEED_PER_MINUTE * (overtime_seconds / 60.0)
+	# Cap enemy speed at player base speed — never outrun the player
+	enemy.move_speed = minf(enemy.move_speed, GameConfig.PLAYER_BASE_SPEED)
 	
 	# Connect death signal for XP drop
 	enemy.died.connect(_on_enemy_died)

@@ -107,35 +107,41 @@ horizontal_alignment = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -140.0
-offset_bottom = 80.0
+offset_left = -220.0
+offset_bottom = 100.0
 grow_horizontal = 0
-pivot_offset = Vector2(140, 0)
+pivot_offset = Vector2(220, 0)
 
-[node name="VBoxContainer" type="VBoxContainer" parent="TopRight"]
+[node name="HBoxContainer" type="HBoxContainer" parent="TopRight"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 15.0
-offset_right = -15.0
+offset_top = 10.0
+offset_right = -10.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TopRight/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 5
 
-[node name="TimerLabel" type="Label" parent="TopRight/VBoxContainer"]
+[node name="TimerLabel" type="Label" parent="TopRight/HBoxContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 28
 text = "00:00"
 horizontal_alignment = 2
 
-[node name="FPSLabel" type="Label" parent="TopRight/VBoxContainer"]
+[node name="FPSLabel" type="Label" parent="TopRight/HBoxContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "FPS: 60"
 horizontal_alignment = 2
 
-[node name="CreditsLabel" type="Label" parent="TopRight/VBoxContainer"]
+[node name="CreditsLabel" type="Label" parent="TopRight/HBoxContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.1, 1)
 theme_override_colors/font_outline_color = Color(0.4, 0.3, 0, 1)
@@ -143,6 +149,11 @@ theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 18
 text = "⟐ 0"
 horizontal_alignment = 2
+
+[node name="CaptainAvatar" type="Control" parent="TopRight/HBoxContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(72, 72)
+size_flags_vertical = 4
 
 [node name="BottomXP" type="Control" parent="."]
 anchors_preset = 12

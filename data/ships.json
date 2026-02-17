@@ -4,8 +4,17 @@
 	"starchaser": {
 		"id": "starchaser",
 		"name": "Starchaser",
-		"description": "Fast and agile reconnaissance vessel. Perfect for beginners.",
-		"sprite": "res://assets/ships/scout.png",
+		"description": "A nimble scout ship of Balsurpian design. Fast, agile, and perfect for beginners.",
+		"sprite": "res://assets/ships/balsurpian_scout.png",
+		"visual": {
+			"width": 64.0,
+			"height": 64.0
+		},
+		"collision": {
+			"type": "circle",
+			"width": 64.0,
+			"height": 64.0
+		},
 		"base_speed": 100.0,
 		"base_stats": {
 			"evasion": 5.0,
@@ -28,7 +37,16 @@
 		"id": "phantom",
 		"name": "Phantom",
 		"description": "Lightning fast strike craft. High risk, high reward.",
-		"sprite": "res://assets/ships/interceptor.png",
+		"sprite": "res://assets/ships/phantom.png",
+		"visual": {
+			"width": 64.0,
+			"height": 64.0
+		},
+		"collision": {
+			"type": "circle",
+			"width": 64.0,
+			"height": 64.0
+		},
 		"base_speed": 120.0,
 		"base_stats": {
 			"max_hp": 70.0,
@@ -60,7 +78,16 @@
 		"id": "dreadnought",
 		"name": "Dreadnought",
 		"description": "Heavy armored vessel. Slow but incredibly durable.",
-		"sprite": "res://assets/ships/fortress.png",
+		"sprite": "res://assets/ships/dreadnought.png",
+		"visual": {
+			"width": 64.0,
+			"height": 90.0
+		},
+		"collision": {
+			"type": "capsule",
+			"width": 64.0,
+			"height": 90.0
+		},
 		"base_speed": 80.0,
 		"base_stats": {
 			"max_hp": 180.0,
@@ -93,6 +120,15 @@
 		"name": "Viper",
 		"description": "Single-seat dogfighter built for speed and precision. One pilot, one purpose: kill everything.",
 		"sprite": "res://assets/ships/viper.png",
+		"visual": {
+			"width": 64.0,
+			"height": 64.0
+		},
+		"collision": {
+			"type": "circle",
+			"width": 64.0,
+			"height": 64.0
+		},
 		"base_speed": 110.0,
 		"base_stats": {
 			"max_hp": 80.0,
@@ -125,6 +161,15 @@
 		"name": "U.S.E. Prometheus SF-1701-A",
 		"description": "Multi-role science cruiser with advanced sensor arrays and generous shield generators. Slow to maneuver but bristling with utility.",
 		"sprite": "res://assets/ships/prometheus.png",
+		"visual": {
+			"width": 64.0,
+			"height": 128.0
+		},
+		"collision": {
+			"type": "capsule",
+			"width": 64.0,
+			"height": 128.0
+		},
 		"base_speed": 90.0,
 		"base_stats": {
 			"max_hp": 120.0,

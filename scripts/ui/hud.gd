@@ -11,9 +11,10 @@ extends CanvasLayer
 @onready var level_label: Label = $TopCenter/LevelLabel
 
 # Top right
-@onready var timer_label: Label = $TopRight/VBoxContainer/TimerLabel
-@onready var fps_label: Label = $TopRight/VBoxContainer/FPSLabel
-@onready var credits_label: Label = $TopRight/VBoxContainer/CreditsLabel
+@onready var timer_label: Label = $TopRight/HBoxContainer/VBoxContainer/TimerLabel
+@onready var fps_label: Label = $TopRight/HBoxContainer/VBoxContainer/FPSLabel
+@onready var credits_label: Label = $TopRight/HBoxContainer/VBoxContainer/CreditsLabel
+@onready var captain_avatar: Control = $TopRight/HBoxContainer/CaptainAvatar
 
 # Bottom - XP bar stretched across screen
 @onready var xp_bar: ProgressBar = $BottomXP/XPBar
@@ -50,6 +51,9 @@ func _ready() -> void:
 	
 	# Apply synthwave colors
 	_apply_synthwave_theme()
+	
+	# Build captain avatar portrait
+	_build_captain_avatar()
 	
 	# Connect to service signals
 	ProgressionManager.xp_changed.connect(_on_xp_changed)
@@ -126,6 +130,105 @@ func _apply_synthwave_theme() -> void:
 	modules_title.add_theme_color_override("font_color", COLOR_WEAPONS)
 	modules_title.add_theme_color_override("font_outline_color", Color(0, 0.25, 0.3, 1.0))
 	modules_title.add_theme_constant_override("outline_size", 2)
+
+
+## Avatar circle diameter in pixels.
+const AVATAR_SIZE: float = 72.0
+## Fraction of the source image height to show (0.0–1.0). 0.45 = top 45% (head & shoulders).
+const AVATAR_CROP_FRACTION: float = 0.65
+
+## Build a circular-masked captain portrait in the CaptainAvatar container.
+func _build_captain_avatar() -> void:
+	if not captain_avatar:
+		return
+	var captain_data: Dictionary = RunManager.run_data.get("captain_data", {})
+	var sprite_path: String = String(captain_data.get("sprite", ""))
+	if sprite_path.is_empty() or not ResourceLoader.exists(sprite_path):
+		captain_avatar.visible = false
+		return
+
+	var tex: Texture2D = load(sprite_path) as Texture2D
+	if tex == null:
+		captain_avatar.visible = false
+		return
+
+	# Compute texture aspect ratio so the shader can correct for non-square images
+	var tex_size: Vector2 = tex.get_size()
+	var tex_aspect: float = tex_size.x / tex_size.y if tex_size.y > 0.0 else 1.0
+
+	# Portrait — use a ColorRect with a shader that does everything:
+	# 1. Samples the texture with correct aspect ratio
+	# 2. Shows only the top portion (head & shoulders)
+	# 3. Masks to a perfect circle
+	var portrait: ColorRect = ColorRect.new()
+	portrait.color = Color(1, 1, 1, 1)
+	portrait.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	captain_avatar.add_child(portrait)
+
+	var shader_code: String = """
+shader_type canvas_item;
+
+uniform sampler2D portrait_tex : filter_linear;
+uniform float crop_fraction : hint_range(0.1, 1.0) = 0.5;
+uniform float tex_aspect = 1.0;
+
+void fragment() {
+	// Sample a square region from the texture with uniform scaling on both axes.
+	// crop_fraction zooms in (smaller = tighter crop on head).
+	vec2 sample_uv;
+	if (tex_aspect >= 1.0) {
+		// Wide or square texture: fit full height, center-crop width
+		float x_span = crop_fraction / tex_aspect;
+		sample_uv.x = mix(0.5 - x_span * 0.5, 0.5 + x_span * 0.5, UV.x);
+		sample_uv.y = UV.y * crop_fraction;
+	} else {
+		// Tall texture (typical portrait): fit full width, crop from top
+		float half_crop = crop_fraction * 0.5;
+		sample_uv.x = mix(0.5 - half_crop, 0.5 + half_crop, UV.x);
+		sample_uv.y = UV.y * tex_aspect * crop_fraction;
+	}
+
+	vec4 col = texture(portrait_tex, sample_uv);
+
+	// Perfect circle mask
+	vec2 centered = UV - vec2(0.5);
+	float dist = length(centered);
+	col.a *= 1.0 - smoothstep(0.47, 0.5, dist);
+	COLOR = col;
+}
+"""
+	var shader: Shader = Shader.new()
+	shader.code = shader_code
+	var mat: ShaderMaterial = ShaderMaterial.new()
+	mat.shader = shader
+	mat.set_shader_parameter("portrait_tex", tex)
+	mat.set_shader_parameter("crop_fraction", AVATAR_CROP_FRACTION)
+	mat.set_shader_parameter("tex_aspect", tex_aspect)
+	portrait.material = mat
+
+	# Circular border ring (synthwave cyan)
+	var border_rect: ColorRect = ColorRect.new()
+	border_rect.color = Color(1, 1, 1, 1)
+	border_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	captain_avatar.add_child(border_rect)
+
+	var border_shader_code: String = """
+shader_type canvas_item;
+
+void fragment() {
+	vec2 centered = UV - vec2(0.5);
+	float dist = length(centered);
+	float ring = smoothstep(0.46, 0.48, dist) * (1.0 - smoothstep(0.49, 0.51, dist));
+	COLOR = vec4(0.0, 1.0, 0.9, ring);
+}
+"""
+	var border_shader: Shader = Shader.new()
+	border_shader.code = border_shader_code
+	var border_mat: ShaderMaterial = ShaderMaterial.new()
+	border_mat.shader = border_shader
+	border_rect.material = border_mat
+
+	FileLogger.log_info("HUD", "Captain avatar loaded: %s (aspect: %.2f)" % [sprite_path, tex_aspect])
 
 
 func _process(_delta: float) -> void:

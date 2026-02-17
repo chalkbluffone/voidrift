@@ -115,6 +115,12 @@ func _ready() -> void:
 func _initialize_from_loadout(ship_data: Dictionary, captain_data: Dictionary, synergy_data: Dictionary) -> void:
 	stats.initialize_from_loadout(ship_data, captain_data, synergy_data)
 	
+	# Apply ship sprite from data
+	_apply_ship_sprite(ship_data)
+	
+	# Apply collision shape from data
+	_apply_collision_shape(ship_data)
+	
 	# Set phase shift from ship data
 	var phase_shift: Dictionary = ship_data.get("phase_shift", {})
 	var base_charges: int = phase_shift.get("charges", 3)
@@ -130,6 +136,60 @@ func _initialize_from_loadout(ship_data: Dictionary, captain_data: Dictionary, s
 	
 	# Equip weapons from run data
 	weapons.sync_from_run_data()
+
+
+## Default visual size when ship JSON omits the visual section.
+const DEFAULT_VISUAL_WIDTH: float = 64.0
+const DEFAULT_VISUAL_HEIGHT: float = 64.0
+
+## Default collision radius when ship JSON omits the collision section.
+const DEFAULT_COLLISION_RADIUS: float = 24.0
+
+## Load the ship's sprite texture from data and scale to per-ship visual dimensions.
+func _apply_ship_sprite(ship_data: Dictionary) -> void:
+	var sprite_path: String = ship_data.get("sprite", "")
+	if sprite_path.is_empty() or not sprite:
+		return
+	var tex: Texture2D = load(sprite_path) as Texture2D
+	if tex == null:
+		FileLogger.log_warn("Ship", "Failed to load ship sprite: %s" % sprite_path)
+		return
+	var frames: SpriteFrames = SpriteFrames.new()
+	frames.add_animation(&"default")
+	frames.add_frame(&"default", tex)
+	sprite.sprite_frames = frames
+	sprite.animation = &"default"
+	sprite.play()
+	# Scale to per-ship visual dimensions from JSON
+	var visual: Dictionary = ship_data.get("visual", {})
+	var target_w: float = float(visual.get("width", DEFAULT_VISUAL_WIDTH))
+	var target_h: float = float(visual.get("height", DEFAULT_VISUAL_HEIGHT))
+	var tex_size: Vector2 = tex.get_size()
+	if tex_size.x > 0.0 and tex_size.y > 0.0:
+		sprite.scale = Vector2(target_w / tex_size.x, target_h / tex_size.y)
+	FileLogger.log_info("Ship", "Applied ship sprite: %s (visual: %.0fx%.0f, scale: %s)" % [sprite_path, target_w, target_h, sprite.scale])
+
+
+## Apply per-ship collision shape from JSON data (circle or capsule).
+func _apply_collision_shape(ship_data: Dictionary) -> void:
+	if not collision_shape:
+		return
+	var col: Dictionary = ship_data.get("collision", {})
+	var col_type: String = String(col.get("type", "circle"))
+	var col_w: float = float(col.get("width", DEFAULT_COLLISION_RADIUS * 2.0))
+	var col_h: float = float(col.get("height", DEFAULT_COLLISION_RADIUS * 2.0))
+	match col_type:
+		"capsule":
+			var capsule: CapsuleShape2D = CapsuleShape2D.new()
+			capsule.radius = col_w * 0.5
+			capsule.height = col_h
+			collision_shape.shape = capsule
+			FileLogger.log_info("Ship", "Collision: capsule (radius=%.1f, height=%.1f)" % [capsule.radius, capsule.height])
+		_:
+			var circle: CircleShape2D = CircleShape2D.new()
+			circle.radius = col_w * 0.5
+			collision_shape.shape = circle
+			FileLogger.log_info("Ship", "Collision: circle (radius=%.1f)" % circle.radius)
 
 
 ## Create and configure the captain's active ability from JSON data.
