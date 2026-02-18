@@ -145,6 +145,7 @@ func _sync_ui_from_settings() -> void:
 	var music_slider: Node = options_container.get_node_or_null("Panel/VBoxContainer/MusicVolume/Slider")
 	var fullscreen_check: Node = options_container.get_node_or_null("Panel/VBoxContainer/Fullscreen/CheckButton")
 	var vsync_check: Node = options_container.get_node_or_null("Panel/VBoxContainer/VSync/CheckButton")
+	var debug_overlay_check: Node = options_container.get_node_or_null("Panel/VBoxContainer/DebugOverlay/CheckButton")
 	
 	if master_slider:
 		master_slider.value = _settings.master_volume
@@ -156,6 +157,8 @@ func _sync_ui_from_settings() -> void:
 		fullscreen_check.button_pressed = _settings.fullscreen
 	if vsync_check:
 		vsync_check.button_pressed = _settings.vsync
+	if debug_overlay_check:
+		debug_overlay_check.button_pressed = _settings.show_debug_overlay
 
 
 func _connect_options_signals() -> void:
@@ -164,6 +167,7 @@ func _connect_options_signals() -> void:
 	var music_slider: Node = options_container.get_node_or_null("Panel/VBoxContainer/MusicVolume/Slider")
 	var fullscreen_check: Node = options_container.get_node_or_null("Panel/VBoxContainer/Fullscreen/CheckButton")
 	var vsync_check: Node = options_container.get_node_or_null("Panel/VBoxContainer/VSync/CheckButton")
+	var debug_overlay_check: Node = options_container.get_node_or_null("Panel/VBoxContainer/DebugOverlay/CheckButton")
 	var back_btn: Node = options_container.get_node_or_null("Panel/VBoxContainer/BackButton")
 
 	if master_slider and not master_slider.value_changed.is_connected(_settings.set_master_volume):
@@ -176,6 +180,8 @@ func _connect_options_signals() -> void:
 		fullscreen_check.toggled.connect(_settings.set_fullscreen)
 	if vsync_check and not vsync_check.toggled.is_connected(_settings.set_vsync):
 		vsync_check.toggled.connect(_settings.set_vsync)
+	if debug_overlay_check and not debug_overlay_check.toggled.is_connected(_settings.set_show_debug_overlay):
+		debug_overlay_check.toggled.connect(_settings.set_show_debug_overlay)
 	if back_btn and not back_btn.pressed.is_connected(_on_options_back_pressed):
 		back_btn.pressed.connect(_on_options_back_pressed)
 

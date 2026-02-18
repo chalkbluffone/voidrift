@@ -8,16 +8,18 @@ script = ExtResource("1_hud")
 
 [node name="TopLeft" type="Control" parent="."]
 anchors_preset = 0
-offset_right = 280.0
-offset_bottom = 50.0
+offset_right = 320.0
+offset_bottom = 60.0
 
 [node name="LeftWeapons" type="Control" parent="."]
-anchors_preset = 6
+anchors_preset = 4
+anchor_left = 0.0
 anchor_top = 0.5
+anchor_right = 0.0
 anchor_bottom = 0.5
 offset_left = 10.0
 offset_top = -140.0
-offset_right = 220.0
+offset_right = 350.0
 offset_bottom = 140.0
 grow_vertical = 2
 
@@ -53,10 +55,10 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 15.0
-offset_top = 15.0
-offset_right = -15.0
-offset_bottom = -15.0
+offset_left = 12.0
+offset_top = 10.0
+offset_right = -12.0
+offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 2
 max_value = 100.0
@@ -72,8 +74,8 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 12
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 18
 text = "100 / 100"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -135,12 +137,6 @@ theme_override_font_sizes/font_size = 28
 text = "00:00"
 horizontal_alignment = 2
 
-[node name="FPSLabel" type="Label" parent="TopRight/HBoxContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = "FPS: 60"
-horizontal_alignment = 2
-
 [node name="CreditsLabel" type="Label" parent="TopRight/HBoxContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.1, 1)
@@ -148,6 +144,15 @@ theme_override_colors/font_outline_color = Color(0.4, 0.3, 0, 1)
 theme_override_constants/outline_size = 2
 theme_override_font_sizes/font_size = 18
 text = "⟐ 0"
+horizontal_alignment = 2
+
+[node name="StardustLabel" type="Label" parent="TopRight/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.85, 1.0, 1)
+theme_override_colors/font_outline_color = Color(0.1, 0.2, 0.4, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 18
+text = "✦ 0"
 horizontal_alignment = 2
 
 [node name="CaptainAvatar" type="Control" parent="TopRight/HBoxContainer"]
@@ -163,6 +168,18 @@ anchor_bottom = 1.0
 offset_top = -40.0
 grow_horizontal = 2
 grow_vertical = 0
+
+[node name="BottomLeftDebug" type="VBoxContainer" parent="."]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 0.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = -170.0
+offset_right = 400.0
+offset_bottom = -44.0
+grow_vertical = 0
+theme_override_constants/separation = 2
 
 [node name="XPBar" type="ProgressBar" parent="BottomXP"]
 layout_mode = 1

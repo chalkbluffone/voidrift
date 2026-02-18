@@ -52,7 +52,7 @@ const PICKUP_MAGNET_ACCELERATION: float = 800.0  # How fast pickups accelerate
 # =============================================================================
 # CREDITS
 # =============================================================================
-const CREDIT_DROP_CHANCE: float = 0.30  # 30% chance enemies drop credits
+const CREDIT_DROP_CHANCE: float = 0.40  # 30% chance enemies drop credits
 const CREDIT_SCALE_PER_MINUTE: float = 0.1  # +10% credit value per minute
 
 # =============================================================================
@@ -134,7 +134,7 @@ const WEAPON_EFFECT_COUNT_BY_RARITY: Dictionary = {
 # Maximum weapon level (each re-pick at level-up increments the weapon's level).
 const MAX_WEAPON_LEVEL: int = 40
 
-# Rarity factors applied to CSV-derived tier baseline deltas.
+# Rarity factors applied to json-derived tier baseline deltas.
 # In "baseline_plus_factor" mode: final_delta = tier_value * rarity_factor.
 # In "direct" mode: final_delta = tier_value (factor ignored).
 const WEAPON_RARITY_FACTORS: Dictionary = {

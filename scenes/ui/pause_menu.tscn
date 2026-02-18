@@ -192,6 +192,17 @@ text = "V-Sync"
 layout_mode = 2
 button_pressed = true
 
+[node name="DebugOverlay" type="HBoxContainer" parent="OptionsContainer/Panel/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="OptionsContainer/Panel/VBoxContainer/DebugOverlay"]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+text = "Debug Overlay"
+
+[node name="CheckButton" type="CheckButton" parent="OptionsContainer/Panel/VBoxContainer/DebugOverlay"]
+layout_mode = 2
+
 [node name="Spacer3" type="Control" parent="OptionsContainer/Panel/VBoxContainer"]
 custom_minimum_size = Vector2(0, 15)
 layout_mode = 2

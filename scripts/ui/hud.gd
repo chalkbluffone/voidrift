@@ -12,9 +12,16 @@ extends CanvasLayer
 
 # Top right
 @onready var timer_label: Label = $TopRight/HBoxContainer/VBoxContainer/TimerLabel
-@onready var fps_label: Label = $TopRight/HBoxContainer/VBoxContainer/FPSLabel
 @onready var credits_label: Label = $TopRight/HBoxContainer/VBoxContainer/CreditsLabel
+@onready var stardust_label: Label = $TopRight/HBoxContainer/VBoxContainer/StardustLabel
 @onready var captain_avatar: Control = $TopRight/HBoxContainer/CaptainAvatar
+
+# Bottom left - debug stats
+@onready var debug_container: VBoxContainer = $BottomLeftDebug
+var fps_label: Label = null
+var nodes_label: Label = null
+var draw_calls_label: Label = null
+var vram_label: Label = null
 
 # Bottom - XP bar stretched across screen
 @onready var xp_bar: ProgressBar = $BottomXP/XPBar
@@ -29,6 +36,8 @@ extends CanvasLayer
 
 @onready var RunManager: Node = get_node("/root/RunManager")
 @onready var ProgressionManager: Node = get_node("/root/ProgressionManager")
+@onready var PersistenceManager: Node = get_node("/root/PersistenceManager")
+@onready var SettingsManager: Node = get_node("/root/SettingsManager")
 @onready var DataLoader: Node = get_node("/root/DataLoader")
 @onready var FileLogger: Node = get_node("/root/FileLogger")
 
@@ -43,6 +52,7 @@ const COLOR_TIMER: Color = Color(0.0, 1.0, 0.9, 1.0)  # Cyan
 const COLOR_LEVEL: Color = Color(1.0, 0.95, 0.2, 1.0)  # Neon yellow
 const COLOR_LEVEL_GLOW: Color = Color(1.0, 0.4, 0.8, 1.0)  # Pink glow for level up
 const COLOR_CREDITS: Color = Color(1.0, 0.85, 0.1, 1.0)  # Gold for credits
+const COLOR_STARDUST: Color = Color(0.6, 0.85, 1.0, 1.0)  # Icy blue for stardust
 const COLOR_WEAPONS: Color = Color(0.2, 1.0, 0.9, 1.0)  # Cyan-ish
 
 const FONT_HEADER: Font = preload("res://assets/fonts/Orbitron-Bold.ttf")
@@ -60,8 +70,10 @@ func _ready() -> void:
 	# Connect to service signals
 	ProgressionManager.xp_changed.connect(_on_xp_changed)
 	ProgressionManager.credits_changed.connect(_on_credits_changed)
+	ProgressionManager.stardust_changed.connect(_on_stardust_changed)
 	ProgressionManager.level_up_completed.connect(_on_level_up_completed)
 	RunManager.run_started.connect(_on_run_started)
+	SettingsManager.settings_changed.connect(_on_settings_changed)
 	
 	# Wait a frame then find player
 	await get_tree().process_frame
@@ -71,6 +83,8 @@ func _ready() -> void:
 	_update_timer(0.0)
 	_update_level(1)
 	_update_credits(0)
+	_update_stardust(PersistenceManager.persistent_data.get("stardust", 0))
+	_apply_debug_visibility()
 
 
 func _apply_synthwave_theme() -> void:
@@ -90,6 +104,12 @@ func _apply_synthwave_theme() -> void:
 	hp_bg.corner_radius_bottom_left = 4
 	hp_bg.corner_radius_bottom_right = 4
 	hp_bar.add_theme_stylebox_override("background", hp_bg)
+	
+	# HP Label - Theme font + strong contrast
+	hp_label.add_theme_font_override("font", FONT_HEADER)
+	hp_label.add_theme_color_override("font_color", Color(1, 1, 1, 1))
+	hp_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
+	hp_label.add_theme_constant_override("outline_size", 4)
 	
 	# XP Bar - Neon purple
 	var xp_style: StyleBoxFlat = StyleBoxFlat.new()
@@ -114,8 +134,8 @@ func _apply_synthwave_theme() -> void:
 	timer_label.add_theme_color_override("font_outline_color", Color(0, 0.3, 0.4, 1.0))
 	timer_label.add_theme_constant_override("outline_size", 2)
 	
-	# FPS - Dimmer cyan
-	fps_label.add_theme_color_override("font_color", Color(0.0, 0.7, 0.6, 0.7))
+	# Debug stats - bottom left
+	_build_debug_labels()
 	
 	# Level - Neon yellow with glow effect
 	level_label.add_theme_font_override("font", FONT_HEADER)
@@ -128,6 +148,12 @@ func _apply_synthwave_theme() -> void:
 	credits_label.add_theme_font_override("font", FONT_HEADER)
 	credits_label.add_theme_color_override("font_color", COLOR_CREDITS)
 
+	# Stardust - Icy blue
+	stardust_label.add_theme_font_override("font", FONT_HEADER)
+	stardust_label.add_theme_color_override("font_color", COLOR_STARDUST)
+	stardust_label.add_theme_color_override("font_outline_color", Color(0.1, 0.2, 0.4, 1.0))
+	stardust_label.add_theme_constant_override("outline_size", 2)
+
 	# Weapons panel
 	weapons_title.add_theme_font_override("font", FONT_HEADER)
 	weapons_title.add_theme_color_override("font_color", COLOR_WEAPONS)
@@ -137,6 +163,27 @@ func _apply_synthwave_theme() -> void:
 	modules_title.add_theme_color_override("font_color", COLOR_WEAPONS)
 	modules_title.add_theme_color_override("font_outline_color", Color(0, 0.25, 0.3, 1.0))
 	modules_title.add_theme_constant_override("outline_size", 2)
+
+
+## Create debug stat labels programmatically in the bottom-left VBoxContainer.
+func _build_debug_labels() -> void:
+	fps_label = _make_debug_label("FPS: 0")
+	nodes_label = _make_debug_label("NODES: 0")
+	draw_calls_label = _make_debug_label("DRAW: 0")
+	vram_label = _make_debug_label("VRAM: 0 MB")
+
+
+## Factory for a single debug label with consistent style.
+func _make_debug_label(initial_text: String) -> Label:
+	var label: Label = Label.new()
+	label.text = initial_text
+	label.add_theme_font_override("font", FONT_HEADER)
+	label.add_theme_font_size_override("font_size", 16)
+	label.add_theme_color_override("font_color", Color(1, 1, 1, 0.85))
+	label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
+	label.add_theme_constant_override("outline_size", 3)
+	debug_container.add_child(label)
+	return label
 
 
 ## Avatar circle diameter in pixels.
@@ -239,8 +286,17 @@ void fragment() {
 
 
 func _process(_delta: float) -> void:
-	# Update FPS
-	fps_label.text = "FPS: %d" % Engine.get_frames_per_second()
+	# Update debug stats (only when visible)
+	if debug_container.visible:
+		if fps_label:
+			fps_label.text = "FPS: %d" % Engine.get_frames_per_second()
+		if nodes_label:
+			nodes_label.text = "NODES: %d" % int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT))
+		if draw_calls_label:
+			draw_calls_label.text = "DRAW: %d" % int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME))
+		if vram_label:
+			var vram_mb: float = Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / (1024.0 * 1024.0)
+			vram_label.text = "VRAM: %.1f MB" % vram_mb
 	
 	# Update timer (countdown)
 	if RunManager.current_state == RunManager.GameState.PLAYING:
@@ -342,6 +398,15 @@ func _update_timer(time_remaining: float) -> void:
 
 # --- Signal Handlers ---
 
+func _on_settings_changed() -> void:
+	_apply_debug_visibility()
+
+
+## Show or hide the debug overlay based on the current setting.
+func _apply_debug_visibility() -> void:
+	debug_container.visible = SettingsManager.show_debug_overlay
+
+
 func _on_hp_changed(current: float, maximum: float) -> void:
 	_update_hp(current, maximum)
 
@@ -365,6 +430,22 @@ func _animate_credits_gain() -> void:
 	var tween: Tween = create_tween()
 	credits_label.scale = Vector2(1.3, 1.3)
 	tween.tween_property(credits_label, "scale", Vector2.ONE, 0.2).set_ease(Tween.EASE_OUT)
+
+
+func _on_stardust_changed(amount: int) -> void:
+	_update_stardust(amount)
+	_animate_stardust_gain()
+
+
+func _update_stardust(amount: int) -> void:
+	stardust_label.text = "✦ %d" % amount
+
+
+func _animate_stardust_gain() -> void:
+	## Quick pulse animation when gaining stardust.
+	var tween: Tween = create_tween()
+	stardust_label.scale = Vector2(1.3, 1.3)
+	tween.tween_property(stardust_label, "scale", Vector2.ONE, 0.2).set_ease(Tween.EASE_OUT)
 
 
 func _on_weapon_changed(_weapon_id: String = "") -> void:
@@ -400,6 +481,8 @@ func _refresh_weapon_list() -> void:
 			weapon_name = String(w.get("name", id))
 		var label: Label = Label.new()
 		label.text = "%s  LV %d" % [weapon_name.to_upper(), level]
+		label.clip_text = true
+		label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		label.add_theme_color_override("font_color", Color(1, 1, 1, 0.95))
 		label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
 		label.add_theme_constant_override("outline_size", 2)
@@ -447,6 +530,8 @@ func _refresh_modules_list() -> void:
 			display_name = String(data.get("name", id))
 		var label: Label = Label.new()
 		label.text = "%s  LV %d" % [display_name.to_upper(), level]
+		label.clip_text = true
+		label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		label.add_theme_color_override("font_color", Color(1, 1, 1, 0.90))
 		label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
 		label.add_theme_constant_override("outline_size", 2)

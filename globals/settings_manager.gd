@@ -15,6 +15,7 @@ var sfx_volume: float = 1.0
 var music_volume: float = 1.0
 var fullscreen: bool = false
 var vsync: bool = true
+var show_debug_overlay: bool = false
 
 
 func _ready() -> void:
@@ -73,6 +74,12 @@ func set_vsync(enabled: bool) -> void:
 	settings_changed.emit()
 
 
+func set_show_debug_overlay(enabled: bool) -> void:
+	show_debug_overlay = enabled
+	save_settings()
+	settings_changed.emit()
+
+
 # --- Persistence ---
 
 func save_settings() -> void:
@@ -82,6 +89,7 @@ func save_settings() -> void:
 	config.set_value("audio", "music", music_volume)
 	config.set_value("display", "fullscreen", fullscreen)
 	config.set_value("display", "vsync", vsync)
+	config.set_value("display", "show_debug_overlay", show_debug_overlay)
 	config.save(SAVE_PATH)
 
 
@@ -95,6 +103,7 @@ func load_settings() -> void:
 	music_volume = config.get_value("audio", "music", 1.0)
 	fullscreen = config.get_value("display", "fullscreen", false)
 	vsync = config.get_value("display", "vsync", true)
+	show_debug_overlay = config.get_value("display", "show_debug_overlay", false)
 
 
 func apply_all_settings() -> void:

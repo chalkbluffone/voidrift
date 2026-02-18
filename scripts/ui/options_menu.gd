@@ -12,6 +12,7 @@ const CARD_HOVER_FX_SCRIPT: Script = preload("res://scripts/ui/card_hover_fx.gd"
 @onready var music_slider: HSlider = $Panel/MarginContainer/VBoxContainer/MusicVolume/Slider
 @onready var fullscreen_check: CheckButton = $Panel/MarginContainer/VBoxContainer/Fullscreen/CheckButton
 @onready var vsync_check: CheckButton = $Panel/MarginContainer/VBoxContainer/VSync/CheckButton
+@onready var debug_overlay_check: CheckButton = $Panel/MarginContainer/VBoxContainer/DebugOverlay/CheckButton
 @onready var back_button: Button = $Panel/MarginContainer/VBoxContainer/BackButton
 
 var _button_hover_tweens: Dictionary = {}
@@ -34,6 +35,7 @@ func _sync_ui_from_settings() -> void:
 	music_slider.value = _settings.music_volume
 	fullscreen_check.button_pressed = _settings.fullscreen
 	vsync_check.button_pressed = _settings.vsync
+	debug_overlay_check.button_pressed = _settings.show_debug_overlay
 
 
 func _connect_signals() -> void:
@@ -42,6 +44,7 @@ func _connect_signals() -> void:
 	music_slider.value_changed.connect(_settings.set_music_volume)
 	fullscreen_check.toggled.connect(_settings.set_fullscreen)
 	vsync_check.toggled.connect(_settings.set_vsync)
+	debug_overlay_check.toggled.connect(_settings.set_show_debug_overlay)
 	back_button.pressed.connect(_on_back_pressed)
 
 
