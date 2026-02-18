@@ -1,52 +1,45 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene format=3 uid="uid://b7mrd16ynkx2v"]
 
-[ext_resource type="Script" path="res://scripts/enemies/loot_freighter.gd" id="1_freighter"]
-[ext_resource type="Texture2D" path="res://assets/enemies/IntergalacticShippingFreighter.png" id="2_sprite"]
-[ext_resource type="Shader" path="res://effects/freighter_underglow/freighter_underglow.gdshader" id="3_glow_shader"]
-
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_freighter"]
-radius = 24.0
-height = 60.0
+[ext_resource type="Script" uid="uid://em15rdtgby0b" path="res://scripts/enemies/loot_freighter.gd" id="1_freighter"]
+[ext_resource type="Texture2D" uid="uid://dvi018bwv7lib" path="res://assets/enemies/IntergalacticShippingFreighter.png" id="2_sprite"]
+[ext_resource type="Shader" uid="uid://bmtqtk3dcc1ma" path="res://effects/freighter_underglow/freighter_underglow.gdshader" id="3_glow_shader"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_underglow"]
 shader = ExtResource("3_glow_shader")
-shader_parameter/glow_color = Color(0.0, 1.0, 1.0, 0.6)
+shader_parameter/glow_color = Color(0, 1, 1, 0.6)
 shader_parameter/glow_intensity = 1.5
 shader_parameter/falloff = 2.0
 shader_parameter/pulse_speed = 1.5
 shader_parameter/pulse_min = 0.5
 shader_parameter/pulse_max = 1.0
 
-[node name="ShippingFreighter" type="CharacterBody2D" groups=["enemies"]]
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_freighter"]
+radius = 24.0
+height = 60.0
+
+[node name="ShippingFreighter" type="CharacterBody2D" unique_id=1061284104 groups=["enemies"]]
 collision_layer = 8
 collision_mask = 5
 script = ExtResource("1_freighter")
-drop_type = "xp"
-flee_speed = 70.0
 stardust_value = 4
-drop_burst_count = 5
 
-[node name="Underglow" type="ColorRect" parent="."]
+[node name="Underglow" type="ColorRect" parent="." unique_id=1305632688]
 material = SubResource("ShaderMaterial_underglow")
 offset_left = -50.0
 offset_top = -50.0
 offset_right = 50.0
 offset_bottom = 50.0
-color = Color(1, 1, 1, 1)
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1994019735]
 rotation = 1.5707964
 scale = Vector2(0.15, 0.15)
 texture = ExtResource("2_sprite")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2029644892]
 shape = SubResource("CapsuleShape2D_freighter")
 
-[node name="HitboxArea" type="Area2D" parent="."]
-monitoring = true
-monitorable = true
+[node name="HitboxArea" type="Area2D" parent="." unique_id=1670214505]
 collision_layer = 8
-collision_mask = 1
 
-[node name="HitboxShape" type="CollisionShape2D" parent="HitboxArea"]
+[node name="HitboxShape" type="CollisionShape2D" parent="HitboxArea" unique_id=1917708721]
 shape = SubResource("CapsuleShape2D_freighter")

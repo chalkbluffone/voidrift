@@ -6,20 +6,19 @@ extends Control
 
 const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
 
-# Synthwave palette
-const COLOR_PANEL_BG: Color = Color(0.08, 0.05, 0.15, 0.95)
-const COLOR_PANEL_BORDER: Color = Color(0.4, 0.2, 0.5, 1.0)         # Dim purple (unselected)
-const COLOR_PANEL_SELECTED: Color = Color(1.0, 0.08, 0.4, 1.0)      # Hot pink (selected)
-const COLOR_BUTTON: Color = Color(0.67, 0.2, 0.95, 1.0)             # Neon purple
-const COLOR_BUTTON_HOVER: Color = Color(1.0, 0.08, 0.4, 1.0)        # Hot pink
-const COLOR_BUTTON_DISABLED: Color = Color(0.3, 0.15, 0.4, 0.6)     # Dim purple
-const COLOR_TITLE: Color = Color(0.0, 1.0, 0.9, 1.0)                # Cyan
-const COLOR_HEADER: Color = Color(1.0, 0.95, 0.2, 1.0)              # Neon yellow
-const COLOR_NAME: Color = Color(1.0, 1.0, 1.0, 1.0)                 # White
-const COLOR_DESC: Color = Color(0.75, 0.7, 0.85, 1.0)               # Light lavender
-const COLOR_STAT_LABEL: Color = Color(0.5, 0.5, 0.6, 1.0)           # Dim gray
-const COLOR_STAT_VALUE: Color = Color(0.0, 1.0, 0.9, 1.0)           # Cyan
-const COLOR_LOCKED: Color = Color(0.4, 0.4, 0.4, 0.6)               # Dim gray for locked
+# Synthwave palette — sourced from UiColors shared constants
+const COLOR_PANEL_BG: Color = UiColors.PANEL_BG
+const COLOR_PANEL_BORDER: Color = UiColors.PANEL_BORDER
+const COLOR_PANEL_SELECTED: Color = UiColors.PANEL_SELECTED
+const COLOR_BUTTON: Color = UiColors.BUTTON_PRIMARY
+const COLOR_BUTTON_DISABLED: Color = UiColors.BUTTON_DISABLED
+const COLOR_TITLE: Color = UiColors.CYAN
+const COLOR_HEADER: Color = UiColors.NEON_YELLOW
+const COLOR_NAME: Color = UiColors.TEXT_PRIMARY
+const COLOR_DESC: Color = UiColors.TEXT_DESC
+const COLOR_STAT_LABEL: Color = UiColors.TEXT_STAT_LABEL
+const COLOR_STAT_VALUE: Color = UiColors.TEXT_STAT_VALUE
+const COLOR_LOCKED: Color = UiColors.TEXT_LOCKED
 
 const CARD_CORNER_RADIUS: int = 8
 const CARD_BORDER_WIDTH: int = 2
@@ -56,15 +55,21 @@ func _ready() -> void:
 	launch_button.pressed.connect(_on_launch_pressed)
 	back_button.pressed.connect(_on_back_pressed)
 
-	_style_button(launch_button, COLOR_BUTTON)
-	_style_button(back_button, Color(0.4, 0.3, 0.5, 1.0))
+	CARD_HOVER_FX_SCRIPT.style_synthwave_button(launch_button, COLOR_BUTTON, _button_hover_tweens, BUTTON_CORNER_RADIUS)
+	CARD_HOVER_FX_SCRIPT.style_synthwave_button(back_button, UiColors.BUTTON_BACK, _button_hover_tweens, BUTTON_CORNER_RADIUS)
 	launch_button.disabled = true
 	_update_launch_button_style()
 
 	_populate_ships()
 	_populate_captains()
+	_setup_card_focus_neighbors()
 
-	back_button.grab_focus()
+	# Focus first ship card so controller users start in the content
+	var first_ship: PanelContainer = ship_list.get_child(0) as PanelContainer if ship_list.get_child_count() > 0 else null
+	if first_ship:
+		first_ship.grab_focus()
+	else:
+		back_button.grab_focus()
 
 
 func _input(event: InputEvent) -> void:
@@ -109,11 +114,12 @@ func _build_ship_card(data: Dictionary) -> PanelContainer:
 	card.set_meta("entry_id", ship_id)
 	_style_card(card, false)
 
-	# Make clickable
+	# Make clickable + focusable for controller
 	card.gui_input.connect(_on_ship_card_input.bind(ship_id))
 	card.mouse_entered.connect(_on_loadout_card_mouse_entered.bind(card))
 	card.mouse_exited.connect(_on_loadout_card_mouse_exited.bind(card))
 	card.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	CARD_HOVER_FX_SCRIPT.setup_card_focus(card, _card_hover_tweens, card.get_instance_id())
 
 	var margin: MarginContainer = MarginContainer.new()
 	margin.add_theme_constant_override("margin_left", 12)
@@ -287,6 +293,7 @@ func _build_captain_card(data: Dictionary) -> PanelContainer:
 	card.mouse_entered.connect(_on_loadout_card_mouse_entered.bind(card))
 	card.mouse_exited.connect(_on_loadout_card_mouse_exited.bind(card))
 	card.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	CARD_HOVER_FX_SCRIPT.setup_card_focus(card, _card_hover_tweens, card.get_instance_id())
 
 	var margin: MarginContainer = MarginContainer.new()
 	margin.add_theme_constant_override("margin_left", 12)
@@ -380,7 +387,7 @@ func _build_captain_card(data: Dictionary) -> PanelContainer:
 		active_label.text = "⚡ " + String(active.get("name", "")) + " — " + String(active.get("description", "")) + " (%ds)" % int(cooldown)
 		active_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		active_label.add_theme_font_size_override("font_size", 14)
-		active_label.add_theme_color_override("font_color", Color(1.0, 0.95, 0.2, 1.0))
+		active_label.add_theme_color_override("font_color", UiColors.NEON_YELLOW)
 		vbox.add_child(active_label)
 
 	return card
@@ -418,10 +425,14 @@ func _add_stat_pair(parent: HBoxContainer, label_text: String, value_text: Strin
 func _on_ship_card_input(event: InputEvent, ship_id: String) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		_select_ship(ship_id)
+	elif event.is_action_pressed("ui_accept"):
+		_select_ship(ship_id)
 
 
 func _on_captain_card_input(event: InputEvent, captain_id: String) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		_select_captain(captain_id)
+	elif event.is_action_pressed("ui_accept"):
 		_select_captain(captain_id)
 
 
@@ -440,33 +451,6 @@ func _on_loadout_card_mouse_exited(card: PanelContainer) -> void:
 func _set_loadout_card_hover_state(card: PanelContainer, hovered: bool) -> void:
 	var card_key: int = card.get_instance_id()
 	CARD_HOVER_FX_SCRIPT.tween_hover_state(card, _card_hover_tweens, card_key, hovered, 0.0, Vector2(1.03, 1.03), 0.16, 0.12)
-
-
-func _on_button_mouse_entered(button: Button) -> void:
-	if not is_instance_valid(button):
-		return
-	_set_button_hover_state(button, true)
-
-
-func _on_button_mouse_exited(button: Button) -> void:
-	if not is_instance_valid(button):
-		return
-	_set_button_hover_state(button, false)
-
-
-func _set_button_hover_state(button: Button, hovered: bool) -> void:
-	if button.disabled:
-		return
-	var btn_key: int = button.get_instance_id()
-	var target_scale: Vector2 = Vector2(1.05, 1.05) if hovered else Vector2.ONE
-	button.pivot_offset = button.size * 0.5
-
-	if _button_hover_tweens.has(btn_key) and is_instance_valid(_button_hover_tweens[btn_key]):
-		_button_hover_tweens[btn_key].kill()
-
-	var tw: Tween = button.create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
-	tw.tween_property(button, "scale", target_scale, 0.14 if hovered else 0.10)
-	_button_hover_tweens[btn_key] = tw
 
 
 func _select_ship(ship_id: String) -> void:
@@ -498,11 +482,11 @@ func _update_launch_state() -> void:
 
 func _update_launch_button_style() -> void:
 	if launch_button.disabled:
-		_style_button(launch_button, COLOR_BUTTON_DISABLED)
-		launch_button.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5, 0.8))
+		CARD_HOVER_FX_SCRIPT.style_synthwave_button(launch_button, COLOR_BUTTON_DISABLED, _button_hover_tweens, BUTTON_CORNER_RADIUS)
+		launch_button.add_theme_color_override("font_color", UiColors.TEXT_DISABLED)
 		launch_button.mouse_default_cursor_shape = Control.CURSOR_ARROW
 	else:
-		_style_button(launch_button, COLOR_BUTTON)
+		CARD_HOVER_FX_SCRIPT.style_synthwave_button(launch_button, COLOR_BUTTON, _button_hover_tweens, BUTTON_CORNER_RADIUS)
 		launch_button.add_theme_color_override("font_color", Color.WHITE)
 		launch_button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 
@@ -576,51 +560,46 @@ func _style_card(card: PanelContainer, selected: bool) -> void:
 			card,
 			CARD_HOVER_SHADER,
 			COLOR_PANEL_SELECTED,
-			Color(0.0, 1.0, 1.0, 1.0),
-			Color(1.0, 0.95, 0.25, 1.0)
+			UiColors.PARTICLE_CYAN,
+			UiColors.CLICK_FLASH
 		)
 
 	if card.has_meta(hover_key):
 		var card_edge_color: Color = COLOR_PANEL_SELECTED if selected else COLOR_PANEL_BORDER
-		var glow_color: Color = card_edge_color.lerp(Color(0.0, 1.0, 1.0, 1.0), 0.45)
-		CARD_HOVER_FX_SCRIPT.set_hover_colors(card, card_edge_color, glow_color, Color(1.0, 0.95, 0.25, 1.0))
+		var glow_color: Color = card_edge_color.lerp(UiColors.PARTICLE_CYAN, 0.45)
+		CARD_HOVER_FX_SCRIPT.set_hover_colors(card, card_edge_color, glow_color, UiColors.CLICK_FLASH)
 		CARD_HOVER_FX_SCRIPT.reset_hover(card, _card_hover_tweens, card.get_instance_id(), 0.0)
 
 	if not selected and card.scale != Vector2.ONE:
 		card.scale = Vector2.ONE
 
 
-func _style_button(button: Button, base_color: Color) -> void:
-	var normal: StyleBoxFlat = StyleBoxFlat.new()
-	normal.bg_color = base_color
-	normal.corner_radius_top_left = BUTTON_CORNER_RADIUS
-	normal.corner_radius_top_right = BUTTON_CORNER_RADIUS
-	normal.corner_radius_bottom_left = BUTTON_CORNER_RADIUS
-	normal.corner_radius_bottom_right = BUTTON_CORNER_RADIUS
-	button.add_theme_stylebox_override("normal", normal)
+## Configure focus neighbors so D-pad crosses between ship and captain columns
+## and reaches the bottom-bar buttons.
+func _setup_card_focus_neighbors() -> void:
+	var ship_children: Array[Node] = ship_list.get_children()
+	var captain_children: Array[Node] = captain_list.get_children()
 
-	var hover: StyleBoxFlat = StyleBoxFlat.new()
-	hover.bg_color = base_color.lightened(0.35)
-	hover.corner_radius_top_left = BUTTON_CORNER_RADIUS
-	hover.corner_radius_top_right = BUTTON_CORNER_RADIUS
-	hover.corner_radius_bottom_left = BUTTON_CORNER_RADIUS
-	hover.corner_radius_bottom_right = BUTTON_CORNER_RADIUS
-	button.add_theme_stylebox_override("hover", hover)
+	# Cross-column neighbors: ship right → first captain, captain left → first ship
+	for child: Node in ship_children:
+		if child is PanelContainer and captain_children.size() > 0:
+			child.focus_neighbor_right = captain_children[0].get_path()
+	for child: Node in captain_children:
+		if child is PanelContainer and ship_children.size() > 0:
+			child.focus_neighbor_left = ship_children[0].get_path()
 
-	var pressed: StyleBoxFlat = StyleBoxFlat.new()
-	pressed.bg_color = base_color.darkened(0.2)
-	pressed.corner_radius_top_left = BUTTON_CORNER_RADIUS
-	pressed.corner_radius_top_right = BUTTON_CORNER_RADIUS
-	pressed.corner_radius_bottom_left = BUTTON_CORNER_RADIUS
-	pressed.corner_radius_bottom_right = BUTTON_CORNER_RADIUS
-	button.add_theme_stylebox_override("pressed", pressed)
+	# Bottom of each column → buttons
+	if ship_children.size() > 0:
+		ship_children[-1].focus_neighbor_bottom = back_button.get_path()
+	if captain_children.size() > 0:
+		captain_children[-1].focus_neighbor_bottom = launch_button.get_path()
 
-	var focus: StyleBoxEmpty = StyleBoxEmpty.new()
-	button.add_theme_stylebox_override("focus", focus)
+	# Buttons → top of columns
+	if ship_children.size() > 0:
+		back_button.focus_neighbor_top = ship_children[0].get_path()
+	if captain_children.size() > 0:
+		launch_button.focus_neighbor_top = captain_children[0].get_path()
 
-	button.add_theme_color_override("font_color", Color.WHITE)
-	button.add_theme_color_override("font_hover_color", Color.WHITE)
-
-	button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-	button.mouse_entered.connect(_on_button_mouse_entered.bind(button))
-	button.mouse_exited.connect(_on_button_mouse_exited.bind(button))
+	# Left/right between buttons
+	back_button.focus_neighbor_right = launch_button.get_path()
+	launch_button.focus_neighbor_left = back_button.get_path()

@@ -90,6 +90,128 @@ static func reset_hover(card: PanelContainer, hover_tweens: Dictionary, hover_ke
 	hover_mat.set_shader_parameter("click_strength", 0.0)
 
 
+## Make a PanelContainer card focusable and trigger hover FX on focus_entered / focus_exited.
+## Call AFTER ensure_hover_overlay() so the shader overlay already exists.
+## Connects focus_entered → tween hover on, focus_exited → tween hover off.
+## Also handles ui_accept to emit the card's gui_input with a synthetic action.
+static func setup_card_focus(
+	card: PanelContainer,
+	hover_tweens: Dictionary,
+	hover_key: Variant,
+	base_strength: float = 0.0,
+	hover_scale: Vector2 = Vector2(1.03, 1.03),
+) -> void:
+	card.focus_mode = Control.FOCUS_ALL
+	card.focus_entered.connect(func() -> void:
+		tween_hover_state(card, hover_tweens, hover_key, true, base_strength, hover_scale)
+	)
+	card.focus_exited.connect(func() -> void:
+		tween_hover_state(card, hover_tweens, hover_key, false, base_strength, hover_scale)
+	)
+
+
+## Create a synthwave-styled button with normal / hover / pressed / focus StyleBoxFlat overrides.
+## Focus StyleBox matches hover (lightened) so gamepad focus looks identical to mouse hover.
+## Connects mouse_entered/exited AND focus_entered/exited to scale tween.
+static func style_synthwave_button(
+	button: Button,
+	base_color: Color,
+	hover_tweens: Dictionary,
+	corner_radius: int = 4,
+	content_margin_h: int = 0,
+	content_margin_v: int = 0,
+) -> void:
+	var normal: StyleBoxFlat = StyleBoxFlat.new()
+	normal.bg_color = base_color
+	normal.corner_radius_top_left = corner_radius
+	normal.corner_radius_top_right = corner_radius
+	normal.corner_radius_bottom_left = corner_radius
+	normal.corner_radius_bottom_right = corner_radius
+	if content_margin_h > 0:
+		normal.content_margin_left = content_margin_h
+		normal.content_margin_right = content_margin_h
+	if content_margin_v > 0:
+		normal.content_margin_top = content_margin_v
+		normal.content_margin_bottom = content_margin_v
+	button.add_theme_stylebox_override("normal", normal)
+
+	var hover: StyleBoxFlat = StyleBoxFlat.new()
+	hover.bg_color = base_color.lightened(0.35)
+	hover.corner_radius_top_left = corner_radius
+	hover.corner_radius_top_right = corner_radius
+	hover.corner_radius_bottom_left = corner_radius
+	hover.corner_radius_bottom_right = corner_radius
+	if content_margin_h > 0:
+		hover.content_margin_left = content_margin_h
+		hover.content_margin_right = content_margin_h
+	if content_margin_v > 0:
+		hover.content_margin_top = content_margin_v
+		hover.content_margin_bottom = content_margin_v
+	button.add_theme_stylebox_override("hover", hover)
+
+	var pressed: StyleBoxFlat = StyleBoxFlat.new()
+	pressed.bg_color = base_color.darkened(0.2)
+	pressed.corner_radius_top_left = corner_radius
+	pressed.corner_radius_top_right = corner_radius
+	pressed.corner_radius_bottom_left = corner_radius
+	pressed.corner_radius_bottom_right = corner_radius
+	if content_margin_h > 0:
+		pressed.content_margin_left = content_margin_h
+		pressed.content_margin_right = content_margin_h
+	if content_margin_v > 0:
+		pressed.content_margin_top = content_margin_v
+		pressed.content_margin_bottom = content_margin_v
+	button.add_theme_stylebox_override("pressed", pressed)
+
+	# Focus looks the same as hover — visible indicator for gamepad navigation
+	var focus: StyleBoxFlat = hover.duplicate() as StyleBoxFlat
+	button.add_theme_stylebox_override("focus", focus)
+
+	button.add_theme_color_override("font_color", Color.WHITE)
+	button.add_theme_color_override("font_hover_color", Color.WHITE)
+	button.add_theme_color_override("font_focus_color", Color.WHITE)
+	button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+
+	# Connect hover + focus → scale tween (both trigger same visual)
+	button.mouse_entered.connect(func() -> void:
+		tween_button_scale(button, hover_tweens, true)
+	)
+	button.mouse_exited.connect(func() -> void:
+		tween_button_scale(button, hover_tweens, false)
+	)
+	button.focus_entered.connect(func() -> void:
+		tween_button_scale(button, hover_tweens, true)
+	)
+	button.focus_exited.connect(func() -> void:
+		tween_button_scale(button, hover_tweens, false)
+	)
+
+
+## Scale tween for button hover / focus. Shared logic for mouse and gamepad.
+static func tween_button_scale(
+	button: Button,
+	hover_tweens: Dictionary,
+	hovered: bool,
+	target_scale: Vector2 = Vector2(1.05, 1.05),
+	in_duration: float = 0.14,
+	out_duration: float = 0.10,
+) -> void:
+	if not is_instance_valid(button):
+		return
+	if button.disabled:
+		return
+	var btn_key: int = button.get_instance_id()
+	button.pivot_offset = button.size * 0.5
+
+	if hover_tweens.has(btn_key) and is_instance_valid(hover_tweens[btn_key]):
+		hover_tweens[btn_key].kill()
+
+	var scale_target: Vector2 = target_scale if hovered else Vector2.ONE
+	var tw: Tween = button.create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	tw.tween_property(button, "scale", scale_target, in_duration if hovered else out_duration)
+	hover_tweens[btn_key] = tw
+
+
 static func _get_hover_material(card: PanelContainer) -> ShaderMaterial:
 	if not card.has_meta(HOVER_META_KEY):
 		return null

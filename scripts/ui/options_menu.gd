@@ -4,6 +4,7 @@ extends Control
 ## Uses SettingsManager autoload for centralized settings management.
 
 const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
+const CARD_HOVER_FX_SCRIPT: Script = preload("res://scripts/ui/card_hover_fx.gd")
 
 @onready var _settings: Node = get_node("/root/SettingsManager")
 @onready var master_slider: HSlider = $Panel/VBoxContainer/MasterVolume/Slider
@@ -13,11 +14,18 @@ const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
 @onready var vsync_check: CheckButton = $Panel/VBoxContainer/VSync/CheckButton
 @onready var back_button: Button = $Panel/VBoxContainer/BackButton
 
+var _button_hover_tweens: Dictionary = {}
+
 
 func _ready() -> void:
 	_sync_ui_from_settings()
 	_connect_signals()
-	back_button.grab_focus()
+
+	# Style back button with synthwave focus/hover support
+	CARD_HOVER_FX_SCRIPT.style_synthwave_button(back_button, UiColors.BUTTON_BACK, _button_hover_tweens, 4)
+
+	# Focus the first slider so controller users start at the top
+	master_slider.grab_focus()
 
 
 func _sync_ui_from_settings() -> void:

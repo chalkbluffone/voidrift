@@ -3,20 +3,19 @@ extends CanvasLayer
 ## LevelUp UI - Shows upgrade choices when player levels up.
 ## Displays 3 cards with upgrade options. Player can select, reroll, or skip.
 
-# Synthwave colors
-const COLOR_COMMON: Color = Color(0.7, 0.7, 0.7, 1.0)       # Gray
-const COLOR_UNCOMMON: Color = Color(0.2, 0.8, 0.2, 1.0)    # Green
-const COLOR_RARE: Color = Color(0.2, 0.5, 1.0, 1.0)        # Blue
-const COLOR_EPIC: Color = Color(0.67, 0.2, 0.95, 1.0)      # Purple
-const COLOR_LEGENDARY: Color = Color(1.0, 0.8, 0.0, 1.0)   # Gold
+# Synthwave colors — sourced from UiColors shared constants
+const COLOR_COMMON: Color = UiColors.RARITY_COMMON
+const COLOR_UNCOMMON: Color = UiColors.RARITY_UNCOMMON
+const COLOR_RARE: Color = UiColors.RARITY_RARE
+const COLOR_EPIC: Color = UiColors.RARITY_EPIC
+const COLOR_LEGENDARY: Color = UiColors.RARITY_LEGENDARY
 
-const COLOR_WEAPON: Color = Color(1.0, 0.3, 0.3, 1.0)      # Red-ish for weapons
-const COLOR_UPGRADE: Color = Color(0.0, 0.9, 0.8, 1.0)     # Cyan for upgrades
+const COLOR_WEAPON: Color = UiColors.TYPE_WEAPON
+const COLOR_UPGRADE: Color = UiColors.TYPE_UPGRADE
 
-const COLOR_PANEL_BG: Color = Color(0.08, 0.05, 0.15, 0.95)
-const COLOR_PANEL_BORDER: Color = Color(1.0, 0.08, 0.4, 1.0)  # Hot pink
-const COLOR_BUTTON: Color = Color(0.67, 0.2, 0.95, 1.0)       # Neon purple
-const COLOR_BUTTON_HOVER: Color = Color(1.0, 0.08, 0.4, 1.0)  # Hot pink
+const COLOR_PANEL_BG: Color = UiColors.PANEL_BG
+const COLOR_PANEL_BORDER: Color = UiColors.HOT_PINK
+const COLOR_BUTTON: Color = UiColors.BUTTON_PRIMARY
 
 const FONT_HEADER: Font = preload("res://assets/fonts/Orbitron-Bold.ttf")
 const CARD_HOVER_SHADER: Shader = preload("res://shaders/ui_upgrade_card_hover.gdshader")
@@ -54,7 +53,7 @@ func _ready() -> void:
 		$VBoxContainer/ChoicesContainer/Choice3,
 	]
 	
-	# Make entire cards clickable
+	# Make entire cards clickable and focusable
 	for i: int in range(_cards.size()):
 		var card: PanelContainer = _cards[i]
 		card.gui_input.connect(_on_card_input.bind(i))
@@ -62,6 +61,7 @@ func _ready() -> void:
 		card.mouse_exited.connect(_on_card_mouse_exited.bind(i))
 		card.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		card.mouse_filter = Control.MOUSE_FILTER_STOP
+		CARD_HOVER_FX_SCRIPT.setup_card_focus(card, _card_hover_tweens, i)
 		# Let clicks pass through children to the card
 		for child: Control in card.get_children():
 			child.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -91,12 +91,12 @@ func _apply_synthwave_theme() -> void:
 	background.color = Color(0, 0, 0, 0.85)
 	
 	# Level up label - big neon yellow
-	level_up_label.add_theme_color_override("font_color", Color(1.0, 0.95, 0.2, 1.0))
+	level_up_label.add_theme_color_override("font_color", UiColors.NEON_YELLOW)
 	level_up_label.add_theme_font_override("font", FONT_HEADER)
 	level_up_label.add_theme_font_size_override("font_size", 72)
 	
 	# Choose label - cyan
-	choose_label.add_theme_color_override("font_color", Color(0.0, 1.0, 0.9, 1.0))
+	choose_label.add_theme_color_override("font_color", UiColors.CYAN)
 	choose_label.add_theme_font_override("font", FONT_HEADER)
 	choose_label.add_theme_font_size_override("font_size", 32)
 	
@@ -110,9 +110,9 @@ func _apply_synthwave_theme() -> void:
 		if icon_area:
 			_add_icon_starfield_bg(icon_area)
 	
-	# Style action buttons
-	_style_button(refresh_button, COLOR_BUTTON)
-	_style_button(skip_button, Color(0.5, 0.5, 0.5, 1.0))
+	# Style action buttons (shared synthwave button helper)
+	CARD_HOVER_FX_SCRIPT.style_synthwave_button(refresh_button, COLOR_BUTTON, _button_hover_tweens, 4, 16, 8)
+	CARD_HOVER_FX_SCRIPT.style_synthwave_button(skip_button, UiColors.BUTTON_NEUTRAL, _button_hover_tweens, 4, 16, 8)
 	refresh_button.add_theme_font_override("font", FONT_HEADER)
 	refresh_button.add_theme_font_size_override("font_size", 24)
 	refresh_button.custom_minimum_size.x = 200
@@ -121,11 +121,17 @@ func _apply_synthwave_theme() -> void:
 	skip_button.custom_minimum_size.x = 200
 	skip_button.text = "SKIP"
 
+	# Focus neighbors: last card → buttons, buttons → first card
+	if _cards.size() > 0:
+		_cards[_cards.size() - 1].focus_neighbor_bottom = refresh_button.get_path()
+		refresh_button.focus_neighbor_top = _cards[0].get_path()
+		skip_button.focus_neighbor_top = _cards[0].get_path()
+
 
 func _style_card(card: PanelContainer) -> void:
 	var style: StyleBoxFlat = StyleBoxFlat.new()
 	style.bg_color = COLOR_PANEL_BG
-	style.border_color = Color(0.4, 0.2, 0.5, 1.0)
+	style.border_color = UiColors.PANEL_BORDER
 	style.border_width_left = 2
 	style.border_width_right = 2
 	style.border_width_top = 2
@@ -150,7 +156,7 @@ func _style_card(card: PanelContainer) -> void:
 			+ "    COLOR = vec4(color_edge.rgb, color_edge.a * (1.0 - UV.x));\n" \
 			+ "}\n"
 		grad_mat.shader = grad_shader
-		var default_color: Color = Color(0.4, 0.2, 0.5, 0.35)
+		var default_color: Color = Color(UiColors.PANEL_BORDER.r, UiColors.PANEL_BORDER.g, UiColors.PANEL_BORDER.b, 0.35)
 		grad_mat.set_shader_parameter("color_edge", default_color)
 		grad_rect.material = grad_mat
 		card.add_child(grad_rect)
@@ -161,85 +167,31 @@ func _style_card(card: PanelContainer) -> void:
 		CARD_HOVER_FX_SCRIPT.ensure_hover_overlay(
 			card,
 			CARD_HOVER_SHADER,
-			Color(1.0, 0.08, 0.58, 1.0),
-			Color(0.0, 1.0, 1.0, 1.0),
-			Color(1.0, 0.95, 0.25, 1.0)
+			UiColors.PARTICLE_PINK,
+			UiColors.PARTICLE_CYAN,
+			UiColors.CLICK_FLASH
 		)
 
 
-func _style_button(button: Button, base_color: Color) -> void:
-	var normal: StyleBoxFlat = StyleBoxFlat.new()
-	normal.bg_color = base_color
-	normal.corner_radius_top_left = 4
-	normal.corner_radius_top_right = 4
-	normal.corner_radius_bottom_left = 4
-	normal.corner_radius_bottom_right = 4
-	normal.content_margin_left = 16
-	normal.content_margin_right = 16
-	normal.content_margin_top = 8
-	normal.content_margin_bottom = 8
-	button.add_theme_stylebox_override("normal", normal)
-	
-	var hover: StyleBoxFlat = StyleBoxFlat.new()
-	hover.bg_color = base_color.lightened(0.35)
-	hover.corner_radius_top_left = 4
-	hover.corner_radius_top_right = 4
-	hover.corner_radius_bottom_left = 4
-	hover.corner_radius_bottom_right = 4
-	hover.content_margin_left = 16
-	hover.content_margin_right = 16
-	hover.content_margin_top = 8
-	hover.content_margin_bottom = 8
-	button.add_theme_stylebox_override("hover", hover)
-	
-	var pressed: StyleBoxFlat = StyleBoxFlat.new()
-	pressed.bg_color = base_color.darkened(0.2)
-	pressed.corner_radius_top_left = 4
-	pressed.corner_radius_top_right = 4
-	pressed.corner_radius_bottom_left = 4
-	pressed.corner_radius_bottom_right = 4
-	pressed.content_margin_left = 16
-	pressed.content_margin_right = 16
-	pressed.content_margin_top = 8
-	pressed.content_margin_bottom = 8
-	button.add_theme_stylebox_override("pressed", pressed)
-
-	var focus: StyleBoxEmpty = StyleBoxEmpty.new()
-	button.add_theme_stylebox_override("focus", focus)
-
-	button.add_theme_color_override("font_color", Color.WHITE)
-	button.add_theme_color_override("font_hover_color", Color.WHITE)
-
-	button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-	button.mouse_entered.connect(_on_button_mouse_entered.bind(button))
-	button.mouse_exited.connect(_on_button_mouse_exited.bind(button))
+func _style_button(_button: Button, _base_color: Color) -> void:
+	# DEPRECATED: Use CARD_HOVER_FX_SCRIPT.style_synthwave_button() instead.
+	# Kept as no-op stub in case any external callers remain.
+	pass
 
 
-func _on_button_mouse_entered(button: Button) -> void:
-	if not is_instance_valid(button):
-		return
-	_set_button_hover_state(button, true)
+func _on_button_mouse_entered(_button: Button) -> void:
+	# Now handled by CARD_HOVER_FX_SCRIPT.style_synthwave_button() focus/hover connections.
+	pass
 
 
-func _on_button_mouse_exited(button: Button) -> void:
-	if not is_instance_valid(button):
-		return
-	_set_button_hover_state(button, false)
+func _on_button_mouse_exited(_button: Button) -> void:
+	# Now handled by CARD_HOVER_FX_SCRIPT.style_synthwave_button() focus/hover connections.
+	pass
 
 
-func _set_button_hover_state(button: Button, hovered: bool) -> void:
-	if button.disabled:
-		return
-	var btn_key: int = button.get_instance_id()
-	var target_scale: Vector2 = Vector2(1.05, 1.05) if hovered else Vector2.ONE
-	button.pivot_offset = button.size * 0.5
-
-	if _button_hover_tweens.has(btn_key) and is_instance_valid(_button_hover_tweens[btn_key]):
-		_button_hover_tweens[btn_key].kill()
-
-	var tw: Tween = button.create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
-	tw.tween_property(button, "scale", target_scale, 0.14 if hovered else 0.10)
-	_button_hover_tweens[btn_key] = tw
+func _set_button_hover_state(_button: Button, _hovered: bool) -> void:
+	# Now handled by CARD_HOVER_FX_SCRIPT.tween_button_scale().
+	pass
 
 
 func _on_level_up_triggered(current_level: int, available_upgrades: Array) -> void:
@@ -259,6 +211,12 @@ func _on_level_up_triggered(current_level: int, available_upgrades: Array) -> vo
 	
 	# Animate cards appearing
 	_animate_cards_in()
+
+	# Focus the first visible card for controller navigation
+	for card: PanelContainer in _cards:
+		if card.visible:
+			card.call_deferred("grab_focus")
+			break
 
 
 func _populate_cards() -> void:
@@ -353,7 +311,7 @@ func _update_card(index: int, option: Dictionary) -> void:
 			var new_tag: Label = Label.new()
 			new_tag.name = "NewTag"
 			new_tag.text = "NEW"
-			new_tag.add_theme_color_override("font_color", Color(1.0, 0.95, 0.2, 1.0))
+			new_tag.add_theme_color_override("font_color", UiColors.NEON_YELLOW)
 			new_tag.add_theme_font_override("font", FONT_HEADER)
 			new_tag.add_theme_font_size_override("font_size", 18)
 			new_tag.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -384,8 +342,8 @@ func _update_card_border(card: PanelContainer, color: Color) -> void:
 
 	var hover_key: String = "_hover_rect"
 	if card.has_meta(hover_key):
-		var glow_color: Color = color.lerp(Color(0.0, 1.0, 1.0, 1.0), 0.45)
-		var click_color: Color = color.lerp(Color(1.0, 0.95, 0.25, 1.0), 0.65)
+		var glow_color: Color = color.lerp(UiColors.PARTICLE_CYAN, 0.45)
+		var click_color: Color = color.lerp(UiColors.CLICK_FLASH, 0.65)
 		CARD_HOVER_FX_SCRIPT.set_hover_colors(card, color, glow_color, click_color)
 
 
@@ -532,7 +490,7 @@ func _update_refresh_button() -> void:
 		label_cost.name = "LabelCost"
 		label_cost.add_theme_font_override("font", FONT_HEADER)
 		label_cost.add_theme_font_size_override("font_size", 14) # Smaller
-		label_cost.add_theme_color_override("font_color", Color(1.0, 0.85, 0.1, 1.0)) # Synthwave yellow
+		label_cost.add_theme_color_override("font_color", UiColors.NEON_YELLOW) # Synthwave yellow
 		label_cost.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		label_cost.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		hbox.add_child(label_cost)
@@ -597,12 +555,14 @@ func _reset_card_hover_visual(card: PanelContainer, index: int) -> void:
 	CARD_HOVER_FX_SCRIPT.reset_hover(card, _card_hover_tweens, index, 0.0)
 
 
-## Handle click on entire card area.
+## Handle click/accept on entire card area.
 func _on_card_input(event: InputEvent, index: int) -> void:
 	if event is InputEventMouseButton:
 		var mb: InputEventMouseButton = event as InputEventMouseButton
 		if mb.button_index == MOUSE_BUTTON_LEFT and mb.pressed:
 			_on_card_selected(index)
+	elif event.is_action_pressed("ui_accept"):
+		_on_card_selected(index)
 
 
 func _on_card_selected(index: int) -> void:
@@ -644,9 +604,9 @@ func _play_card_reject_particles(card: PanelContainer) -> void:
 	pop_tween.tween_property(card, "scale", Vector2(0.88, 0.88), 0.13).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
 
 	var synth_colors: Array[Color] = [
-		Color(1.0, 0.08, 0.58, 1.0),
-		Color(0.58, 0.0, 1.0, 1.0),
-		Color(0.0, 1.0, 1.0, 1.0),
+		UiColors.PARTICLE_PINK,
+		UiColors.PARTICLE_PURPLE,
+		UiColors.PARTICLE_CYAN,
 	]
 
 	for i: int in range(synth_colors.size()):

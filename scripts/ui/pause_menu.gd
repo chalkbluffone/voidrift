@@ -8,6 +8,7 @@ signal resumed
 
 const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
 const GAME_SCENE: String = "res://scenes/gameplay/world.tscn"
+const CARD_HOVER_FX_SCRIPT: Script = preload("res://scripts/ui/card_hover_fx.gd")
 
 @onready var _settings: Node = get_node("/root/SettingsManager")
 @onready var RunManager: Node = get_node("/root/RunManager")
@@ -21,6 +22,7 @@ const GAME_SCENE: String = "res://scenes/gameplay/world.tscn"
 
 var _is_paused: bool = false
 var _options_visible: bool = false
+var _button_hover_tweens: Dictionary = {}
 
 
 func _ready() -> void:
@@ -30,7 +32,18 @@ func _ready() -> void:
 	options_button.pressed.connect(_on_options_pressed)
 	quit_run_button.pressed.connect(_on_quit_run_pressed)
 	exit_button.pressed.connect(_on_exit_pressed)
-	
+
+	# Style all buttons with synthwave focus/hover support
+	for button: Button in [resume_button, restart_button, options_button, quit_run_button, exit_button]:
+		CARD_HOVER_FX_SCRIPT.style_synthwave_button(button, UiColors.BUTTON_PRIMARY, _button_hover_tweens, 4)
+
+	# Style the options back button too
+	var options_back_btn: Button = options_container.get_node_or_null("Panel/VBoxContainer/BackButton") as Button
+	if options_back_btn:
+		CARD_HOVER_FX_SCRIPT.style_synthwave_button(options_back_btn, UiColors.BUTTON_BACK, _button_hover_tweens, 4)
+
+	_connect_options_signals()
+
 	# Start hidden
 	visible = false
 	process_mode = Node.PROCESS_MODE_ALWAYS
