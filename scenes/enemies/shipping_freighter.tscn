@@ -14,8 +14,8 @@ shader_parameter/pulse_min = 0.5
 shader_parameter/pulse_max = 1.0
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_freighter"]
-radius = 24.0
-height = 60.0
+radius = 31.0
+height = 174.0
 
 [node name="ShippingFreighter" type="CharacterBody2D" unique_id=1061284104 groups=["enemies"]]
 collision_layer = 8
@@ -25,9 +25,9 @@ stardust_value = 4
 
 [node name="Underglow" type="ColorRect" parent="." unique_id=1305632688]
 material = SubResource("ShaderMaterial_underglow")
-offset_left = -50.0
+offset_left = -107.0
 offset_top = -50.0
-offset_right = 50.0
+offset_right = 104.0
 offset_bottom = 50.0
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1994019735]
@@ -36,10 +36,12 @@ scale = Vector2(0.15, 0.15)
 texture = ExtResource("2_sprite")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2029644892]
+rotation = 1.5707964
 shape = SubResource("CapsuleShape2D_freighter")
 
 [node name="HitboxArea" type="Area2D" parent="." unique_id=1670214505]
 collision_layer = 8
 
 [node name="HitboxShape" type="CollisionShape2D" parent="HitboxArea" unique_id=1917708721]
+rotation = 1.5707964
 shape = SubResource("CapsuleShape2D_freighter")

@@ -92,8 +92,6 @@ func _apply_synthwave_theme() -> void:
 
 	# Buttons - synthwave style with focus support
 	for button: Button in [retry_button, main_menu_button]:
-		button.add_theme_font_override("font", FONT_HEADER)
-		button.add_theme_font_size_override("font_size", 24)
 		CARD_HOVER_FX_SCRIPT.style_synthwave_button(button, UiColors.BUTTON_PRIMARY, _button_hover_tweens, 4)
 
 

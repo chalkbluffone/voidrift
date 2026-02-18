@@ -7,12 +7,12 @@ const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
 const CARD_HOVER_FX_SCRIPT: Script = preload("res://scripts/ui/card_hover_fx.gd")
 
 @onready var _settings: Node = get_node("/root/SettingsManager")
-@onready var master_slider: HSlider = $Panel/VBoxContainer/MasterVolume/Slider
-@onready var sfx_slider: HSlider = $Panel/VBoxContainer/SFXVolume/Slider
-@onready var music_slider: HSlider = $Panel/VBoxContainer/MusicVolume/Slider
-@onready var fullscreen_check: CheckButton = $Panel/VBoxContainer/Fullscreen/CheckButton
-@onready var vsync_check: CheckButton = $Panel/VBoxContainer/VSync/CheckButton
-@onready var back_button: Button = $Panel/VBoxContainer/BackButton
+@onready var master_slider: HSlider = $Panel/MarginContainer/VBoxContainer/MasterVolume/Slider
+@onready var sfx_slider: HSlider = $Panel/MarginContainer/VBoxContainer/SFXVolume/Slider
+@onready var music_slider: HSlider = $Panel/MarginContainer/VBoxContainer/MusicVolume/Slider
+@onready var fullscreen_check: CheckButton = $Panel/MarginContainer/VBoxContainer/Fullscreen/CheckButton
+@onready var vsync_check: CheckButton = $Panel/MarginContainer/VBoxContainer/VSync/CheckButton
+@onready var back_button: Button = $Panel/MarginContainer/VBoxContainer/BackButton
 
 var _button_hover_tweens: Dictionary = {}
 

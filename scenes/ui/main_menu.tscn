@@ -48,7 +48,7 @@ custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
 
 [node name="PlayButton" type="Button" parent="VBoxContainer"]
-custom_minimum_size = Vector2(200, 40)
+custom_minimum_size = Vector2(300, 40)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_fonts/font = ExtResource("2_orbitron")
@@ -56,7 +56,7 @@ theme_override_font_sizes/font_size = 24
 text = "▶ Play"
 
 [node name="OptionsButton" type="Button" parent="VBoxContainer"]
-custom_minimum_size = Vector2(200, 40)
+custom_minimum_size = Vector2(300, 40)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_fonts/font = ExtResource("2_orbitron")
@@ -64,7 +64,7 @@ theme_override_font_sizes/font_size = 24
 text = "⚙ Options"
 
 [node name="WeaponsLabButton" type="Button" parent="VBoxContainer"]
-custom_minimum_size = Vector2(200, 40)
+custom_minimum_size = Vector2(300, 40)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_fonts/font = ExtResource("2_orbitron")
@@ -72,7 +72,7 @@ theme_override_font_sizes/font_size = 24
 text = "🔧 Weapons Lab"
 
 [node name="QuitButton" type="Button" parent="VBoxContainer"]
-custom_minimum_size = Vector2(200, 40)
+custom_minimum_size = Vector2(300, 40)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_fonts/font = ExtResource("2_orbitron")

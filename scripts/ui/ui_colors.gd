@@ -45,8 +45,8 @@ const BG_OVERLAY: Color = Color(0.0, 0.0, 0.0, 0.85)
 
 # --- Button Colors ---
 
-## Default button color (neon purple).
-const BUTTON_PRIMARY: Color = Color(0.67, 0.2, 0.95, 1.0)
+## Default button color (magenta-purple).
+const BUTTON_PRIMARY: Color = Color("#920075")
 
 ## Back / secondary button color.
 const BUTTON_BACK: Color = Color(0.4, 0.3, 0.5, 1.0)

@@ -50,13 +50,21 @@ func _ready() -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_cancel"):
-		if _options_visible:
-			_close_options()
-		elif _is_paused:
+	if event.is_action_pressed("pause"):
+		# Start / Escape toggles pause from any sub-state
+		if _is_paused:
+			if _options_visible:
+				_close_options()
 			_unpause()
 		else:
 			_pause()
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("ui_cancel") and _is_paused:
+		# Circle / B goes back one level
+		if _options_visible:
+			_close_options()
+		else:
+			_unpause()
 		get_viewport().set_input_as_handled()
 
 
