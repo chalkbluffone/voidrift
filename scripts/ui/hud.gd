@@ -337,8 +337,8 @@ func _find_player() -> void:
 
 func _update_hp(current: float, maximum: float) -> void:
 	hp_bar.max_value = maximum
-	hp_bar.value = current
-	hp_label.text = "%d / %d" % [ceili(current), ceili(maximum)]
+	hp_bar.value = maxf(current, 0.0)
+	hp_label.text = "%d / %d" % [maxi(ceili(current), 0), ceili(maximum)]
 
 
 func _update_xp(current: float, required: float) -> void:

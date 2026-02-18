@@ -24,6 +24,7 @@ const CARD_HOVER_FX_SCRIPT: Script = preload("res://scripts/ui/card_hover_fx.gd"
 @onready var GameConfig: Node = get_node("/root/GameConfig")
 @onready var RunManager: Node = get_node("/root/RunManager")
 @onready var ProgressionManager: Node = get_node("/root/ProgressionManager")
+@onready var _settings: Node = get_node("/root/SettingsManager")
 @onready var level_up_label: Label = $VBoxContainer/LevelUpLabel
 @onready var choose_label: Label = $VBoxContainer/ChooseLabel
 @onready var choices_container: VBoxContainer = $VBoxContainer/ChoicesContainer
@@ -603,16 +604,23 @@ func _play_card_reject_particles(card: PanelContainer) -> void:
 	pop_tween.tween_property(card, "modulate:a", 0.0, 0.13)
 	pop_tween.tween_property(card, "scale", Vector2(0.88, 0.88), 0.13).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
 
+	var density_mult: float = _settings.get_particle_density_multiplier()
+	if density_mult <= 0.0:
+		return  # Particles disabled
+
 	var synth_colors: Array[Color] = [
 		UiColors.PARTICLE_PINK,
 		UiColors.PARTICLE_PURPLE,
 		UiColors.PARTICLE_CYAN,
 	]
 
+	var base_amount: int = 42
+	var scaled_amount: int = maxi(1, int(float(base_amount) * density_mult))
+
 	for i: int in range(synth_colors.size()):
 		var particles: CPUParticles2D = CPUParticles2D.new()
 		particles.one_shot = true
-		particles.amount = 42
+		particles.amount = scaled_amount
 		particles.lifetime = 0.46
 		particles.explosiveness = 1.0
 		particles.randomness = 0.45

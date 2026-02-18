@@ -14,7 +14,7 @@ enum FreighterState {
 @export var drop_type: String = "xp"
 
 ## How fast the freighter moves when fleeing (set from data)
-@export var flee_speed: float = 70.0
+@export var flee_speed: float = 90.0
 
 ## Number of pickup orbs to scatter on death (for jackpot feel)
 @export var drop_burst_count: int = 5

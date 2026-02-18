@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://options_panel_001"]
+
+[ext_resource type="Script" path="res://scripts/ui/options_panel.gd" id="1_panel"]
+
+[node name="OptionsPanel" type="PanelContainer"]
+custom_minimum_size = Vector2(520, 440)
+script = ExtResource("1_panel")
