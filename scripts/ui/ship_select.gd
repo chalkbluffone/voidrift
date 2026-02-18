@@ -26,14 +26,16 @@ const CARD_BORDER_WIDTH: int = 2
 const BUTTON_CORNER_RADIUS: int = 4
 
 const FONT_HEADER: Font = preload("res://assets/fonts/Orbitron-Bold.ttf")
+const CARD_HOVER_SHADER: Shader = preload("res://shaders/ui_upgrade_card_hover.gdshader")
+const CARD_HOVER_FX_SCRIPT: Script = preload("res://scripts/ui/card_hover_fx.gd")
 
 @onready var DataLoader: Node = get_node("/root/DataLoader")
 @onready var RunManager: Node = get_node("/root/RunManager")
 @onready var FileLogger: Node = get_node_or_null("/root/FileLogger")
 
 # Containers populated in _ready
-@onready var ship_list: VBoxContainer = $MarginContainer/VBoxContainer/ContentRow/ShipColumn/ShipScroll/ShipList
-@onready var captain_list: VBoxContainer = $MarginContainer/VBoxContainer/ContentRow/CaptainColumn/CaptainScroll/CaptainList
+@onready var ship_list: VBoxContainer = $MarginContainer/VBoxContainer/ContentRow/ShipColumn/ShipScroll/ShipPadding/ShipList
+@onready var captain_list: VBoxContainer = $MarginContainer/VBoxContainer/ContentRow/CaptainColumn/CaptainScroll/CaptainPadding/CaptainList
 @onready var launch_button: Button = $MarginContainer/VBoxContainer/BottomBar/LaunchButton
 @onready var back_button: Button = $MarginContainer/VBoxContainer/BottomBar/BackButton
 
@@ -43,6 +45,8 @@ var _selected_captain_id: String = ""
 ## Maps ship/captain id → PanelContainer card node for highlight updates.
 var _ship_cards: Dictionary = {}
 var _captain_cards: Dictionary = {}
+var _card_hover_tweens: Dictionary = {}
+var _button_hover_tweens: Dictionary = {}
 
 
 func _ready() -> void:
@@ -100,10 +104,15 @@ func _build_ship_card(data: Dictionary) -> PanelContainer:
 	var card: PanelContainer = PanelContainer.new()
 	card.custom_minimum_size = Vector2(0, 120)
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	card.pivot_offset = card.size * 0.5
+	card.set_meta("entry_type", "ship")
+	card.set_meta("entry_id", ship_id)
 	_style_card(card, false)
 
 	# Make clickable
 	card.gui_input.connect(_on_ship_card_input.bind(ship_id))
+	card.mouse_entered.connect(_on_loadout_card_mouse_entered.bind(card))
+	card.mouse_exited.connect(_on_loadout_card_mouse_exited.bind(card))
 	card.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 
 	var margin: MarginContainer = MarginContainer.new()
@@ -269,9 +278,14 @@ func _build_captain_card(data: Dictionary) -> PanelContainer:
 	var captain_id: String = String(data.get("id", ""))
 	var card: PanelContainer = PanelContainer.new()
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	card.pivot_offset = card.size * 0.5
+	card.set_meta("entry_type", "captain")
+	card.set_meta("entry_id", captain_id)
 	_style_card(card, false)
 
 	card.gui_input.connect(_on_captain_card_input.bind(captain_id))
+	card.mouse_entered.connect(_on_loadout_card_mouse_entered.bind(card))
+	card.mouse_exited.connect(_on_loadout_card_mouse_exited.bind(card))
 	card.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 
 	var margin: MarginContainer = MarginContainer.new()
@@ -411,6 +425,48 @@ func _on_captain_card_input(event: InputEvent, captain_id: String) -> void:
 		_select_captain(captain_id)
 
 
+func _on_loadout_card_mouse_entered(card: PanelContainer) -> void:
+	if not is_instance_valid(card):
+		return
+	_set_loadout_card_hover_state(card, true)
+
+
+func _on_loadout_card_mouse_exited(card: PanelContainer) -> void:
+	if not is_instance_valid(card):
+		return
+	_set_loadout_card_hover_state(card, false)
+
+
+func _set_loadout_card_hover_state(card: PanelContainer, hovered: bool) -> void:
+	var card_key: int = card.get_instance_id()
+	CARD_HOVER_FX_SCRIPT.tween_hover_state(card, _card_hover_tweens, card_key, hovered, 0.0, Vector2(1.03, 1.03), 0.16, 0.12)
+
+
+func _on_button_mouse_entered(button: Button) -> void:
+	if not is_instance_valid(button):
+		return
+	_set_button_hover_state(button, true)
+
+
+func _on_button_mouse_exited(button: Button) -> void:
+	if not is_instance_valid(button):
+		return
+	_set_button_hover_state(button, false)
+
+
+func _set_button_hover_state(button: Button, hovered: bool) -> void:
+	var btn_key: int = button.get_instance_id()
+	var target_scale: Vector2 = Vector2(1.05, 1.05) if hovered else Vector2.ONE
+	button.pivot_offset = button.size * 0.5
+
+	if _button_hover_tweens.has(btn_key) and is_instance_valid(_button_hover_tweens[btn_key]):
+		_button_hover_tweens[btn_key].kill()
+
+	var tw: Tween = button.create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	tw.tween_property(button, "scale", target_scale, 0.14 if hovered else 0.10)
+	_button_hover_tweens[btn_key] = tw
+
+
 func _select_ship(ship_id: String) -> void:
 	_selected_ship_id = ship_id
 	if FileLogger:
@@ -503,6 +559,32 @@ func _style_card(card: PanelContainer, selected: bool) -> void:
 		card.add_child(grad_rect)
 		card.set_meta(gradient_key, grad_rect)
 
+	if card.has_meta(gradient_key):
+		var grad_rect_existing: ColorRect = card.get_meta(gradient_key) as ColorRect
+		if grad_rect_existing and grad_rect_existing.material is ShaderMaterial:
+			var grad_mat_existing: ShaderMaterial = grad_rect_existing.material as ShaderMaterial
+			var edge_color: Color = COLOR_PANEL_SELECTED if selected else COLOR_PANEL_BORDER
+			grad_mat_existing.set_shader_parameter("color_edge", Color(edge_color.r, edge_color.g, edge_color.b, 0.35))
+
+	var hover_key: String = "_hover_rect"
+	if not card.has_meta(hover_key):
+		CARD_HOVER_FX_SCRIPT.ensure_hover_overlay(
+			card,
+			CARD_HOVER_SHADER,
+			COLOR_PANEL_SELECTED,
+			Color(0.0, 1.0, 1.0, 1.0),
+			Color(1.0, 0.95, 0.25, 1.0)
+		)
+
+	if card.has_meta(hover_key):
+		var card_edge_color: Color = COLOR_PANEL_SELECTED if selected else COLOR_PANEL_BORDER
+		var glow_color: Color = card_edge_color.lerp(Color(0.0, 1.0, 1.0, 1.0), 0.45)
+		CARD_HOVER_FX_SCRIPT.set_hover_colors(card, card_edge_color, glow_color, Color(1.0, 0.95, 0.25, 1.0))
+		CARD_HOVER_FX_SCRIPT.reset_hover(card, _card_hover_tweens, card.get_instance_id(), 0.0)
+
+	if not selected and card.scale != Vector2.ONE:
+		card.scale = Vector2.ONE
+
 
 func _style_button(button: Button, base_color: Color) -> void:
 	var normal: StyleBoxFlat = StyleBoxFlat.new()
@@ -514,7 +596,7 @@ func _style_button(button: Button, base_color: Color) -> void:
 	button.add_theme_stylebox_override("normal", normal)
 
 	var hover: StyleBoxFlat = StyleBoxFlat.new()
-	hover.bg_color = base_color.lightened(0.2)
+	hover.bg_color = base_color.lightened(0.35)
 	hover.corner_radius_top_left = BUTTON_CORNER_RADIUS
 	hover.corner_radius_top_right = BUTTON_CORNER_RADIUS
 	hover.corner_radius_bottom_left = BUTTON_CORNER_RADIUS
@@ -529,5 +611,12 @@ func _style_button(button: Button, base_color: Color) -> void:
 	pressed.corner_radius_bottom_right = BUTTON_CORNER_RADIUS
 	button.add_theme_stylebox_override("pressed", pressed)
 
+	var focus: StyleBoxEmpty = StyleBoxEmpty.new()
+	button.add_theme_stylebox_override("focus", focus)
+
 	button.add_theme_color_override("font_color", Color.WHITE)
 	button.add_theme_color_override("font_hover_color", Color.WHITE)
+
+	button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	button.mouse_entered.connect(_on_button_mouse_entered.bind(button))
+	button.mouse_exited.connect(_on_button_mouse_exited.bind(button))

@@ -20,6 +20,7 @@ const COLOR_BUTTON_HOVER: Color = Color(1.0, 0.08, 0.4, 1.0)  # Hot pink
 
 const FONT_HEADER: Font = preload("res://assets/fonts/Orbitron-Bold.ttf")
 const CARD_HOVER_SHADER: Shader = preload("res://shaders/ui_upgrade_card_hover.gdshader")
+const CARD_HOVER_FX_SCRIPT: Script = preload("res://scripts/ui/card_hover_fx.gd")
 
 @onready var GameConfig: Node = get_node("/root/GameConfig")
 @onready var RunManager: Node = get_node("/root/RunManager")
@@ -156,20 +157,13 @@ func _style_card(card: PanelContainer) -> void:
 
 	var hover_key: String = "_hover_rect"
 	if not card.has_meta(hover_key):
-		var hover_rect: ColorRect = ColorRect.new()
-		hover_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		hover_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		var hover_mat: ShaderMaterial = ShaderMaterial.new()
-		hover_mat.shader = CARD_HOVER_SHADER
-		hover_mat.set_shader_parameter("hover_strength", 0.0)
-		hover_mat.set_shader_parameter("click_strength", 0.0)
-		hover_mat.set_shader_parameter("click_time", -10.0)
-		hover_mat.set_shader_parameter("edge_color", Color(1.0, 0.08, 0.58, 1.0))
-		hover_mat.set_shader_parameter("glow_color", Color(0.0, 1.0, 1.0, 1.0))
-		hover_mat.set_shader_parameter("click_color", Color(1.0, 0.95, 0.25, 1.0))
-		hover_rect.material = hover_mat
-		card.add_child(hover_rect)
-		card.set_meta(hover_key, hover_rect)
+		CARD_HOVER_FX_SCRIPT.ensure_hover_overlay(
+			card,
+			CARD_HOVER_SHADER,
+			Color(1.0, 0.08, 0.58, 1.0),
+			Color(0.0, 1.0, 1.0, 1.0),
+			Color(1.0, 0.95, 0.25, 1.0)
+		)
 
 
 func _style_button(button: Button, base_color: Color) -> void:
@@ -355,14 +349,9 @@ func _update_card_border(card: PanelContainer, color: Color) -> void:
 
 	var hover_key: String = "_hover_rect"
 	if card.has_meta(hover_key):
-		var hover_rect: ColorRect = card.get_meta(hover_key) as ColorRect
-		if hover_rect and hover_rect.material is ShaderMaterial:
-			var hover_mat: ShaderMaterial = hover_rect.material as ShaderMaterial
-			var glow_color: Color = color.lerp(Color(0.0, 1.0, 1.0, 1.0), 0.45)
-			var click_color: Color = color.lerp(Color(1.0, 0.95, 0.25, 1.0), 0.65)
-			hover_mat.set_shader_parameter("edge_color", color)
-			hover_mat.set_shader_parameter("glow_color", glow_color)
-			hover_mat.set_shader_parameter("click_color", click_color)
+		var glow_color: Color = color.lerp(Color(0.0, 1.0, 1.0, 1.0), 0.45)
+		var click_color: Color = color.lerp(Color(1.0, 0.95, 0.25, 1.0), 0.65)
+		CARD_HOVER_FX_SCRIPT.set_hover_colors(card, color, glow_color, click_color)
 
 
 ## Add animated starfield background to an icon area control (matching loadout screen).
@@ -564,47 +553,11 @@ func _on_card_mouse_exited(index: int) -> void:
 
 
 func _set_card_hover_state(card: PanelContainer, index: int, hovered: bool) -> void:
-	if _card_hover_tweens.has(index):
-		var existing_tween: Tween = _card_hover_tweens[index] as Tween
-		if existing_tween and existing_tween.is_valid():
-			existing_tween.kill()
-
-	var hover_key: String = "_hover_rect"
-	if not card.has_meta(hover_key):
-		return
-	var hover_rect: ColorRect = card.get_meta(hover_key) as ColorRect
-	if not hover_rect or not (hover_rect.material is ShaderMaterial):
-		return
-	var hover_mat: ShaderMaterial = hover_rect.material as ShaderMaterial
-
-	var tween: Tween = create_tween()
-	tween.set_parallel(true)
-	_card_hover_tweens[index] = tween
-
-	var target_strength: float = 1.0 if hovered else 0.0
-	var target_scale: Vector2 = Vector2(1.03, 1.03) if hovered else Vector2.ONE
-	var duration: float = 0.16 if hovered else 0.12
-
-	tween.tween_property(hover_mat, "shader_parameter/hover_strength", target_strength, duration)
-	tween.tween_property(card, "scale", target_scale, duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	CARD_HOVER_FX_SCRIPT.tween_hover_state(card, _card_hover_tweens, index, hovered, 0.0, Vector2(1.03, 1.03), 0.16, 0.12)
 
 
 func _reset_card_hover_visual(card: PanelContainer, index: int) -> void:
-	if _card_hover_tweens.has(index):
-		var existing_tween: Tween = _card_hover_tweens[index] as Tween
-		if existing_tween and existing_tween.is_valid():
-			existing_tween.kill()
-		_card_hover_tweens.erase(index)
-
-	card.scale = Vector2.ONE
-
-	var hover_key: String = "_hover_rect"
-	if card.has_meta(hover_key):
-		var hover_rect: ColorRect = card.get_meta(hover_key) as ColorRect
-		if hover_rect and hover_rect.material is ShaderMaterial:
-			var hover_mat: ShaderMaterial = hover_rect.material as ShaderMaterial
-			hover_mat.set_shader_parameter("hover_strength", 0.0)
-			hover_mat.set_shader_parameter("click_strength", 0.0)
+	CARD_HOVER_FX_SCRIPT.reset_hover(card, _card_hover_tweens, index, 0.0)
 
 
 ## Handle click on entire card area.

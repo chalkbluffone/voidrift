@@ -48,12 +48,13 @@ horizontal_alignment = 1
 [node name="ContentRow" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
+size_flags_horizontal = 4
 theme_override_constants/separation = 20
 
 [node name="ShipColumn" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ContentRow"]
+custom_minimum_size = Vector2(640, 0)
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.7
 theme_override_constants/separation = 8
 
 [node name="ShipHeader" type="Label" parent="MarginContainer/VBoxContainer/ContentRow/ShipColumn"]
@@ -69,7 +70,15 @@ layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
-[node name="ShipList" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ContentRow/ShipColumn/ShipScroll"]
+[node name="ShipPadding" type="MarginContainer" parent="MarginContainer/VBoxContainer/ContentRow/ShipColumn/ShipScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="ShipList" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ContentRow/ShipColumn/ShipScroll/ShipPadding"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 10
@@ -79,9 +88,9 @@ layout_mode = 2
 theme_override_constants/separation = 4
 
 [node name="CaptainColumn" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ContentRow"]
+custom_minimum_size = Vector2(640, 0)
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.7
 theme_override_constants/separation = 8
 
 [node name="CaptainHeader" type="Label" parent="MarginContainer/VBoxContainer/ContentRow/CaptainColumn"]
@@ -97,7 +106,15 @@ layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
-[node name="CaptainList" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ContentRow/CaptainColumn/CaptainScroll"]
+[node name="CaptainPadding" type="MarginContainer" parent="MarginContainer/VBoxContainer/ContentRow/CaptainColumn/CaptainScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="CaptainList" type="VBoxContainer" parent="MarginContainer/VBoxContainer/ContentRow/CaptainColumn/CaptainScroll/CaptainPadding"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 10
@@ -110,7 +127,7 @@ theme_override_constants/separation = 20
 custom_minimum_size = Vector2(140, 44)
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
-text = "← Back"
+text = "[ESC] BACK"
 
 [node name="Spacer" type="Control" parent="MarginContainer/VBoxContainer/BottomBar"]
 layout_mode = 2
