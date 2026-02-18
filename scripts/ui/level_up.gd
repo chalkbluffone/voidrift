@@ -19,6 +19,7 @@ const COLOR_BUTTON: Color = Color(0.67, 0.2, 0.95, 1.0)       # Neon purple
 const COLOR_BUTTON_HOVER: Color = Color(1.0, 0.08, 0.4, 1.0)  # Hot pink
 
 const FONT_HEADER: Font = preload("res://assets/fonts/Orbitron-Bold.ttf")
+const CARD_HOVER_SHADER: Shader = preload("res://shaders/ui_upgrade_card_hover.gdshader")
 
 @onready var GameConfig: Node = get_node("/root/GameConfig")
 @onready var RunManager: Node = get_node("/root/RunManager")
@@ -39,6 +40,8 @@ const FONT_HEADER: Font = preload("res://assets/fonts/Orbitron-Bold.ttf")
 var _cards: Array[PanelContainer] = []
 var _current_options: Array = []
 var _is_showing: bool = false
+var _is_selecting: bool = false
+var _card_hover_tweens: Dictionary = {}
 
 
 func _ready() -> void:
@@ -53,6 +56,8 @@ func _ready() -> void:
 	for i: int in range(_cards.size()):
 		var card: PanelContainer = _cards[i]
 		card.gui_input.connect(_on_card_input.bind(i))
+		card.mouse_entered.connect(_on_card_mouse_entered.bind(i))
+		card.mouse_exited.connect(_on_card_mouse_exited.bind(i))
 		card.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 		card.mouse_filter = Control.MOUSE_FILTER_STOP
 		# Let clicks pass through children to the card
@@ -149,6 +154,23 @@ func _style_card(card: PanelContainer) -> void:
 		card.add_child(grad_rect)
 		card.set_meta(gradient_key, grad_rect)
 
+	var hover_key: String = "_hover_rect"
+	if not card.has_meta(hover_key):
+		var hover_rect: ColorRect = ColorRect.new()
+		hover_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		hover_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		var hover_mat: ShaderMaterial = ShaderMaterial.new()
+		hover_mat.shader = CARD_HOVER_SHADER
+		hover_mat.set_shader_parameter("hover_strength", 0.0)
+		hover_mat.set_shader_parameter("click_strength", 0.0)
+		hover_mat.set_shader_parameter("click_time", -10.0)
+		hover_mat.set_shader_parameter("edge_color", Color(1.0, 0.08, 0.58, 1.0))
+		hover_mat.set_shader_parameter("glow_color", Color(0.0, 1.0, 1.0, 1.0))
+		hover_mat.set_shader_parameter("click_color", Color(1.0, 0.95, 0.25, 1.0))
+		hover_rect.material = hover_mat
+		card.add_child(hover_rect)
+		card.set_meta(hover_key, hover_rect)
+
 
 func _style_button(button: Button, base_color: Color) -> void:
 	var normal: StyleBoxFlat = StyleBoxFlat.new()
@@ -195,6 +217,7 @@ func _on_level_up_triggered(current_level: int, available_upgrades: Array) -> vo
 	FileLogger.log_info("LevelUpUI", "Level up triggered! Level: %d, Options: %d" % [current_level, available_upgrades.size()])
 	
 	_current_options = available_upgrades
+	_is_selecting = false
 	level_up_label.text = "LEVEL %d!" % current_level
 	
 	_populate_cards()
@@ -212,6 +235,7 @@ func _on_level_up_triggered(current_level: int, available_upgrades: Array) -> vo
 func _populate_cards() -> void:
 	for i in range(_cards.size()):
 		var card: PanelContainer = _cards[i]
+		_reset_card_hover_visual(card, i)
 		
 		if i < _current_options.size():
 			card.visible = true
@@ -328,6 +352,17 @@ func _update_card_border(card: PanelContainer, color: Color) -> void:
 		if grad_rect and grad_rect.material is ShaderMaterial:
 			var mat: ShaderMaterial = grad_rect.material as ShaderMaterial
 			mat.set_shader_parameter("color_edge", Color(color.r, color.g, color.b, 0.35))
+
+	var hover_key: String = "_hover_rect"
+	if card.has_meta(hover_key):
+		var hover_rect: ColorRect = card.get_meta(hover_key) as ColorRect
+		if hover_rect and hover_rect.material is ShaderMaterial:
+			var hover_mat: ShaderMaterial = hover_rect.material as ShaderMaterial
+			var glow_color: Color = color.lerp(Color(0.0, 1.0, 1.0, 1.0), 0.45)
+			var click_color: Color = color.lerp(Color(1.0, 0.95, 0.25, 1.0), 0.65)
+			hover_mat.set_shader_parameter("edge_color", color)
+			hover_mat.set_shader_parameter("glow_color", glow_color)
+			hover_mat.set_shader_parameter("click_color", click_color)
 
 
 ## Add animated starfield background to an icon area control (matching loadout screen).
@@ -506,6 +541,72 @@ func _animate_cards_in() -> void:
 			tween.tween_property(card, "scale", Vector2.ONE, 0.3).set_delay(i * 0.1).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
+func _on_card_mouse_entered(index: int) -> void:
+	if _is_selecting:
+		return
+	if index < 0 or index >= _cards.size():
+		return
+	var card: PanelContainer = _cards[index]
+	if not card.visible:
+		return
+	_set_card_hover_state(card, index, true)
+
+
+func _on_card_mouse_exited(index: int) -> void:
+	if _is_selecting:
+		return
+	if index < 0 or index >= _cards.size():
+		return
+	var card: PanelContainer = _cards[index]
+	if not card.visible:
+		return
+	_set_card_hover_state(card, index, false)
+
+
+func _set_card_hover_state(card: PanelContainer, index: int, hovered: bool) -> void:
+	if _card_hover_tweens.has(index):
+		var existing_tween: Tween = _card_hover_tweens[index] as Tween
+		if existing_tween and existing_tween.is_valid():
+			existing_tween.kill()
+
+	var hover_key: String = "_hover_rect"
+	if not card.has_meta(hover_key):
+		return
+	var hover_rect: ColorRect = card.get_meta(hover_key) as ColorRect
+	if not hover_rect or not (hover_rect.material is ShaderMaterial):
+		return
+	var hover_mat: ShaderMaterial = hover_rect.material as ShaderMaterial
+
+	var tween: Tween = create_tween()
+	tween.set_parallel(true)
+	_card_hover_tweens[index] = tween
+
+	var target_strength: float = 1.0 if hovered else 0.0
+	var target_scale: Vector2 = Vector2(1.03, 1.03) if hovered else Vector2.ONE
+	var duration: float = 0.16 if hovered else 0.12
+
+	tween.tween_property(hover_mat, "shader_parameter/hover_strength", target_strength, duration)
+	tween.tween_property(card, "scale", target_scale, duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+
+func _reset_card_hover_visual(card: PanelContainer, index: int) -> void:
+	if _card_hover_tweens.has(index):
+		var existing_tween: Tween = _card_hover_tweens[index] as Tween
+		if existing_tween and existing_tween.is_valid():
+			existing_tween.kill()
+		_card_hover_tweens.erase(index)
+
+	card.scale = Vector2.ONE
+
+	var hover_key: String = "_hover_rect"
+	if card.has_meta(hover_key):
+		var hover_rect: ColorRect = card.get_meta(hover_key) as ColorRect
+		if hover_rect and hover_rect.material is ShaderMaterial:
+			var hover_mat: ShaderMaterial = hover_rect.material as ShaderMaterial
+			hover_mat.set_shader_parameter("hover_strength", 0.0)
+			hover_mat.set_shader_parameter("click_strength", 0.0)
+
+
 ## Handle click on entire card area.
 func _on_card_input(event: InputEvent, index: int) -> void:
 	if event is InputEventMouseButton:
@@ -515,14 +616,78 @@ func _on_card_input(event: InputEvent, index: int) -> void:
 
 
 func _on_card_selected(index: int) -> void:
+	if _is_selecting:
+		return
+	if index < 0 or index >= _cards.size():
+		return
 	if index >= _current_options.size():
 		return
+
+	_is_selecting = true
+	set_process_input(false)
+	_is_showing = false
 	
 	var selected_option: Dictionary = _current_options[index]
 	FileLogger.log_info("LevelUpUI", "Selected option %d: %s" % [index, selected_option.get("id", "unknown")])
-	
-	_hide_ui()
-	ProgressionManager.select_level_up_option(selected_option)
+
+	for i: int in range(_cards.size()):
+		if i == index:
+			continue
+		if i < _current_options.size() and _cards[i].visible:
+			_play_card_reject_particles(_cards[i])
+
+	var select_tween: Tween = create_tween()
+	select_tween.tween_interval(0.2)
+	select_tween.tween_callback(func() -> void:
+		_hide_ui()
+		ProgressionManager.select_level_up_option(selected_option)
+	)
+
+
+func _play_card_reject_particles(card: PanelContainer) -> void:
+	var card_rect: Rect2 = card.get_global_rect()
+	var card_center: Vector2 = card_rect.position + (card_rect.size * 0.5)
+
+	var pop_tween: Tween = create_tween()
+	pop_tween.set_parallel(true)
+	pop_tween.tween_property(card, "modulate:a", 0.0, 0.13)
+	pop_tween.tween_property(card, "scale", Vector2(0.88, 0.88), 0.13).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+
+	var synth_colors: Array[Color] = [
+		Color(1.0, 0.08, 0.58, 1.0),
+		Color(0.58, 0.0, 1.0, 1.0),
+		Color(0.0, 1.0, 1.0, 1.0),
+	]
+
+	for i: int in range(synth_colors.size()):
+		var particles: CPUParticles2D = CPUParticles2D.new()
+		particles.one_shot = true
+		particles.amount = 42
+		particles.lifetime = 0.46
+		particles.explosiveness = 1.0
+		particles.randomness = 0.45
+		particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+		particles.emission_rect_extents = card_rect.size * 0.42
+		particles.direction = Vector2.UP
+		particles.spread = 180.0
+		particles.gravity = Vector2(0.0, 192.0)
+		particles.initial_velocity_min = 136.0 + (i * 16.0)
+		particles.initial_velocity_max = 288.0 + (i * 24.0)
+		particles.angular_velocity_min = -280.0
+		particles.angular_velocity_max = 280.0
+		particles.scale_amount_min = 1.35
+		particles.scale_amount_max = 2.4
+		particles.color = synth_colors[i].lightened(0.12)
+		particles.global_position = card_center
+		particles.z_index = 200
+		add_child(particles)
+		particles.emitting = true
+
+		var cleanup_timer: SceneTreeTimer = get_tree().create_timer(0.82)
+		cleanup_timer.timeout.connect(func() -> void:
+			if is_instance_valid(particles):
+				particles.queue_free()
+		)
 
 
 func _on_refresh_pressed() -> void:
