@@ -11,6 +11,7 @@ signal died(enemy: BaseEnemy, position: Vector2)
 @export var contact_damage: float = 4.0
 @export var xp_value: float = 1.0
 @export var credit_value: int = 1
+@export var stardust_value: int = 0
 
 var current_hp: float = 25.0
 var _is_dying: bool = false
@@ -164,3 +165,7 @@ func get_xp_value() -> float:
 
 func get_credit_value() -> int:
 	return credit_value
+
+
+func get_stardust_value() -> int:
+	return stardust_value

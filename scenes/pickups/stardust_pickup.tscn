@@ -1,0 +1,37 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/pickups/stardust_pickup.gd" id="1_stardust"]
+[ext_resource type="Shader" path="res://effects/stardust_pickup/stardust_glow.gdshader" id="2_shader"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_stardust"]
+shader = ExtResource("2_shader")
+shader_parameter/color_cycle_speed = 0.8
+shader_parameter/glow_intensity = 2.0
+shader_parameter/star_sharpness = 1.5
+shader_parameter/rotation_speed = 0.8
+shader_parameter/pulse_speed = 2.5
+shader_parameter/pulse_min = 0.6
+shader_parameter/pulse_max = 1.2
+shader_parameter/sparkle_speed = 5.0
+shader_parameter/sparkle_intensity = 0.4
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_stardust"]
+radius = 14.0
+
+[node name="StardustPickup" type="Area2D"]
+collision_layer = 16
+collision_mask = 33
+monitoring = true
+monitorable = true
+script = ExtResource("1_stardust")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_stardust")
+
+[node name="Visual" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_stardust")
+offset_left = -16.0
+offset_top = -16.0
+offset_right = 16.0
+offset_bottom = 16.0
+color = Color(1, 1, 1, 1)

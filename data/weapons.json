@@ -1,533 +1,513 @@
 {
-  "broken_tractor_beam": {
-	"description": "Tethers to a target with a malfunctioning tractor beam that irradiates it over time and stays locked on until the target dies… on accident. Whoops.",
-	"display_name": "Broken Tractor Beam",
-	"enabled": true,
-	"motion": {
-	  "burst_multiplier": 2.0,
-	  "pull_speed": 80.0
+	"broken_tractor_beam": {
+		"description": "Tethers to a target with a malfunctioning tractor beam that irradiates it over time and stays locked on until the target dies… on accident. Whoops.",
+		"display_name": "Broken Tractor Beam",
+		"enabled": true,
+		"motion": {
+			"burst_multiplier": 2.0,
+			"pull_speed": 80.0
+		},
+		"scene": "res://effects/broken_tractor_beam/BrokenTractorBeam.tscn",
+		"shape": {
+			"size": 300.0
+		},
+		"spawner": "res://effects/broken_tractor_beam/broken_tractor_beam_spawner.gd",
+		"stats": {
+			"cooldown": 2.5,
+			"damage": 15.0,
+			"dot_interval": 0.5,
+			"duration": 2.0
+		},
+		"targeting": "nearest",
+		"type": "beam",
+		"unlock_condition": "default",
+		"visual": {
+			"beam_width": 12.0,
+			"color_core": "#88ccff",
+			"color_glow": "#4488ff",
+			"glow_strength": 1.5,
+			"particle_count": 30.0,
+			"particle_lifetime": 0.4,
+			"particle_speed": 200.0
+		}
 	},
-	"scene": "res://effects/broken_tractor_beam/BrokenTractorBeam.tscn",
-	"shape": {
-	  "size": 300.0
+	"ion_wake": {
+		"description": "Periodically drops ionized damage circles behind your ship that grow and explode into synthwave particles. Higher spawn rate means more circles left in your wake.",
+		"display_name": "Ion Wake",
+		"enabled": true,
+		"motion": {
+			"hold_time": 1.0
+		},
+		"particles": {
+			"count": 160.0,
+			"excitement": 60.0,
+			"gravity": 0.0,
+			"lifetime": 0.5,
+			"speed_max": 250.0,
+			"speed_min": 100.0
+		},
+		"scene": "res://effects/ion_wake/IonWake.tscn",
+		"shape": {
+			"growth_percent": 0.2,
+			"size": 32.0
+		},
+		"spawn": {
+			"spawn_angle_degrees": 180.0,
+			"spawn_distance": 16.0
+		},
+		"spawner": "res://effects/ion_wake/ion_wake_spawner.gd",
+		"stats": {
+			"cooldown": 2.5,
+			"damage": 15.0,
+			"projectile_count": 1.0
+		},
+		"type": "melee",
+		"unlock_condition": "none",
+		"visual": {
+			"circle_color": "#ff141480"
+		}
 	},
-	"spawner": "res://effects/broken_tractor_beam/broken_tractor_beam_spawner.gd",
-	"stats": {
-	  "cooldown": 2.5,
-	  "damage": 15.0,
-	  "dot_interval": 0.5,
-	  "duration": 2.0
+	"nikolas_coil": {
+		"description": "Fires an instant Tesla arc that chains to nearby enemies via successive bounces. Not a trendy car.",
+		"display_name": "Nikola's Coil",
+		"enabled": true,
+		"motion": {
+			"cascade_delay": 0.08,
+			"fade_in": 0.04,
+			"fade_out": 0.15,
+			"hold_time": 0.3
+		},
+		"scene": "res://effects/nikolas_coil/NikolasCoil.tscn",
+		"shape": {
+			"arc_width": 8.0,
+			"search_radius": 300.0
+		},
+		"spawner": "res://effects/nikolas_coil/nikolas_coil_spawner.gd",
+		"stats": {
+			"cooldown": 1.2,
+			"damage": 15.0,
+			"duration": 0.6
+		},
+		"type": "projectile",
+		"unlock_condition": "default",
+		"visual": {
+			"bolt_width": 0.5,
+			"branch_intensity": 0.3,
+			"color_core": "#ffffff",
+			"color_fringe": "#8844cc",
+			"color_glow": "#4488ff",
+			"flicker_speed": 30.0,
+			"glow_strength": 4.0,
+			"jaggedness": 0.7
+		}
 	},
-	"targeting": "nearest",
-	"type": "beam",
-	"unlock_condition": "default",
-	"visual": {
-	  "beam_width": 12.0,
-	  "color_core": "#88ccff",
-	  "color_glow": "#4488ff",
-	  "glow_strength": 1.5,
-	  "particle_count": 30.0,
-	  "particle_lifetime": 0.4,
-	  "particle_speed": 200.0
+	"nope_bubble": {
+		"description": "Blocks hits with rechargeable shield charges, consuming one per block and releasing a staggering shockwave.",
+		"display_name": "Nope Bubble",
+		"enabled": true,
+		"motion": {},
+		"scene": "res://effects/nope_bubble/NopeBubble.tscn",
+		"shape": {
+			"shockwave_angle_deg": 45.0,
+			"shockwave_range": 200.0,
+			"size": 45.0
+		},
+		"spawner": "res://effects/nope_bubble/nope_bubble_spawner.gd",
+		"stats": {
+			"ambient_particle_count": 24.0,
+			"boss_damage_reduction": 0.5,
+			"cooldown": 3.0,
+			"damage": 15.0,
+			"knockback": 200.0,
+			"particle_count": 25.0,
+			"projectile_count": 3.0
+		},
+		"type": "area",
+		"unlock_condition": "default",
+		"visual": {
+			"color": "#8c26d9"
+		}
+	},
+	"personal_space_violator": {
+		"description": "Unleashes a wide spray of neon pellets that shred anything foolish enough to get close. Devastating at point-blank range but loses punch fast — if they're far away, you're just tickling them with glowing confetti.",
+		"display_name": "Personal Space Violator",
+		"enabled": true,
+		"motion": {
+			"spread_degrees": 45.0
+		},
+		"scene": "res://effects/personal_space_violator/PersonalSpaceViolator.tscn",
+		"shape": {
+			"pellet_radius": 2.0
+		},
+		"spawner": "res://effects/personal_space_violator/personal_space_violator_spawner.gd",
+		"stats": {
+			"cooldown": 2.85,
+			"damage": 15.0,
+			"falloff_end": 350.0,
+			"falloff_start": 80.0,
+			"lifetime": 0.8,
+			"projectile_count": 3.0,
+			"projectile_speed": 600.0
+		},
+		"targeting": "nearest",
+		"type": "projectile",
+		"unlock_condition": "default",
+		"visual": {
+			"bloom_intensity": 3.0,
+			"color_core": "#ffffff",
+			"color_glow": "#39ff14",
+			"glow_strength": 0.5,
+			"pellet_height_px": 5.0
+		}
+	},
+	"proximity_tax": {
+		"description": "Imposes a damaging aura around the ship that harms enemies who get too close. It's like a tax, but in space...and kills bad guys.",
+		"display_name": "Proximity Tax",
+		"enabled": true,
+		"motion": {},
+		"scene": "res://effects/aoe_base/AoEBase.tscn",
+		"shape": {},
+		"spawner": "res://effects/aoe_base/aoe_base_spawner.gd",
+		"stats": {
+			"cooldown": 0.5,
+			"damage": 15.0,
+			"size": 90.0
+		},
+		"type": "area",
+		"unlock_condition": "default",
+		"visual": {}
+	},
+	"psp_9000": {
+		"description": "PSP or Personal Space Program, deploys orbiting security drones that body-check nearby enemies for physical damage and knockback. Not to be confused with a certain handheld gaming device.",
+		"display_name": "PSP-9000",
+		"enabled": true,
+		"motion": {},
+		"scene": "res://effects/orbit_base/OrbitBase.tscn",
+		"shape": {
+			"drone_size": 9.0,
+			"orbit_radius": 72.0
+		},
+		"spawner": "res://effects/orbit_base/orbit_base_spawner.gd",
+		"stats": {
+			"cooldown": 2.0,
+			"damage": 15.0,
+			"hit_cooldown": 0.35,
+			"knockback": 280.0,
+			"projectile_count": 3.0,
+			"projectile_speed": 1.0
+		},
+		"type": "orbit",
+		"unlock_condition": "default",
+		"visual": {}
+	},
+	"radiant_arc": {
+		"description": "Emits a short-range photonic slash in a wide arc from the ship’s forward edge, instantly cutting through and damaging any targets caught in its path. Really cool looking.",
+		"display_name": "Radiant Arc",
+		"enabled": true,
+		"motion": {
+			"fade_in": 0.18,
+			"fade_out": 0.15,
+			"rotation_offset_deg": 0.0,
+			"seed_offset": 81.0,
+			"speed": 0.0,
+			"sweep_speed": 1.0
+		},
+		"particles": {
+			"amount": 60.0,
+			"color": "#cccccccc",
+			"drag": 2.0,
+			"enabled": true,
+			"lifetime": 0.4,
+			"outward": 0.5,
+			"radius": 0.5,
+			"size": 1.0,
+			"speed": 135.0,
+			"spread": 0.5
+		},
+		"scene": "res://effects/radiant_arc/RadiantArc.tscn",
+		"shape": {
+			"arc_angle_deg": 310.0,
+			"distance": 25.0,
+			"length_scale": 1.0,
+			"radius": 72.0,
+			"taper": 0.0,
+			"thickness": 24.0
+		},
+		"spawner": "res://effects/radiant_arc/radiant_arc_spawner.gd",
+		"stats": {
+			"cooldown": 1.0,
+			"damage": 15.0,
+			"duration": 1.0
+		},
+		"type": "melee",
+		"unlock_condition": "none",
+		"visual": {
+			"chromatic_aberration": 1.45,
+			"color_a": "#ff0000",
+			"color_b": "#e5ff00",
+			"color_c": "#ff0000",
+			"core_strength": 0.0,
+			"electric_frequency": 32.0,
+			"electric_speed": 23.0,
+			"electric_strength": 0.85,
+			"glow_strength": 10.0,
+			"gradient_offset": 0.0,
+			"noise_strength": 1.7,
+			"pulse_speed": 26.0,
+			"pulse_strength": 0.7,
+			"uv_scroll_speed": 0.0
+		}
+	},
+	"snarky_comeback": {
+		"description": "Throws a radiant arc projectile that returns back… created by General Cliff Snarky during the Great Flobus Wars of Quadrant 12. Also talks a grip of shit.",
+		"display_name": "Snarky Comeback",
+		"enabled": true,
+		"motion": {
+			"fade_in": 0.18,
+			"fade_out": 0.3,
+			"max_range": 500.0,
+			"projectile_speed": 400.0,
+			"return_radius": 30.0,
+			"rotation_offset_deg": 0.0,
+			"seed_offset": 42.0,
+			"speed": 0.0,
+			"spin_speed": 1.0,
+			"sweep_speed": 2.0
+		},
+		"particles": {
+			"amount": 60.0,
+			"color": "#cccccccc",
+			"drag": 2.0,
+			"enabled": true,
+			"lifetime": 0.4,
+			"outward": 0.5,
+			"radius": 0.5,
+			"size": 1.0,
+			"speed": 135.0,
+			"spread": 0.5
+		},
+		"scene": "res://effects/snarky_comeback/SnarkyComeback.tscn",
+		"shape": {
+			"arc_angle_deg": 200.0,
+			"distance": 0.0,
+			"length_scale": 1.0,
+			"radius": 28.0,
+			"taper": 0.0,
+			"thickness": 16.0
+		},
+		"spawner": "res://effects/snarky_comeback/snarky_comeback_spawner.gd",
+		"stats": {
+			"cooldown": 1.0,
+			"damage": 15.0,
+			"duration": 1.45,
+			"projectile_count": 1.0
+		},
+		"type": "projectile",
+		"unlock_condition": "default",
+		"visual": {
+			"chromatic_aberration": 1.45,
+			"color_a": "#ff0000",
+			"color_b": "#e5ff00",
+			"color_c": "#ff0000",
+			"core_strength": 0.0,
+			"electric_frequency": 32.0,
+			"electric_speed": 23.0,
+			"electric_strength": 0.85,
+			"glow_strength": 10.0,
+			"gradient_offset": 0.0,
+			"noise_strength": 1.7,
+			"pulse_speed": 26.0,
+			"pulse_strength": 0.7,
+			"uv_scroll_speed": 0.0
+		}
+	},
+	"space_napalm": {
+		"description": "Launches a volatile incendiary orb that detonates on impact, blanketing the blast radius with burning damage over time. Not to be confused with regular napalm.",
+		"display_name": "Space Napalm",
+		"enabled": true,
+		"motion": {
+			"fade_in": 0.08,
+			"fade_out": 0.5,
+			"projectile_speed": 350.0
+		},
+		"particles": {
+			"burst_amount": 50.0,
+			"ember_amount": 20.0,
+			"ember_lifetime": 0.5,
+			"flame_amount": 55.0,
+			"flame_lifetime": 0.6,
+			"smoke_amount": 12.0,
+			"smoke_lifetime": 1.2,
+			"trail_amount": 35.0,
+			"trail_lifetime": 0.35
+		},
+		"scene": "res://effects/space_napalm/SpaceNapalm.tscn",
+		"shape": {
+			"aoe_radius": 80.0,
+			"proj_size": 12.0,
+			"spread_time": 0.8
+		},
+		"spawner": "res://effects/space_napalm/space_napalm_spawner.gd",
+		"stats": {
+			"burn_damage": 5.0,
+			"burn_duration": 3.5,
+			"cooldown": 1.5,
+			"damage": 15.0,
+			"dot_interval": 0.5,
+			"projectile_count": 1.0
+		},
+		"type": "projectile",
+		"unlock_condition": "default",
+		"visual": {
+			"fire_color_core": "#fff280",
+			"fire_color_mid": "#ff730d",
+			"fire_color_outer": "#9a1400",
+			"fire_color_smoke": "#261a14",
+			"fire_flame_speed": 3.0,
+			"fire_flame_turbulence": 0.6,
+			"fire_glow_strength": 3.5,
+			"proj_color_core": "#fffff5",
+			"proj_color_edge": "#cc2600",
+			"proj_color_mid": "#ff9a1a",
+			"proj_glow_strength": 4.0,
+			"proj_morph_intensity": 0.25,
+			"proj_morph_speed": 3.0,
+			"proj_tail_length": 0.35
+		}
+	},
+	"space_nukes": {
+		"description": "Launches a barrage of explosive projectiles that detonate on impact, causing area damage to nearby enemies. It's like fireworks, but deadlier. In space.",
+		"display_name": "Space Nukes",
+		"enabled": true,
+		"motion": {
+			"launch_arc_max_deg": 71.0,
+			"launch_arc_min_deg": 35.0,
+			"lifetime": 2.2
+		},
+		"scene": "res://scenes/gameplay/projectile.tscn",
+		"shape": {
+			"explosion_radius": 96.0
+		},
+		"spawner": "res://effects/space_nukes/space_nukes_spawner.gd",
+		"stats": {
+			"cooldown": 1.8,
+			"crit_chance": 0.0,
+			"damage": 15.0,
+			"projectile_count": 1.0,
+			"projectile_speed": 520.0
+		},
+		"type": "projectile",
+		"unlock_condition": "default",
+		"visual": {
+			"explosion_color": "#ff8a1f99",
+			"projectile_color": "#ffd457"
+		}
+	},
+	"spin_cycle": {
+		"description": "Creates a swirling vortex of energy around the ship, damaging enemies caught within its radius. It's like a cosmic washing machine for bad guys.",
+		"display_name": "Spin Cycle",
+		"enabled": true,
+		"motion": {},
+		"scene": "res://effects/spin_cycle/SpinCycle.tscn",
+		"shape": {
+			"slice_fraction": 0.1
+		},
+		"spawner": "res://effects/spin_cycle/spin_cycle_spawner.gd",
+		"stats": {
+			"base_radius": 150.0,
+			"cooldown": 2.0,
+			"damage": 15.0,
+			"hit_cooldown": 0.25,
+			"rotation_speed": 3.14159
+		},
+		"type": "area",
+		"unlock_condition": "default",
+		"visual": {
+			"ring_color": "#ffffff26",
+			"wedge_color": "#66ccff80"
+		}
+	},
+	"straight_line_negotiator": {
+		"description": "Fires a magnet-accelerated spike that travels in a perfectly straight line and pierces through multiple enemies. Definitely not a space sniper rifle. Honest.",
+		"display_name": "Straight-Line Negotiator",
+		"enabled": true,
+		"motion": {},
+		"scene": "res://effects/straight_line_negotiator/StraightLineNegotiator.tscn",
+		"shape": {},
+		"spawner": "res://effects/straight_line_negotiator/straight_line_negotiator_spawner.gd",
+		"stats": {
+			"cooldown": 1.0,
+			"damage": 15.0,
+			"lifetime": 1.1,
+			"piercing": 3.0,
+			"projectile_count": 1.0,
+			"projectile_speed": 500.0,
+			"size": 200.0
+		},
+		"targeting": "nearest",
+		"type": "projectile",
+		"unlock_condition": "default",
+		"visual": {
+			"color_core": "#fff6e6",
+			"color_glow": "#59f2ff",
+			"glow_strength": 1.4,
+			"needle_length_px": 28.0,
+			"needle_width_px": 2.0,
+			"trail_alpha": 0.35
+		}
+	},
+	"timmy_gun": {
+		"description": "The Timson Sub-Space Machine Gun model T2928A1, unloads a burst of physical rounds that ricochet off targets, bouncing to hit additional enemies before dissipating. Also, known as the \"Trench Broom\" as it was used in the great Balsurpian war of 2918 to disipate Balsurpians from the Ionic Trenches of Delton VII.",
+		"display_name": "Timmy Gun",
+		"enabled": true,
+		"motion": {
+			"burst_interval": 0.06
+		},
+		"scene": "res://effects/timmy_gun/TimmyGun.tscn",
+		"shape": {
+			"bounce_range": 400.0
+		},
+		"spawner": "res://effects/timmy_gun/timmy_gun_spawner.gd",
+		"stats": {
+			"cooldown": 0.6,
+			"damage": 3.0,
+			"lifetime": 1.5,
+			"projectile_bounces": 1.0,
+			"projectile_count": 5.0,
+			"projectile_speed": 900.0
+		},
+		"targeting": "nearest",
+		"type": "projectile",
+		"unlock_condition": "default",
+		"visual": {
+			"bullet_radius": 2.5,
+			"color_core": "#ccddff",
+			"color_glow": "#00bbff",
+			"glow_strength": 2.0
+		}
+	},
+	"tothian_mines": {
+		"description": "Deploys proximity-triggered mines that detonate when enemies come near, dealing area damage. Inspired by the ancient Tothian defense systems.",
+		"display_name": "Tothian Mines",
+		"enabled": true,
+		"motion": {},
+		"scene": "res://effects/tothian_mines/TothianMine.tscn",
+		"shape": {
+			"trigger_radius": 52.0
+		},
+		"spawner": "res://effects/tothian_mines/tothian_mine_spawner.gd",
+		"stats": {
+			"cooldown": 2.5,
+			"damage": 15.0,
+			"duration": 10.0,
+			"projectile_count": 1.0,
+			"size": 92.0
+		},
+		"type": "area",
+		"unlock_condition": "default",
+		"visual": {
+			"explosion_color": "#ff7f2f99",
+			"mine_color": "#ff4d4d"
+		}
 	}
-  },
-  "ion_wake": {
-	"description": "Periodically drops ionized damage circles behind your ship that grow and explode into synthwave particles. Higher spawn rate means more circles left in your wake.",
-	"display_name": "Ion Wake",
-	"enabled": true,
-	"motion": {
-	  "hold_time": 1.0
-	},
-	"particles": {
-	  "count": 160.0,
-	  "excitement": 60.0,
-	  "gravity": 0.0,
-	  "lifetime": 0.5,
-	  "speed_max": 250.0,
-	  "speed_min": 100.0
-	},
-	"scene": "res://effects/ion_wake/IonWake.tscn",
-	"shape": {
-	  "growth_percent": 0.2,
-	  "size": 32.0
-	},
-	"spawn": {
-	  "spawn_angle_degrees": 180.0,
-	  "spawn_distance": 16.0
-	},
-	"spawner": "res://effects/ion_wake/ion_wake_spawner.gd",
-	"stats": {
-	  "cooldown": 2.5,
-	  "damage": 15.0,
-	  "projectile_count": 1.0
-	},
-	"type": "melee",
-	"unlock_condition": "none",
-	"visual": {
-	  "circle_color": "#ff141480"
-	}
-  },
-  "nikolas_coil": {
-	"description": "Fires an instant Tesla arc that chains to nearby enemies via successive bounces. Not a trendy car.",
-	"display_name": "Nikola's Coil",
-	"enabled": true,
-	"motion": {
-	  "cascade_delay": 0.08,
-	  "fade_in": 0.04,
-	  "fade_out": 0.15,
-	  "hold_time": 0.3
-	},
-	"scene": "res://effects/nikolas_coil/NikolasCoil.tscn",
-	"shape": {
-	  "arc_width": 8.0,
-	  "search_radius": 300.0
-	},
-	"spawner": "res://effects/nikolas_coil/nikolas_coil_spawner.gd",
-	"stats": {
-	  "cooldown": 1.2,
-	  "damage": 15.0,
-	  "duration": 0.6
-	},
-	"type": "projectile",
-	"unlock_condition": "default",
-	"visual": {
-	  "bolt_width": 0.5,
-	  "branch_intensity": 0.3,
-	  "color_core": "#ffffff",
-	  "color_fringe": "#8844cc",
-	  "color_glow": "#4488ff",
-	  "flicker_speed": 30.0,
-	  "glow_strength": 4.0,
-	  "jaggedness": 0.7
-	}
-  },
-  "nope_bubble": {
-	"description": "Blocks hits with rechargeable shield charges, consuming one per block and releasing a staggering shockwave.",
-	"display_name": "Nope Bubble",
-	"enabled": true,
-	"motion": {
-
-	},
-	"scene": "res://effects/nope_bubble/NopeBubble.tscn",
-	"shape": {
-	  "shockwave_angle_deg": 45.0,
-	  "shockwave_range": 200.0,
-	  "size": 45.0
-	},
-	"spawner": "res://effects/nope_bubble/nope_bubble_spawner.gd",
-	"stats": {
-	  "ambient_particle_count": 24.0,
-	  "boss_damage_reduction": 0.5,
-	  "cooldown": 3.0,
-	  "damage": 15.0,
-	  "knockback": 200.0,
-	  "particle_count": 25.0,
-	  "projectile_count": 3.0
-	},
-	"type": "area",
-	"unlock_condition": "default",
-	"visual": {
-	  "color": "#8c26d9"
-	}
-  },
-  "personal_space_violator": {
-	"description": "Unleashes a wide spray of neon pellets that shred anything foolish enough to get close. Devastating at point-blank range but loses punch fast — if they're far away, you're just tickling them with glowing confetti.",
-	"display_name": "Personal Space Violator",
-	"enabled": true,
-	"motion": {
-	  "spread_degrees": 45.0
-	},
-	"scene": "res://effects/personal_space_violator/PersonalSpaceViolator.tscn",
-	"shape": {
-	  "pellet_radius": 2.0
-	},
-	"spawner": "res://effects/personal_space_violator/personal_space_violator_spawner.gd",
-	"stats": {
-	  "cooldown": 2.85,
-	  "damage": 15.0,
-	  "falloff_end": 350.0,
-	  "falloff_start": 80.0,
-	  "lifetime": 0.8,
-	  "projectile_count": 3.0,
-	  "projectile_speed": 600.0
-	},
-	"targeting": "nearest",
-	"type": "projectile",
-	"unlock_condition": "default",
-	"visual": {
-	  "bloom_intensity": 3.0,
-	  "color_core": "#ffffff",
-	  "color_glow": "#39ff14",
-	  "glow_strength": 0.5,
-	  "pellet_height_px": 5.0
-	}
-  },
-  "proximity_tax": {
-	"description": "Imposes a damaging aura around the ship that harms enemies who get too close. It's like a tax, but in space...and kills bad guys.",
-	"display_name": "Proximity Tax",
-	"enabled": true,
-	"motion": {
-
-	},
-	"scene": "res://effects/aoe_base/AoEBase.tscn",
-	"shape": {
-
-	},
-	"spawner": "res://effects/aoe_base/aoe_base_spawner.gd",
-	"stats": {
-	  "cooldown": 0.5,
-	  "damage": 15.0,
-	  "size": 90.0
-	},
-	"type": "area",
-	"unlock_condition": "default",
-	"visual": {
-
-	}
-  },
-  "psp_9000": {
-	"description": "PSP or Personal Space Program, deploys orbiting security drones that body-check nearby enemies for physical damage and knockback. Not to be confused with a certain handheld gaming device.",
-	"display_name": "PSP-9000",
-	"enabled": true,
-	"motion": {
-
-	},
-	"scene": "res://effects/orbit_base/OrbitBase.tscn",
-	"shape": {
-	  "drone_size": 9.0,
-	  "orbit_radius": 72.0
-	},
-	"spawner": "res://effects/orbit_base/orbit_base_spawner.gd",
-	"stats": {
-	  "cooldown": 2.0,
-	  "damage": 15.0,
-	  "hit_cooldown": 0.35,
-	  "knockback": 280.0,
-	  "projectile_count": 3.0,
-	  "projectile_speed": 1.0
-	},
-	"type": "orbit",
-	"unlock_condition": "default",
-	"visual": {
-
-	}
-  },
-  "radiant_arc": {
-	"description": "Emits a short-range photonic slash in a wide arc from the ship’s forward edge, instantly cutting through and damaging any targets caught in its path. Really cool looking.",
-	"display_name": "Radiant Arc",
-	"enabled": true,
-	"motion": {
-	  "fade_in": 0.18,
-	  "fade_out": 0.15,
-	  "rotation_offset_deg": 0.0,
-	  "seed_offset": 81.0,
-	  "speed": 0.0,
-	  "sweep_speed": 1.0
-	},
-	"particles": {
-	  "amount": 60.0,
-	  "color": "#cccccccc",
-	  "drag": 2.0,
-	  "enabled": true,
-	  "lifetime": 0.4,
-	  "outward": 0.5,
-	  "radius": 0.5,
-	  "size": 1.0,
-	  "speed": 135.0,
-	  "spread": 0.5
-	},
-	"scene": "res://effects/radiant_arc/RadiantArc.tscn",
-	"shape": {
-	  "arc_angle_deg": 310.0,
-	  "distance": 25.0,
-	  "length_scale": 1.0,
-	  "radius": 72.0,
-	  "taper": 0.0,
-	  "thickness": 24.0
-	},
-	"spawner": "res://effects/radiant_arc/radiant_arc_spawner.gd",
-	"stats": {
-	  "cooldown": 1.0,
-	  "damage": 15.0,
-	  "duration": 1.0
-	},
-	"type": "melee",
-	"unlock_condition": "none",
-	"visual": {
-	  "chromatic_aberration": 1.45,
-	  "color_a": "#ff0000",
-	  "color_b": "#e5ff00",
-	  "color_c": "#ff0000",
-	  "core_strength": 0.0,
-	  "electric_frequency": 32.0,
-	  "electric_speed": 23.0,
-	  "electric_strength": 0.85,
-	  "glow_strength": 10.0,
-	  "gradient_offset": 0.0,
-	  "noise_strength": 1.7,
-	  "pulse_speed": 26.0,
-	  "pulse_strength": 0.7,
-	  "uv_scroll_speed": 0.0
-	}
-  },
-  "snarky_comeback": {
-	"description": "Throws a radiant arc projectile that returns back… created by General Cliff Snarky during the Great Flobus Wars of Quadrant 12. Also talks a grip of shit.",
-	"display_name": "Snarky Comeback",
-	"enabled": true,
-	"motion": {
-	  "fade_in": 0.18,
-	  "fade_out": 0.3,
-	  "max_range": 500.0,
-	  "projectile_speed": 400.0,
-	  "return_radius": 30.0,
-	  "rotation_offset_deg": 0.0,
-	  "seed_offset": 42.0,
-	  "speed": 0.0,
-	  "spin_speed": 1.0,
-	  "sweep_speed": 2.0
-	},
-	"particles": {
-	  "amount": 60.0,
-	  "color": "#cccccccc",
-	  "drag": 2.0,
-	  "enabled": true,
-	  "lifetime": 0.4,
-	  "outward": 0.5,
-	  "radius": 0.5,
-	  "size": 1.0,
-	  "speed": 135.0,
-	  "spread": 0.5
-	},
-	"scene": "res://effects/snarky_comeback/SnarkyComeback.tscn",
-	"shape": {
-	  "arc_angle_deg": 200.0,
-	  "distance": 0.0,
-	  "length_scale": 1.0,
-	  "radius": 28.0,
-	  "taper": 0.0,
-	  "thickness": 16.0
-	},
-	"spawner": "res://effects/snarky_comeback/snarky_comeback_spawner.gd",
-	"stats": {
-	  "cooldown": 1.0,
-	  "damage": 15.0,
-	  "duration": 1.45,
-	  "projectile_count": 1.0
-	},
-	"type": "projectile",
-	"unlock_condition": "default",
-	"visual": {
-	  "chromatic_aberration": 1.45,
-	  "color_a": "#ff0000",
-	  "color_b": "#e5ff00",
-	  "color_c": "#ff0000",
-	  "core_strength": 0.0,
-	  "electric_frequency": 32.0,
-	  "electric_speed": 23.0,
-	  "electric_strength": 0.85,
-	  "glow_strength": 10.0,
-	  "gradient_offset": 0.0,
-	  "noise_strength": 1.7,
-	  "pulse_speed": 26.0,
-	  "pulse_strength": 0.7,
-	  "uv_scroll_speed": 0.0
-	}
-  },
-  "space_napalm": {
-	"description": "Launches a volatile incendiary orb that detonates on impact, blanketing the blast radius with burning damage over time. Not to be confused with regular napalm.",
-	"display_name": "Space Napalm",
-	"enabled": true,
-	"motion": {
-	  "fade_in": 0.08,
-	  "fade_out": 0.5,
-	  "projectile_speed": 350.0
-	},
-	"particles": {
-	  "burst_amount": 50.0,
-	  "ember_amount": 20.0,
-	  "ember_lifetime": 0.5,
-	  "flame_amount": 55.0,
-	  "flame_lifetime": 0.6,
-	  "smoke_amount": 12.0,
-	  "smoke_lifetime": 1.2,
-	  "trail_amount": 35.0,
-	  "trail_lifetime": 0.35
-	},
-	"scene": "res://effects/space_napalm/SpaceNapalm.tscn",
-	"shape": {
-	  "aoe_radius": 80.0,
-	  "proj_size": 12.0,
-	  "spread_time": 0.8
-	},
-	"spawner": "res://effects/space_napalm/space_napalm_spawner.gd",
-	"stats": {
-	  "burn_damage": 5.0,
-	  "burn_duration": 3.5,
-	  "cooldown": 1.5,
-	  "damage": 15.0,
-	  "dot_interval": 0.5,
-	  "projectile_count": 1.0
-	},
-	"type": "projectile",
-	"unlock_condition": "default",
-	"visual": {
-	  "fire_color_core": "#fff280",
-	  "fire_color_mid": "#ff730d",
-	  "fire_color_outer": "#9a1400",
-	  "fire_color_smoke": "#261a14",
-	  "fire_flame_speed": 3.0,
-	  "fire_flame_turbulence": 0.6,
-	  "fire_glow_strength": 3.5,
-	  "proj_color_core": "#fffff5",
-	  "proj_color_edge": "#cc2600",
-	  "proj_color_mid": "#ff9a1a",
-	  "proj_glow_strength": 4.0,
-	  "proj_morph_intensity": 0.25,
-	  "proj_morph_speed": 3.0,
-	  "proj_tail_length": 0.35
-	}
-  },
-  "space_nukes": {
-	"description": "Launches a barrage of explosive projectiles that detonate on impact, causing area damage to nearby enemies. It's like fireworks, but deadlier. In space.",
-	"display_name": "Space Nukes",
-	"enabled": true,
-	"motion": {
-	  "launch_arc_max_deg": 71.0,
-	  "launch_arc_min_deg": 35.0,
-	  "lifetime": 2.2
-	},
-	"scene": "res://scenes/gameplay/projectile.tscn",
-	"shape": {
-	  "explosion_radius": 96.0
-	},
-	"spawner": "res://effects/space_nukes/space_nukes_spawner.gd",
-	"stats": {
-	  "cooldown": 1.8,
-	  "crit_chance": 0.0,
-	  "damage": 15.0,
-	  "projectile_count": 1.0,
-	  "projectile_speed": 520.0
-	},
-	"type": "projectile",
-	"unlock_condition": "default",
-	"visual": {
-	  "explosion_color": "#ff8a1f99",
-	  "projectile_color": "#ffd457"
-	}
-  },
-  "spin_cycle": {
-	"description": "Creates a swirling vortex of energy around the ship, damaging enemies caught within its radius. It's like a cosmic washing machine for bad guys.",
-	"display_name": "Spin Cycle",
-	"enabled": true,
-	"motion": {
-
-	},
-	"scene": "res://effects/spin_cycle/SpinCycle.tscn",
-	"shape": {
-	  "slice_fraction": 0.1
-	},
-	"spawner": "res://effects/spin_cycle/spin_cycle_spawner.gd",
-	"stats": {
-	  "base_radius": 150.0,
-	  "cooldown": 2.0,
-	  "damage": 15.0,
-	  "hit_cooldown": 0.25,
-	  "rotation_speed": 3.14159
-	},
-	"type": "area",
-	"unlock_condition": "default",
-	"visual": {
-	  "ring_color": "#ffffff26",
-	  "wedge_color": "#66ccff80"
-	}
-  },
-  "straight_line_negotiator": {
-	"description": "Fires a magnet-accelerated spike that travels in a perfectly straight line and pierces through multiple enemies. Definitely not a space sniper rifle. Honest.",
-	"display_name": "Straight-Line Negotiator",
-	"enabled": true,
-	"motion": {
-
-	},
-	"scene": "res://effects/straight_line_negotiator/StraightLineNegotiator.tscn",
-	"shape": {
-
-	},
-	"spawner": "res://effects/straight_line_negotiator/straight_line_negotiator_spawner.gd",
-	"stats": {
-	  "cooldown": 1.0,
-	  "damage": 15.0,
-	  "lifetime": 1.1,
-	  "piercing": 3.0,
-	  "projectile_count": 1.0,
-	  "projectile_speed": 500.0,
-	  "size": 200.0
-	},
-	"targeting": "nearest",
-	"type": "projectile",
-	"unlock_condition": "default",
-	"visual": {
-	  "color_core": "#fff6e6",
-	  "color_glow": "#59f2ff",
-	  "glow_strength": 1.4,
-	  "needle_length_px": 28.0,
-	  "needle_width_px": 2.0,
-	  "trail_alpha": 0.35
-	}
-  },
-  "timmy_gun": {
-	"description": "The Timson Sub-Space Machine Gun model T2928A1, unloads a burst of physical rounds that ricochet off targets, bouncing to hit additional enemies before dissipating. Also, known as the \"Trench Broom\" as it was used in the great Balsurpian war of 2918 to disipate Balsurpians from the Ionic Trenches of Delton VII.",
-	"display_name": "Timmy Gun",
-	"enabled": true,
-	"motion": {
-	  "burst_interval": 0.06
-	},
-	"scene": "res://effects/timmy_gun/TimmyGun.tscn",
-	"shape": {
-	  "bounce_range": 400.0
-	},
-	"spawner": "res://effects/timmy_gun/timmy_gun_spawner.gd",
-	"stats": {
-	  "cooldown": 0.6,
-	  "damage": 3.0,
-	  "lifetime": 1.5,
-	  "projectile_bounces": 1.0,
-	  "projectile_count": 5.0,
-	  "projectile_speed": 900.0
-	},
-	"targeting": "nearest",
-	"type": "projectile",
-	"unlock_condition": "default",
-	"visual": {
-	  "bullet_radius": 2.5,
-	  "color_core": "#ccddff",
-	  "color_glow": "#00bbff",
-	  "glow_strength": 2.0
-	}
-  },
-  "tothian_mines": {
-	"description": "Deploys proximity-triggered mines that detonate when enemies come near, dealing area damage. Inspired by the ancient Tothian defense systems.",
-	"display_name": "Tothian Mines",
-	"enabled": true,
-	"motion": {
-
-	},
-	"scene": "res://effects/tothian_mines/TothianMine.tscn",
-	"shape": {
-	  "trigger_radius": 52.0
-	},
-	"spawner": "res://effects/tothian_mines/tothian_mine_spawner.gd",
-	"stats": {
-	  "cooldown": 2.5,
-	  "damage": 15.0,
-	  "duration": 10.0,
-	  "projectile_count": 1.0,
-	  "size": 92.0
-	},
-	"type": "area",
-	"unlock_condition": "default",
-	"visual": {
-	  "explosion_color": "#ff7f2f99",
-	  "mine_color": "#ff4d4d"
-	}
-  }
 }

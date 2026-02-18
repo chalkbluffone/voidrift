@@ -16,6 +16,8 @@ signal target_settings_changed(speed: float, spawn_rate: float, hp: float)
 signal auto_spawn_toggled(enabled: bool)
 signal show_hitboxes_toggled(enabled: bool)
 signal boss_target_toggled(enabled: bool)
+signal spawn_shipping_freighter_pressed()
+signal spawn_armored_freighter_pressed()
 
 # UI Node references
 var _main_panel: PanelContainer
@@ -263,6 +265,28 @@ func _build_ui() -> void:
 	_boss_target_check.focus_mode = Control.FOCUS_CLICK
 	_boss_target_check.toggled.connect(func(pressed): boss_target_toggled.emit(pressed))
 	debug_hbox.add_child(_boss_target_check)
+	
+	# Freighter spawn buttons
+	var freighter_label: Label = Label.new()
+	freighter_label.text = "Loot Freighters:"
+	main_vbox.add_child(freighter_label)
+	
+	var freighter_hbox: HBoxContainer = HBoxContainer.new()
+	main_vbox.add_child(freighter_hbox)
+	
+	var spawn_shipping_btn: Button = Button.new()
+	spawn_shipping_btn.text = "Shipping"
+	spawn_shipping_btn.tooltip_text = "Spawn Intergalactic Shipping Freighter (XP + Stardust)"
+	spawn_shipping_btn.focus_mode = Control.FOCUS_CLICK
+	spawn_shipping_btn.pressed.connect(func(): spawn_shipping_freighter_pressed.emit())
+	freighter_hbox.add_child(spawn_shipping_btn)
+	
+	var spawn_armored_btn: Button = Button.new()
+	spawn_armored_btn.text = "Armored"
+	spawn_armored_btn.tooltip_text = "Spawn Intergalactic Armored Freighter (Credits + Stardust)"
+	spawn_armored_btn.focus_mode = Control.FOCUS_CLICK
+	spawn_armored_btn.pressed.connect(func(): spawn_armored_freighter_pressed.emit())
+	freighter_hbox.add_child(spawn_armored_btn)
 	
 	_add_separator(main_vbox)
 	

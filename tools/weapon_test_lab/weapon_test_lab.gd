@@ -11,6 +11,13 @@ signal config_saved(weapon_id: String)
 # --- Preloads ---
 const ShipScene: PackedScene = preload("res://scenes/gameplay/ship.tscn")
 const TestTargetScene: PackedScene = preload("res://tools/weapon_test_lab/test_target.tscn")
+const ShippingFreighterScene: PackedScene = preload("res://scenes/enemies/shipping_freighter.tscn")
+const ArmoredFreighterScene: PackedScene = preload("res://scenes/enemies/armored_freighter.tscn")
+const XPPickupScene: PackedScene = preload("res://scenes/pickups/xp_pickup.tscn")
+const CreditPickupScene: PackedScene = preload("res://scenes/pickups/credit_pickup.tscn")
+const StardustPickupScene: PackedScene = preload("res://scenes/pickups/stardust_pickup.tscn")
+
+const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
 
 # --- Node references ---
 @onready var camera: Camera2D = $Camera2D
@@ -82,11 +89,18 @@ func _ready() -> void:
 		ui_panel.auto_spawn_toggled.connect(_on_auto_spawn_toggled)
 		ui_panel.show_hitboxes_toggled.connect(_on_show_hitboxes_toggled)
 		ui_panel.boss_target_toggled.connect(_on_boss_target_toggled)
+		ui_panel.spawn_shipping_freighter_pressed.connect(_on_spawn_shipping_freighter)
+		ui_panel.spawn_armored_freighter_pressed.connect(_on_spawn_armored_freighter)
 		ui_panel.initialize(weapon_list)
 	
 	# Initialize with first weapon
 	if weapon_list.size() > 0:
 		select_weapon(weapon_list[0].id)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel"):
+		get_tree().change_scene_to_file(MAIN_MENU_SCENE)
 
 
 func _process(delta: float) -> void:
@@ -275,6 +289,69 @@ func _on_show_hitboxes_toggled(enabled: bool) -> void:
 
 func _on_boss_target_toggled(enabled: bool) -> void:
 	_spawn_boss_target = enabled
+
+
+func _on_spawn_shipping_freighter() -> void:
+	_spawn_freighter(ShippingFreighterScene)
+
+
+func _on_spawn_armored_freighter() -> void:
+	_spawn_freighter(ArmoredFreighterScene)
+
+
+## Spawn a loot freighter scene at a random position near the ship.
+## Freighters are stationary in the test lab so you can shoot them and observe drops.
+func _spawn_freighter(scene: PackedScene) -> void:
+	var freighter: Node2D = scene.instantiate()
+	var pos: Vector2 = test_ship.global_position + Vector2(250, 0)
+	freighter.global_position = pos
+
+	# Zero out speeds so the freighter stays stationary in the test lab
+	freighter.move_speed = 0.0
+	freighter.flee_speed = 0.0
+
+	freighter.add_to_group("enemies")
+	target_container.add_child(freighter)
+
+	# Connect died signal to spawn drops
+	freighter.died.connect(_on_freighter_died)
+
+
+## Handle freighter death in the test lab — spawn burst drops so we can see them.
+func _on_freighter_died(enemy: Node, death_position: Vector2) -> void:
+	var burst_count: int = int(enemy.drop_burst_count)
+	var drop_type: String = String(enemy.drop_type)
+
+	# Spawn primary pickup burst
+	if drop_type == "xp" and enemy.get_xp_value() > 0:
+		var per_orb: float = float(enemy.get_xp_value()) / float(burst_count)
+		for i: int in range(burst_count):
+			var offset: Vector2 = Vector2(randf_range(-30, 30), randf_range(-30, 30))
+			var xp: Area2D = XPPickupScene.instantiate()
+			xp.global_position = death_position + offset
+			xp.initialize(per_orb)
+			call_deferred("add_child", xp)
+	elif drop_type == "credits" and enemy.get_credit_value() > 0:
+		var total: int = enemy.get_credit_value()
+		var per_orb: int = maxi(1, int(float(total) / float(burst_count)))
+		var remainder: int = total - (per_orb * burst_count)
+		for i: int in range(burst_count):
+			var extra: int = 1 if i < remainder else 0
+			var offset: Vector2 = Vector2(randf_range(-30, 30), randf_range(-30, 30))
+			var credit: Area2D = CreditPickupScene.instantiate()
+			credit.global_position = death_position + offset
+			credit.initialize(per_orb + extra)
+			call_deferred("add_child", credit)
+
+	# Spawn stardust
+	var stardust_amount: int = enemy.get_stardust_value()
+	if stardust_amount > 0:
+		for i: int in range(stardust_amount):
+			var offset: Vector2 = Vector2(randf_range(-25, 25), randf_range(-25, 25))
+			var stardust: Area2D = StardustPickupScene.instantiate()
+			stardust.global_position = death_position + offset
+			stardust.initialize(1)
+			call_deferred("add_child", stardust)
 
 
 # --- Save/Load to weapons.json ---

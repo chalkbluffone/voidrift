@@ -155,7 +155,6 @@ func _apply_ship_sprite(ship_data: Dictionary) -> void:
 		FileLogger.log_warn("Ship", "Failed to load ship sprite: %s" % sprite_path)
 		return
 	var frames: SpriteFrames = SpriteFrames.new()
-	frames.add_animation(&"default")
 	frames.add_frame(&"default", tex)
 	sprite.sprite_frames = frames
 	sprite.animation = &"default"

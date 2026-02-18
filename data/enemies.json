@@ -11,13 +11,60 @@
 			"damage": 4.0,
 			"speed": 70.0,
 			"xp_value": 1.0,
-			"credits_value": 1.0
+			"credits_value": 1.0,
+			"stardust_value": 0.0
 		},
 		"behavior": "chase",
 		"spawn_weight": 100.0,
 		"min_difficulty": 0.0,
 		"tags": [
 			"basic"
+		]
+	},
+	"shipping_freighter": {
+		"id": "shipping_freighter",
+		"name": "Intergalactic Shipping Freighter",
+		"description": "A lumbering cargo freighter loaded with XP. Chases until hit, then flees. Kill it for a jackpot of XP and stardust.",
+		"scene": "res://scenes/enemies/shipping_freighter.tscn",
+		"base_stats": {
+			"hp": 200.0,
+			"damage": 6.0,
+			"speed": 70.0,
+			"flee_speed": 150.0,
+			"xp_value": 20.0,
+			"credits_value": 0.0,
+			"stardust_value": 4.0,
+			"drop_burst_count": 5.0
+		},
+		"behavior": "chase_then_flee",
+		"spawn_weight": 5.0,
+		"min_difficulty": 0.5,
+		"tags": [
+			"loot",
+			"freighter"
+		]
+	},
+	"armored_freighter": {
+		"id": "armored_freighter",
+		"name": "Intergalactic Armored Freighter",
+		"description": "A heavily armored vault ship carrying credits. Chases until hit, then flees. Kill it for a jackpot of credits and stardust.",
+		"scene": "res://scenes/enemies/armored_freighter.tscn",
+		"base_stats": {
+			"hp": 250.0,
+			"damage": 8.0,
+			"speed": 70.0,
+			"flee_speed": 150.0,
+			"xp_value": 0.0,
+			"credits_value": 25.0,
+			"stardust_value": 4.0,
+			"drop_burst_count": 5.0
+		},
+		"behavior": "chase_then_flee",
+		"spawn_weight": 5.0,
+		"min_difficulty": 0.5,
+		"tags": [
+			"loot",
+			"freighter"
 		]
 	}
 }

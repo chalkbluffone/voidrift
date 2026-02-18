@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dm7kw2vp6h8qy"]
 
-[ext_resource type="Script" uid="uid://b0l8c5l015w4q" path="res://effects/ion_wake/ion_wake.gd" id="1_ion_wake"]
+[ext_resource type="Script" uid="uid://d0rvrr6swedsd" path="res://effects/ion_wake/ion_wake.gd" id="1_ion_wake"]
 
 [node name="IonWake" type="Node2D"]
 z_index = -2
