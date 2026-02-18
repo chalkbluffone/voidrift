@@ -455,6 +455,8 @@ func _on_button_mouse_exited(button: Button) -> void:
 
 
 func _set_button_hover_state(button: Button, hovered: bool) -> void:
+	if button.disabled:
+		return
 	var btn_key: int = button.get_instance_id()
 	var target_scale: Vector2 = Vector2(1.05, 1.05) if hovered else Vector2.ONE
 	button.pivot_offset = button.size * 0.5
@@ -498,9 +500,11 @@ func _update_launch_button_style() -> void:
 	if launch_button.disabled:
 		_style_button(launch_button, COLOR_BUTTON_DISABLED)
 		launch_button.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5, 0.8))
+		launch_button.mouse_default_cursor_shape = Control.CURSOR_ARROW
 	else:
 		_style_button(launch_button, COLOR_BUTTON)
 		launch_button.add_theme_color_override("font_color", Color.WHITE)
+		launch_button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 
 
 # ---------------------------------------------------------------------------

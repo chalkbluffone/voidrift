@@ -80,7 +80,7 @@ func _apply_synthwave_theme() -> void:
 	# Buttons - synthwave style
 	for button: Button in [retry_button, main_menu_button]:
 		button.add_theme_font_override("font", FONT_HEADER)
-		button.add_theme_font_size_override("font_size", 22)
+		button.add_theme_font_size_override("font_size", 24)
 
 
 func _on_retry_pressed() -> void:

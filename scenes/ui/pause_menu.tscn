@@ -47,26 +47,36 @@ layout_mode = 2
 [node name="ResumeButton" type="Button" parent="Panel/VBoxContainer"]
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
+theme_override_fonts/font = ExtResource("2_orbitron")
+theme_override_font_sizes/font_size = 24
 text = "▶ Resume"
 
 [node name="RestartButton" type="Button" parent="Panel/VBoxContainer"]
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
+theme_override_fonts/font = ExtResource("2_orbitron")
+theme_override_font_sizes/font_size = 24
 text = "↺ Restart Run"
 
 [node name="OptionsButton" type="Button" parent="Panel/VBoxContainer"]
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
+theme_override_fonts/font = ExtResource("2_orbitron")
+theme_override_font_sizes/font_size = 24
 text = "⚙ Options"
 
 [node name="QuitRunButton" type="Button" parent="Panel/VBoxContainer"]
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
+theme_override_fonts/font = ExtResource("2_orbitron")
+theme_override_font_sizes/font_size = 24
 text = "← Quit to Menu"
 
 [node name="ExitButton" type="Button" parent="Panel/VBoxContainer"]
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
+theme_override_fonts/font = ExtResource("2_orbitron")
+theme_override_font_sizes/font_size = 24
 text = "✕ Exit to Desktop"
 
 [node name="OptionsContainer" type="Control" parent="."]
@@ -189,4 +199,6 @@ layout_mode = 2
 [node name="BackButton" type="Button" parent="OptionsContainer/Panel/VBoxContainer"]
 custom_minimum_size = Vector2(0, 36)
 layout_mode = 2
+theme_override_fonts/font = ExtResource("2_orbitron")
+theme_override_font_sizes/font_size = 24
 text = "← Back"

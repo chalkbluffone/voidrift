@@ -43,6 +43,7 @@ var _current_options: Array = []
 var _is_showing: bool = false
 var _is_selecting: bool = false
 var _card_hover_tweens: Dictionary = {}
+var _button_hover_tweens: Dictionary = {}
 
 
 func _ready() -> void:
@@ -113,10 +114,10 @@ func _apply_synthwave_theme() -> void:
 	_style_button(refresh_button, COLOR_BUTTON)
 	_style_button(skip_button, Color(0.5, 0.5, 0.5, 1.0))
 	refresh_button.add_theme_font_override("font", FONT_HEADER)
-	refresh_button.add_theme_font_size_override("font_size", 22)
+	refresh_button.add_theme_font_size_override("font_size", 24)
 	refresh_button.custom_minimum_size.x = 200
 	skip_button.add_theme_font_override("font", FONT_HEADER)
-	skip_button.add_theme_font_size_override("font_size", 22)
+	skip_button.add_theme_font_size_override("font_size", 24)
 	skip_button.custom_minimum_size.x = 200
 	skip_button.text = "SKIP"
 
@@ -180,7 +181,7 @@ func _style_button(button: Button, base_color: Color) -> void:
 	button.add_theme_stylebox_override("normal", normal)
 	
 	var hover: StyleBoxFlat = StyleBoxFlat.new()
-	hover.bg_color = base_color.lightened(0.2)
+	hover.bg_color = base_color.lightened(0.35)
 	hover.corner_radius_top_left = 4
 	hover.corner_radius_top_right = 4
 	hover.corner_radius_bottom_left = 4
@@ -202,9 +203,43 @@ func _style_button(button: Button, base_color: Color) -> void:
 	pressed.content_margin_top = 8
 	pressed.content_margin_bottom = 8
 	button.add_theme_stylebox_override("pressed", pressed)
-	
+
+	var focus: StyleBoxEmpty = StyleBoxEmpty.new()
+	button.add_theme_stylebox_override("focus", focus)
+
 	button.add_theme_color_override("font_color", Color.WHITE)
 	button.add_theme_color_override("font_hover_color", Color.WHITE)
+
+	button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	button.mouse_entered.connect(_on_button_mouse_entered.bind(button))
+	button.mouse_exited.connect(_on_button_mouse_exited.bind(button))
+
+
+func _on_button_mouse_entered(button: Button) -> void:
+	if not is_instance_valid(button):
+		return
+	_set_button_hover_state(button, true)
+
+
+func _on_button_mouse_exited(button: Button) -> void:
+	if not is_instance_valid(button):
+		return
+	_set_button_hover_state(button, false)
+
+
+func _set_button_hover_state(button: Button, hovered: bool) -> void:
+	if button.disabled:
+		return
+	var btn_key: int = button.get_instance_id()
+	var target_scale: Vector2 = Vector2(1.05, 1.05) if hovered else Vector2.ONE
+	button.pivot_offset = button.size * 0.5
+
+	if _button_hover_tweens.has(btn_key) and is_instance_valid(_button_hover_tweens[btn_key]):
+		_button_hover_tweens[btn_key].kill()
+
+	var tw: Tween = button.create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	tw.tween_property(button, "scale", target_scale, 0.14 if hovered else 0.10)
+	_button_hover_tweens[btn_key] = tw
 
 
 func _on_level_up_triggered(current_level: int, available_upgrades: Array) -> void:
@@ -512,8 +547,10 @@ func _update_refresh_button() -> void:
 	
 	if refresh_button.disabled:
 		refresh_button.modulate = Color(0.5, 0.5, 0.5, 1.0)
+		refresh_button.mouse_default_cursor_shape = Control.CURSOR_ARROW
 	else:
 		refresh_button.modulate = Color.WHITE
+		refresh_button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 
 
 func _animate_cards_in() -> void:
