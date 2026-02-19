@@ -129,6 +129,7 @@ func _apply_window_mode() -> void:
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN)
 
 
+@warning_ignore("integer_division")
 func _center_window() -> void:
 	var screen_size: Vector2i = DisplayServer.screen_get_size()
 	var win_size: Vector2i = DisplayServer.window_get_size()

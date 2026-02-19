@@ -45,6 +45,15 @@ var _is_selecting: bool = false
 var _card_hover_tweens: Dictionary = {}
 var _button_hover_tweens: Dictionary = {}
 
+## Tracks the in-flight hide tween so we can kill it if a new level-up arrives.
+var _hide_tween: Tween = null
+
+## Label showing "X remaining" when multiple level-ups are queued.
+var _pending_label: Label = null
+
+## Duration of the brief gameplay flash between queued level-ups (seconds).
+const QUEUE_FLASH_DELAY: float = 0.3
+
 
 func _ready() -> void:
 	# Get card references
@@ -78,7 +87,16 @@ func _ready() -> void:
 	
 	# Connect to ProgressionManager signals
 	ProgressionManager.level_up_triggered.connect(_on_level_up_triggered)
-	
+
+	# Build the "X remaining" badge label
+	_pending_label = Label.new()
+	_pending_label.add_theme_font_override("font", FONT_HEADER)
+	_pending_label.add_theme_font_size_override("font_size", 20)
+	_pending_label.add_theme_color_override("font_color", UiColors.NEON_YELLOW)
+	_pending_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_pending_label.visible = false
+	root_container.add_child(_pending_label)
+
 	# Apply synthwave styling
 	_apply_synthwave_theme()
 	
@@ -197,10 +215,26 @@ func _set_button_hover_state(_button: Button, _hovered: bool) -> void:
 
 func _on_level_up_triggered(current_level: int, available_upgrades: Array) -> void:
 	FileLogger.log_info("LevelUpUI", "Level up triggered! Level: %d, Options: %d" % [current_level, available_upgrades.size()])
-	
+
+	# Kill any in-flight hide tween so its stale hide() callback never fires
+	if _hide_tween and _hide_tween.is_valid():
+		_hide_tween.kill()
+		_hide_tween = null
+	# Ensure CanvasItem children are fully opaque (in case the old tween was mid-fade)
+	root_container.modulate.a = 1.0
+	background.modulate.a = 1.0
+
 	_current_options = available_upgrades
 	_is_selecting = false
 	level_up_label.text = "LEVEL %d!" % current_level
+
+	# Update pending badge
+	var remaining: int = ProgressionManager.get_pending_level_ups()
+	if remaining > 0:
+		_pending_label.text = "%d more upgrade%s queued" % [remaining, "s" if remaining != 1 else ""]
+		_pending_label.visible = true
+	else:
+		_pending_label.visible = false
 	
 	_populate_cards()
 	_update_refresh_button()
@@ -592,6 +626,8 @@ func _on_card_selected(index: int) -> void:
 	select_tween.tween_callback(func() -> void:
 		_hide_ui()
 		ProgressionManager.select_level_up_option(selected_option)
+		# After resume_game() unpauses, check for queued level-ups
+		_check_queue_after_hide()
 	)
 
 
@@ -665,23 +701,41 @@ func _on_skip_pressed() -> void:
 	FileLogger.log_info("LevelUpUI", "Skipping level up")
 	_hide_ui()
 	RunManager.resume_game()
+	_check_queue_after_hide()
+
+
+## After an upgrade is chosen or skipped and the game resumes,
+## wait a brief flash then trigger the next queued level-up (if any).
+func _check_queue_after_hide() -> void:
+	if ProgressionManager.get_pending_level_ups() <= 0:
+		return
+	# Brief gameplay flash so the player sees the world between upgrades
+	var flash_timer: SceneTreeTimer = get_tree().create_timer(QUEUE_FLASH_DELAY)
+	flash_timer.timeout.connect(func() -> void:
+		ProgressionManager.advance_level_up_queue()
+	)
 
 
 func _hide_ui() -> void:
 	_is_showing = false
 	set_process_input(false)
-	
+
+	# Kill any previous hide tween that might still be running
+	if _hide_tween and _hide_tween.is_valid():
+		_hide_tween.kill()
+
 	# Animate out
-	var tween: Tween = create_tween()
-	tween.set_parallel(true)
+	_hide_tween = create_tween()
+	_hide_tween.set_parallel(true)
 	# CanvasLayer has no modulate; fade CanvasItem children instead.
-	tween.tween_property(root_container, "modulate:a", 0.0, 0.2)
-	tween.tween_property(background, "modulate:a", 0.0, 0.2)
-	tween.set_parallel(false)
-	tween.tween_callback(hide)
-	tween.tween_callback(func() -> void:
+	_hide_tween.tween_property(root_container, "modulate:a", 0.0, 0.2)
+	_hide_tween.tween_property(background, "modulate:a", 0.0, 0.2)
+	_hide_tween.set_parallel(false)
+	_hide_tween.tween_callback(hide)
+	_hide_tween.tween_callback(func() -> void:
 		root_container.modulate.a = 1.0
 		background.modulate.a = 1.0
+		_hide_tween = null
 	)
 
 

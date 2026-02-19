@@ -9,6 +9,9 @@ signal credits_changed(amount: int)
 signal stardust_changed(amount: int)
 signal xp_changed(current: float, required: float, level: int)
 
+## Number of queued level-ups still waiting to be shown (excludes the one currently active).
+var _pending_level_ups: int = 0
+
 # --- XP Scaling (logarithmic cumulative) ---
 # Level = floor(2 + log(Exp / BaseLevelCost) / log(Multiplier))
 const XP_BASE: float = 7.0       ## Cumulative XP cost to reach level 2 (~7 enemy kills)
@@ -48,20 +51,30 @@ func _emit_xp_changed() -> void:
 
 
 ## Add XP (cumulative) and check for level ups.
+## Queues multiple level-ups and triggers them one at a time.
 func add_xp(amount: float) -> void:
 	var player: Node = RunManager.get_player()
 	var xp_mult: float = 1.0
 	if player and player.has_method("get_stat"):
 		xp_mult = player.get_stat("xp_gain")
-	
+
 	var actual_xp: float = amount * xp_mult
 	RunManager.run_data.xp += actual_xp
 	RunManager.run_data.xp_collected += actual_xp
-	
-	# Check for level ups based on cumulative XP thresholds
-	while RunManager.run_data.xp >= _xp_threshold(RunManager.run_data.level + 1):
+
+	# Count how many levels this XP grants
+	var levels_gained: int = 0
+	var test_level: int = RunManager.run_data.level
+	while RunManager.run_data.xp >= _xp_threshold(test_level + 1):
+		test_level += 1
+		levels_gained += 1
+
+	if levels_gained > 0:
+		# Queue all but the first; trigger the first immediately
+		_pending_level_ups += levels_gained - 1
+		FileLogger.log_info("ProgressionManager", "Gained %d level(s), %d queued" % [levels_gained, _pending_level_ups])
 		_level_up()
-	
+
 	_emit_xp_changed()
 
 
@@ -104,6 +117,20 @@ func select_level_up_option(option: Dictionary) -> void:
 	
 	level_up_completed.emit(option)
 	RunManager.resume_game()
+
+
+## How many level-ups are still queued after the current one.
+func get_pending_level_ups() -> int:
+	return _pending_level_ups
+
+
+## Called by the level-up UI after the gameplay flash to trigger the next queued level-up.
+func advance_level_up_queue() -> void:
+	if _pending_level_ups <= 0:
+		return
+	_pending_level_ups -= 1
+	FileLogger.log_info("ProgressionManager", "Advancing queue — %d remaining" % _pending_level_ups)
+	_level_up()
 
 
 func get_current_level() -> int:

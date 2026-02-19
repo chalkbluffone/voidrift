@@ -44,6 +44,10 @@ func _ready() -> void:
 
 
 func _input(event: InputEvent) -> void:
+	# Block pause toggle while level-up UI is active
+	if RunManager.current_state == RunManager.GameState.LEVEL_UP:
+		return
+
 	if event.is_action_pressed("pause"):
 		# Start / Escape toggles pause from any sub-state
 		if _is_paused:
