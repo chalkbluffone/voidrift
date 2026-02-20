@@ -68,11 +68,13 @@ const LEVEL_UP_REFRESH_COST: int = 25  # Credits to refresh upgrade cards
 # How many cards appear per level-up.
 const LEVEL_UP_OPTION_COUNT: int = 3
 
-# XP curve (geometric series): xp_threshold(lvl) = XP_BASE * (XP_GROWTH^n - 1) / (XP_GROWTH - 1)
-# where n = lvl - XP_START_LEVEL. Each level costs XP_GROWTH times more than the last.
-const XP_BASE: float = 7.0            # XP cost of the first level-up (~7 kills). Scales all levels uniformly.
-const XP_GROWTH: float = 1.2          # Each level costs this much more than the previous (1.2 = +20%)
-const XP_START_LEVEL: int = 1         # Level at which XP costs begin (levels below this are free)
+# XP curve: per-level cost = XP_BASE * XP_GROWTH ^ (n ^ XP_CURVE), summed cumulatively.
+# XP_BASE  — cost of the first level-up. Scales all levels uniformly.
+# XP_GROWTH — each level costs roughly this much more than the previous (1.3 = +30%).
+# XP_CURVE — depth of the curve. 1.0 = standard geometric. >1.0 = steeper late-game. <1.0 = flatter.
+const XP_BASE: float = 7.0            # XP cost of the first level-up (~7 kills)
+const XP_GROWTH: float = 1.3          # Growth rate between successive levels
+const XP_CURVE: float = 1.0           # Curve depth exponent (1.0 = default, raise to punish late levels)
 
 # Loadout capacity
 const MAX_WEAPON_SLOTS: int = 4       # Max weapons per run

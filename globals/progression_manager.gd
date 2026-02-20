@@ -33,16 +33,16 @@ func _ready() -> void:
 
 # --- XP & Leveling ---
 
-## Cumulative XP threshold to reach a given level (geometric series sum).
-## Level 1 = 0, level 2 = XP_BASE, level 3 = XP_BASE + XP_BASE * XP_GROWTH, etc.
-## Each level costs XP_GROWTH times more than the previous level.
+## Cumulative XP threshold to reach a given level.
+## Per-level cost = XP_BASE * XP_GROWTH ^ (i ^ XP_CURVE), summed for i = 0 .. level-2.
+## When XP_CURVE = 1.0, this reduces to the standard geometric series.
 func _xp_threshold(level: int) -> float:
-	if level <= GameConfig.XP_START_LEVEL:
+	if level <= 1:
 		return 0.0
-	var n: float = float(level - GameConfig.XP_START_LEVEL)
-	if GameConfig.XP_GROWTH == 1.0:
-		return GameConfig.XP_BASE * n
-	return GameConfig.XP_BASE * (pow(GameConfig.XP_GROWTH, n) - 1.0) / (GameConfig.XP_GROWTH - 1.0)
+	var total: float = 0.0
+	for i: int in range(level - 1):
+		total += GameConfig.XP_BASE * pow(GameConfig.XP_GROWTH, pow(float(i), GameConfig.XP_CURVE))
+	return total
 
 
 ## Emit XP progress relative to current level boundaries (for HUD bar).
