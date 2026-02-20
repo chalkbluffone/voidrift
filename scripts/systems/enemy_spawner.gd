@@ -214,7 +214,7 @@ func _spawn_xp(pos: Vector2, amount: float) -> void:
 	xp.initialize(amount)
 	
 	# Slight random offset
-	xp.position += Vector2(randf_range(-10, 10), randf_range(-10, 10))
+	xp.position += Vector2(randf_range(-GameConfig.PICKUP_SCATTER_XP, GameConfig.PICKUP_SCATTER_XP), randf_range(-GameConfig.PICKUP_SCATTER_XP, GameConfig.PICKUP_SCATTER_XP))
 	
 	# Use call_deferred to avoid physics query flushing error
 	get_tree().current_scene.call_deferred("add_child", xp)
@@ -226,7 +226,7 @@ func _spawn_credits(pos: Vector2, amount: int) -> void:
 	credit.initialize(amount)
 
 	# Slight random offset (different from XP so they don't overlap)
-	credit.position += Vector2(randf_range(-15, 15), randf_range(-15, 15))
+	credit.position += Vector2(randf_range(-GameConfig.PICKUP_SCATTER_CREDIT, GameConfig.PICKUP_SCATTER_CREDIT), randf_range(-GameConfig.PICKUP_SCATTER_CREDIT, GameConfig.PICKUP_SCATTER_CREDIT))
 
 	# Use call_deferred to avoid physics query flushing error
 	get_tree().current_scene.call_deferred("add_child", credit)
@@ -236,7 +236,7 @@ func _spawn_credits(pos: Vector2, amount: int) -> void:
 func _spawn_burst_xp(pos: Vector2, total_amount: float, count: int) -> void:
 	var per_orb: float = total_amount / float(count)
 	for i: int in range(count):
-		var offset: Vector2 = Vector2(randf_range(-30, 30), randf_range(-30, 30))
+		var offset: Vector2 = Vector2(randf_range(-GameConfig.PICKUP_SCATTER_BURST, GameConfig.PICKUP_SCATTER_BURST), randf_range(-GameConfig.PICKUP_SCATTER_BURST, GameConfig.PICKUP_SCATTER_BURST))
 		_spawn_xp(pos + offset, per_orb)
 
 
@@ -246,7 +246,7 @@ func _spawn_burst_credits(pos: Vector2, total_amount: int, count: int) -> void:
 	var remainder: int = total_amount - (per_orb * count)
 	for i: int in range(count):
 		var extra: int = 1 if i < remainder else 0
-		var offset: Vector2 = Vector2(randf_range(-30, 30), randf_range(-30, 30))
+		var offset: Vector2 = Vector2(randf_range(-GameConfig.PICKUP_SCATTER_BURST, GameConfig.PICKUP_SCATTER_BURST), randf_range(-GameConfig.PICKUP_SCATTER_BURST, GameConfig.PICKUP_SCATTER_BURST))
 		_spawn_credits(pos + offset, per_orb + extra)
 
 
@@ -254,7 +254,7 @@ func _spawn_burst_credits(pos: Vector2, total_amount: int, count: int) -> void:
 func _spawn_burst_stardust(pos: Vector2, total_amount: int) -> void:
 	for i: int in range(total_amount):
 		var stardust: Area2D = StardustPickupScene.instantiate()
-		var offset: Vector2 = Vector2(randf_range(-25, 25), randf_range(-25, 25))
+		var offset: Vector2 = Vector2(randf_range(-GameConfig.PICKUP_SCATTER_STARDUST, GameConfig.PICKUP_SCATTER_STARDUST), randf_range(-GameConfig.PICKUP_SCATTER_STARDUST, GameConfig.PICKUP_SCATTER_STARDUST))
 		stardust.global_position = pos + offset
 		stardust.initialize(1)
 		get_tree().current_scene.call_deferred("add_child", stardust)

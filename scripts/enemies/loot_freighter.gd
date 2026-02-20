@@ -27,8 +27,7 @@ var _has_been_hit: bool = false
 var _flee_timer: float = 0.0
 
 ## Small random drift interval to prevent perfectly straight flee paths
-const FLEE_DRIFT_INTERVAL: float = 2.0
-const FLEE_DRIFT_ANGLE: float = 0.3  # Radians of random drift
+## Tuned in GameConfig: FREIGHTER_FLEE_DRIFT_INTERVAL, FREIGHTER_FLEE_DRIFT_ANGLE
 
 
 func _ready() -> void:
@@ -99,9 +98,9 @@ func _flee_movement(delta: float) -> void:
 		_flee_direction = _flee_direction.lerp(away_dir, 2.0 * delta).normalized()
 
 	# Add slight drift every interval to make movement less predictable
-	if _flee_timer >= FLEE_DRIFT_INTERVAL:
+	if _flee_timer >= GameConfig.FREIGHTER_FLEE_DRIFT_INTERVAL:
 		_flee_timer = 0.0
-		var drift_angle: float = randf_range(-FLEE_DRIFT_ANGLE, FLEE_DRIFT_ANGLE)
+		var drift_angle: float = randf_range(-GameConfig.FREIGHTER_FLEE_DRIFT_ANGLE, GameConfig.FREIGHTER_FLEE_DRIFT_ANGLE)
 		_flee_direction = _flee_direction.rotated(drift_angle).normalized()
 
 	var flee_velocity: Vector2 = _flee_direction * flee_speed

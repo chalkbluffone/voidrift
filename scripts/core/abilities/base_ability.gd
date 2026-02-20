@@ -14,8 +14,8 @@ signal ability_ready
 var ability_id: String = ""
 var ability_name: String = ""
 var description: String = ""
-var cooldown: float = 75.0
-var duration: float = 5.0
+var cooldown: float = GameConfig.ABILITY_DEFAULT_COOLDOWN
+var duration: float = GameConfig.ABILITY_DEFAULT_DURATION
 var effects: Dictionary = {}
 var vfx_id: String = ""
 
@@ -32,8 +32,8 @@ func configure(ability_data: Dictionary, ship: Node, stats: Node) -> void:
 	ability_id = ability_data.get("id", "")
 	ability_name = ability_data.get("name", "")
 	description = ability_data.get("description", "")
-	cooldown = float(ability_data.get("cooldown", 75.0))
-	duration = float(ability_data.get("duration", 5.0))
+	cooldown = float(ability_data.get("cooldown", GameConfig.ABILITY_DEFAULT_COOLDOWN))
+	duration = float(ability_data.get("duration", GameConfig.ABILITY_DEFAULT_DURATION))
 	effects = ability_data.get("effects", {})
 	vfx_id = ability_data.get("vfx", "")
 	_owner_ship = ship

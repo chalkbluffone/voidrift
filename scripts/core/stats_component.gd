@@ -87,12 +87,11 @@ const DEFAULT_BASE_STATS: Dictionary = {
 # Stats that use diminishing returns (armor, evasion)
 const DIMINISHING_STATS: Array[String] = [STAT_ARMOR, STAT_EVASION]
 
-# Stats that are capped
-const STAT_CAPS: Dictionary = {
-	STAT_XP_GAIN: 10.0,
-	STAT_ARMOR: 90.0,
-	STAT_EVASION: 90.0,
-}
+# Stats that are capped — loaded from GameConfig
+var STAT_CAPS: Dictionary = {}
+
+# Reference to GameConfig autoload
+var GameConfig: Node
 
 # --- Instance Data ---
 
@@ -113,8 +112,6 @@ var _cache_dirty: bool = true
 var current_hp: float = 0.0
 var current_shield: float = 0.0
 var shield_recharge_timer: float = 0.0
-const SHIELD_RECHARGE_DELAY: float = 5.0
-const SHIELD_RECHARGE_RATE: float = 10.0  # per second
 
 # HP Regen accumulator
 var _regen_accumulator: float = 0.0
@@ -123,6 +120,11 @@ var _regen_accumulator: float = 0.0
 func _ready() -> void:
 	# Get autoload references
 	DataLoader = get_node_or_null("/root/DataLoader")
+	GameConfig = get_node_or_null("/root/GameConfig")
+	
+	# Load stat caps from GameConfig
+	if GameConfig:
+		STAT_CAPS = GameConfig.STAT_CAPS.duplicate()
 	
 	# Start with hardcoded defaults as fallback
 	for stat_name in DEFAULT_BASE_STATS:
@@ -330,14 +332,15 @@ func _calculate_stat(stat_name: String) -> float:
 	return result
 
 
-## Apply diminishing returns curve. Higher values become less effective.
+## Apply diminishing returns curve. Higher values become less effective.\n## Denominator tuned via GameConfig.DIMINISHING_RETURNS_DENOMINATOR.
 func _apply_diminishing_returns(raw_value: float) -> float:
-	# Formula: effective = raw / (raw + 100)
-	# At 100 raw, you get 50% effective
-	# At 200 raw, you get 66% effective
+	# Formula: effective = raw / (raw + DENOM)
+	# At DENOM raw, you get 50% effective
+	# At 2*DENOM raw, you get 66% effective
 	if raw_value <= 0:
 		return 0.0
-	return (raw_value / (raw_value + 100.0)) * 100.0
+	var denom: float = GameConfig.DIMINISHING_RETURNS_DENOMINATOR if GameConfig else 100.0
+	return (raw_value / (raw_value + denom)) * 100.0
 
 
 func _mark_dirty() -> void:
@@ -363,13 +366,13 @@ func take_damage(amount: float, source: Node = null) -> float:
 	if current_shield > 0:
 		if current_shield >= actual_damage:
 			current_shield -= actual_damage
-			shield_recharge_timer = SHIELD_RECHARGE_DELAY
+			shield_recharge_timer = GameConfig.SHIELD_RECHARGE_DELAY
 			shield_changed.emit(current_shield, get_stat(STAT_SHIELD))
 			return actual_damage
 		else:
 			actual_damage -= current_shield
 			current_shield = 0
-			shield_recharge_timer = SHIELD_RECHARGE_DELAY
+			shield_recharge_timer = GameConfig.SHIELD_RECHARGE_DELAY
 			shield_changed.emit(current_shield, get_stat(STAT_SHIELD))
 	
 	# Apply to HP
@@ -428,7 +431,7 @@ func _process_shield_recharge(delta: float) -> void:
 		shield_recharge_timer -= delta
 		return
 	
-	current_shield = minf(current_shield + SHIELD_RECHARGE_RATE * delta, max_shield)
+	current_shield = minf(current_shield + GameConfig.SHIELD_RECHARGE_RATE * delta, max_shield)
 	shield_changed.emit(current_shield, max_shield)
 
 

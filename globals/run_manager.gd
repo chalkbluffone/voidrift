@@ -25,8 +25,7 @@ enum GameState {
 var current_state: GameState = GameState.MAIN_MENU
 
 # --- Run Configuration ---
-const DEFAULT_RUN_DURATION: float = 600.0  # 10 minutes
-var run_duration: float = DEFAULT_RUN_DURATION
+var run_duration: float = GameConfig.DEFAULT_RUN_DURATION
 
 # --- Run Data ---
 var run_data: Dictionary = {}
@@ -111,7 +110,7 @@ func _reset_run_data() -> void:
 		# Progression (managed by ProgressionManager but stored here)
 		"level": 1,
 		"xp": 0.0,
-		"xp_required": 7.0,
+		"xp_required": GameConfig.XP_BASE,
 		"time_elapsed": 0.0,
 		"time_remaining": run_duration,
 		

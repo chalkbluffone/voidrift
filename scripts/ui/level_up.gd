@@ -52,7 +52,7 @@ var _hide_tween: Tween = null
 var _pending_label: Label = null
 
 ## Duration of the brief gameplay flash between queued level-ups (seconds).
-const QUEUE_FLASH_DELAY: float = 0.3
+## Tuned in GameConfig: LEVEL_UP_QUEUE_FLASH_DELAY
 
 
 func _ready() -> void:
@@ -710,7 +710,7 @@ func _check_queue_after_hide() -> void:
 	if ProgressionManager.get_pending_level_ups() <= 0:
 		return
 	# Brief gameplay flash so the player sees the world between upgrades
-	var flash_timer: SceneTreeTimer = get_tree().create_timer(QUEUE_FLASH_DELAY)
+	var flash_timer: SceneTreeTimer = get_tree().create_timer(GameConfig.LEVEL_UP_QUEUE_FLASH_DELAY)
 	flash_timer.timeout.connect(func() -> void:
 		ProgressionManager.advance_level_up_queue()
 	)

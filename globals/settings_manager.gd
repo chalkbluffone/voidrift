@@ -38,6 +38,7 @@ var window_mode: int = WindowMode.WINDOWED
 var resolution: Vector2i = Vector2i(1920, 1080)
 var vsync: bool = true
 var max_fps: int = 0
+var primary_display: int = 0  ## Index of the monitor to use (0-based)
 
 # ── Graphics ───────────────────────────────────────────────────────────
 var screen_shake_intensity: float = 1.0
@@ -117,6 +118,16 @@ func set_max_fps(value: int) -> void:
 	settings_changed.emit()
 
 
+## Set the primary display (monitor) for the game window.
+func set_primary_display(screen_index: int) -> void:
+	var screen_count: int = DisplayServer.get_screen_count()
+	primary_display = clampi(screen_index, 0, maxi(screen_count - 1, 0))
+	DisplayServer.window_set_current_screen(primary_display)
+	_apply_window_mode()
+	save_settings()
+	settings_changed.emit()
+
+
 func _apply_window_mode() -> void:
 	match window_mode:
 		WindowMode.WINDOWED:
@@ -131,9 +142,10 @@ func _apply_window_mode() -> void:
 
 @warning_ignore("integer_division")
 func _center_window() -> void:
-	var screen_size: Vector2i = DisplayServer.screen_get_size()
+	var screen_origin: Vector2i = DisplayServer.screen_get_position(primary_display)
+	var screen_size: Vector2i = DisplayServer.screen_get_size(primary_display)
 	var win_size: Vector2i = DisplayServer.window_get_size()
-	var pos: Vector2i = (screen_size - win_size) / 2
+	var pos: Vector2i = screen_origin + (screen_size - win_size) / 2
 	DisplayServer.window_set_position(pos)
 
 
@@ -189,6 +201,7 @@ func save_settings() -> void:
 	config.set_value("display", "resolution_h", resolution.y)
 	config.set_value("display", "vsync", vsync)
 	config.set_value("display", "max_fps", max_fps)
+	config.set_value("display", "primary_display", primary_display)
 	# Graphics
 	config.set_value("graphics", "screen_shake_intensity", screen_shake_intensity)
 	config.set_value("graphics", "particle_density", particle_density)
@@ -222,6 +235,7 @@ func load_settings() -> void:
 	resolution = Vector2i(res_w, res_h)
 	vsync = bool(config.get_value("display", "vsync", true))
 	max_fps = int(config.get_value("display", "max_fps", 0))
+	primary_display = clampi(int(config.get_value("display", "primary_display", 0)), 0, maxi(DisplayServer.get_screen_count() - 1, 0))
 
 	# Graphics
 	screen_shake_intensity = float(config.get_value("graphics", "screen_shake_intensity", 1.0))
@@ -238,6 +252,7 @@ func apply_all_settings() -> void:
 	_set_bus_volume("SFX", sfx_volume)
 	_set_bus_volume("Music", music_volume)
 
+	DisplayServer.window_set_current_screen(primary_display)
 	_apply_window_mode()
 
 	if vsync:

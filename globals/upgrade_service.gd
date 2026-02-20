@@ -53,33 +53,33 @@ func generate_level_up_options() -> Array[Dictionary]:
 			if uid != "":
 				owned_modules.append(uid)
 
-	var weapon_slots_full: bool = owned_weapons.size() >= ProgressionManager.MAX_WEAPON_SLOTS
-	var module_slots_full: bool = owned_modules.size() >= ProgressionManager.MAX_MODULE_SLOTS
+	var weapon_slots_full: bool = owned_weapons.size() >= GameConfig.MAX_WEAPON_SLOTS
+	var module_slots_full: bool = owned_modules.size() >= GameConfig.MAX_MODULE_SLOTS
 
 	# Weights: after you have a weapon/module, bias towards leveling what you already have.
-	var w_existing_weapon: float = 1.0
-	var w_new_weapon: float = 1.5
-	var w_existing_module: float = 1.0
-	var w_new_module: float = 1.2
+	var w_existing_weapon: float = GameConfig.OFFER_WEIGHT_EXISTING_WEAPON
+	var w_new_weapon: float = GameConfig.OFFER_WEIGHT_NEW_WEAPON
+	var w_existing_module: float = GameConfig.OFFER_WEIGHT_EXISTING_MODULE
+	var w_new_module: float = GameConfig.OFFER_WEIGHT_NEW_MODULE
 
 	if weapon_slots_full:
 		# All weapon slots occupied — only offer upgrades for owned weapons.
-		w_existing_weapon = 8.0
+		w_existing_weapon = GameConfig.OFFER_WEIGHT_WEAPON_FULL_EXISTING
 		w_new_weapon = 0.0
 	else:
 		# Slots still open — only offer new weapons until loadout is full.
 		w_existing_weapon = 0.0
-		w_new_weapon = 6.0
+		w_new_weapon = GameConfig.OFFER_WEIGHT_WEAPON_OPEN_NEW
 
 	if module_slots_full:
-		w_existing_module = 8.0
+		w_existing_module = GameConfig.OFFER_WEIGHT_MODULE_FULL_EXISTING
 		w_new_module = 0.0
 	elif owned_modules.size() > 0:
-		w_existing_module = 4.0
-		w_new_module = 1.2
+		w_existing_module = GameConfig.OFFER_WEIGHT_MODULE_PARTIAL_EXISTING
+		w_new_module = GameConfig.OFFER_WEIGHT_MODULE_PARTIAL_NEW
 	else:
-		w_existing_module = 1.0
-		w_new_module = 5.0
+		w_existing_module = GameConfig.OFFER_WEIGHT_MODULE_EMPTY_EXISTING
+		w_new_module = GameConfig.OFFER_WEIGHT_MODULE_EMPTY_NEW
 
 	var candidates: Array[Dictionary] = []
 	candidates.append_array(_build_module_candidates(

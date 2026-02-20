@@ -26,6 +26,7 @@ var _sfx_slider: HSlider
 var _music_slider: HSlider
 
 var _window_mode_option: OptionButton
+var _primary_display_option: OptionButton
 var _resolution_option: OptionButton
 var _max_fps_option: OptionButton
 var _vsync_check: CheckButton
@@ -152,6 +153,14 @@ func _build_audio_tab(parent: VBoxContainer) -> void:
 func _build_display_tab(parent: VBoxContainer) -> void:
 	_window_mode_option = _make_option_row(parent, "Window Mode",
 		["Windowed", "Borderless Fullscreen", "Exclusive Fullscreen"])
+
+	# Primary display / monitor picker
+	var display_labels: Array[String] = []
+	var screen_count: int = DisplayServer.get_screen_count()
+	for i: int in screen_count:
+		var screen_size: Vector2i = DisplayServer.screen_get_size(i)
+		display_labels.append("Display %d  (%d×%d)" % [i + 1, screen_size.x, screen_size.y])
+	_primary_display_option = _make_option_row(parent, "Monitor", display_labels)
 
 	var res_labels: Array[String] = []
 	for preset: Vector2i in _settings.RESOLUTION_PRESETS:
@@ -288,6 +297,7 @@ func sync_from_settings() -> void:
 
 	# Display
 	_window_mode_option.selected = _settings.window_mode
+	_sync_primary_display_option()
 	_sync_resolution_option()
 	_sync_fps_option()
 	_vsync_check.button_pressed = _settings.vsync
@@ -310,6 +320,18 @@ func _sync_resolution_option() -> void:
 	_resolution_option.selected = idx
 
 
+## Sync the monitor picker to the current primary_display, rebuilding items
+## in case screens were connected or disconnected since the UI was built.
+func _sync_primary_display_option() -> void:
+	_primary_display_option.clear()
+	var screen_count: int = DisplayServer.get_screen_count()
+	for i: int in screen_count:
+		var screen_size: Vector2i = DisplayServer.screen_get_size(i)
+		_primary_display_option.add_item("Display %d  (%d×%d)" % [i + 1, screen_size.x, screen_size.y])
+	var selected_idx: int = clampi(_settings.primary_display, 0, maxi(screen_count - 1, 0))
+	_primary_display_option.selected = selected_idx
+
+
 func _sync_fps_option() -> void:
 	var idx: int = 0
 	for i: int in _settings.FPS_PRESETS.size():
@@ -327,6 +349,7 @@ func _connect_signals() -> void:
 
 	# Display
 	_window_mode_option.item_selected.connect(_settings.set_window_mode)
+	_primary_display_option.item_selected.connect(_settings.set_primary_display)
 	_resolution_option.item_selected.connect(_on_resolution_selected)
 	_max_fps_option.item_selected.connect(_on_fps_selected)
 	_vsync_check.toggled.connect(_settings.set_vsync)

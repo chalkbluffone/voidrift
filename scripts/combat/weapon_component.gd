@@ -19,7 +19,7 @@ var stats_component: Node = null
 
 ## When false, weapons won't auto-fire (for test lab manual control).
 var auto_fire_enabled: bool = true
-var _targeting_range: float = 500.0
+var _targeting_range: float = GameConfig.WEAPON_TARGETING_RANGE
 
 ## Internal helpers (composition, not child nodes).
 var _inventory: WeaponInventory = WeaponInventory.new()

@@ -39,6 +39,7 @@ var vram_label: Label = null
 @onready var PersistenceManager: Node = get_node("/root/PersistenceManager")
 @onready var SettingsManager: Node = get_node("/root/SettingsManager")
 @onready var DataLoader: Node = get_node("/root/DataLoader")
+@onready var GameConfig: Node = get_node("/root/GameConfig")
 @onready var FileLogger: Node = get_node("/root/FileLogger")
 
 var _player: Node = null
@@ -187,9 +188,7 @@ func _make_debug_label(initial_text: String) -> Label:
 
 
 ## Avatar circle diameter in pixels.
-const AVATAR_SIZE: float = 72.0
-## Fraction of the source image height to show (0.0–1.0). 0.45 = top 45% (head & shoulders).
-const AVATAR_CROP_FRACTION: float = 0.65
+## Tuned in GameConfig: HUD_AVATAR_SIZE, HUD_AVATAR_CROP_FRACTION
 
 ## Build a circular-masked captain portrait in the CaptainAvatar container.
 func _build_captain_avatar() -> void:
@@ -256,7 +255,7 @@ void fragment() {
 	var mat: ShaderMaterial = ShaderMaterial.new()
 	mat.shader = shader
 	mat.set_shader_parameter("portrait_tex", tex)
-	mat.set_shader_parameter("crop_fraction", AVATAR_CROP_FRACTION)
+	mat.set_shader_parameter("crop_fraction", GameConfig.HUD_AVATAR_CROP_FRACTION)
 	mat.set_shader_parameter("tex_aspect", tex_aspect)
 	portrait.material = mat
 

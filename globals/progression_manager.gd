@@ -14,12 +14,12 @@ var _pending_level_ups: int = 0
 
 # --- XP Scaling (logarithmic cumulative) ---
 # Level = floor(2 + log(Exp / BaseLevelCost) / log(Multiplier))
-const XP_BASE: float = 7.0       ## Cumulative XP cost to reach level 2 (~7 enemy kills)
-const XP_GROWTH: float = 1.2     ## Multiplier between successive level thresholds
+# Tuned in GameConfig: XP_BASE, XP_GROWTH
 
 # --- Loadout Limits ---
-const MAX_WEAPON_SLOTS: int = 4
-const MAX_MODULE_SLOTS: int = 4
+# Tuned in GameConfig: MAX_WEAPON_SLOTS, MAX_MODULE_SLOTS
+
+@onready var GameConfig: Node = get_node("/root/GameConfig")
 
 @onready var RunManager: Node = get_node("/root/RunManager")
 @onready var UpgradeService: Node = get_node("/root/UpgradeService")
@@ -33,12 +33,16 @@ func _ready() -> void:
 
 # --- XP & Leveling ---
 
-## Cumulative XP threshold to reach a given level.
-## Level 1 = 0, level 2 = XP_BASE, level 3 = XP_BASE * XP_GROWTH, etc.
+## Cumulative XP threshold to reach a given level (geometric series sum).
+## Level 1 = 0, level 2 = XP_BASE, level 3 = XP_BASE + XP_BASE * XP_GROWTH, etc.
+## Each level costs XP_GROWTH times more than the previous level.
 func _xp_threshold(level: int) -> float:
-	if level <= 1:
+	if level <= GameConfig.XP_START_LEVEL:
 		return 0.0
-	return XP_BASE * pow(XP_GROWTH, float(level - 2))
+	var n: float = float(level - GameConfig.XP_START_LEVEL)
+	if GameConfig.XP_GROWTH == 1.0:
+		return GameConfig.XP_BASE * n
+	return GameConfig.XP_BASE * (pow(GameConfig.XP_GROWTH, n) - 1.0) / (GameConfig.XP_GROWTH - 1.0)
 
 
 ## Emit XP progress relative to current level boundaries (for HUD bar).
@@ -102,7 +106,7 @@ func select_level_up_option(option: Dictionary) -> void:
 	if type == "upgrade":
 		_add_ship_upgrade(id)
 	elif type == "weapon":
-		if id not in RunManager.run_data.weapons and RunManager.run_data.weapons.size() < MAX_WEAPON_SLOTS:
+		if id not in RunManager.run_data.weapons and RunManager.run_data.weapons.size() < GameConfig.MAX_WEAPON_SLOTS:
 			# New weapon — add to loadout
 			RunManager.run_data.weapons.append(id)
 		elif id in RunManager.run_data.weapons:
@@ -155,7 +159,7 @@ func _add_ship_upgrade(upgrade_id: String) -> void:
 			RunManager.run_data.ship_upgrades[i] = u
 			return
 	
-	if RunManager.run_data.ship_upgrades.size() >= MAX_MODULE_SLOTS:
+	if RunManager.run_data.ship_upgrades.size() >= GameConfig.MAX_MODULE_SLOTS:
 		return
 	
 	RunManager.run_data.ship_upgrades.append({"id": upgrade_id, "stacks": 1})

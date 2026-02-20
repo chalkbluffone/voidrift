@@ -64,10 +64,14 @@ func _ready() -> void:
 	_populate_captains()
 	_setup_card_focus_neighbors()
 
-	# Focus first ship card so controller users start in the content
+	# Focus first ship card so controller users start in the content.
+	# Immediately reset the hover visual so it doesn't appear hovered on load —
+	# the focus_entered signal triggers the hover tween, but we want it neutral
+	# until the player actively hovers or navigates with a gamepad.
 	var first_ship: PanelContainer = ship_list.get_child(0) as PanelContainer if ship_list.get_child_count() > 0 else null
 	if first_ship:
 		first_ship.grab_focus()
+		CARD_HOVER_FX_SCRIPT.reset_hover(first_ship, _card_hover_tweens, first_ship.get_instance_id())
 	else:
 		back_button.grab_focus()
 

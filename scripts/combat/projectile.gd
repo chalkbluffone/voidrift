@@ -20,7 +20,7 @@ var _weapon_crit_chance: float = 0.0
 var _weapon_crit_damage: float = 0.0
 
 var _hits_remaining: int = 1
-var _lifetime: float = 5.0
+var _lifetime: float = GameConfig.PROJECTILE_DEFAULT_LIFETIME
 
 
 func _ready() -> void:

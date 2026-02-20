@@ -29,12 +29,9 @@ const StatsComponentScript: GDScript = preload("res://scripts/core/stats_compone
 @export var test_mode: bool = false
 
 # --- Phase Shift ---
-const PHASE_SHIFT_DURATION: float = 0.3  # How long the dash lasts
-const PHASE_SHIFT_COOLDOWN: float = 0.5  # Min time between phases
-
 @export var max_phase_energy: int = 3
 var phase_energy: int = 3
-var phase_recharge_time: float = 3.0  # Seconds to recharge one charge
+var phase_recharge_time: float = GameConfig.PHASE_RECHARGE_TIME
 var _phase_recharge_timer: float = 0.0
 var _is_phasing: bool = false
 var _phase_timer: float = 0.0
@@ -50,8 +47,6 @@ var _base_speed: float = 100.0  # Will be set from GameConfig in _ready
 var _last_move_direction: Vector2 = Vector2.RIGHT
 var _knockback_velocity: Vector2 = Vector2.ZERO
 var _last_input_device: String = "keyboard" # "keyboard" or "joypad"
-const KNOCKBACK_FRICTION: float = 10.0
-const DAMAGE_IFRAMES: float = 0.5  # Brief i-frames after taking damage
 
 # --- Damage Interceptors ---
 # Callables that receive (amount: float, source: Node) and return modified damage float.
@@ -59,10 +54,6 @@ const DAMAGE_IFRAMES: float = 0.5  # Brief i-frames after taking damage
 var _damage_interceptors: Array[Callable] = []
 
 # --- Camera Dynamic Zoom ---
-const CAMERA_BASE_ZOOM: float = 1.2
-const CAMERA_SPEED_ZOOM_FACTOR: float = 0.08  ## How much zoom decreases per 1.0 speed multiplier above baseline
-const CAMERA_MIN_ZOOM: float = 0.7  ## Floor so camera never zooms too far out
-const CAMERA_ZOOM_LERP: float = 3.0  ## Smoothing speed for zoom transitions
 var _camera: Camera2D = null
 
 # --- Captain Ability ---
@@ -138,12 +129,7 @@ func _initialize_from_loadout(ship_data: Dictionary, captain_data: Dictionary, s
 	weapons.sync_from_run_data()
 
 
-## Default visual size when ship JSON omits the visual section.
-const DEFAULT_VISUAL_WIDTH: float = 64.0
-const DEFAULT_VISUAL_HEIGHT: float = 64.0
 
-## Default collision radius when ship JSON omits the collision section.
-const DEFAULT_COLLISION_RADIUS: float = 24.0
 
 ## Load the ship's sprite texture from data and scale to per-ship visual dimensions.
 func _apply_ship_sprite(ship_data: Dictionary) -> void:
@@ -161,8 +147,8 @@ func _apply_ship_sprite(ship_data: Dictionary) -> void:
 	sprite.play()
 	# Scale to per-ship visual dimensions from JSON
 	var visual: Dictionary = ship_data.get("visual", {})
-	var target_w: float = float(visual.get("width", DEFAULT_VISUAL_WIDTH))
-	var target_h: float = float(visual.get("height", DEFAULT_VISUAL_HEIGHT))
+	var target_w: float = float(visual.get("width", GameConfig.DEFAULT_VISUAL_WIDTH))
+	var target_h: float = float(visual.get("height", GameConfig.DEFAULT_VISUAL_HEIGHT))
 	var tex_size: Vector2 = tex.get_size()
 	if tex_size.x > 0.0 and tex_size.y > 0.0:
 		sprite.scale = Vector2(target_w / tex_size.x, target_h / tex_size.y)
@@ -175,8 +161,8 @@ func _apply_collision_shape(ship_data: Dictionary) -> void:
 		return
 	var col: Dictionary = ship_data.get("collision", {})
 	var col_type: String = String(col.get("type", "circle"))
-	var col_w: float = float(col.get("width", DEFAULT_COLLISION_RADIUS * 2.0))
-	var col_h: float = float(col.get("height", DEFAULT_COLLISION_RADIUS * 2.0))
+	var col_w: float = float(col.get("width", GameConfig.DEFAULT_COLLISION_RADIUS * 2.0))
+	var col_h: float = float(col.get("height", GameConfig.DEFAULT_COLLISION_RADIUS * 2.0))
 	match col_type:
 		"capsule":
 			var capsule: CapsuleShape2D = CapsuleShape2D.new()
@@ -286,7 +272,7 @@ func _physics_process(delta: float) -> void:
 
 func _process_movement(delta: float) -> void:
 	# Process knockback decay
-	_knockback_velocity = _knockback_velocity.move_toward(Vector2.ZERO, KNOCKBACK_FRICTION * delta * 500)
+	_knockback_velocity = _knockback_velocity.move_toward(Vector2.ZERO, GameConfig.PLAYER_KNOCKBACK_FRICTION * delta * 500)
 
 	# Hybrid movement:
 	# - Keyboard: 8-way digital (snapped)
@@ -318,7 +304,7 @@ func _process_movement(delta: float) -> void:
 	if _is_phasing:
 		# During phase shift, move in phase direction at high speed
 		var phase_distance: float = stats.get_stat(StatsComponentScript.STAT_PHASE_SHIFT_DISTANCE)
-		velocity = _phase_direction * (phase_distance / PHASE_SHIFT_DURATION)
+		velocity = _phase_direction * (phase_distance / GameConfig.PHASE_SHIFT_DURATION)
 	else:
 		# Normal movement + knockback
 		var speed_mult: float = stats.get_stat(StatsComponentScript.STAT_MOVEMENT_SPEED)
@@ -337,9 +323,9 @@ func _process_camera_zoom(delta: float) -> void:
 	var speed_mult: float = stats.get_stat(StatsComponentScript.STAT_MOVEMENT_SPEED)
 	# Extra speed above baseline (1.0) pulls the camera back
 	var speed_excess: float = maxf(speed_mult - 1.0, 0.0)
-	var target_zoom: float = maxf(CAMERA_BASE_ZOOM - speed_excess * CAMERA_SPEED_ZOOM_FACTOR, CAMERA_MIN_ZOOM)
+	var target_zoom: float = maxf(GameConfig.CAMERA_BASE_ZOOM - speed_excess * GameConfig.CAMERA_SPEED_ZOOM_FACTOR, GameConfig.CAMERA_MIN_ZOOM)
 	var current_zoom: float = _camera.zoom.x
-	var new_zoom: float = lerpf(current_zoom, target_zoom, minf(1.0, CAMERA_ZOOM_LERP * delta))
+	var new_zoom: float = lerpf(current_zoom, target_zoom, minf(1.0, GameConfig.CAMERA_ZOOM_LERP * delta))
 	_camera.zoom = Vector2(new_zoom, new_zoom)
 
 
@@ -375,8 +361,8 @@ func _try_phase_shift() -> void:
 	phase_energy_changed.emit(phase_energy, max_phase_energy)
 	
 	_is_phasing = true
-	_phase_timer = PHASE_SHIFT_DURATION
-	_phase_cooldown_timer = PHASE_SHIFT_COOLDOWN
+	_phase_timer = GameConfig.PHASE_SHIFT_DURATION
+	_phase_cooldown_timer = GameConfig.PHASE_SHIFT_COOLDOWN
 	_phase_direction = _last_move_direction
 	
 	# Grant i-frames
@@ -411,7 +397,7 @@ func _end_phase_shift() -> void:
 	collision_shape.set_deferred("disabled", false)
 	
 	# Brief i-frames after phase ends
-	_iframes_timer = 0.2
+	_iframes_timer = GameConfig.POST_PHASE_IFRAMES
 	
 	# Visual feedback
 	if sprite:
@@ -473,11 +459,11 @@ func take_damage(amount: float, source: Node = null) -> float:
 		if source and source is Node2D:
 			var source_2d: Node2D = source as Node2D
 			var knockback_dir: Vector2 = (global_position - source_2d.global_position).normalized()
-			_knockback_velocity = knockback_dir * 400
+			_knockback_velocity = knockback_dir * GameConfig.PLAYER_KNOCKBACK_FORCE
 		
 		# Brief i-frames to prevent rapid damage
 		_set_invincible(true)
-		_iframes_timer = DAMAGE_IFRAMES
+		_iframes_timer = GameConfig.DAMAGE_IFRAMES
 	
 	return actual_damage
 

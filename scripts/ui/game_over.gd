@@ -17,6 +17,7 @@ const CARD_HOVER_FX_SCRIPT: Script = preload("res://scripts/ui/card_hover_fx.gd"
 const FONT_HEADER: Font = preload("res://assets/fonts/Orbitron-Bold.ttf")
 
 @onready var RunManager: Node = get_node("/root/RunManager")
+@onready var GameConfig: Node = get_node("/root/GameConfig")
 @onready var FileLogger: Node = get_node_or_null("/root/FileLogger")
 
 var _button_hover_tweens: Dictionary = {}
@@ -65,7 +66,7 @@ func _on_run_ended(victory: bool, stats: Dictionary) -> void:
 	_apply_synthwave_theme()
 
 	# Show with brief delay so death animation plays
-	await get_tree().create_timer(0.6).timeout
+	await get_tree().create_timer(GameConfig.GAME_OVER_DELAY).timeout
 	visible = true
 	retry_button.grab_focus()
 

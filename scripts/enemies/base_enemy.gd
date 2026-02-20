@@ -22,14 +22,13 @@ var _target: Node2D = null
 var _hitbox: Area2D = null
 @onready var RunManager: Node = get_node("/root/RunManager")
 @onready var FileLogger: Node = get_node("/root/FileLogger")
+@onready var GameConfig: Node = get_node("/root/GameConfig")
 
 # --- Knockback ---
 var _knockback_velocity: Vector2 = Vector2.ZERO
-const KNOCKBACK_FRICTION: float = 8.0
 
 # --- Contact Damage ---
 var _damage_cooldown: float = 0.0
-const DAMAGE_INTERVAL: float = 0.5  # Deal damage every 0.5 seconds while touching
 
 
 func _ready() -> void:
@@ -67,7 +66,7 @@ func _process_contact_damage(delta: float) -> void:
 			if body.is_in_group("player") and body.has_method("take_damage"):
 				var damage_dealt: float = body.take_damage(contact_damage, self)
 				if damage_dealt > 0:
-					_damage_cooldown = DAMAGE_INTERVAL
+					_damage_cooldown = GameConfig.ENEMY_CONTACT_DAMAGE_INTERVAL
 				return
 	
 	# Method 2: Check Area2D overlapping (backup)
@@ -77,7 +76,7 @@ func _process_contact_damage(delta: float) -> void:
 			if body.is_in_group("player") and body.has_method("take_damage"):
 				var damage_dealt: float = body.take_damage(contact_damage, self)
 				if damage_dealt > 0:
-					_damage_cooldown = DAMAGE_INTERVAL
+					_damage_cooldown = GameConfig.ENEMY_CONTACT_DAMAGE_INTERVAL
 				return
 
 
@@ -106,7 +105,7 @@ func _process_movement(_delta: float) -> void:
 
 
 func _process_knockback(delta: float) -> void:
-	_knockback_velocity = _knockback_velocity.move_toward(Vector2.ZERO, KNOCKBACK_FRICTION * delta * 100)
+	_knockback_velocity = _knockback_velocity.move_toward(Vector2.ZERO, GameConfig.ENEMY_KNOCKBACK_FRICTION * delta * 100)
 
 
 func take_damage(amount: float, _source: Node = null) -> void:

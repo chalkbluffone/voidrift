@@ -52,16 +52,135 @@ const PICKUP_MAGNET_ACCELERATION: float = 800.0  # How fast pickups accelerate
 # =============================================================================
 # CREDITS
 # =============================================================================
-const CREDIT_DROP_CHANCE: float = 0.40  # 30% chance enemies drop credits
+const CREDIT_DROP_CHANCE: float = 0.40  # 40% chance enemies drop credits
 const CREDIT_SCALE_PER_MINUTE: float = 0.1  # +10% credit value per minute
 
 # =============================================================================
-# LEVEL UP
+# RUN
+# =============================================================================
+const DEFAULT_RUN_DURATION: float = 600.0  # Run timer in seconds (600 = 10 minutes)
+
+# =============================================================================
+# LEVEL UP / PROGRESSION
 # =============================================================================
 const LEVEL_UP_REFRESH_COST: int = 25  # Credits to refresh upgrade cards
 
 # How many cards appear per level-up.
 const LEVEL_UP_OPTION_COUNT: int = 3
+
+# XP curve (geometric series): xp_threshold(lvl) = XP_BASE * (XP_GROWTH^n - 1) / (XP_GROWTH - 1)
+# where n = lvl - XP_START_LEVEL. Each level costs XP_GROWTH times more than the last.
+const XP_BASE: float = 7.0            # XP cost of the first level-up (~7 kills). Scales all levels uniformly.
+const XP_GROWTH: float = 1.2          # Each level costs this much more than the previous (1.2 = +20%)
+const XP_START_LEVEL: int = 1         # Level at which XP costs begin (levels below this are free)
+
+# Loadout capacity
+const MAX_WEAPON_SLOTS: int = 4       # Max weapons per run
+const MAX_MODULE_SLOTS: int = 4       # Max tomes/modules per run
+
+# Brief gameplay flash between queued level-ups (seconds)
+const LEVEL_UP_QUEUE_FLASH_DELAY: float = 0.3
+
+# =============================================================================
+# PHASE SHIFT
+# =============================================================================
+const PHASE_SHIFT_DURATION: float = 0.3   # How long the dash lasts (seconds)
+const PHASE_SHIFT_COOLDOWN: float = 0.5   # Min time between phases (seconds)
+const PHASE_RECHARGE_TIME: float = 3.0    # Seconds to recharge one phase charge
+const POST_PHASE_IFRAMES: float = 0.2     # Brief i-frames after phase ends (seconds)
+
+# =============================================================================
+# SURVIVABILITY / I-FRAMES
+# =============================================================================
+const DAMAGE_IFRAMES: float = 0.5         # I-frame duration after taking damage (seconds)
+const PLAYER_KNOCKBACK_FORCE: float = 400.0  # Knockback velocity from damage source
+const PLAYER_KNOCKBACK_FRICTION: float = 10.0  # Knockback decay rate (player)
+const ENEMY_KNOCKBACK_FRICTION: float = 8.0   # Knockback decay rate (enemies)
+const ENEMY_CONTACT_DAMAGE_INTERVAL: float = 0.5  # Contact damage tick rate (seconds)
+
+# =============================================================================
+# COMBAT / STATS
+# =============================================================================
+const SHIELD_RECHARGE_DELAY: float = 5.0   # Seconds before shield starts recharging
+const SHIELD_RECHARGE_RATE: float = 10.0   # Shield HP recovered per second
+const DIMINISHING_RETURNS_DENOMINATOR: float = 100.0  # DR formula: raw / (raw + DENOM)
+const WEAPON_TARGETING_RANGE: float = 500.0  # Auto-aim max distance (pixels)
+const PROJECTILE_DEFAULT_LIFETIME: float = 5.0  # Seconds before projectile self-destructs
+
+# Hard caps for stats (stat_name → max value)
+const STAT_CAPS: Dictionary = {
+	"xp_gain": 10.0,
+	"armor": 90.0,
+	"evasion": 90.0,
+}
+
+# =============================================================================
+# CAMERA
+# =============================================================================
+const CAMERA_BASE_ZOOM: float = 1.2       # Default camera zoom level
+const CAMERA_SPEED_ZOOM_FACTOR: float = 0.08  # Zoom reduction per 1.0 speed multiplier above baseline
+const CAMERA_MIN_ZOOM: float = 0.7        # Floor so camera never zooms too far out
+const CAMERA_ZOOM_LERP: float = 3.0       # Zoom transition smoothing speed
+
+# =============================================================================
+# UPGRADE OFFER WEIGHTS
+# =============================================================================
+# Controls how often weapons vs modules appear at level-up.
+# Slots full → only upgrade existing. Slots open → only offer new.
+
+# Base weights when slots are partially filled
+const OFFER_WEIGHT_EXISTING_WEAPON: float = 1.0
+const OFFER_WEIGHT_NEW_WEAPON: float = 1.5
+const OFFER_WEIGHT_EXISTING_MODULE: float = 1.0
+const OFFER_WEIGHT_NEW_MODULE: float = 1.2
+
+# When weapon slots are full
+const OFFER_WEIGHT_WEAPON_FULL_EXISTING: float = 8.0
+# When weapon slots still open
+const OFFER_WEIGHT_WEAPON_OPEN_NEW: float = 6.0
+
+# When module slots are full
+const OFFER_WEIGHT_MODULE_FULL_EXISTING: float = 8.0
+# When module slots partially filled
+const OFFER_WEIGHT_MODULE_PARTIAL_EXISTING: float = 4.0
+const OFFER_WEIGHT_MODULE_PARTIAL_NEW: float = 1.2
+# When module slots empty
+const OFFER_WEIGHT_MODULE_EMPTY_EXISTING: float = 1.0
+const OFFER_WEIGHT_MODULE_EMPTY_NEW: float = 5.0
+
+# =============================================================================
+# LOOT FREIGHTER
+# =============================================================================
+const FREIGHTER_FLEE_DRIFT_INTERVAL: float = 2.0  # Seconds between random flee direction changes
+const FREIGHTER_FLEE_DRIFT_ANGLE: float = 0.3     # Radians of random drift
+
+# =============================================================================
+# PICKUP SCATTER (cosmetic feel)
+# =============================================================================
+const PICKUP_SCATTER_XP: float = 10.0       # XP pickup random offset (pixels)
+const PICKUP_SCATTER_CREDIT: float = 15.0   # Credit pickup random offset (pixels)
+const PICKUP_SCATTER_BURST: float = 30.0    # Burst pickup random offset (pixels)
+const PICKUP_SCATTER_STARDUST: float = 25.0 # Stardust random offset (pixels)
+
+# =============================================================================
+# UI COSMETIC
+# =============================================================================
+const GAME_OVER_DELAY: float = 0.6         # Death animation delay before game over screen (seconds)
+const HUD_AVATAR_SIZE: float = 72.0        # Captain portrait diameter (pixels)
+const HUD_AVATAR_CROP_FRACTION: float = 0.65  # How much of captain sprite to show (0-1)
+
+# =============================================================================
+# ABILITY DEFAULTS
+# =============================================================================
+const ABILITY_DEFAULT_COOLDOWN: float = 75.0  # Fallback cooldown if captain JSON omits it
+const ABILITY_DEFAULT_DURATION: float = 5.0   # Fallback duration if captain JSON omits it
+
+# =============================================================================
+# SHIP VISUAL DEFAULTS
+# =============================================================================
+const DEFAULT_VISUAL_WIDTH: float = 64.0      # Ship sprite fallback width (pixels)
+const DEFAULT_VISUAL_HEIGHT: float = 64.0     # Ship sprite fallback height (pixels)
+const DEFAULT_COLLISION_RADIUS: float = 24.0  # Ship collision fallback radius (pixels)
 
 # =============================================================================
 # RARITY / UPGRADE ROLLS
