@@ -17,17 +17,29 @@ const ENEMY_BASE_SPEED: float = 70.0  # Base movement speed (slower than player'
 # Overtime speed scaling — only activates after the countdown hits zero
 const ENEMY_OVERTIME_SPEED_PER_MINUTE: float = 8.0  # +8 speed per overtime minute
 
-# Enemy damage scales linearly — manageable with HP/armor/evasion upgrades
-const ENEMY_DAMAGE_SCALE_PER_MINUTE: float = 0.25  # +25% damage per minute (linear)
+# --- Enemy Stat Scaling (polynomial, over time) ---
+# HP formula: hp_mult = 1 + pow(time_minutes, ENEMY_HP_EXPONENT)
+# Damage formula: damage_mult = 1 + (time_minutes * ENEMY_DAMAGE_SCALE_PER_MINUTE)
+const ENEMY_HP_EXPONENT: float = 1.25     # Polynomial exponent for HP scaling (1.25 ≈ 18× at 10 min)
+const ENEMY_DAMAGE_SCALE_PER_MINUTE: float = 0.10  # +10% damage per minute (mild threat)
 
-# Enemy HP scales exponentially — forces multiplicative damage stacking
-# Formula: hp_mult = ENEMY_HP_BASE_MULT * pow(ENEMY_HP_GROWTH_RATE, minutes)
-# At 1min ≈ 1.45x, 3min ≈ 3.0x, 6min ≈ 9.3x, 9min ≈ 28x, 12min ≈ 85x
-const ENEMY_HP_BASE_MULT: float = 1.0
-const ENEMY_HP_GROWTH_RATE: float = 1.45  # Exponential base per minute
+# --- Difficulty Stat Scaling ---
+# Player's "difficulty" stat (0.0 = 0%, 1.0 = 100%) multiplies enemy stats and spawn rate.
+# Formula: stat_mult *= (1.0 + difficulty * WEIGHT)
+const DIFFICULTY_HP_WEIGHT: float = 1.0       # How much difficulty affects HP
+const DIFFICULTY_DAMAGE_WEIGHT: float = 0.5   # How much difficulty affects damage
+const DIFFICULTY_SPAWN_WEIGHT: float = 1.0    # How much difficulty affects spawn rate
 
-# XP/credit rewards scale to match difficulty
-const ENEMY_XP_SCALE_PER_MINUTE: float = 0.15  # +15% XP value per minute
+# --- XP Drops (static, no scaling) ---
+const ENEMY_XP_NORMAL: float = 1.0   # XP dropped by normal enemies
+const ENEMY_XP_ELITE: float = 3.0    # XP dropped by elite enemies
+
+# --- Elite Enemies ---
+const ELITE_BASE_CHANCE: float = 0.05       # 5% base chance to spawn elite
+const ELITE_HP_MULT: float = 3.0            # Elite HP multiplier
+const ELITE_DAMAGE_MULT: float = 2.0        # Elite damage multiplier
+const ELITE_SIZE_SCALE: float = 1.3         # Elite visual scale
+const ELITE_COLOR: Color = Color(1.0, 0.4, 0.2, 1.0)  # Orange tint for elites
 
 # =============================================================================
 # SPAWNING
@@ -41,6 +53,14 @@ const SPAWN_BATCH_SIZE_PER_MINUTE: float = 0.5  # Extra enemies per batch per mi
 
 # Overtime spawn scaling — additional ramp after the countdown hits zero
 const OVERTIME_SPAWN_RATE_GROWTH: float = 0.8  # Extra enemies/sec per overtime minute
+
+# --- Swarm Events ---
+# Swarms temporarily boost spawn rate. Triggered at specific times during the run.
+const SWARM_TIMES: Array[float] = [240.0, 420.0]  # Swarm at 4 min (240s) and 7 min (420s)
+const SWARM_DURATION_MIN: float = 45.0            # Minimum swarm duration (seconds)
+const SWARM_DURATION_MAX: float = 60.0            # Maximum swarm duration (seconds)
+const SWARM_SPAWN_MULTIPLIER: float = 3.0         # Spawn rate multiplier during swarm
+const SWARM_WARNING_DURATION: float = 2.0         # How long to show "Fleet inbound" warning
 
 # =============================================================================
 # PICKUPS

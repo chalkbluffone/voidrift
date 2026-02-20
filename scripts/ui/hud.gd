@@ -57,9 +57,11 @@ const COLOR_STARDUST: Color = Color(0.6, 0.85, 1.0, 1.0)  # Icy blue for stardus
 const COLOR_WEAPONS: Color = Color(0.2, 1.0, 0.9, 1.0)  # Cyan-ish
 
 const FONT_HEADER: Font = preload("res://assets/fonts/Orbitron-Bold.ttf")
+const FONT_SWARM: Font = preload("res://assets/fonts/Orbitron-ExtraBold.ttf")
 const DEBUG_XP_GRAPH_SCENE: PackedScene = preload("res://scenes/ui/debug_xp_graph.tscn")
 
 var _debug_xp_graph: Control = null
+var _swarm_warning_label: Label = null
 
 
 func _ready() -> void:
@@ -74,6 +76,9 @@ func _ready() -> void:
 	# Build debug XP graph (bottom-right, above XP bar)
 	_build_debug_xp_graph()
 	
+	# Build swarm warning label (centered at top)
+	_build_swarm_warning_label()
+	
 	# Connect to service signals
 	ProgressionManager.xp_changed.connect(_on_xp_changed)
 	ProgressionManager.credits_changed.connect(_on_credits_changed)
@@ -81,6 +86,9 @@ func _ready() -> void:
 	ProgressionManager.level_up_completed.connect(_on_level_up_completed)
 	RunManager.run_started.connect(_on_run_started)
 	SettingsManager.settings_changed.connect(_on_settings_changed)
+	
+	# Connect to enemy spawner signals (if it exists in scene)
+	_connect_enemy_spawner_signals()
 	
 	# Wait a frame then find player
 	await get_tree().process_frame
@@ -559,3 +567,80 @@ func _refresh_modules_list() -> void:
 		label.add_theme_font_size_override("font_size", 13)
 		label.tooltip_text = "%s (LV %d)" % [id, level]
 		modules_list.add_child(label)
+
+
+# =============================================================================
+# SWARM WARNING UI
+# =============================================================================
+
+## Build the swarm warning label (initially hidden).
+func _build_swarm_warning_label() -> void:
+	_swarm_warning_label = Label.new()
+	_swarm_warning_label.text = "A MASSIVE FLEET IS INBOUND"
+	_swarm_warning_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_swarm_warning_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_swarm_warning_label.add_theme_font_override("font", FONT_SWARM)
+	_swarm_warning_label.add_theme_font_size_override("font_size", 48)
+	_swarm_warning_label.add_theme_color_override("font_color", Color(1.0, 0.3, 0.2, 1.0))  # Red-orange
+	_swarm_warning_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 1.0))
+	_swarm_warning_label.add_theme_constant_override("outline_size", 4)
+	
+	# Position at top center, 50px from top
+	_swarm_warning_label.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	_swarm_warning_label.offset_top = 50.0
+	_swarm_warning_label.offset_bottom = 110.0
+	
+	_swarm_warning_label.visible = false
+	add_child(_swarm_warning_label)
+
+
+## Connect to enemy spawner signals if available.
+func _connect_enemy_spawner_signals() -> void:
+	# Wait a frame to ensure scene is loaded
+	await get_tree().process_frame
+	
+	var spawners: Array[Node] = get_tree().get_nodes_in_group("enemy_spawner")
+	if spawners.size() > 0:
+		var spawner: Node = spawners[0]
+		if spawner.has_signal("swarm_warning_started"):
+			spawner.swarm_warning_started.connect(_on_swarm_warning_started)
+		if spawner.has_signal("swarm_started"):
+			spawner.swarm_started.connect(_on_swarm_started)
+		FileLogger.log_info("HUD", "Connected to EnemySpawner swarm signals")
+	else:
+		# Try finding by class/script name
+		var spawner: Node = _find_enemy_spawner()
+		if spawner:
+			if spawner.has_signal("swarm_warning_started"):
+				spawner.swarm_warning_started.connect(_on_swarm_warning_started)
+			if spawner.has_signal("swarm_started"):
+				spawner.swarm_started.connect(_on_swarm_started)
+			FileLogger.log_info("HUD", "Connected to EnemySpawner (by search)")
+
+
+## Find enemy spawner in the scene tree.
+func _find_enemy_spawner() -> Node:
+	var current_scene: Node = get_tree().current_scene
+	if not current_scene:
+		return null
+	var spawner: Node = current_scene.get_node_or_null("EnemySpawner")
+	if spawner:
+		return spawner
+	# Search deeper
+	for child in current_scene.get_children():
+		if child.name == "EnemySpawner":
+			return child
+	return null
+
+
+## Called when swarm warning triggers — show the warning label.
+func _on_swarm_warning_started() -> void:
+	if _swarm_warning_label:
+		_swarm_warning_label.visible = true
+		FileLogger.log_info("HUD", "Swarm warning displayed")
+
+
+## Called when swarm actually starts — hide the warning.
+func _on_swarm_started() -> void:
+	if _swarm_warning_label:
+		_swarm_warning_label.visible = false

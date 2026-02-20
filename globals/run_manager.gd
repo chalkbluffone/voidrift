@@ -126,6 +126,7 @@ func _reset_run_data() -> void:
 		"enemies_killed": 0,
 		"elites_killed": 0,
 		"bosses_killed": 0,
+		"swarms_completed": 0,
 		"damage_dealt": 0.0,
 		"damage_taken": 0.0,
 		"credits_collected": 0,
@@ -195,6 +196,10 @@ func record_damage_taken(amount: float) -> void:
 
 func record_phase() -> void:
 	run_data.phases_performed += 1
+
+
+func record_swarm_completed() -> void:
+	run_data.swarms_completed += 1
 
 
 # --- Getters ---

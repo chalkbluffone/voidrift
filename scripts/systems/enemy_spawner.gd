@@ -1,7 +1,11 @@
 extends Node2D
 
 ## EnemySpawner - Spawns enemies around the player in waves.
-## Supports weighted random enemy selection and loot freighter drops.
+## Supports weighted random enemy selection, elite enemies, swarm events, and loot freighter drops.
+
+signal swarm_warning_started
+signal swarm_started
+signal swarm_ended
 
 const XPPickupScene: PackedScene = preload("res://scenes/pickups/xp_pickup.tscn")
 const CreditPickupScene: PackedScene = preload("res://scenes/pickups/credit_pickup.tscn")
@@ -14,6 +18,11 @@ var _spawn_timer: float = 0.0
 var _enemy_pool: Array[Dictionary] = []
 var _total_weight: float = 0.0
 
+## Swarm state
+var _swarm_active: bool = false
+var _swarm_timer: float = 0.0
+var _swarms_triggered: int = 0  # How many swarms have been triggered this run
+
 @onready var RunManager: Node = get_node("/root/RunManager")
 @onready var GameConfig: Node = get_node("/root/GameConfig")
 @onready var DataLoader: Node = get_node("/root/DataLoader")
@@ -21,6 +30,7 @@ var _total_weight: float = 0.0
 
 
 func _ready() -> void:
+	add_to_group("enemy_spawner")
 	_find_player()
 	_build_enemy_pool()
 
@@ -29,6 +39,15 @@ func _process(delta: float) -> void:
 	if not _player:
 		_find_player()
 		return
+	
+	# Check for swarm triggers
+	_check_swarm_triggers()
+	
+	# Update swarm timer if active
+	if _swarm_active:
+		_swarm_timer -= delta
+		if _swarm_timer <= 0.0:
+			_end_swarm()
 	
 	_spawn_timer -= delta
 	if _spawn_timer <= 0:
@@ -47,10 +66,20 @@ func _find_player() -> void:
 func _get_spawn_interval() -> float:
 	var time_minutes: float = RunManager.run_data.time_elapsed / 60.0
 	var current_rate: float = GameConfig.BASE_SPAWN_RATE + (GameConfig.SPAWN_RATE_GROWTH * time_minutes)
+	
 	# Overtime: extra spawn ramp after countdown hits zero
 	var overtime_seconds: float = maxf(0.0, -RunManager.run_data.time_remaining)
 	if overtime_seconds > 0.0:
 		current_rate += GameConfig.OVERTIME_SPAWN_RATE_GROWTH * (overtime_seconds / 60.0)
+	
+	# Difficulty stat scales spawn rate
+	var difficulty_stat: float = _get_player_difficulty_stat()
+	current_rate *= (1.0 + difficulty_stat * GameConfig.DIFFICULTY_SPAWN_WEIGHT)
+	
+	# Swarm multiplier
+	if _swarm_active:
+		current_rate *= GameConfig.SWARM_SPAWN_MULTIPLIER
+	
 	return 1.0 / maxf(current_rate, 0.1)
 
 
@@ -85,12 +114,11 @@ func _spawn_enemy() -> void:
 
 	enemy.global_position = spawn_pos
 
-	# Apply base stats from enemy data (JSON) before time-based scaling
+	# Apply base stats from enemy data (JSON) before scaling
 	var base_stats: Dictionary = enemy_data.get("base_stats", {})
 	enemy.max_hp = float(base_stats.get("hp", enemy.max_hp))
 	enemy.contact_damage = float(base_stats.get("damage", enemy.contact_damage))
 	enemy.move_speed = float(base_stats.get("speed", enemy.move_speed))
-	enemy.xp_value = float(base_stats.get("xp_value", enemy.xp_value))
 	enemy.credit_value = int(base_stats.get("credits_value", enemy.credit_value))
 	enemy.stardust_value = int(base_stats.get("stardust_value", 0))
 
@@ -100,18 +128,38 @@ func _spawn_enemy() -> void:
 	if enemy is LootFreighter and base_stats.has("drop_burst_count"):
 		enemy.drop_burst_count = int(base_stats.get("drop_burst_count", 5))
 
-	# Scale enemy stats based on time
+	# --- Determine if this is an elite ---
+	var is_elite: bool = _roll_for_elite()
+	if is_elite:
+		enemy.enemy_type = "elite"
+	
+	# --- Calculate scaling multipliers ---
 	var time_minutes: float = RunManager.run_data.time_elapsed / 60.0
-
-	# HP scales exponentially — requires multiplicative damage stacking to keep up
-	var hp_mult: float = GameConfig.ENEMY_HP_BASE_MULT * pow(GameConfig.ENEMY_HP_GROWTH_RATE, time_minutes)
-	# Damage scales linearly — manageable with defensive stats
-	var damage_mult: float = 1.0 + (time_minutes * GameConfig.ENEMY_DAMAGE_SCALE_PER_MINUTE)
-
+	var difficulty_stat: float = _get_player_difficulty_stat()
+	
+	# HP scales polynomially with time, then multiplied by difficulty
+	# Formula: hp_mult = (1 + time^exponent) * (1 + difficulty * weight)
+	var time_hp_mult: float = 1.0 + pow(time_minutes, GameConfig.ENEMY_HP_EXPONENT)
+	var diff_hp_mult: float = 1.0 + (difficulty_stat * GameConfig.DIFFICULTY_HP_WEIGHT)
+	var hp_mult: float = time_hp_mult * diff_hp_mult
+	
+	# Damage scales linearly with time, then multiplied by difficulty
+	var time_damage_mult: float = 1.0 + (time_minutes * GameConfig.ENEMY_DAMAGE_SCALE_PER_MINUTE)
+	var diff_damage_mult: float = 1.0 + (difficulty_stat * GameConfig.DIFFICULTY_DAMAGE_WEIGHT)
+	var damage_mult: float = time_damage_mult * diff_damage_mult
+	
+	# Apply elite multipliers
+	if is_elite:
+		hp_mult *= GameConfig.ELITE_HP_MULT
+		damage_mult *= GameConfig.ELITE_DAMAGE_MULT
+	
+	# Apply final stats
 	enemy.max_hp *= hp_mult
 	enemy.current_hp = enemy.max_hp
 	enemy.contact_damage *= damage_mult
-	enemy.xp_value *= (1.0 + time_minutes * GameConfig.ENEMY_XP_SCALE_PER_MINUTE)
+	
+	# XP is static (no scaling) — set based on enemy type
+	enemy.xp_value = GameConfig.ENEMY_XP_ELITE if is_elite else GameConfig.ENEMY_XP_NORMAL
 
 	# Speed only increases in overtime (after countdown hits zero)
 	var overtime_seconds: float = maxf(0.0, -RunManager.run_data.time_remaining)
@@ -119,6 +167,10 @@ func _spawn_enemy() -> void:
 		enemy.move_speed += GameConfig.ENEMY_OVERTIME_SPEED_PER_MINUTE * (overtime_seconds / 60.0)
 	# Cap enemy speed at player base speed — never outrun the player
 	enemy.move_speed = minf(enemy.move_speed, GameConfig.PLAYER_BASE_SPEED)
+	
+	# Apply elite visuals (color tint + size)
+	if is_elite:
+		_apply_elite_visuals(enemy)
 
 	# Connect death signal for drops
 	enemy.died.connect(_on_enemy_died)
@@ -258,3 +310,93 @@ func _spawn_burst_stardust(pos: Vector2, total_amount: int) -> void:
 		stardust.global_position = pos + offset
 		stardust.initialize(1)
 		get_tree().current_scene.call_deferred("add_child", stardust)
+
+
+# =============================================================================
+# SWARM SYSTEM
+# =============================================================================
+
+## Check if it's time to trigger a swarm event.
+func _check_swarm_triggers() -> void:
+	if _swarm_active:
+		return  # Already in a swarm
+	
+	var swarm_times: Array = GameConfig.SWARM_TIMES
+	if _swarms_triggered >= swarm_times.size():
+		return  # All swarms for this run have been triggered
+	
+	var next_swarm_time: float = float(swarm_times[_swarms_triggered])
+	var current_time: float = RunManager.run_data.time_elapsed
+	
+	if current_time >= next_swarm_time:
+		_start_swarm_warning()
+
+
+## Show warning message, then start the swarm.
+func _start_swarm_warning() -> void:
+	_swarms_triggered += 1
+	FileLogger.log_info("EnemySpawner", "Swarm %d warning triggered" % _swarms_triggered)
+	swarm_warning_started.emit()
+	
+	# After warning duration, start the actual swarm
+	var warning_timer: SceneTreeTimer = get_tree().create_timer(GameConfig.SWARM_WARNING_DURATION)
+	warning_timer.timeout.connect(_start_swarm)
+
+
+## Begin the swarm — accelerated spawn rate for a random duration.
+func _start_swarm() -> void:
+	_swarm_active = true
+	_swarm_timer = randf_range(GameConfig.SWARM_DURATION_MIN, GameConfig.SWARM_DURATION_MAX)
+	FileLogger.log_info("EnemySpawner", "Swarm started, duration: %.1f seconds" % _swarm_timer)
+	swarm_started.emit()
+
+
+## End the current swarm event.
+func _end_swarm() -> void:
+	_swarm_active = false
+	RunManager.record_swarm_completed()
+	FileLogger.log_info("EnemySpawner", "Swarm ended")
+	swarm_ended.emit()
+
+
+# =============================================================================
+# ELITE SYSTEM
+# =============================================================================
+
+## Roll to determine if the next enemy should be an elite.
+func _roll_for_elite() -> bool:
+	var base_chance: float = GameConfig.ELITE_BASE_CHANCE
+	var elite_mult: float = _get_player_elite_spawn_rate()
+	var final_chance: float = base_chance * elite_mult
+	return randf() < final_chance
+
+
+## Apply elite visual effects: color tint and size scale.
+func _apply_elite_visuals(enemy: Node) -> void:
+	# Apply color modulate
+	if enemy.has_method("set_modulate"):
+		enemy.modulate = GameConfig.ELITE_COLOR
+	elif "modulate" in enemy:
+		enemy.modulate = GameConfig.ELITE_COLOR
+	
+	# Apply size scale
+	if "scale" in enemy:
+		enemy.scale *= GameConfig.ELITE_SIZE_SCALE
+
+
+# =============================================================================
+# STAT HELPERS
+# =============================================================================
+
+## Get the player's difficulty stat (0.0 = 0%, 1.0 = 100%).
+func _get_player_difficulty_stat() -> float:
+	if _player and _player.has_method("get_stat"):
+		return _player.get_stat("difficulty")
+	return 0.0
+
+
+## Get the player's elite_spawn_rate stat (multiplier, default 1.0).
+func _get_player_elite_spawn_rate() -> float:
+	if _player and _player.has_method("get_stat"):
+		return _player.get_stat("elite_spawn_rate")
+	return 1.0
