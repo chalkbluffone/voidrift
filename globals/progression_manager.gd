@@ -12,9 +12,9 @@ signal xp_changed(current: float, required: float, level: int)
 ## Number of queued level-ups still waiting to be shown (excludes the one currently active).
 var _pending_level_ups: int = 0
 
-# --- XP Scaling (logarithmic cumulative) ---
-# Level = floor(2 + log(Exp / BaseLevelCost) / log(Multiplier))
-# Tuned in GameConfig: XP_BASE, XP_GROWTH
+# --- XP Scaling (polynomial cumulative) ---
+# Per-level cost = XP_BASE * n^XP_EXPONENT, summed cumulatively.
+# Tuned in GameConfig: XP_BASE, XP_EXPONENT
 
 # --- Loadout Limits ---
 # Tuned in GameConfig: MAX_WEAPON_SLOTS, MAX_MODULE_SLOTS
@@ -34,14 +34,13 @@ func _ready() -> void:
 # --- XP & Leveling ---
 
 ## Cumulative XP threshold to reach a given level.
-## Per-level cost = XP_BASE * XP_GROWTH ^ (i ^ XP_CURVE), summed for i = 0 .. level-2.
-## When XP_CURVE = 1.0, this reduces to the standard geometric series.
+## Per-level cost = XP_BASE * n^XP_EXPONENT, summed for n = 1 .. level-1.
 func _xp_threshold(level: int) -> float:
 	if level <= 1:
 		return 0.0
 	var total: float = 0.0
-	for i: int in range(level - 1):
-		total += GameConfig.XP_BASE * pow(GameConfig.XP_GROWTH, pow(float(i), GameConfig.XP_CURVE))
+	for n: int in range(1, level):
+		total += GameConfig.XP_BASE * pow(float(n), GameConfig.XP_EXPONENT)
 	return total
 
 

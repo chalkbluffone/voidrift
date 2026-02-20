@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://debug_xp_graph"]
+
+[ext_resource type="Script" path="res://scripts/ui/debug_xp_graph.gd" id="1_script"]
+
+[node name="DebugXPGraph" type="Control"]
+custom_minimum_size = Vector2(350, 200)
+offset_right = 350.0
+offset_bottom = 200.0
+script = ExtResource("1_script")

@@ -57,6 +57,9 @@ const COLOR_STARDUST: Color = Color(0.6, 0.85, 1.0, 1.0)  # Icy blue for stardus
 const COLOR_WEAPONS: Color = Color(0.2, 1.0, 0.9, 1.0)  # Cyan-ish
 
 const FONT_HEADER: Font = preload("res://assets/fonts/Orbitron-Bold.ttf")
+const DEBUG_XP_GRAPH_SCENE: PackedScene = preload("res://scenes/ui/debug_xp_graph.tscn")
+
+var _debug_xp_graph: Control = null
 
 
 func _ready() -> void:
@@ -67,6 +70,9 @@ func _ready() -> void:
 	
 	# Build captain avatar portrait
 	_build_captain_avatar()
+	
+	# Build debug XP graph (bottom-right, above XP bar)
+	_build_debug_xp_graph()
 	
 	# Connect to service signals
 	ProgressionManager.xp_changed.connect(_on_xp_changed)
@@ -404,6 +410,21 @@ func _on_settings_changed() -> void:
 ## Show or hide the debug overlay based on the current setting.
 func _apply_debug_visibility() -> void:
 	debug_container.visible = SettingsManager.show_debug_overlay
+	if _debug_xp_graph:
+		_debug_xp_graph.visible = SettingsManager.show_debug_overlay
+
+
+## Build the debug XP curve graph in the bottom-right corner above the XP bar.
+func _build_debug_xp_graph() -> void:
+	_debug_xp_graph = DEBUG_XP_GRAPH_SCENE.instantiate()
+	_debug_xp_graph.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	# Position above the XP bar (40px high) with some margin
+	_debug_xp_graph.offset_left = -360.0
+	_debug_xp_graph.offset_right = -10.0
+	_debug_xp_graph.offset_top = -250.0
+	_debug_xp_graph.offset_bottom = -50.0
+	_debug_xp_graph.visible = false
+	add_child(_debug_xp_graph)
 
 
 func _on_hp_changed(current: float, maximum: float) -> void:
