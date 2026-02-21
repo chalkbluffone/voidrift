@@ -499,6 +499,12 @@ func heal(amount: float) -> void:
 	stats.heal(amount)
 
 
+## Apply an external force to the player (e.g., radiation belt push, wind).
+## Force is added to knockback velocity and decays naturally.
+func apply_external_force(force: Vector2) -> void:
+	_knockback_velocity += force
+
+
 # --- Signal Handlers ---
 
 func _on_hp_changed(_current: float, _maximum: float) -> void:

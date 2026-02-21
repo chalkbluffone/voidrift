@@ -59,9 +59,13 @@ const COLOR_WEAPONS: Color = Color(0.2, 1.0, 0.9, 1.0)  # Cyan-ish
 const FONT_HEADER: Font = preload("res://assets/fonts/Orbitron-Bold.ttf")
 const FONT_SWARM: Font = preload("res://assets/fonts/Orbitron-ExtraBold.ttf")
 const DEBUG_XP_GRAPH_SCENE: PackedScene = preload("res://scenes/ui/debug_xp_graph.tscn")
+const MINIMAP_SCENE: PackedScene = preload("res://scenes/ui/minimap.tscn")
+const FullMapOverlayScript: GDScript = preload("res://scripts/ui/full_map_overlay.gd")
 
 var _debug_xp_graph: Control = null
 var _swarm_warning_label: Label = null
+var _minimap: Control = null
+var _full_map_overlay: Control = null
 
 
 func _ready() -> void:
@@ -73,8 +77,14 @@ func _ready() -> void:
 	# Build captain avatar portrait
 	_build_captain_avatar()
 	
-	# Build debug XP graph (bottom-right, above XP bar)
+	# Build debug XP graph (in left debug panel)
 	_build_debug_xp_graph()
+	
+	# Build minimap (bottom-right corner)
+	_build_minimap()
+	
+	# Build full map overlay (shown on Tab/RT)
+	_build_full_map_overlay()
 	
 	# Build swarm warning label (centered at top)
 	_build_swarm_warning_label()
@@ -422,17 +432,65 @@ func _apply_debug_visibility() -> void:
 		_debug_xp_graph.visible = SettingsManager.show_debug_overlay
 
 
-## Build the debug XP curve graph in the bottom-right corner above the XP bar.
+## Build the debug XP curve graph in the bottom-left debug panel.
 func _build_debug_xp_graph() -> void:
 	_debug_xp_graph = DEBUG_XP_GRAPH_SCENE.instantiate()
-	_debug_xp_graph.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	# Position above the XP bar (40px high) with some margin
-	_debug_xp_graph.offset_left = -360.0
-	_debug_xp_graph.offset_right = -10.0
-	_debug_xp_graph.offset_top = -250.0
-	_debug_xp_graph.offset_bottom = -50.0
+	# Size it to fit in the debug panel area
+	_debug_xp_graph.custom_minimum_size = Vector2(300, 180)
+	_debug_xp_graph.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	_debug_xp_graph.visible = false
-	add_child(_debug_xp_graph)
+	# Add to debug container (left side) below other debug labels
+	debug_container.add_child(_debug_xp_graph)
+
+
+## Build the minimap in the bottom-right corner.
+func _build_minimap() -> void:
+	_minimap = MINIMAP_SCENE.instantiate()
+	_minimap.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	# Position above the XP bar with margin
+	var minimap_size: float = GameConfig.MINIMAP_SIZE
+	_minimap.offset_left = -minimap_size - 10.0
+	_minimap.offset_right = -10.0
+	_minimap.offset_top = -minimap_size - 50.0  # Above XP bar
+	_minimap.offset_bottom = -50.0
+	add_child(_minimap)
+	FileLogger.log_info("HUD", "Minimap added to HUD")
+
+
+## Build the full map overlay (shown when holding Tab/RT).
+func _build_full_map_overlay() -> void:
+	_full_map_overlay = Control.new()
+	_full_map_overlay.set_script(FullMapOverlayScript)
+	_full_map_overlay.name = "FullMapOverlay"
+	add_child(_full_map_overlay)
+	
+	# Share fog of war reference from minimap
+	if _minimap and _minimap.has_method("get_fog_of_war"):
+		var fog: RefCounted = _minimap.get_fog_of_war()
+		if fog and _full_map_overlay.has_method("set_fog_of_war"):
+			_full_map_overlay.set_fog_of_war(fog)
+	
+	FileLogger.log_info("HUD", "Full map overlay added to HUD")
+
+
+## Handle input for full map toggle.
+func _unhandled_input(event: InputEvent) -> void:
+	# Tab key or right trigger to show/hide full map
+	if event is InputEventKey:
+		var key_event: InputEventKey = event as InputEventKey
+		if key_event.keycode == KEY_TAB:
+			if key_event.pressed:
+				_full_map_overlay.show_map()
+			else:
+				_full_map_overlay.hide_map()
+	elif event is InputEventJoypadButton:
+		var joy_event: InputEventJoypadButton = event as InputEventJoypadButton
+		# Right trigger (button 7 on most controllers)
+		if joy_event.button_index == JOY_BUTTON_RIGHT_SHOULDER:
+			if joy_event.pressed:
+				_full_map_overlay.show_map()
+			else:
+				_full_map_overlay.hide_map()
 
 
 func _on_hp_changed(current: float, maximum: float) -> void:

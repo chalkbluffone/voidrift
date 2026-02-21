@@ -49,6 +49,7 @@ func _physics_process(delta: float) -> void:
 	_process_movement(delta)
 	move_and_slide()
 	_process_contact_damage(delta)
+	_check_arena_bounds()
 
 
 func _process_contact_damage(delta: float) -> void:
@@ -106,6 +107,15 @@ func _process_movement(_delta: float) -> void:
 
 func _process_knockback(delta: float) -> void:
 	_knockback_velocity = _knockback_velocity.move_toward(Vector2.ZERO, GameConfig.ENEMY_KNOCKBACK_FRICTION * delta * 100)
+
+
+## Despawn enemies that wander too far outside the arena boundary.
+func _check_arena_bounds() -> void:
+	var despawn_radius: float = GameConfig.ARENA_RADIUS + GameConfig.ENEMY_DESPAWN_BUFFER
+	if global_position.length() > despawn_radius:
+		if FileLogger:
+			FileLogger.log_debug("BaseEnemy", "Enemy despawned (outside arena bounds)")
+		queue_free()
 
 
 func take_damage(amount: float, _source: Node = null) -> void:
