@@ -74,7 +74,7 @@ Enemy dies → enemy.died signal
 
 ## Autoload Order (10 autoloads)
 
-1. `GameConfig` — Centralized tuning constants
+1. `GameConfig` — Centralized tuning constants (balance, progression, combat, camera, UI)
 2. `GameSeed` — Deterministic randomness
 3. `DataLoader` — JSON data loading + mod merge
 4. `PersistenceManager` — Save/load persistent data
@@ -117,4 +117,5 @@ Mods load from `user://mods/` and merge with base data.
 - Use signals for cross-system communication (never tight coupling)
 - Use `%UniqueNodeID` syntax for stable node references within scenes
 - All new game content should be data-driven (define in JSON, load via DataLoader)
+- **Never hardcode balance/tuning values in scripts** — add new constants to `GameConfig` and reference `GameConfig.CONSTANT_NAME`
 - When uncertain about Godot 4.6 composition patterns, use the Playwright MCP to verify at `https://docs.godotengine.org/en/stable/`

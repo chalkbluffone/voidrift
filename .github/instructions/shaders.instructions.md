@@ -57,6 +57,9 @@ Use glow/bloom-friendly values (components > 1.0 for HDR glow).
 | `effects/nope_bubble/nope_bubble.gdshader`              | Defensive bubble force field                   |
 | `effects/snarky_comeback/snarky_comeback.gdshader`      | Snarky comeback projectile visual              |
 | `effects/aoe_base/proximity_tax_aura.gdshader`          | Area-of-effect proximity damage aura           |
+| `shaders/ui_upgrade_card_hover.gdshader`                | Card hover/glow edge FX for UI panels          |
+| `shaders/radiation_belt.gdshader`                       | Arena boundary radiation zone (synthwave grid) |
+| `shaders/fog_of_war.gdshader`                           | Minimap fog (neon purple gas with FBM noise)   |
 
 ## Performance Guidelines
 
@@ -64,6 +67,40 @@ Use glow/bloom-friendly values (components > 1.0 for HDR glow).
 - Keep texture lookups minimal per fragment
 - Use `TIME` built-in for animation rather than passing elapsed time as uniform
 - For effects that fade in/out, pass progress as uniform from GDScript
+
+## Godot 4.6 Shader Gotchas
+
+### No `return` in fragment()
+
+Godot 4.6 does **NOT** allow `return` statements in `fragment()` function. Use else blocks or set COLOR directly:
+
+```glsl
+// WRONG - will cause compilation error
+if (some_condition) {
+    COLOR = vec4(0.0);
+    return;  // NOT ALLOWED
+}
+// rest of shader...
+
+// RIGHT - use else block
+if (some_condition) {
+    COLOR = vec4(0.0);
+} else {
+    // rest of shader...
+    COLOR = calculated_color;
+}
+```
+
+### Circle Masks
+
+For circular UI elements (minimap), use smoothstep for soft edges:
+
+```glsl
+vec2 centered = UV - vec2(0.5);
+float dist = length(centered);
+float circle_mask = 1.0 - smoothstep(mask_radius - edge_softness, mask_radius, dist);
+COLOR.a *= circle_mask;
+```
 
 ## Research Protocol
 

@@ -32,12 +32,6 @@ void fragment() {
 	float in_belt = smoothstep(inner_edge - 50.0, inner_edge, dist_from_center) * 
 	                (1.0 - smoothstep(outer_edge, outer_edge + 50.0, dist_from_center));
 	
-	// If not in belt zone, output fully transparent
-	if (in_belt < 0.001) {
-		COLOR = vec4(0.0);
-		return;
-	}
-	
 	// Intensity increases toward outer edge (0 at inner, 1 at outer)
 	float belt_t = clamp((dist_from_center - inner_edge) / belt_width, 0.0, 1.0);
 	
@@ -78,9 +72,10 @@ void fragment() {
 	float alpha = belt_t * belt_t; // Quadratic ramp for softer transition
 	alpha *= (0.5 + pulse * 0.5); // Pulse modulation
 	
-	// Edge fade at outer boundary (in_belt already calculated above)
+	// Edge fade at outer boundary
 	float outer_fade = 1.0 - smoothstep(outer_edge - 50.0, outer_edge + 50.0, dist_from_center);
 	
+	// Final alpha includes in_belt mask (transparent outside belt zone)
 	final_color.a = alpha * in_belt * outer_fade;
 	
 	// Boost RGB for HDR glow

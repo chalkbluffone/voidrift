@@ -10,7 +10,7 @@ signal player_exited_radiation
 
 var _player: Node2D = null
 var _was_in_radiation: bool = false
-var _radiation_visual: ColorRect = null
+var _radiation_visual: Sprite2D = null
 var _radiation_material: ShaderMaterial = null
 
 
@@ -69,17 +69,23 @@ func _find_player() -> void:
 		_player = players[0] as Node2D
 
 
-## Create the radiation belt visual (large ColorRect with shader).
+## Create the radiation belt visual (Sprite2D with shader for proper z-ordering).
 func _setup_visual() -> void:
-	_radiation_visual = ColorRect.new()
+	_radiation_visual = Sprite2D.new()
 	_radiation_visual.name = "RadiationVisual"
 	
-	# Make base color fully transparent (shader handles all rendering)
-	_radiation_visual.color = Color(0, 0, 0, 0)
+	# Create a texture sized for proper UV mapping
+	# Using a small texture but setting region to get proper UV coordinates
+	var rect_size: Vector2 = Vector2(4096, 4096)
+	var tex_size: int = 64  # Small texture, shader does the work
+	var img: Image = Image.create(tex_size, tex_size, false, Image.FORMAT_RGBA8)
+	img.fill(Color.WHITE)
+	var tex: ImageTexture = ImageTexture.create_from_image(img)
+	_radiation_visual.texture = tex
 	
-	# Size to viewport - this will follow the camera and we'll pass world coords
-	# We'll update position each frame to follow the player
-	_radiation_visual.size = Vector2(4096, 4096)  # Large enough to cover screen at any zoom
+	# Scale sprite to desired world size
+	_radiation_visual.scale = rect_size / Vector2(tex_size, tex_size)
+	_radiation_visual.centered = true
 	
 	# Apply radiation belt shader
 	var shader: Shader = preload("res://shaders/radiation_belt.gdshader")
@@ -87,11 +93,11 @@ func _setup_visual() -> void:
 	_radiation_material.shader = shader
 	_radiation_material.set_shader_parameter("arena_radius", GameConfig.ARENA_RADIUS)
 	_radiation_material.set_shader_parameter("belt_width", GameConfig.RADIATION_BELT_WIDTH)
-	_radiation_material.set_shader_parameter("rect_size", _radiation_visual.size)
+	_radiation_material.set_shader_parameter("rect_size", rect_size)
 	_radiation_visual.material = _radiation_material
 	
-	# Set z_index to render behind most game objects but above starfield
-	_radiation_visual.z_index = -50
+	# Set z_index to render above most game elements but below UI
+	_radiation_visual.z_index = 10
 	
 	add_child(_radiation_visual)
 
@@ -100,9 +106,8 @@ func _process(_delta: float) -> void:
 	if _player == null or _radiation_visual == null:
 		return
 	
-	# Keep the ColorRect centered on player so radiation belt renders correctly
-	var half_size: Vector2 = _radiation_visual.size * 0.5
-	_radiation_visual.global_position = _player.global_position - half_size
+	# Keep the Sprite2D centered on player so radiation belt renders correctly
+	_radiation_visual.global_position = _player.global_position
 	
 	# Pass player world position to shader so it can calculate distances from arena center
 	if _radiation_material:

@@ -98,6 +98,199 @@ signal died
 signal damage_taken(amount: int)
 ```
 
+## GameConfig Rule (Mandatory)
+
+**Never hardcode balance or tuning values directly in scripts.** All numeric constants that affect gameplay feel, progression, combat, camera, or UI timing belong in `globals/game_config.gd` (the `GameConfig` autoload).
+
+### How to Reference GameConfig
+
+```gdscript
+# In autoloads (loaded after GameConfig in the autoload order):
+var run_duration: float = GameConfig.DEFAULT_RUN_DURATION
+
+# In scene scripts (use @onready):
+@onready var GameConfig: Node = get_node("/root/GameConfig")
+
+# In class-level var initializers (autoload name is globally available):
+var _targeting_range: float = GameConfig.WEAPON_TARGETING_RANGE
+```
+
+### What Belongs in GameConfig
+
+- Player movement, turn rate
+- Enemy stat scaling, spawn rates, elite thresholds
+- Phase shift timing (duration, cooldown, recharge, i-frames)
+- Knockback forces, damage intervals, i-frame durations
+- Shield recharge timing, diminishing returns formula parameters
+- XP curve parameters, loadout slot counts
+- Camera zoom behavior
+- Upgrade offer weights (weapon vs module frequency)
+- Pickup scatter offsets, credit drop chance/scaling
+- UI timing (game over delay, level-up queue flash)
+- Ability defaults, ship visual fallbacks
+- Rarity weights, weapon tier upgrade parameters
+- Arena/boundary constants, minimap/fog of war settings
+
+### What Does NOT Belong in GameConfig
+
+- Per-weapon or per-ship data → stays in `data/*.json`
+- Purely structural constants (file paths, scene paths, stat names)
+- UI layout sizes set in `.tscn` files
+
+---
+
+## Scaling Systems
+
+### XP Curve (Player Leveling)
+
+Uses polynomial formula for predictable, tunable progression:
+
+```
+threshold(level) = Σ XP_BASE * n^XP_EXPONENT  for n = 1 to level-1
+```
+
+**Constants:** `XP_BASE` (first level cost), `XP_EXPONENT` (curve steepness)
+
+```gdscript
+## Cumulative XP threshold to reach a given level.
+func _xp_threshold(level: int) -> float:
+    if level <= 1:
+        return 0.0
+    var total: float = 0.0
+    for n: int in range(1, level):
+        total += GameConfig.XP_BASE * pow(float(n), GameConfig.XP_EXPONENT)
+    return total
+```
+
+### Enemy Scaling (Over Time)
+
+Enemies scale with run time using polynomial HP and linear damage:
+
+```gdscript
+# HP: polynomial scaling
+var time_hp_mult: float = 1.0 + pow(time_minutes, GameConfig.ENEMY_HP_EXPONENT)
+
+# Damage: linear scaling
+var time_damage_mult: float = 1.0 + (time_minutes * GameConfig.ENEMY_DAMAGE_SCALE_PER_MINUTE)
+```
+
+### Difficulty Stat Integration
+
+Player's `difficulty` stat (0.0 = 0%, 1.0 = 100%) multiplies enemy scaling:
+
+```gdscript
+var diff_hp_mult: float = 1.0 + (difficulty_stat * GameConfig.DIFFICULTY_HP_WEIGHT)
+var diff_damage_mult: float = 1.0 + (difficulty_stat * GameConfig.DIFFICULTY_DAMAGE_WEIGHT)
+var final_hp_mult: float = time_hp_mult * diff_hp_mult
+var final_damage_mult: float = time_damage_mult * diff_damage_mult
+```
+
+Also affects spawn rate in `_get_spawn_interval()`.
+
+### Static XP Drops
+
+XP drops are **not scaled** by time or difficulty:
+
+```gdscript
+enemy.xp_value = GameConfig.ENEMY_XP_ELITE if is_elite else GameConfig.ENEMY_XP_NORMAL
+```
+
+**Constants:** `ENEMY_XP_NORMAL = 1.0`, `ENEMY_XP_ELITE = 3.0`
+
+### Elite Enemies
+
+Rolled per spawn with player's `elite_spawn_rate` modifier:
+
+```gdscript
+func _roll_for_elite() -> bool:
+    var base_chance: float = GameConfig.ELITE_BASE_CHANCE  # 0.05 = 5%
+    var elite_mult: float = _get_player_elite_spawn_rate()
+    return randf() < (base_chance * elite_mult)
+```
+
+Elites get:
+
+- `ELITE_HP_MULT` (3×), `ELITE_DAMAGE_MULT` (2×)
+- Visual: `ELITE_COLOR` (orange tint), `ELITE_SIZE_SCALE` (1.3×)
+- `enemy_type = "elite"` for tracking
+
+### Swarm Events
+
+Temporary spawn rate boost at fixed times during the run:
+
+```gdscript
+const SWARM_TIMES: Array[float] = [240.0, 420.0]  # 4 min, 7 min
+const SWARM_DURATION_MIN: float = 45.0
+const SWARM_DURATION_MAX: float = 60.0
+const SWARM_SPAWN_MULTIPLIER: float = 3.0
+```
+
+Signals: `swarm_warning_started`, `swarm_started`, `swarm_ended`
+
+HUD displays "A MASSIVE FLEET IS INBOUND" during warning phase.
+
+### Arena Boundary System
+
+The play area is a circular arena with a radiation danger zone at the edge:
+
+```gdscript
+const ARENA_RADIUS: float = 4000.0         # Circular play area radius (pixels)
+const RADIATION_BELT_WIDTH: float = 800.0   # Width of radiation zone at edge
+const RADIATION_DAMAGE_PER_SEC: float = 10.0
+const RADIATION_PUSH_FORCE: float = 150.0
+```
+
+Key files:
+
+- `scripts/core/arena_utils.gd` — Static helper for boundary calculations
+- `scripts/systems/arena_boundary.gd` — Visual + damage/push mechanics
+
+```gdscript
+# Check if position is in radiation belt
+func is_in_radiation_belt(pos: Vector2) -> bool:
+    var dist: float = pos.length()
+    var inner_edge: float = GameConfig.ARENA_RADIUS - GameConfig.RADIATION_BELT_WIDTH
+    return dist >= inner_edge and dist <= GameConfig.ARENA_RADIUS
+```
+
+### Fog of War System
+
+Gradient-based fog with smooth dissipating edges around explored areas:
+
+```gdscript
+const FOG_GRID_SIZE: int = 128       # Resolution of fog grid
+const FOG_REVEAL_RADIUS: float = 800.0  # Radius revealed around player
+const FOG_GLOW_INTENSITY: float = 0.6   # Neon glow brightness
+const FOG_OPACITY: float = 0.5          # Overall fog transparency
+```
+
+Key files:
+
+- `scripts/systems/fog_of_war.gd` — RefCounted class managing exploration grid
+- `shaders/fog_of_war.gdshader` — Neon purple gas effect with FBM noise
+
+```gdscript
+# Reveal area around player with gradient edges
+func reveal_radius(world_pos: Vector2, radius: float) -> void:
+    # Creates gradient falloff from full reveal to fog
+    # Uses _fade_cells for smooth transitions
+```
+
+### Minimap System
+
+Circular minimap showing player surroundings with fog overlay:
+
+```gdscript
+const MINIMAP_SIZE: float = 180.0        # Minimap diameter (pixels)
+const MINIMAP_WORLD_RADIUS: float = 1200.0  # World radius visible (controls zoom)
+const FULLMAP_SIZE: float = 800.0        # Full map overlay size
+```
+
+Key files:
+
+- `scripts/ui/minimap.gd` — Minimap rendering (player, enemies, pickups, boundary)
+- `scripts/ui/full_map_overlay.gd` — Large map visible when holding Tab/RT
+
 ---
 
 ## Common Gotchas & Solutions
@@ -151,6 +344,31 @@ Ensure autoload is registered in Project Settings. Use `@onready` to defer until
 
 ```gdscript
 @onready var GameManager: Node = get_node("/root/GameManager")
+```
+
+### `grab_focus()` Triggers Hover/Scale Tweens on Load
+
+Focusable cards with `focus_entered` → hover tween will visually appear hovered the moment `grab_focus()` is called in `_ready()`. The user's mouse is nowhere near the card, but it looks stuck in hover state.
+
+**Fix:** Call `reset_hover()` immediately after `grab_focus()` to kill the tween and reset scale/shader:
+
+```gdscript
+var first_card: PanelContainer = list.get_child(0) as PanelContainer
+if first_card:
+    first_card.grab_focus()
+    CARD_HOVER_FX_SCRIPT.reset_hover(first_card, _card_hover_tweens, first_card.get_instance_id())
+```
+
+### Array.filter() Lambda Typing Error
+
+**Do not use typed parameters in filter/map lambdas.** Causes "Cannot convert argument" errors at runtime:
+
+```gdscript
+# WRONG — crashes at runtime
+_active_instances = _active_instances.filter(func(inst: Node) -> bool: return is_instance_valid(inst))
+
+# RIGHT — use untyped parameter
+_active_instances = _active_instances.filter(func(inst) -> bool: return is_instance_valid(inst))
 ```
 
 ### Projectile/Node Not Visible

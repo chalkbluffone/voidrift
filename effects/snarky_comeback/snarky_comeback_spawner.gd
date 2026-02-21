@@ -38,7 +38,7 @@ func spawn(
 	direction = (nearest.global_position - spawn_pos).normalized()
 
 	# Purge dead references and enforce projectile count limit
-	_active_instances = _active_instances.filter(func(inst: Node) -> bool: return is_instance_valid(inst) and inst.is_inside_tree())
+	_active_instances = _active_instances.filter(func(inst) -> bool: return is_instance_valid(inst) and inst.is_inside_tree())
 	# Update max active from params if available (base + upgrades)
 	var max_count: int = int(params.get("projectile_count", _max_active))
 	if max_count < 1:

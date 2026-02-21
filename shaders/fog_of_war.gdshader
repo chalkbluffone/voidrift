@@ -3,10 +3,12 @@ shader_type canvas_item;
 // Fog of War Shader - neon purple gas effect over unexplored areas.
 // Uses fog texture where black = unexplored, white = explored.
 
-uniform sampler2D fog_texture : filter_nearest, repeat_disable;
+uniform sampler2D fog_texture : filter_linear, repeat_disable;
 uniform float fog_opacity : hint_range(0.0, 1.0) = 0.9;
-uniform float noise_scale : hint_range(1.0, 100.0) = 15.0;
-uniform float noise_speed : hint_range(0.0, 2.0) = 0.4;
+uniform float noise_scale : hint_range(1.0, 100.0) = 12.0;
+uniform float noise_speed : hint_range(0.0, 2.0) = 0.3;
+uniform float fog_edge_blur : hint_range(0.0, 0.2) = 0.04;  // Light blur since texture has gradients
+uniform float edge_dissolve : hint_range(0.0, 0.5) = 0.15;   // Noise-based edge dissolution
 
 // Neon purple/pink synthwave colors
 uniform vec4 fog_color_bright : source_color = vec4(0.8, 0.2, 1.0, 1.0);   // Bright magenta
@@ -46,17 +48,29 @@ float fbm(vec2 p) {
 	return value;
 }
 
+// Sample fog texture with blur for soft edges
+float sample_fog_blurred(vec2 uv, float blur_radius) {
+	float total = 0.0;
+	float weight_sum = 0.0;
+	
+	// 5x5 gaussian-weighted blur for smoother edges
+	for (int x = -2; x <= 2; x++) {
+		for (int y = -2; y <= 2; y++) {
+			vec2 offset = vec2(float(x), float(y)) * blur_radius * 0.5;
+			float weight = 1.0 / (1.0 + length(vec2(float(x), float(y))));
+			total += texture(fog_texture, uv + offset).r * weight;
+			weight_sum += weight;
+		}
+	}
+	
+	return total / weight_sum;
+}
+
 void fragment() {
-	// Sample the fog texture (black = unexplored, white = explored)
-	float explored = texture(fog_texture, UV).r;
+	// Sample the fog texture with blur for soft edges
+	float explored = sample_fog_blurred(UV, fog_edge_blur);
 	
-	// Calculate fog visibility (invert: 1 = show fog, 0 = clear)
-	float fog_visibility = 1.0 - explored;
-	
-	// Apply soft edge transition
-	fog_visibility = smoothstep(0.0, 0.4, fog_visibility);
-	
-	// Add animated noise for gas/plasma effect
+	// Add animated noise for gas/plasma effect (calculate early for edge dissolve)
 	vec2 noise_uv = UV * noise_scale + vec2(TIME * noise_speed, TIME * noise_speed * 0.6);
 	float gas_noise = fbm(noise_uv);
 	
@@ -67,21 +81,28 @@ void fragment() {
 	// Combine noise layers
 	float combined_noise = (gas_noise + gas_noise2) * 0.5;
 	
+	// Calculate fog visibility (invert: 1 = show fog, 0 = clear)
+	float fog_visibility = 1.0 - explored;
+	
+	// Apply noise-based edge dissolution for organic "dissipating" look
+	// Noise pushes the edge in and out, creating wispy tendrils
+	float dissolve_threshold = edge_dissolve * (combined_noise * 2.0 - 1.0);
+	fog_visibility = fog_visibility + dissolve_threshold * 0.4;
+	
+	// Very wide smoothstep for gradual fade (no hard edges)
+	fog_visibility = smoothstep(-0.1, 0.8, fog_visibility);
+	
 	// Pulsing glow effect
 	float pulse = sin(TIME * 2.0 + combined_noise * 4.0) * 0.15 + 0.85;
 	
 	// Mix neon colors based on noise for plasma effect
 	vec4 fog_color = mix(fog_color_glow, fog_color_bright, combined_noise * pulse);
 	
-	// Add bright edges where fog meets explored areas (neon glow at boundaries)
-	float edge_glow = smoothstep(0.3, 0.6, fog_visibility) * (1.0 - smoothstep(0.6, 0.9, fog_visibility));
-	fog_color.rgb += edge_glow * fog_color_bright.rgb * 0.5;
-	
 	// Apply glow intensity
 	fog_color.rgb *= glow_intensity;
 	
-	// Modulate visibility with noise for wispy gas effect
-	float final_visibility = fog_visibility * (0.6 + combined_noise * 0.4);
+	// Simple fade - visibility directly controls alpha, no edge glow ring
+	float final_visibility = fog_visibility * (0.7 + combined_noise * 0.3);
 	
 	// Apply circular mask to clip fog to map bounds
 	vec2 centered = UV - vec2(0.5);

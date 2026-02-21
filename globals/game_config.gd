@@ -342,9 +342,9 @@ const ENEMY_DESPAWN_BUFFER: float = 500.0      # Despawn enemies beyond ARENA_RA
 # MINIMAP / FOG OF WAR / FULL MAP
 # =============================================================================
 const MINIMAP_SIZE: float = 180.0              # Minimap diameter (pixels)
-const MINIMAP_VIEW_RANGE: float = 250.0       # World units visible beyond camera edge
+const MINIMAP_WORLD_RADIUS: float = 600.0     # World radius visible in minimap (smaller = zoomed in)
 const FULLMAP_SIZE: float = 800.0              # Full map overlay diameter (pixels)
 const FOG_GRID_SIZE: int = 128                 # Fog of war grid resolution
-const FOG_REVEAL_RADIUS: float = 600.0         # Radius revealed around player (world units)
+const FOG_REVEAL_RADIUS: float = 800.0         # Radius revealed around player (world units)
 const FOG_GLOW_INTENSITY: float = 0.6          # Brightness of fog neon glow (0.5 = dim, 3.0 = bright)
 const FOG_OPACITY: float = 0.5                 # Fog transparency (0.0 = invisible, 1.0 = fully opaque)

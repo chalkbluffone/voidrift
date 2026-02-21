@@ -20,7 +20,7 @@ const COLOR_EXPLORED: Color = Color(0.15, 0.15, 0.2, 0.6)
 var _player: Node2D = null
 var _fog_of_war: RefCounted = null
 var _minimap_size: float = 180.0
-var _view_range: float = 250.0  # World units visible beyond camera edge
+var _world_radius: float = 1200.0  # World radius visible in minimap
 var _world_to_minimap_scale: float = 0.05
 
 var _fog_overlay: ColorRect = null
@@ -29,12 +29,11 @@ var _fog_material: ShaderMaterial = null
 
 func _ready() -> void:
 	_minimap_size = GameConfig.MINIMAP_SIZE
-	_view_range = GameConfig.MINIMAP_VIEW_RANGE
+	_world_radius = GameConfig.MINIMAP_WORLD_RADIUS
 	
-	# Calculate scale: how many world units fit in minimap
-	# Camera view is roughly 1600px wide at default zoom, plus view_range on each side
-	var total_view_radius: float = 800.0 + _view_range  # Half camera + extra range
-	_world_to_minimap_scale = (_minimap_size * 0.5) / total_view_radius
+	# Calculate scale: world units to minimap pixels
+	# world_radius controls zoom - smaller value = more zoomed in
+	_world_to_minimap_scale = (_minimap_size * 0.5) / _world_radius
 	
 	# Initialize fog of war
 	_fog_of_war = FogOfWarScript.new()
@@ -50,7 +49,7 @@ func _ready() -> void:
 	_setup_fog_overlay()
 	
 	if FileLogger:
-		FileLogger.log_info("Minimap", "Initialized (size: %.0f, view_range: %.0f)" % [_minimap_size, _view_range])
+		FileLogger.log_info("Minimap", "Initialized (size: %.0f, world_radius: %.0f)" % [_minimap_size, _world_radius])
 
 
 func _setup_fog_overlay() -> void:
@@ -86,7 +85,7 @@ func _process(_delta: float) -> void:
 		
 		# Update fog texture for shader
 		if _fog_material:
-			var fog_tex: ImageTexture = _fog_of_war.get_texture(_player.global_position, _view_range + 800.0)
+			var fog_tex: ImageTexture = _fog_of_war.get_texture(_player.global_position, _world_radius)
 			_fog_material.set_shader_parameter("fog_texture", fog_tex)
 	
 	# Redraw every frame

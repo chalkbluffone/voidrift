@@ -145,6 +145,7 @@ func _center_window() -> void:
 	var screen_origin: Vector2i = DisplayServer.screen_get_position(primary_display)
 	var screen_size: Vector2i = DisplayServer.screen_get_size(primary_display)
 	var win_size: Vector2i = DisplayServer.window_get_size()
+	@warning_ignore("integer_division")
 	var pos: Vector2i = screen_origin + (screen_size - win_size) / 2
 	DisplayServer.window_set_position(pos)
 

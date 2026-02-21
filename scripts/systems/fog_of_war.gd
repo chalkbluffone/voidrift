@@ -1,15 +1,17 @@
 class_name FogOfWar
 extends RefCounted
 
-## FogOfWar - Manages binary fog of war state for the minimap.
+## FogOfWar - Manages fog of war state for the minimap.
 ## Tracks which cells of the arena have been explored by the player.
+## Stores gradient values for smooth edge transitions.
 
 var _grid_size: int = 128
 var _cell_size: float = 250.0  # World units per cell
-var _explored: PackedByteArray
+var _explored: PackedByteArray  # 0-255 gradient values
 var _fog_image: Image
 var _fog_texture: ImageTexture
 var _arena_radius: float = 16000.0
+var _fade_cells: int = 3  # Number of cells for edge gradient
 
 
 func _init() -> void:
@@ -62,20 +64,39 @@ func get_texture(center_pos: Vector2, view_radius: float) -> ImageTexture:
 
 
 ## Reveal area around a world position with given radius.
+## Creates gradient edges for smooth fog transitions.
 func reveal_radius(world_pos: Vector2, radius: float) -> void:
 	var center_cell: Vector2i = _world_to_cell(world_pos)
-	var cell_radius: int = ceili(radius / _cell_size)
+	# Extend reveal range to include fade zone
+	var fade_radius: float = float(_fade_cells) * _cell_size
+	var total_radius: float = radius + fade_radius
+	var cell_radius: int = ceili(total_radius / _cell_size)
 	
 	var changed: bool = false
 	
 	for dy: int in range(-cell_radius, cell_radius + 1):
 		for dx: int in range(-cell_radius, cell_radius + 1):
 			var cell: Vector2i = center_cell + Vector2i(dx, dy)
+			if not _is_valid_cell(cell):
+				continue
 			
-			# Check if within circular radius
+			# Calculate distance from reveal center
 			var cell_world: Vector2 = _cell_to_world(cell)
-			if cell_world.distance_to(world_pos) <= radius:
-				if _reveal_cell(cell):
+			var dist: float = cell_world.distance_to(world_pos)
+			
+			# Calculate reveal value based on distance
+			var reveal_value: int = 0
+			if dist <= radius:
+				# Fully revealed
+				reveal_value = 255
+			elif dist <= total_radius:
+				# Gradient fade zone
+				var fade_t: float = (dist - radius) / fade_radius
+				reveal_value = int((1.0 - fade_t) * 255.0)
+			
+			# Only update if new value is higher (never decrease revelation)
+			if reveal_value > 0:
+				if _update_cell_value(cell, reveal_value):
 					changed = true
 	
 	if changed:
@@ -115,25 +136,31 @@ func _is_valid_cell(cell: Vector2i) -> bool:
 	return cell.x >= 0 and cell.x < _grid_size and cell.y >= 0 and cell.y < _grid_size
 
 
-## Get explored state for a cell.
+## Get explored state for a cell (true if any exploration).
 func _get_cell_explored(cell: Vector2i) -> bool:
 	if not _is_valid_cell(cell):
 		return false
-	return _explored[_cell_to_index(cell)] > 0
+	return _explored[_cell_to_index(cell)] > 127  # Consider "explored" if over 50%
 
 
-## Set a cell as explored. Returns true if state changed.
-func _reveal_cell(cell: Vector2i) -> bool:
+## Update a cell's reveal value. Only increases, never decreases. Returns true if changed.
+func _update_cell_value(cell: Vector2i, value: int) -> bool:
 	if not _is_valid_cell(cell):
 		return false
 	
 	var idx: int = _cell_to_index(cell)
-	if _explored[idx] > 0:
-		return false  # Already explored
+	if _explored[idx] >= value:
+		return false  # Already at or above this value
 	
-	_explored[idx] = 255
-	_fog_image.set_pixel(cell.x, cell.y, Color.WHITE)
+	_explored[idx] = value
+	var color_val: float = float(value) / 255.0
+	_fog_image.set_pixel(cell.x, cell.y, Color(color_val, color_val, color_val, 1.0))
 	return true
+
+
+## Set a cell as fully explored. Returns true if state changed.
+func _reveal_cell(cell: Vector2i) -> bool:
+	return _update_cell_value(cell, 255)
 
 
 ## Update the texture from the image.
