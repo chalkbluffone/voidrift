@@ -1,0 +1,51 @@
+[gd_scene load_steps=5 format=3 uid="uid://d2k7xq3m8n5station"]
+
+[ext_resource type="Script" path="res://scripts/systems/space_station.gd" id="1_station"]
+[ext_resource type="Shader" path="res://shaders/station_charge.gdshader" id="2_shader"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_zone"]
+radius = 200.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ring"]
+shader = ExtResource("2_shader")
+shader_parameter/charge = 0.0
+shader_parameter/radius = 0.4
+shader_parameter/thickness = 0.05
+shader_parameter/glow_size = 0.02
+shader_parameter/color_empty = Color(0.2, 0.2, 0.3, 0.5)
+shader_parameter/color_charging = Color(0, 1, 1, 1)
+shader_parameter/color_full = Color(1, 0.08, 0.58, 1)
+shader_parameter/glow_color = Color(0, 1, 1, 0.6)
+shader_parameter/pulse_speed = 2.0
+shader_parameter/pulse_intensity = 0.2
+
+[node name="SpaceStation" type="Node2D"]
+script = ExtResource("1_station")
+
+[node name="Sprite2D" type="Polygon2D" parent="."]
+color = Color(0, 0.8, 0.8, 1)
+polygon = PackedVector2Array(-40, 30, 40, 30, 0, -40)
+
+[node name="ProgressRing" type="ColorRect" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = -250.0
+offset_right = 250.0
+offset_bottom = 250.0
+grow_horizontal = 2
+grow_vertical = 2
+material = SubResource("ShaderMaterial_ring")
+color = Color(1, 1, 1, 1)
+
+[node name="BuffZone" type="Area2D" parent="."]
+collision_layer = 64
+collision_mask = 1
+monitoring = true
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BuffZone"]
+shape = SubResource("CircleShape2D_zone")

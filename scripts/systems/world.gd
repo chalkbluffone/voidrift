@@ -9,6 +9,7 @@ const ArenaBoundaryScene: PackedScene = preload("res://scenes/gameplay/arena_bou
 @onready var FileLogger: Node = get_node_or_null("/root/FileLogger")
 var _stars_near_layer: Node = null
 var _arena_boundary: Node2D = null
+var _station_spawner: StationSpawner = null
 
 func _enter_tree() -> void:
 	randomize()
@@ -28,6 +29,9 @@ func _ready() -> void:
 	
 	# Setup arena boundary
 	_setup_arena_boundary()
+	
+	# Spawn space stations
+	_setup_stations()
 	
 	# Spawn player at random safe position
 	_setup_player_spawn()
@@ -58,6 +62,20 @@ func _setup_player_spawn() -> void:
 		ship.global_position = spawn_pos
 		if FileLogger:
 			FileLogger.log_info("World", "Player spawned at: %s" % spawn_pos)
+
+
+## Spawn space stations around the arena.
+func _setup_stations() -> void:
+	var stations_container: Node2D = get_node_or_null("Stations") as Node2D
+	if not stations_container:
+		stations_container = Node2D.new()
+		stations_container.name = "Stations"
+		add_child(stations_container)
+	
+	_station_spawner = StationSpawner.new()
+	_station_spawner.spawn_stations(stations_container)
+	if FileLogger:
+		FileLogger.log_info("World", "Space stations spawned")
 
 
 func _on_settings_changed() -> void:

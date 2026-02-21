@@ -348,3 +348,91 @@ const FOG_GRID_SIZE: int = 128                 # Fog of war grid resolution
 const FOG_REVEAL_RADIUS: float = 800.0         # Radius revealed around player (world units)
 const FOG_GLOW_INTENSITY: float = 0.6          # Brightness of fog neon glow (0.5 = dim, 3.0 = bright)
 const FOG_OPACITY: float = 0.5                 # Fog transparency (0.0 = invisible, 1.0 = fully opaque)
+
+# =============================================================================
+# SPACE STATIONS (Buff Shrines)
+# =============================================================================
+const STATION_COUNT: int = 15                  # Number of stations spawned per run
+const STATION_ZONE_RADIUS: float = 200.0       # Activation bubble radius (pixels)
+const STATION_CHARGE_TIME: float = 5.0         # Seconds to fully charge when inside zone
+const STATION_DECAY_TIME: float = 5.0          # Seconds for charge to drain to 0 when outside
+const STATION_SPAWN_MIN_RADIUS: float = 500.0  # Minimum distance from arena center
+const STATION_SPAWN_MAX_RADIUS: float = 3200.0 # Maximum distance (inside radiation belt)
+const STATION_MIN_SEPARATION: float = 400.0    # Minimum distance between stations
+const STATION_BUFF_OPTION_COUNT: int = 3       # Number of buff choices shown on completion
+
+# Station rarity weights (no Common — Uncommon to Legendary only)
+const STATION_RARITY_WEIGHTS: Dictionary = {
+	"uncommon": 50.0,
+	"rare": 30.0,
+	"epic": 15.0,
+	"legendary": 5.0,
+}
+
+# Stat bonus ranges per rarity (multiplier values, e.g., 0.04 = +4%)
+const STATION_BUFF_RANGES: Dictionary = {
+	"uncommon": {"min": 0.02, "max": 0.04},
+	"rare": {"min": 0.04, "max": 0.06},
+	"epic": {"min": 0.06, "max": 0.10},
+	"legendary": {"min": 0.10, "max": 0.15},
+}
+
+# All stats that can be buffed by stations (from base_player_stats.json)
+const STATION_BUFFABLE_STATS: Array[String] = [
+	"max_hp", "hp_regen", "overheal", "shield", "armor", "evasion", "lifesteal", "hull_shock",
+	"damage", "crit_chance", "crit_damage", "attack_speed", "projectile_count", "projectile_bounces",
+	"size", "projectile_speed", "duration", "damage_to_elites", "knockback", "movement_speed",
+	"extra_phase_shifts", "phase_shift_distance",
+	"luck", "difficulty",
+	"pickup_range", "xp_gain", "credits_gain", "stardust_gain", "elite_spawn_rate", "powerup_multiplier", "powerup_drop_chance",
+]
+
+# Flat bonus stats (use add_flat_bonus instead of add_multiplier_bonus)
+const STATION_FLAT_STATS: Array[String] = [
+	"max_hp", "hp_regen", "overheal", "shield", "crit_chance", "crit_damage",
+	"projectile_count", "projectile_bounces", "extra_phase_shifts", "phase_shift_distance",
+	"luck", "difficulty",
+]
+
+# Display-friendly stat names for UI
+const STATION_STAT_DISPLAY_NAMES: Dictionary = {
+	"max_hp": "Max HP",
+	"hp_regen": "HP Regen",
+	"overheal": "Overheal",
+	"shield": "Shield",
+	"armor": "Armor",
+	"evasion": "Evasion",
+	"lifesteal": "Lifesteal",
+	"hull_shock": "Hull Shock",
+	"damage": "Damage",
+	"crit_chance": "Crit Chance",
+	"crit_damage": "Crit Damage",
+	"attack_speed": "Attack Speed",
+	"projectile_count": "Projectile Count",
+	"projectile_bounces": "Projectile Bounces",
+	"size": "Size",
+	"projectile_speed": "Projectile Speed",
+	"duration": "Duration",
+	"damage_to_elites": "Elite Damage",
+	"knockback": "Knockback",
+	"movement_speed": "Move Speed",
+	"extra_phase_shifts": "Phase Charges",
+	"phase_shift_distance": "Phase Distance",
+	"luck": "Luck",
+	"difficulty": "Difficulty",
+	"pickup_range": "Pickup Range",
+	"xp_gain": "XP Gain",
+	"credits_gain": "Credit Gain",
+	"stardust_gain": "Stardust Gain",
+	"elite_spawn_rate": "Elite Spawn Rate",
+	"powerup_multiplier": "Powerup Strength",
+	"powerup_drop_chance": "Powerup Drop Rate",
+}
+
+# Rarity colors for station buff UI
+const STATION_RARITY_COLORS: Dictionary = {
+	"uncommon": Color(0.0, 1.0, 0.5, 1.0),    # Green
+	"rare": Color(0.3, 0.6, 1.0, 1.0),        # Blue
+	"epic": Color(0.8, 0.3, 1.0, 1.0),        # Purple
+	"legendary": Color(1.0, 0.8, 0.2, 1.0),   # Gold
+}

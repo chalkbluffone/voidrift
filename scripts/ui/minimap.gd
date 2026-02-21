@@ -11,6 +11,8 @@ const COLOR_BACKGROUND: Color = Color(0.05, 0.05, 0.1, 0.8)
 const COLOR_PLAYER: Color = Color(0.0, 1.0, 0.9, 1.0)  # Cyan
 const COLOR_ENEMY: Color = Color(1.0, 0.2, 0.2, 1.0)   # Red
 const COLOR_PICKUP: Color = Color(0.5, 1.0, 0.3, 1.0)  # Green
+const COLOR_STATION: Color = Color(1.0, 0.8, 0.2, 1.0) # Yellow/Gold
+const COLOR_STATION_DEPLETED: Color = Color(0.4, 0.4, 0.4, 0.5)  # Gray
 const COLOR_BOUNDARY: Color = Color(1.0, 0.0, 1.0, 0.6)  # Pink
 const COLOR_FOG: Color = Color(0.0, 0.0, 0.0, 0.9)
 const COLOR_EXPLORED: Color = Color(0.15, 0.15, 0.2, 0.6)
@@ -107,6 +109,9 @@ func _draw() -> void:
 	# Draw arena boundary ring (relative to player)
 	_draw_arena_boundary(center, radius, player_pos)
 	
+	# Draw stations (always visible on minimap)
+	_draw_stations(center, radius, player_pos)
+	
 	# Draw enemies
 	_draw_enemies(center, radius, player_pos)
 	
@@ -182,6 +187,29 @@ func _draw_pickups(center: Vector2, radius: float, player_pos: Vector2) -> void:
 			continue
 		
 		draw_circle(center + offset, 2.0, COLOR_PICKUP)
+
+
+## Draw space station icons on the minimap (always visible).
+func _draw_stations(center: Vector2, radius: float, player_pos: Vector2) -> void:
+	var stations: Array[Node] = get_tree().get_nodes_in_group("stations")
+	
+	for station: Node in stations:
+		if not station is Node2D:
+			continue
+		var station_2d: Node2D = station as Node2D
+		var offset: Vector2 = (station_2d.global_position - player_pos) * _world_to_minimap_scale
+		
+		# Skip if outside minimap circle
+		if offset.length() > radius - 6.0:
+			continue
+		
+		# Determine color based on depletion state
+		var color: Color = COLOR_STATION
+		if station.has_method("is_depleted") and station.is_depleted():
+			color = COLOR_STATION_DEPLETED
+		
+		# Draw station as a larger dot (size 5) to distinguish from other elements
+		draw_circle(center + offset, 5.0, color)
 
 
 func _find_player() -> void:

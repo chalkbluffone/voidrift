@@ -46,20 +46,21 @@ Use glow/bloom-friendly values (components > 1.0 for HDR glow).
 
 ## Existing Shader Inventory
 
-| File                                                    | Purpose                                        |
-| ------------------------------------------------------- | ---------------------------------------------- |
-| `shaders/starfield.gdshader`                            | Parallax star background with dust layers      |
-| `effects/radiant_arc/radiant_arc.gdshader`              | Arc-shaped melee slash visual (photonic sweep) |
-| `effects/space_napalm/space_napalm_projectile.gdshader` | Napalm projectile trail effect                 |
-| `effects/space_napalm/space_napalm_fire.gdshader`       | Napalm ground fire burn area                   |
-| `effects/ion_wake/ion_wake.gdshader`                    | Ion trail behind ship movement                 |
-| `effects/nikolas_coil/nikolas_coil.gdshader`            | Tesla coil lightning arc effect                |
-| `effects/nope_bubble/nope_bubble.gdshader`              | Defensive bubble force field                   |
-| `effects/snarky_comeback/snarky_comeback.gdshader`      | Snarky comeback projectile visual              |
-| `effects/aoe_base/proximity_tax_aura.gdshader`          | Area-of-effect proximity damage aura           |
-| `shaders/ui_upgrade_card_hover.gdshader`                | Card hover/glow edge FX for UI panels          |
-| `shaders/radiation_belt.gdshader`                       | Arena boundary radiation zone (synthwave grid) |
-| `shaders/fog_of_war.gdshader`                           | Minimap fog (neon purple gas with FBM noise)   |
+| File                                                    | Purpose                                         |
+| ------------------------------------------------------- | ----------------------------------------------- |
+| `shaders/starfield.gdshader`                            | Parallax star background with dust layers       |
+| `effects/radiant_arc/radiant_arc.gdshader`              | Arc-shaped melee slash visual (photonic sweep)  |
+| `effects/space_napalm/space_napalm_projectile.gdshader` | Napalm projectile trail effect                  |
+| `effects/space_napalm/space_napalm_fire.gdshader`       | Napalm ground fire burn area                    |
+| `effects/ion_wake/ion_wake.gdshader`                    | Ion trail behind ship movement                  |
+| `effects/nikolas_coil/nikolas_coil.gdshader`            | Tesla coil lightning arc effect                 |
+| `effects/nope_bubble/nope_bubble.gdshader`              | Defensive bubble force field                    |
+| `effects/snarky_comeback/snarky_comeback.gdshader`      | Snarky comeback projectile visual               |
+| `effects/aoe_base/proximity_tax_aura.gdshader`          | Area-of-effect proximity damage aura            |
+| `shaders/ui_upgrade_card_hover.gdshader`                | Card hover/glow edge FX for UI panels           |
+| `shaders/radiation_belt.gdshader`                       | Arena boundary radiation zone (synthwave grid)  |
+| `shaders/fog_of_war.gdshader`                           | Minimap fog (neon purple gas with FBM noise)    |
+| `shaders/station_charge.gdshader`                       | Station charge progress ring (radial cyan→pink) |
 
 ## Performance Guidelines
 

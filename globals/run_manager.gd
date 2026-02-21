@@ -19,6 +19,7 @@ enum GameState {
 	PLAYING,
 	PAUSED,
 	LEVEL_UP,
+	STATION_BUFF,
 	GAME_OVER
 }
 
@@ -147,7 +148,7 @@ func pause_game() -> void:
 
 
 func resume_game() -> void:
-	if current_state != GameState.PAUSED and current_state != GameState.LEVEL_UP:
+	if current_state != GameState.PAUSED and current_state != GameState.LEVEL_UP and current_state != GameState.STATION_BUFF:
 		return
 	current_state = GameState.PLAYING
 	get_tree().paused = false
@@ -157,6 +158,12 @@ func resume_game() -> void:
 ## Called by ProgressionManager when level up is triggered.
 func set_level_up_state() -> void:
 	current_state = GameState.LEVEL_UP
+	get_tree().paused = true
+
+
+## Called by StationService when station buff selection begins.
+func set_station_buff_state() -> void:
+	current_state = GameState.STATION_BUFF
 	get_tree().paused = true
 
 

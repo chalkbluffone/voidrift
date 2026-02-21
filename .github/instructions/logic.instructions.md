@@ -386,6 +386,7 @@ Checklist: `visible = true`? Texture assigned? `z_index` correct? `scale` non-ze
 | 8     | Enemies     | All enemy types           |
 | 16    | Pickups     | XP pickups, items         |
 | 32    | PickupRange | Ship's PickupRange Area2D |
+| 64    | Stations    | Space station BuffZone    |
 
 ### Collision Masks
 
@@ -396,6 +397,7 @@ Checklist: `visible = true`? Texture assigned? `z_index` correct? `scale` non-ze
 | BaseEnemy   | 8     | 5 (1+4)   | Player + Projectiles      |
 | XPPickup    | 16    | 33 (1+32) | Player body + PickupRange |
 | PickupRange | 32    | 16        | Pickups                   |
+| BuffZone    | 64    | 1         | Player                    |
 
 ---
 

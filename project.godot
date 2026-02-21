@@ -30,6 +30,7 @@ ProgressionManager="*res://globals/progression_manager.gd"
 UpgradeService="*res://globals/upgrade_service.gd"
 FileLogger="*res://globals/file_logger.gd"
 SettingsManager="*res://globals/settings_manager.gd"
+StationService="*res://globals/station_service.gd"
 
 [display]
 

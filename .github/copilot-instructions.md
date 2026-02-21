@@ -83,9 +83,10 @@ tools/          headless_sanity_check.ps1, weapon_test_lab/, build_megabonk_csv.
 5. `RunManager` — Run lifecycle
 6. `ProgressionManager` — XP + level-up
 7. `UpgradeService` — Level-up options
-8. `GameManager` — Legacy facade
-9. `FileLogger` — Debug logging to `debug_log.txt`
-10. `SettingsManager` — Audio/display/monitor selection
+8. `StationService` — Space station buff generation + application
+9. `GameManager` — Legacy facade
+10. `FileLogger` — Debug logging to `debug_log.txt`
+11. `SettingsManager` — Audio/display/monitor selection
 
 ### Data Files (`data/`)
 
@@ -107,32 +108,33 @@ Mods load from `user://mods/` and merge with base data.
 
 All game-balance tuning constants live in the `GameConfig` autoload. **Never hardcode balance values in scripts** — add them to GameConfig and reference `GameConfig.CONSTANT_NAME`.
 
-| Section                    | Key Constants                                                                                                                                            |
-| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Player                     | `PLAYER_BASE_SPEED`, `PLAYER_TURN_RATE`                                                                                                                  |
-| Enemies (Scaling)          | `ENEMY_HP_EXPONENT`, `ENEMY_DAMAGE_SCALE_PER_MINUTE`, `ENEMY_XP_NORMAL`, `ENEMY_XP_ELITE`                                                                |
-| Enemies (Elites)           | `ELITE_BASE_CHANCE`, `ELITE_HP_MULT`, `ELITE_DAMAGE_MULT`, `ELITE_SIZE_SCALE`, `ELITE_COLOR`                                                             |
-| Difficulty Stat            | `DIFFICULTY_HP_WEIGHT`, `DIFFICULTY_DAMAGE_WEIGHT`, `DIFFICULTY_SPAWN_WEIGHT`                                                                            |
-| Spawning                   | `BASE_SPAWN_RATE`, `SPAWN_RATE_GROWTH`, batch/overtime tuning                                                                                            |
-| Swarm Events               | `SWARM_TIMES`, `SWARM_DURATION_MIN`, `SWARM_DURATION_MAX`, `SWARM_SPAWN_MULTIPLIER`, `SWARM_WARNING_DURATION`                                            |
-| Pickups                    | `PICKUP_MAGNET_RADIUS`, `PICKUP_MAGNET_SPEED`, `PICKUP_MAGNET_ACCELERATION`                                                                              |
-| Credits                    | `CREDIT_DROP_CHANCE`, `CREDIT_SCALE_PER_MINUTE`                                                                                                          |
-| Run                        | `DEFAULT_RUN_DURATION`                                                                                                                                   |
-| Level Up / Progression     | `XP_BASE`, `XP_EXPONENT`, `MAX_WEAPON_SLOTS`, `MAX_MODULE_SLOTS`, `LEVEL_UP_OPTION_COUNT`                                                                |
-| Phase Shift                | `PHASE_SHIFT_DURATION`, `PHASE_SHIFT_COOLDOWN`, `PHASE_RECHARGE_TIME`, `POST_PHASE_IFRAMES`                                                              |
-| Survivability / I-Frames   | `DAMAGE_IFRAMES`, `PLAYER_KNOCKBACK_FORCE`, knockback friction, contact damage interval                                                                  |
-| Combat / Stats             | `SHIELD_RECHARGE_DELAY`, `SHIELD_RECHARGE_RATE`, `DIMINISHING_RETURNS_DENOMINATOR`, `STAT_CAPS`, `WEAPON_TARGETING_RANGE`, `PROJECTILE_DEFAULT_LIFETIME` |
-| Camera                     | `CAMERA_BASE_ZOOM`, `CAMERA_SPEED_ZOOM_FACTOR`, `CAMERA_MIN_ZOOM`, `CAMERA_ZOOM_LERP`                                                                    |
-| Upgrade Offer Weights      | `OFFER_WEIGHT_*` — controls weapon vs module frequency at level-up                                                                                       |
-| Loot Freighter             | `FREIGHTER_FLEE_DRIFT_INTERVAL`, `FREIGHTER_FLEE_DRIFT_ANGLE`                                                                                            |
-| Pickup Scatter (cosmetic)  | `PICKUP_SCATTER_XP`, `PICKUP_SCATTER_CREDIT`, `PICKUP_SCATTER_BURST`, `PICKUP_SCATTER_STARDUST`                                                          |
-| UI Cosmetic                | `GAME_OVER_DELAY`, `HUD_AVATAR_SIZE`, `HUD_AVATAR_CROP_FRACTION`                                                                                         |
-| Ability Defaults           | `ABILITY_DEFAULT_COOLDOWN`, `ABILITY_DEFAULT_DURATION`                                                                                                   |
-| Ship Visual Defaults       | `DEFAULT_VISUAL_WIDTH`, `DEFAULT_VISUAL_HEIGHT`, `DEFAULT_COLLISION_RADIUS`                                                                              |
-| Rarity / Upgrade Rolls     | `RARITY_ORDER`, `RARITY_DEFAULT_WEIGHTS`, luck model, tier multipliers                                                                                   |
-| Weapon Tier Upgrade System | `MAX_WEAPON_LEVEL`, `WEAPON_RARITY_FACTORS`, stat pick counts, stat weights                                                                              |
-| Arena / Boundary           | `ARENA_RADIUS`, `RADIATION_BELT_WIDTH`, `RADIATION_DAMAGE_PER_SEC`, `RADIATION_PUSH_FORCE`, spawn/despawn margins                                        |
-| Minimap / Fog of War       | `MINIMAP_SIZE`, `MINIMAP_WORLD_RADIUS`, `FULLMAP_SIZE`, `FOG_GRID_SIZE`, `FOG_REVEAL_RADIUS`, `FOG_GLOW_INTENSITY`, `FOG_OPACITY`                        |
+| Section                    | Key Constants                                                                                                                                                                            |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Player                     | `PLAYER_BASE_SPEED`, `PLAYER_TURN_RATE`                                                                                                                                                  |
+| Enemies (Scaling)          | `ENEMY_HP_EXPONENT`, `ENEMY_DAMAGE_SCALE_PER_MINUTE`, `ENEMY_XP_NORMAL`, `ENEMY_XP_ELITE`                                                                                                |
+| Enemies (Elites)           | `ELITE_BASE_CHANCE`, `ELITE_HP_MULT`, `ELITE_DAMAGE_MULT`, `ELITE_SIZE_SCALE`, `ELITE_COLOR`                                                                                             |
+| Difficulty Stat            | `DIFFICULTY_HP_WEIGHT`, `DIFFICULTY_DAMAGE_WEIGHT`, `DIFFICULTY_SPAWN_WEIGHT`                                                                                                            |
+| Spawning                   | `BASE_SPAWN_RATE`, `SPAWN_RATE_GROWTH`, batch/overtime tuning                                                                                                                            |
+| Swarm Events               | `SWARM_TIMES`, `SWARM_DURATION_MIN`, `SWARM_DURATION_MAX`, `SWARM_SPAWN_MULTIPLIER`, `SWARM_WARNING_DURATION`                                                                            |
+| Pickups                    | `PICKUP_MAGNET_RADIUS`, `PICKUP_MAGNET_SPEED`, `PICKUP_MAGNET_ACCELERATION`                                                                                                              |
+| Credits                    | `CREDIT_DROP_CHANCE`, `CREDIT_SCALE_PER_MINUTE`                                                                                                                                          |
+| Run                        | `DEFAULT_RUN_DURATION`                                                                                                                                                                   |
+| Level Up / Progression     | `XP_BASE`, `XP_EXPONENT`, `MAX_WEAPON_SLOTS`, `MAX_MODULE_SLOTS`, `LEVEL_UP_OPTION_COUNT`                                                                                                |
+| Phase Shift                | `PHASE_SHIFT_DURATION`, `PHASE_SHIFT_COOLDOWN`, `PHASE_RECHARGE_TIME`, `POST_PHASE_IFRAMES`                                                                                              |
+| Survivability / I-Frames   | `DAMAGE_IFRAMES`, `PLAYER_KNOCKBACK_FORCE`, knockback friction, contact damage interval                                                                                                  |
+| Combat / Stats             | `SHIELD_RECHARGE_DELAY`, `SHIELD_RECHARGE_RATE`, `DIMINISHING_RETURNS_DENOMINATOR`, `STAT_CAPS`, `WEAPON_TARGETING_RANGE`, `PROJECTILE_DEFAULT_LIFETIME`                                 |
+| Camera                     | `CAMERA_BASE_ZOOM`, `CAMERA_SPEED_ZOOM_FACTOR`, `CAMERA_MIN_ZOOM`, `CAMERA_ZOOM_LERP`                                                                                                    |
+| Upgrade Offer Weights      | `OFFER_WEIGHT_*` — controls weapon vs module frequency at level-up                                                                                                                       |
+| Loot Freighter             | `FREIGHTER_FLEE_DRIFT_INTERVAL`, `FREIGHTER_FLEE_DRIFT_ANGLE`                                                                                                                            |
+| Pickup Scatter (cosmetic)  | `PICKUP_SCATTER_XP`, `PICKUP_SCATTER_CREDIT`, `PICKUP_SCATTER_BURST`, `PICKUP_SCATTER_STARDUST`                                                                                          |
+| UI Cosmetic                | `GAME_OVER_DELAY`, `HUD_AVATAR_SIZE`, `HUD_AVATAR_CROP_FRACTION`                                                                                                                         |
+| Ability Defaults           | `ABILITY_DEFAULT_COOLDOWN`, `ABILITY_DEFAULT_DURATION`                                                                                                                                   |
+| Ship Visual Defaults       | `DEFAULT_VISUAL_WIDTH`, `DEFAULT_VISUAL_HEIGHT`, `DEFAULT_COLLISION_RADIUS`                                                                                                              |
+| Rarity / Upgrade Rolls     | `RARITY_ORDER`, `RARITY_DEFAULT_WEIGHTS`, luck model, tier multipliers                                                                                                                   |
+| Weapon Tier Upgrade System | `MAX_WEAPON_LEVEL`, `WEAPON_RARITY_FACTORS`, stat pick counts, stat weights                                                                                                              |
+| Arena / Boundary           | `ARENA_RADIUS`, `RADIATION_BELT_WIDTH`, `RADIATION_DAMAGE_PER_SEC`, `RADIATION_PUSH_FORCE`, spawn/despawn margins                                                                        |
+| Minimap / Fog of War       | `MINIMAP_SIZE`, `MINIMAP_WORLD_RADIUS`, `FULLMAP_SIZE`, `FOG_GRID_SIZE`, `FOG_REVEAL_RADIUS`, `FOG_GLOW_INTENSITY`, `FOG_OPACITY`                                                        |
+| Space Stations             | `STATION_COUNT`, `STATION_ZONE_RADIUS`, `STATION_CHARGE_TIME`, `STATION_DECAY_TIME`, `STATION_SPAWN_RADIUS_*`, `STATION_RARITY_WEIGHTS`, `STATION_BUFF_RANGES`, `STATION_BUFFABLE_STATS` |
 
 ---
 
@@ -153,6 +155,7 @@ All game-balance tuning constants live in the `GameConfig` autoload. **Never har
 - **Arena Boundary**: Circular 4000px radius play area with 800px radiation belt at edge. Radiation deals DOT and pushes player back toward center.
 - **Minimap**: 180px circular minimap in bottom-right showing player, enemies, pickups, arena boundary with fog of war overlay.
 - **Full Map Overlay**: 800px map overlay on left side when holding Tab/RT, shows full arena with fog of war.
+- **Space Stations**: 15 stations spawn randomly around arena at run start. Player stands in 200px zone to charge (5s). On completion, choose 1 of 3 stat buffs (Uncommon-Legendary rarity, luck-influenced). One-time use per station. Charge decays slowly when leaving zone.
 
 ---
 
@@ -203,6 +206,17 @@ Core systems, player ship + Phase Shift, 17 weapon effects, enemy spawner with p
 - ArenaUtils helper class for boundary calculations
 - FogOfWar RefCounted class with gradient reveal system
 
+**Session 2026-02-21:**
+
+- Space station system (15 stations per run, seeded random placement)
+- Station charge mechanic (5s charge in 200px zone, slow decay when leaving)
+- Station buff popup UI (3-choice selection matching level-up pattern)
+- StationService autoload (buff generation, rarity rolls with luck influence, buff application)
+- Station charge shader (radial progress ring with cyan→pink synthwave gradient)
+- Minimap station markers (gold active, gray depleted, always visible)
+- Full map station markers (fog-restricted visibility)
+- GameState.STATION_BUFF for pausing during buff selection
+
 ### TODO (Priority)
 
 1. Camera orbit (right stick/mouse)
@@ -230,4 +244,4 @@ Core systems, player ship + Phase Shift, 17 weapon effects, enemy spawner with p
 - [Godot 4 Docs](https://docs.godotengine.org/en/stable/)
 - [GDQuest](https://www.gdquest.com/)
 
-_Last updated: February 20, 2026_
+_Last updated: February 21, 2026_
