@@ -34,8 +34,6 @@ var _burst_timer: float = 0.0
 var _fire_origin: Vector2 = Vector2.ZERO
 var _fire_direction: Vector2 = Vector2.RIGHT
 
-@onready var FileLogger: Node = get_node_or_null("/root/FileLogger")
-
 
 func setup(params: Dictionary) -> TimmyGun:
 	for key in params:
@@ -61,8 +59,6 @@ func fire_from(spawn_pos: Vector2, direction: Vector2, stats_component: Node = n
 	_spawn_bullet(_fire_origin, _fire_direction, bounce_count)
 	_burst_queue = burst_count - 1
 	_burst_timer = burst_interval
-
-	FileLogger.log_info("TimmyGun", "Burst started: %d rounds from %s dir=%s bounces=%d" % [burst_count, str(spawn_pos), str(_fire_direction), bounce_count])
 
 
 func _process(delta: float) -> void:

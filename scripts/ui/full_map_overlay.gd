@@ -13,11 +13,8 @@ const COLOR_PLAYER: Color = Color(0.0, 1.0, 0.9, 1.0)  # Cyan
 const COLOR_ENEMY: Color = Color(1.0, 0.2, 0.2, 1.0)   # Red
 const COLOR_PICKUP: Color = Color(0.5, 1.0, 0.3, 1.0)  # Green
 const COLOR_STATION: Color = Color(1.0, 0.8, 0.2, 1.0) # Yellow/Gold
-const COLOR_STATION_DEPLETED: Color = Color(0.4, 0.4, 0.4, 0.5)  # Gray
 const COLOR_BOUNDARY: Color = Color(1.0, 0.0, 1.0, 0.8)  # Pink
 const COLOR_GRID: Color = Color(0.1, 0.1, 0.15, 0.5)
-
-@onready var FileLogger: Node = get_node_or_null("/root/FileLogger")
 
 var _player: Node2D = null
 var _fog_of_war: FogOfWar = null  # Reference from minimap (shared)
@@ -59,9 +56,6 @@ func _ready() -> void:
 	
 	# Start hidden
 	visible = false
-	
-	if FileLogger:
-		FileLogger.log_info("FullMapOverlay", "Initialized (size: %.0f)" % _map_size)
 
 
 func _setup_fog_overlay() -> void:
@@ -214,17 +208,16 @@ func _draw_stations(center: Vector2) -> void:
 		if offset.length() > radius - 6.0:
 			continue
 		
+		# Skip depleted stations — they disappear from the map
+		if station.has_method("is_depleted") and station.is_depleted():
+			continue
+		
 		# Skip if in unexplored area (fog of war restriction for full map)
 		if _fog_of_war and not _fog_of_war.is_explored(station_2d.global_position):
 			continue
 		
-		# Determine color based on depletion state
-		var color: Color = COLOR_STATION
-		if station.has_method("is_depleted") and station.is_depleted():
-			color = COLOR_STATION_DEPLETED
-		
 		# Draw station as a larger dot (size 6) to distinguish from other elements
-		draw_circle(center + offset, 6.0, color)
+		draw_circle(center + offset, 6.0, COLOR_STATION)
 
 
 ## Show the full map overlay.
@@ -234,9 +227,6 @@ func show_map() -> void:
 	
 	_is_visible = true
 	visible = true
-	
-	if FileLogger:
-		FileLogger.log_debug("FullMapOverlay", "Showing full map")
 
 
 ## Hide the full map overlay.
@@ -246,9 +236,6 @@ func hide_map() -> void:
 	
 	_is_visible = false
 	visible = false
-	
-	if FileLogger:
-		FileLogger.log_debug("FullMapOverlay", "Hiding full map")
 
 
 ## Set the fog of war reference (shared with minimap).

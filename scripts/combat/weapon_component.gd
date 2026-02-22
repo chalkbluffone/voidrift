@@ -27,7 +27,6 @@ var _spawners: WeaponSpawnerCache = WeaponSpawnerCache.new()
 
 @onready var DataLoader: Node = get_node_or_null("/root/DataLoader")
 @onready var RunManager: Node = get_node_or_null("/root/RunManager")
-@onready var FileLogger: Node = get_node_or_null("/root/FileLogger")
 
 
 # ---------------------------------------------------------------------------
@@ -35,11 +34,9 @@ var _spawners: WeaponSpawnerCache = WeaponSpawnerCache.new()
 # ---------------------------------------------------------------------------
 
 func _ready() -> void:
-	FileLogger.log_info("WeaponComponent", "Initializing...")
 	var parent: Node = get_parent()
 	if parent.has_node("StatsComponent"):
 		stats_component = parent.get_node("StatsComponent")
-		FileLogger.log_info("WeaponComponent", "Found StatsComponent")
 
 
 func _process(delta: float) -> void:
@@ -114,7 +111,6 @@ func _fire_projectile_weapon(weapon_id: String, data: Dictionary, _level: int) -
 	## Coil, etc.) are routed through the spawner system instead.
 	var spawner_path: String = data.get("spawner", "")
 	if not spawner_path.is_empty() and not spawner_path.begins_with("res://effects/projectile_base/"):
-		FileLogger.log_info("WeaponComponent", "Delegating %s to custom spawner: %s" % [weapon_id, spawner_path])
 		_fire_projectile_via_spawner(weapon_id, data)
 		return
 
@@ -171,7 +167,6 @@ func _fire_projectile_via_spawner(weapon_id: String, data: Dictionary) -> void:
 	## apply consistently.
 	var parent: Node = get_parent()
 	if not parent:
-		FileLogger.log_warn("WeaponComponent", "_fire_projectile_via_spawner: no parent for %s" % weapon_id)
 		return
 	var config: Dictionary = WeaponDataFlattener.flatten(data).flat
 
@@ -213,14 +208,11 @@ func _fire_projectile_via_spawner(weapon_id: String, data: Dictionary) -> void:
 	config["crit_chance"] = float(config.get("crit_chance", 0.0)) + _inventory.get_weapon_flat(weapon_id, StatsComponentScript.STAT_CRIT_CHANCE)
 	config["crit_damage"] = float(config.get("crit_damage", 0.0)) + _inventory.get_weapon_flat(weapon_id, StatsComponentScript.STAT_CRIT_DAMAGE)
 
-	FileLogger.log_info("WeaponComponent", "Spawner config for %s: %d keys" % [weapon_id, config.size()])
 	var spawner: Object = _spawners.get_or_create_spawner(weapon_id, data, get_tree().current_scene)
 	if spawner == null:
-		FileLogger.log_warn("WeaponComponent", "No spawner for custom projectile weapon: %s" % weapon_id)
 		return
 
 	if not spawner.has_method("spawn"):
-		FileLogger.log_warn("WeaponComponent", "Spawner missing spawn() for weapon: %s" % weapon_id)
 		return
 
 	var spawn_arg_count: int = WeaponSpawnerCache.get_spawner_arg_count(spawner, 3)
@@ -275,8 +267,6 @@ func _fire_orbit_weapon(weapon_id: String, data: Dictionary, _level: int) -> voi
 		var result: Variant = spawner.spawn(parent.global_position, config, parent)
 		if result:
 			weapon_fired.emit(weapon_id, [result])
-	else:
-		FileLogger.log_warn("WeaponComponent", "No spawner for orbit weapon: %s" % weapon_id)
 
 
 func _fire_area_weapon(weapon_id: String, data: Dictionary, _level: int) -> void:
@@ -318,8 +308,6 @@ func _fire_area_weapon(weapon_id: String, data: Dictionary, _level: int) -> void
 		var result: Variant = spawner.spawn(parent.global_position, config, parent)
 		if result:
 			weapon_fired.emit(weapon_id, [result])
-	else:
-		FileLogger.log_warn("WeaponComponent", "No spawner for area weapon: %s" % weapon_id)
 
 
 func _fire_beam_weapon(weapon_id: String, data: Dictionary, _level: int) -> void:
@@ -333,15 +321,11 @@ func _fire_beam_weapon(weapon_id: String, data: Dictionary, _level: int) -> void
 		var result: Variant = spawner.spawn(parent.global_position, direction, config, parent)
 		if result:
 			weapon_fired.emit(weapon_id, [result])
-	else:
-		FileLogger.log_warn("WeaponComponent", "No spawner for beam weapon: %s" % weapon_id)
 
 
 func _fire_melee_weapon(weapon_id: String, data: Dictionary, _level: int) -> void:
-	FileLogger.log_info("WeaponComponent", "Firing melee weapon: %s" % weapon_id)
 	var parent: Node2D = get_parent()
 	if not parent:
-		FileLogger.log_warn("WeaponComponent", "No parent for melee weapon")
 		return
 	var config: Dictionary = WeaponDataFlattener.flatten(data).flat
 	_fire_via_spawner(weapon_id, config, parent)
@@ -513,11 +497,6 @@ func equip_weapon(weapon_id: String) -> bool:
 	var weapon_type: String = weapon_data.get("type", "projectile")
 	var is_new: bool = _inventory.equip_weapon(weapon_id, weapon_data)
 
-	if is_new:
-		FileLogger.log_info("WeaponComponent", "Equipping weapon: %s (type: %s)" % [weapon_id, weapon_type])
-		FileLogger.log_info("WeaponComponent", "Equipped weapon: %s" % weapon_id)
-		FileLogger.log_data("WeaponComponent", "Weapon data", weapon_data)
-
 	weapon_equipped.emit(weapon_id)
 	return true
 
@@ -557,8 +536,6 @@ func get_equipped_weapon_summaries() -> Array[Dictionary]:
 
 func sync_from_run_data() -> void:
 	## Sync equipped weapons from run data.
-	FileLogger.log_info("WeaponComponent", "sync_from_run_data called, weapons: %s" % str(RunManager.run_data.weapons))
 	for weapon_id in RunManager.run_data.weapons:
 		if not has_weapon(weapon_id):
-			FileLogger.log_info("WeaponComponent", "Equipping weapon from run_data: %s" % weapon_id)
 			equip_weapon(weapon_id)

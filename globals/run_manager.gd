@@ -35,7 +35,6 @@ var run_data: Dictionary = {}
 var _player: Node = null
 
 @onready var DataLoader: Node = get_node("/root/DataLoader")
-@onready var FileLogger: Node = get_node("/root/FileLogger")
 
 
 func _ready() -> void:

@@ -27,7 +27,8 @@ radius = 24.083189
 radius = 40.0
 
 [node name="Ship" type="CharacterBody2D" unique_id=845647578 groups=["player"]]
-collision_mask = 8
+collision_mask = 10
+z_index = 10
 script = ExtResource("1_2gnfn")
 
 [node name="StatsComponent" type="Node" parent="." unique_id=1671158239]

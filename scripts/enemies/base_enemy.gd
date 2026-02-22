@@ -21,7 +21,6 @@ var enemy_type: String = "normal"  # "normal", "elite", "boss"
 var _target: Node2D = null
 var _hitbox: Area2D = null
 @onready var RunManager: Node = get_node("/root/RunManager")
-@onready var FileLogger: Node = get_node("/root/FileLogger")
 @onready var GameConfig: Node = get_node("/root/GameConfig")
 
 # --- Knockback ---
@@ -113,8 +112,6 @@ func _process_knockback(delta: float) -> void:
 func _check_arena_bounds() -> void:
 	var despawn_radius: float = GameConfig.ARENA_RADIUS + GameConfig.ENEMY_DESPAWN_BUFFER
 	if global_position.length() > despawn_radius:
-		if FileLogger:
-			FileLogger.log_debug("BaseEnemy", "Enemy despawned (outside arena bounds)")
 		queue_free()
 
 

@@ -30,7 +30,6 @@ const CARD_HOVER_FX_SCRIPT: Script = preload("res://scripts/ui/card_hover_fx.gd"
 
 @onready var DataLoader: Node = get_node("/root/DataLoader")
 @onready var RunManager: Node = get_node("/root/RunManager")
-@onready var FileLogger: Node = get_node_or_null("/root/FileLogger")
 
 # Containers populated in _ready
 @onready var ship_list: VBoxContainer = $MarginContainer/VBoxContainer/ContentRow/ShipColumn/ShipScroll/ShipPadding/ShipList
@@ -49,9 +48,6 @@ var _button_hover_tweens: Dictionary = {}
 
 
 func _ready() -> void:
-	if FileLogger:
-		FileLogger.log_info("ShipSelect", "Initializing ship & captain selection screen")
-
 	launch_button.pressed.connect(_on_launch_pressed)
 	back_button.pressed.connect(_on_back_pressed)
 
@@ -461,8 +457,6 @@ func _set_loadout_card_hover_state(card: PanelContainer, hovered: bool) -> void:
 
 func _select_ship(ship_id: String) -> void:
 	_selected_ship_id = ship_id
-	if FileLogger:
-		FileLogger.log_info("ShipSelect", "Selected ship: %s" % ship_id)
 	# Update card highlights
 	for id: String in _ship_cards:
 		var card: PanelContainer = _ship_cards[id]
@@ -472,8 +466,6 @@ func _select_ship(ship_id: String) -> void:
 
 func _select_captain(captain_id: String) -> void:
 	_selected_captain_id = captain_id
-	if FileLogger:
-		FileLogger.log_info("ShipSelect", "Selected captain: %s" % captain_id)
 	for id: String in _captain_cards:
 		var card: PanelContainer = _captain_cards[id]
 		_style_card(card, id == _selected_captain_id)
@@ -504,8 +496,6 @@ func _update_launch_button_style() -> void:
 func _on_launch_pressed() -> void:
 	if _selected_ship_id == "" or _selected_captain_id == "":
 		return
-	if FileLogger:
-		FileLogger.log_info("ShipSelect", "Launching run — Ship: %s, Captain: %s" % [_selected_ship_id, _selected_captain_id])
 	RunManager.start_run(_selected_ship_id, _selected_captain_id)
 
 

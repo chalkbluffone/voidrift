@@ -40,7 +40,6 @@ var vram_label: Label = null
 @onready var SettingsManager: Node = get_node("/root/SettingsManager")
 @onready var DataLoader: Node = get_node("/root/DataLoader")
 @onready var GameConfig: Node = get_node("/root/GameConfig")
-@onready var FileLogger: Node = get_node("/root/FileLogger")
 
 var _player: Node = null
 var _level_tween: Tween = null
@@ -69,8 +68,6 @@ var _full_map_overlay: Control = null
 
 
 func _ready() -> void:
-	FileLogger.log_info("HUD", "Initializing HUD...")
-	
 	# Apply synthwave colors
 	_apply_synthwave_theme()
 	
@@ -305,8 +302,6 @@ void fragment() {
 	border_mat.shader = border_shader
 	border_rect.material = border_mat
 
-	FileLogger.log_info("HUD", "Captain avatar loaded: %s (aspect: %.2f)" % [sprite_path, tex_aspect])
-
 
 func _process(_delta: float) -> void:
 	# Update debug stats (only when visible)
@@ -336,7 +331,6 @@ func _find_player() -> void:
 	var players: Array[Node] = get_tree().get_nodes_in_group("player")
 	if players.size() > 0:
 		_player = players[0]
-		FileLogger.log_info("HUD", "Found player: %s" % _player.name)
 		
 		# Hook weapon events
 		if _player.has_node("WeaponComponent"):
@@ -454,7 +448,6 @@ func _build_minimap() -> void:
 	_minimap.offset_top = -minimap_size - 50.0  # Above XP bar
 	_minimap.offset_bottom = -50.0
 	add_child(_minimap)
-	FileLogger.log_info("HUD", "Minimap added to HUD")
 
 
 ## Build the full map overlay (shown when holding Tab/RT).
@@ -469,8 +462,6 @@ func _build_full_map_overlay() -> void:
 		var fog: RefCounted = _minimap.get_fog_of_war()
 		if fog and _full_map_overlay.has_method("set_fog_of_war"):
 			_full_map_overlay.set_fog_of_war(fog)
-	
-	FileLogger.log_info("HUD", "Full map overlay added to HUD")
 
 
 ## Handle input for full map toggle.
@@ -664,7 +655,6 @@ func _connect_enemy_spawner_signals() -> void:
 			spawner.swarm_warning_started.connect(_on_swarm_warning_started)
 		if spawner.has_signal("swarm_started"):
 			spawner.swarm_started.connect(_on_swarm_started)
-		FileLogger.log_info("HUD", "Connected to EnemySpawner swarm signals")
 	else:
 		# Try finding by class/script name
 		var spawner: Node = _find_enemy_spawner()
@@ -673,7 +663,6 @@ func _connect_enemy_spawner_signals() -> void:
 				spawner.swarm_warning_started.connect(_on_swarm_warning_started)
 			if spawner.has_signal("swarm_started"):
 				spawner.swarm_started.connect(_on_swarm_started)
-			FileLogger.log_info("HUD", "Connected to EnemySpawner (by search)")
 
 
 ## Find enemy spawner in the scene tree.
@@ -695,7 +684,6 @@ func _find_enemy_spawner() -> Node:
 func _on_swarm_warning_started() -> void:
 	if _swarm_warning_label:
 		_swarm_warning_label.visible = true
-		FileLogger.log_info("HUD", "Swarm warning displayed")
 
 
 ## Called when swarm actually starts — hide the warning.

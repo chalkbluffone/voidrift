@@ -354,6 +354,7 @@ const FOG_OPACITY: float = 0.5                 # Fog transparency (0.0 = invisib
 # =============================================================================
 const STATION_COUNT: int = 15                  # Number of stations spawned per run
 const STATION_ZONE_RADIUS: float = 200.0       # Activation bubble radius (pixels)
+const STATION_COLLISION_RADIUS: float = 50.0   # Solid collision radius for station center
 const STATION_CHARGE_TIME: float = 5.0         # Seconds to fully charge when inside zone
 const STATION_DECAY_TIME: float = 5.0          # Seconds for charge to drain to 0 when outside
 const STATION_SPAWN_MIN_RADIUS: float = 500.0  # Minimum distance from arena center

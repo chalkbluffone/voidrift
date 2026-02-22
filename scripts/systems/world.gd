@@ -6,7 +6,6 @@ extends Node2D
 const ArenaBoundaryScene: PackedScene = preload("res://scenes/gameplay/arena_boundary.tscn")
 
 @onready var _settings: Node = get_node("/root/SettingsManager")
-@onready var FileLogger: Node = get_node_or_null("/root/FileLogger")
 var _stars_near_layer: Node = null
 var _arena_boundary: Node2D = null
 var _station_spawner: StationSpawner = null
@@ -50,8 +49,6 @@ func _setup_arena_boundary() -> void:
 	# Insert before Ship so it renders behind gameplay elements
 	add_child(_arena_boundary)
 	move_child(_arena_boundary, 1)  # After Starfield
-	if FileLogger:
-		FileLogger.log_info("World", "Arena boundary added at origin")
 
 
 ## Move the player ship to a random safe spawn position.
@@ -60,8 +57,6 @@ func _setup_player_spawn() -> void:
 	if ship:
 		var spawn_pos: Vector2 = ArenaUtils.get_random_spawn_position()
 		ship.global_position = spawn_pos
-		if FileLogger:
-			FileLogger.log_info("World", "Player spawned at: %s" % spawn_pos)
 
 
 ## Spawn space stations around the arena.
@@ -74,8 +69,6 @@ func _setup_stations() -> void:
 	
 	_station_spawner = StationSpawner.new()
 	_station_spawner.spawn_stations(stations_container)
-	if FileLogger:
-		FileLogger.log_info("World", "Space stations spawned")
 
 
 func _on_settings_changed() -> void:

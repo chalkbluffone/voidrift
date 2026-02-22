@@ -5,13 +5,10 @@ class_name SpinCycleSpawner
 
 var _parent_node: Node
 var _active_spin_cycle: Node2D = null
-var FileLogger: Node = null
 
 
 func _init(parent: Node) -> void:
 	_parent_node = parent
-	if _parent_node:
-		FileLogger = _parent_node.get_node_or_null("/root/FileLogger")
 
 
 func spawn(
@@ -24,8 +21,6 @@ func spawn(
 			_active_spin_cycle.setup(params)
 		if follow_source and _active_spin_cycle.has_method("set_follow_source"):
 			_active_spin_cycle.set_follow_source(follow_source)
-		if FileLogger:
-			FileLogger.log_debug("SpinCycleSpawner", "Updated active Spin Cycle instance")
 		return _active_spin_cycle
 
 	var scene: PackedScene = load("res://effects/spin_cycle/SpinCycle.tscn")
@@ -49,8 +44,6 @@ func spawn(
 
 	instance.tree_exiting.connect(_on_spin_cycle_destroyed)
 	_active_spin_cycle = instance
-	if FileLogger:
-		FileLogger.log_info("SpinCycleSpawner", "Spawned Spin Cycle instance")
 	return instance
 
 

@@ -7,7 +7,6 @@ signal hit_enemy(enemy: Node2D, damage_info: Dictionary)
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var RunManager: Node = get_node("/root/RunManager")
-@onready var FileLogger: Node = get_node("/root/FileLogger")
 
 var damage: float = 10.0
 var direction: Vector2 = Vector2.RIGHT
@@ -36,12 +35,6 @@ func _ready() -> void:
 	
 	# Set rotation to match direction
 	rotation = direction.angle()
-	
-	# Debug sprite texture info
-	var tex_info: String = "null"
-	if sprite.texture:
-		tex_info = "size=%s" % sprite.texture.get_size()
-	FileLogger.log_debug("Projectile", "Ready at %s scale: %s visible: %s sprite_tex: %s z_index: %d" % [global_position, scale, visible, tex_info, z_index])
 
 
 func _process(delta: float) -> void:

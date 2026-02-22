@@ -11,7 +11,6 @@ var _is_attracted: bool = false
 
 @onready var ProgressionManager: Node = get_node("/root/ProgressionManager")
 @onready var GameConfig: Node = get_node("/root/GameConfig")
-@onready var FileLogger: Node = get_node("/root/FileLogger")
 
 
 func _ready() -> void:

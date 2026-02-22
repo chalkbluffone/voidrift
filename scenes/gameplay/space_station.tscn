@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://d2k7xq3m8n5station"]
+[gd_scene load_steps=6 format=3 uid="uid://d2k7xq3m8n5station"]
 
 [ext_resource type="Script" path="res://scripts/systems/space_station.gd" id="1_station"]
 [ext_resource type="Shader" path="res://shaders/station_charge.gdshader" id="2_shader"]
@@ -6,7 +6,11 @@
 [sub_resource type="CircleShape2D" id="CircleShape2D_zone"]
 radius = 200.0
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
+radius = 50.0
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ring"]
+resource_local_to_scene = true
 shader = ExtResource("2_shader")
 shader_parameter/charge = 0.0
 shader_parameter/radius = 0.4
@@ -49,3 +53,10 @@ monitorable = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="BuffZone"]
 shape = SubResource("CircleShape2D_zone")
+
+[node name="CollisionBody" type="StaticBody2D" parent="."]
+collision_layer = 2
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CollisionBody"]
+shape = SubResource("CircleShape2D_body")

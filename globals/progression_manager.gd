@@ -24,7 +24,6 @@ var _pending_level_ups: int = 0
 @onready var RunManager: Node = get_node("/root/RunManager")
 @onready var UpgradeService: Node = get_node("/root/UpgradeService")
 @onready var PersistenceManager: Node = get_node("/root/PersistenceManager")
-@onready var FileLogger: Node = get_node("/root/FileLogger")
 
 
 func _ready() -> void:
@@ -75,7 +74,6 @@ func add_xp(amount: float) -> void:
 	if levels_gained > 0:
 		# Queue all but the first; trigger the first immediately
 		_pending_level_ups += levels_gained - 1
-		FileLogger.log_info("ProgressionManager", "Gained %d level(s), %d queued" % [levels_gained, _pending_level_ups])
 		_level_up()
 
 	_emit_xp_changed()
@@ -85,8 +83,6 @@ func _level_up() -> void:
 	RunManager.run_data.level += 1
 	RunManager.run_data.xp_required = _xp_threshold(RunManager.run_data.level + 1)
 	
-	FileLogger.log_info("ProgressionManager", "LEVEL UP! Now level %d (next threshold: %.0f)" % [RunManager.run_data.level, RunManager.run_data.xp_required])
-	
 	# Generate upgrade options via UpgradeService
 	var upgrades: Array = UpgradeService.generate_level_up_options()
 	
@@ -94,7 +90,7 @@ func _level_up() -> void:
 		RunManager.set_level_up_state()
 		level_up_triggered.emit(RunManager.run_data.level, upgrades)
 	else:
-		FileLogger.log_warn("ProgressionManager", "No upgrades available!")
+		push_warning("ProgressionManager: No upgrades available!")
 
 
 ## Apply the selected level up option.
@@ -132,7 +128,6 @@ func advance_level_up_queue() -> void:
 	if _pending_level_ups <= 0:
 		return
 	_pending_level_ups -= 1
-	FileLogger.log_info("ProgressionManager", "Advancing queue — %d remaining" % _pending_level_ups)
 	_level_up()
 
 

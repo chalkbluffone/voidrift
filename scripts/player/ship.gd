@@ -22,7 +22,6 @@ const StatsComponentScript: GDScript = preload("res://scripts/core/stats_compone
 @onready var sprite: AnimatedSprite2D = $Sprite2D
 @onready var RunManager: Node = get_node_or_null("/root/RunManager")
 @onready var ProgressionManager: Node = get_node_or_null("/root/ProgressionManager")
-@onready var FileLogger: Node = get_node_or_null("/root/FileLogger")
 
 # --- Test Mode ---
 ## When true, skips run registration and auto-weapon equip
@@ -61,9 +60,6 @@ var _captain_ability: Node = null
 
 
 func _ready() -> void:
-	if FileLogger:
-		FileLogger.log_info("Ship", "Initializing player ship... (test_mode=%s)" % test_mode)
-	
 	# Set base speed from config
 	var config: Node = get_node_or_null("/root/GameConfig")
 	if config:
@@ -138,7 +134,7 @@ func _apply_ship_sprite(ship_data: Dictionary) -> void:
 		return
 	var tex: Texture2D = load(sprite_path) as Texture2D
 	if tex == null:
-		FileLogger.log_warn("Ship", "Failed to load ship sprite: %s" % sprite_path)
+		push_warning("Ship: Failed to load ship sprite: %s" % sprite_path)
 		return
 	var frames: SpriteFrames = SpriteFrames.new()
 	frames.add_frame(&"default", tex)
@@ -152,7 +148,6 @@ func _apply_ship_sprite(ship_data: Dictionary) -> void:
 	var tex_size: Vector2 = tex.get_size()
 	if tex_size.x > 0.0 and tex_size.y > 0.0:
 		sprite.scale = Vector2(target_w / tex_size.x, target_h / tex_size.y)
-	FileLogger.log_info("Ship", "Applied ship sprite: %s (visual: %.0fx%.0f, scale: %s)" % [sprite_path, target_w, target_h, sprite.scale])
 
 
 ## Apply per-ship collision shape from JSON data (circle or capsule).
@@ -169,12 +164,10 @@ func _apply_collision_shape(ship_data: Dictionary) -> void:
 			capsule.radius = col_w * 0.5
 			capsule.height = col_h
 			collision_shape.shape = capsule
-			FileLogger.log_info("Ship", "Collision: capsule (radius=%.1f, height=%.1f)" % [capsule.radius, capsule.height])
 		_:
 			var circle: CircleShape2D = CircleShape2D.new()
 			circle.radius = col_w * 0.5
 			collision_shape.shape = circle
-			FileLogger.log_info("Ship", "Collision: circle (radius=%.1f)" % circle.radius)
 
 
 ## Create and configure the captain's active ability from JSON data.
@@ -215,10 +208,8 @@ func _setup_captain_ability(captain_data: Dictionary) -> void:
 
 
 func _deferred_init() -> void:
-	FileLogger.log_info("Ship", "Running deferred init...")
 	# Initialize from loadout data (deferred to ensure @onready vars ready)
 	if not RunManager.run_data.ship_data.is_empty():
-		FileLogger.log_info("Ship", "Initializing from loadout data")
 		_initialize_from_loadout(
 			RunManager.run_data.ship_data,
 			RunManager.run_data.captain_data,
@@ -226,7 +217,6 @@ func _deferred_init() -> void:
 		)
 	else:
 		# Default setup for testing without full run
-		FileLogger.log_info("Ship", "No loadout data, setting up default weapons")
 		_setup_default_weapons()
 
 
@@ -240,21 +230,15 @@ func _update_pickup_range() -> void:
 	var config: Node = get_node_or_null("/root/GameConfig")
 	var pickup_area: Area2D = get_node_or_null("PickupRange")
 	if not pickup_area or not config:
-		if FileLogger:
-			FileLogger.log_warn("Ship", "_update_pickup_range: missing config or PickupRange node")
 		return
 	var shape: CollisionShape2D = pickup_area.get_node_or_null("PickupRangeShape")
 	if not shape or not shape.shape is CircleShape2D:
-		if FileLogger:
-			FileLogger.log_warn("Ship", "_update_pickup_range: missing PickupRangeShape or not CircleShape2D")
 		return
 	var multiplier: float = 1.0
 	if stats:
 		multiplier = stats.get_stat(StatsComponentScript.STAT_PICKUP_RANGE)
 	var new_radius: float = config.PICKUP_MAGNET_RADIUS * multiplier
 	(shape.shape as CircleShape2D).radius = new_radius
-	if FileLogger:
-		FileLogger.log_info("Ship", "PickupRange radius set to %.1f (base=%.1f * mult=%.2f)" % [new_radius, config.PICKUP_MAGNET_RADIUS, multiplier])
 
 
 func _on_stat_changed(stat_name: String, _old_value: float, _new_value: float) -> void:
@@ -344,8 +328,7 @@ func _input(event: InputEvent) -> void:
 
 func _try_captain_ability() -> void:
 	if _captain_ability and _captain_ability.try_activate():
-		if FileLogger:
-			FileLogger.log_info("Ship", "Captain ability activated: " + _captain_ability.ability_name)
+		pass
 
 
 func _try_phase_shift() -> void:
@@ -471,14 +454,10 @@ func take_damage(amount: float, source: Node = null) -> float:
 func register_damage_interceptor(callback: Callable) -> void:
 	if not _damage_interceptors.has(callback):
 		_damage_interceptors.append(callback)
-		if FileLogger:
-			FileLogger.log_info("Ship", "Registered damage interceptor")
 
 
 func unregister_damage_interceptor(callback: Callable) -> void:
 	_damage_interceptors.erase(callback)
-	if FileLogger:
-		FileLogger.log_info("Ship", "Unregistered damage interceptor")
 
 
 func _flash_damage() -> void:
@@ -536,13 +515,11 @@ func _on_level_up_completed(option: Dictionary) -> void:
 	var id: String = option.get("id", "")
 	
 	if type == "upgrade":
-		FileLogger.log_info("Ship", "Applying upgrade: " + id)
 		if stats.has_method("apply_level_up_upgrade"):
 			stats.apply_level_up_upgrade(option)
 		else:
 			stats.apply_ship_upgrade(id)
 	elif type == "weapon":
-		FileLogger.log_info("Ship", "Equipping weapon: " + id)
 		if weapons and weapons.has_method("equip_weapon"):
 			weapons.equip_weapon(id)
 			var effects_any: Variant = option.get("effects", [])
@@ -568,6 +545,11 @@ func is_invincible() -> bool:
 ## Get the WeaponComponent for external control (e.g., test lab).
 func get_weapon_component() -> Node:
 	return weapons
+
+
+## Get the StatsComponent for external access (e.g., station buffs).
+func get_stats() -> Node:
+	return stats
 
 
 ## Fire a weapon with explicit config (for test lab).

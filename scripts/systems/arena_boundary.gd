@@ -6,8 +6,6 @@ extends Node2D
 signal player_entered_radiation
 signal player_exited_radiation
 
-@onready var FileLogger: Node = get_node_or_null("/root/FileLogger")
-
 var _player: Node2D = null
 var _was_in_radiation: bool = false
 var _radiation_visual: Sprite2D = null
@@ -17,10 +15,6 @@ var _radiation_material: ShaderMaterial = null
 func _ready() -> void:
 	_find_player()
 	_setup_visual()
-	if FileLogger:
-		FileLogger.log_info("ArenaBoundary", "Arena boundary initialized (radius: %.0f, belt: %.0f)" % [
-			GameConfig.ARENA_RADIUS, GameConfig.RADIATION_BELT_WIDTH
-		])
 
 
 func _physics_process(delta: float) -> void:
@@ -33,12 +27,8 @@ func _physics_process(delta: float) -> void:
 	# Emit signals on state change
 	if is_in_radiation and not _was_in_radiation:
 		player_entered_radiation.emit()
-		if FileLogger:
-			FileLogger.log_debug("ArenaBoundary", "Player entered radiation belt")
 	elif not is_in_radiation and _was_in_radiation:
 		player_exited_radiation.emit()
-		if FileLogger:
-			FileLogger.log_debug("ArenaBoundary", "Player exited radiation belt")
 	
 	_was_in_radiation = is_in_radiation
 	

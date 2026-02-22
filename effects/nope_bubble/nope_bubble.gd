@@ -53,8 +53,6 @@ var _was_down: bool = false  # Track if shield was already down to avoid repeat 
 var _enemy_hit_cooldowns: Dictionary = {}  # enemy instance_id -> remaining cooldown
 const BUBBLE_HIT_COOLDOWN: float = 0.5  # Seconds before same enemy can trigger again
 
-@onready var FileLogger: Node = get_node_or_null("/root/FileLogger")
-
 
 func _ready() -> void:
 	add_to_group("nope_bubble")
@@ -92,8 +90,6 @@ func add_layer() -> void:
 	if _current_layers < _max_layers:
 		_current_layers += 1
 		_update_visuals()
-		if FileLogger:
-			FileLogger.log_info("NopeBubble", "Regenerated layer: %d/%d" % [_current_layers, _max_layers])
 
 
 ## Damage interceptor callback — registered on the Ship.
@@ -425,11 +421,6 @@ func _handle_bubble_collision(enemy: Node) -> void:
 	if not _regen_active:
 		_regen_active = true
 		_regen_timer = cooldown
-	
-	if FileLogger:
-		var is_boss: bool = "enemy_type" in enemy and enemy.enemy_type == "boss"
-		var block_type: String = "weak" if is_boss else "full"
-		FileLogger.log_info("NopeBubble", "Layer consumed (%s block): %d/%d remaining" % [block_type, _current_layers, _max_layers])
 
 
 ## Convert integer to Roman numeral string

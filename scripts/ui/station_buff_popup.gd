@@ -9,7 +9,6 @@ const CARD_HOVER_FX_SCRIPT: Script = preload("res://scripts/ui/card_hover_fx.gd"
 
 @onready var RunManager: Node = get_node("/root/RunManager")
 @onready var StationService: Node = get_node("/root/StationService")
-@onready var FileLogger: Node = get_node("/root/FileLogger")
 
 @onready var background: ColorRect = $ColorRect
 @onready var root_container: VBoxContainer = $VBoxContainer
@@ -174,8 +173,6 @@ func _show_popup() -> void:
 	# Focus first card
 	if _cards.size() > 0 and _cards[0].visible:
 		_cards[0].grab_focus()
-	
-	FileLogger.log_info("StationBuffPopup", "Showing %d buff options" % [_current_options.size()])
 
 
 func _hide_popup() -> void:
@@ -205,24 +202,25 @@ func _select_option(index: int) -> void:
 		return
 	
 	var option: Dictionary = _current_options[index]
-	FileLogger.log_info("StationBuffPopup", "Selected %s +%.0f%%" % [
-		String(option.get("stat", "")),
-		float(option.get("amount", 0.0)) * 100.0
-	])
 	
 	# Apply buff via StationService (which will emit station_buff_completed)
+	var applied: bool = false
 	var player: Node = RunManager.get_player()
 	if player and player.has_method("get_stats"):
 		var stats: Node = player.get_stats()
 		if stats:
 			StationService.apply_buff(option, stats)
+			applied = true
+	
+	# Fallback: ensure station_buff_completed always fires
+	if not applied:
+		StationService.station_buff_completed.emit(option)
 	
 	_hide_popup()
 	RunManager.resume_game()
 
 
 func _on_ignore_pressed() -> void:
-	FileLogger.log_info("StationBuffPopup", "Player ignored buff")
 	StationService.station_buff_completed.emit({})
 	_hide_popup()
 	RunManager.resume_game()

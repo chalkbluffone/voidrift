@@ -19,7 +19,7 @@ height = 174.0
 
 [node name="ShippingFreighter" type="CharacterBody2D" unique_id=1061284104 groups=["enemies"]]
 collision_layer = 8
-collision_mask = 5
+collision_mask = 7
 script = ExtResource("1_freighter")
 stardust_value = 4
 

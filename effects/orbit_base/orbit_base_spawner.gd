@@ -5,13 +5,10 @@ class_name OrbitBaseSpawner
 
 var _parent_node: Node
 var _active_orbit: Node2D = null
-var FileLogger: Node = null
 
 
 func _init(parent: Node) -> void:
 	_parent_node = parent
-	if _parent_node:
-		FileLogger = _parent_node.get_node_or_null("/root/FileLogger")
 
 
 func spawn(
@@ -24,8 +21,6 @@ func spawn(
 			_active_orbit.setup(params)
 		if follow_source:
 			_active_orbit.set_follow_source(follow_source)
-		if FileLogger:
-			FileLogger.log_debug("OrbitBaseSpawner", "Updated active PSP orbit instance")
 		return _active_orbit
 
 	var scene: PackedScene = load("res://effects/orbit_base/OrbitBase.tscn")
@@ -46,8 +41,6 @@ func spawn(
 
 	instance.tree_exiting.connect(_on_orbit_destroyed)
 	_active_orbit = instance
-	if FileLogger:
-		FileLogger.log_info("OrbitBaseSpawner", "Spawned PSP orbit instance")
 	return instance
 
 

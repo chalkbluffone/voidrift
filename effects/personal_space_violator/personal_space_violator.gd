@@ -36,8 +36,6 @@ const PROJECTILE_SCENE: PackedScene = preload("res://scenes/gameplay/projectile.
 var _pellets: Array = []  # Array of projectile node refs
 var _spawn_origin: Vector2 = Vector2.ZERO
 
-@onready var FileLogger: Node = get_node_or_null("/root/FileLogger")
-
 
 func setup(params: Dictionary) -> PersonalSpaceViolator:
 	for key in params:
@@ -68,8 +66,6 @@ func fire_burst(origin: Vector2, direction: Vector2) -> void:
 		angle += randf_range(-deg_to_rad(3.0), deg_to_rad(3.0))
 		var spd: float = pellet_speed * randf_range(0.9, 1.1)
 		_spawn_pellet(angle, spd)
-
-	FileLogger.log_info("PersonalSpaceViolator", "Fired %d pellets from %s spread=%.1f deg" % [pellet_count, str(origin), spread_degrees])
 
 
 func _spawn_pellet(angle: float, speed: float) -> void:

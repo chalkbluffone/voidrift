@@ -31,7 +31,6 @@ const FLAT_STATS: Dictionary = {
 @onready var PersistenceManager: Node = get_node("/root/PersistenceManager")
 @onready var ProgressionManager: Node = get_node("/root/ProgressionManager")
 @onready var GameConfig: Node = get_node("/root/GameConfig")
-@onready var FileLogger: Node = get_node("/root/FileLogger")
 @onready var GameSeed: Node = get_node("/root/GameSeed")
 
 
@@ -303,12 +302,10 @@ func _build_weapon_effects(weapon_id: String, rarity: String, rng: RandomNumberG
 	# Load tier data from weapon_upgrades.json
 	var upgrade_data: Dictionary = DataLoader.get_weapon_upgrade(weapon_id)
 	if upgrade_data.is_empty():
-		FileLogger.log_warn("UpgradeService", "No weapon_upgrade data for: %s" % weapon_id)
 		return effects
 
 	var tier_stats: Dictionary = upgrade_data.get("tier_stats", {})
 	if tier_stats.is_empty():
-		FileLogger.log_warn("UpgradeService", "Empty tier_stats for weapon: %s" % weapon_id)
 		return effects
 
 	# Build weighted pool from eligible stats (only stats present in tier_stats)
@@ -370,14 +367,6 @@ func _build_weapon_effects(weapon_id: String, rarity: String, rng: RandomNumberG
 				scaled_delta = GameConfig.WEAPON_MIN_POSITIVE_DELTA
 
 		effects.append({"stat": stat_name_c, "kind": kind, "amount": scaled_delta})
-
-	# Debug logging
-	var effect_summary: Array = []
-	for e in effects:
-		effect_summary.append("%s(%s): %.3f" % [e.get("stat", ""), e.get("kind", ""), e.get("amount", 0.0)])
-	FileLogger.log_debug("UpgradeService", "Weapon upgrade [%s] rarity=%s factor=%.1f effects=[%s]" % [
-		weapon_id, rarity, rarity_factor, ", ".join(effect_summary)
-	])
 
 	return effects
 

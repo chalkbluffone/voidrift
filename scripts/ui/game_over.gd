@@ -18,7 +18,6 @@ const FONT_HEADER: Font = preload("res://assets/fonts/Orbitron-Bold.ttf")
 
 @onready var RunManager: Node = get_node("/root/RunManager")
 @onready var GameConfig: Node = get_node("/root/GameConfig")
-@onready var FileLogger: Node = get_node_or_null("/root/FileLogger")
 
 var _button_hover_tweens: Dictionary = {}
 
@@ -38,9 +37,6 @@ func _ready() -> void:
 
 
 func _on_run_ended(victory: bool, stats: Dictionary) -> void:
-	if FileLogger:
-		FileLogger.log_info("GameOver", "Run ended. Victory: %s" % victory)
-
 	# Set title
 	if victory:
 		game_over_label.text = "VICTORY"

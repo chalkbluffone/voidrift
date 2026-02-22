@@ -12,7 +12,6 @@ signal station_buff_triggered(options: Array)
 signal station_buff_completed(buff: Dictionary)
 
 @onready var RunManager: Node = get_node("/root/RunManager")
-@onready var FileLogger: Node = get_node("/root/FileLogger")
 
 
 ## Generate buff options for a completed station.
@@ -120,7 +119,6 @@ func _roll_station_rarity(luck: float) -> String:
 ## @param stats_component: The player's StatsComponent
 func apply_buff(buff: Dictionary, stats_component: Node) -> void:
 	if buff.is_empty():
-		FileLogger.log_info("StationService", "Player ignored station buff")
 		station_buff_completed.emit({})
 		return
 	
@@ -138,13 +136,6 @@ func apply_buff(buff: Dictionary, stats_component: Node) -> void:
 		stats_component.add_flat_bonus(stat, amount)
 	else:
 		stats_component.add_multiplier_bonus(stat, amount)
-	
-	FileLogger.log_info("StationService", "Applied %s buff +%.0f%% %s (%s)" % [
-		String(buff.get("rarity", "uncommon")),
-		amount * 100.0,
-		stat,
-		"flat" if is_flat else "mult"
-	])
 	
 	station_buff_completed.emit(buff)
 

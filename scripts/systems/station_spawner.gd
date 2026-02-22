@@ -24,15 +24,11 @@ func spawn_stations(parent: Node) -> void:
 	
 	var positions: Array[Vector2] = _generate_spawn_positions()
 	
-	var file_logger: Node = parent.get_node_or_null("/root/FileLogger")
 	for pos in positions:
 		var station: Node2D = SPACE_STATION_SCENE.instantiate()
 		station.global_position = pos
 		parent.add_child(station)
 		_spawned_stations.append(station)
-	
-	if file_logger:
-		file_logger.log_info("StationSpawner", "Spawned %d stations" % [_spawned_stations.size()])
 
 
 ## Generate random spawn positions with minimum separation.

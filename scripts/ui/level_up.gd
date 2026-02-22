@@ -35,7 +35,6 @@ const CARD_HOVER_FX_SCRIPT: Script = preload("res://scripts/ui/card_hover_fx.gd"
 @onready var root_container: Control = $VBoxContainer
 
 @onready var UpgradeService: Node = get_node("/root/UpgradeService")
-@onready var FileLogger: Node = get_node("/root/FileLogger")
 
 # Card references (3 cards)
 var _cards: Array[PanelContainer] = []
@@ -214,8 +213,6 @@ func _set_button_hover_state(_button: Button, _hovered: bool) -> void:
 
 
 func _on_level_up_triggered(current_level: int, available_upgrades: Array) -> void:
-	FileLogger.log_info("LevelUpUI", "Level up triggered! Level: %d, Options: %d" % [current_level, available_upgrades.size()])
-
 	# Kill any in-flight hide tween so its stale hide() callback never fires
 	if _hide_tween and _hide_tween.is_valid():
 		_hide_tween.kill()
@@ -613,7 +610,6 @@ func _on_card_selected(index: int) -> void:
 	_is_showing = false
 	
 	var selected_option: Dictionary = _current_options[index]
-	FileLogger.log_info("LevelUpUI", "Selected option %d: %s" % [index, selected_option.get("id", "unknown")])
 
 	for i: int in range(_cards.size()):
 		if i == index:
@@ -686,19 +682,14 @@ func _play_card_reject_particles(card: PanelContainer) -> void:
 
 func _on_refresh_pressed() -> void:
 	if ProgressionManager.spend_credits(GameConfig.LEVEL_UP_REFRESH_COST):
-		FileLogger.log_info("LevelUpUI", "Refreshing options (spent %d credits)" % GameConfig.LEVEL_UP_REFRESH_COST)
-		
 		# Generate new options
 		_current_options = UpgradeService.generate_level_up_options()
 		_populate_cards()
 		_update_refresh_button()
 		_animate_cards_in()
-	else:
-		FileLogger.log_debug("LevelUpUI", "Cannot afford refresh")
 
 
 func _on_skip_pressed() -> void:
-	FileLogger.log_info("LevelUpUI", "Skipping level up")
 	_hide_ui()
 	RunManager.resume_game()
 	_check_queue_after_hide()

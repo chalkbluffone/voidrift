@@ -26,7 +26,6 @@ var _swarms_triggered: int = 0  # How many swarms have been triggered this run
 @onready var RunManager: Node = get_node("/root/RunManager")
 @onready var GameConfig: Node = get_node("/root/GameConfig")
 @onready var DataLoader: Node = get_node("/root/DataLoader")
-@onready var FileLogger: Node = get_node("/root/FileLogger")
 
 
 func _ready() -> void:
@@ -188,7 +187,6 @@ func _build_enemy_pool() -> void:
 		if scene_path.is_empty():
 			continue
 		if not ResourceLoader.exists(scene_path):
-			FileLogger.log_warn("EnemySpawner", "Scene not found for enemy: %s" % String(enemy_data.get("id", "unknown")))
 			continue
 		var scene: PackedScene = load(scene_path) as PackedScene
 		var weight: float = float(enemy_data.get("spawn_weight", 0.0))
@@ -200,7 +198,6 @@ func _build_enemy_pool() -> void:
 			"weight": weight,
 		})
 		_total_weight += weight
-	FileLogger.log_info("EnemySpawner", "Built enemy pool: %d types, total weight %.1f" % [_enemy_pool.size(), _total_weight])
 
 
 ## Pick a random enemy from the pool using weighted selection.
@@ -335,7 +332,6 @@ func _check_swarm_triggers() -> void:
 ## Show warning message, then start the swarm.
 func _start_swarm_warning() -> void:
 	_swarms_triggered += 1
-	FileLogger.log_info("EnemySpawner", "Swarm %d warning triggered" % _swarms_triggered)
 	swarm_warning_started.emit()
 	
 	# After warning duration, start the actual swarm
@@ -347,7 +343,6 @@ func _start_swarm_warning() -> void:
 func _start_swarm() -> void:
 	_swarm_active = true
 	_swarm_timer = randf_range(GameConfig.SWARM_DURATION_MIN, GameConfig.SWARM_DURATION_MAX)
-	FileLogger.log_info("EnemySpawner", "Swarm started, duration: %.1f seconds" % _swarm_timer)
 	swarm_started.emit()
 
 
@@ -355,7 +350,6 @@ func _start_swarm() -> void:
 func _end_swarm() -> void:
 	_swarm_active = false
 	RunManager.record_swarm_completed()
-	FileLogger.log_info("EnemySpawner", "Swarm ended")
 	swarm_ended.emit()
 
 

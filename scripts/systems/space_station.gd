@@ -19,7 +19,6 @@ var _player_ref: Node2D = null
 
 @onready var RunManager: Node = get_node("/root/RunManager")
 @onready var StationService: Node = get_node("/root/StationService")
-@onready var FileLogger: Node = get_node("/root/FileLogger")
 @onready var _buff_zone: Area2D = $BuffZone
 @onready var _progress_ring: ColorRect = $ProgressRing
 @onready var _sprite: CanvasItem = $Sprite2D
@@ -71,14 +70,12 @@ func _on_body_entered(body: Node2D) -> void:
 		_is_player_inside = true
 		_player_ref = body
 		charging_started.emit()
-		FileLogger.log_info("SpaceStation", "Player entered zone, charge = %.1f%%" % [_charge * 100.0])
 
 
 func _on_body_exited(body: Node2D) -> void:
 	if body.is_in_group("player"):
 		_is_player_inside = false
 		charging_stopped.emit()
-		FileLogger.log_info("SpaceStation", "Player exited zone, charge = %.1f%%" % [_charge * 100.0])
 
 
 func _on_charge_complete() -> void:
@@ -86,7 +83,6 @@ func _on_charge_complete() -> void:
 		return
 	
 	_awaiting_selection = true
-	FileLogger.log_info("SpaceStation", "Charge complete! Triggering buff selection.")
 	charge_completed.emit()
 	
 	# Get player's luck stat for rarity rolls
@@ -109,15 +105,8 @@ func _on_buff_completed(buff: Dictionary) -> void:
 	_is_depleted = true
 	_charge = 0.0
 	
-	# Apply the buff to the player
-	if not buff.is_empty() and _player_ref and _player_ref.has_method("get_stats"):
-		var stats: Node = _player_ref.get_stats()
-		if stats:
-			StationService.apply_buff(buff, stats)
-	
-	# Visual feedback - dim the station
+	# Visual feedback - dim the station and hide ring
 	_update_depleted_visual()
-	FileLogger.log_info("SpaceStation", "Depleted")
 
 
 func _update_progress_visual() -> void:

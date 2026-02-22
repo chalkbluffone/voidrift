@@ -12,12 +12,9 @@ const COLOR_PLAYER: Color = Color(0.0, 1.0, 0.9, 1.0)  # Cyan
 const COLOR_ENEMY: Color = Color(1.0, 0.2, 0.2, 1.0)   # Red
 const COLOR_PICKUP: Color = Color(0.5, 1.0, 0.3, 1.0)  # Green
 const COLOR_STATION: Color = Color(1.0, 0.8, 0.2, 1.0) # Yellow/Gold
-const COLOR_STATION_DEPLETED: Color = Color(0.4, 0.4, 0.4, 0.5)  # Gray
 const COLOR_BOUNDARY: Color = Color(1.0, 0.0, 1.0, 0.6)  # Pink
 const COLOR_FOG: Color = Color(0.0, 0.0, 0.0, 0.9)
 const COLOR_EXPLORED: Color = Color(0.15, 0.15, 0.2, 0.6)
-
-@onready var FileLogger: Node = get_node_or_null("/root/FileLogger")
 
 var _player: Node2D = null
 var _fog_of_war: RefCounted = null
@@ -49,9 +46,6 @@ func _ready() -> void:
 	
 	# Create fog overlay with shader
 	_setup_fog_overlay()
-	
-	if FileLogger:
-		FileLogger.log_info("Minimap", "Initialized (size: %.0f, world_radius: %.0f)" % [_minimap_size, _world_radius])
 
 
 func _setup_fog_overlay() -> void:
@@ -189,13 +183,18 @@ func _draw_pickups(center: Vector2, radius: float, player_pos: Vector2) -> void:
 		draw_circle(center + offset, 2.0, COLOR_PICKUP)
 
 
-## Draw space station icons on the minimap (always visible).
+## Draw space station icons on the minimap (active stations only).
 func _draw_stations(center: Vector2, radius: float, player_pos: Vector2) -> void:
 	var stations: Array[Node] = get_tree().get_nodes_in_group("stations")
 	
 	for station: Node in stations:
 		if not station is Node2D:
 			continue
+		
+		# Skip depleted stations — they disappear from the map
+		if station.has_method("is_depleted") and station.is_depleted():
+			continue
+		
 		var station_2d: Node2D = station as Node2D
 		var offset: Vector2 = (station_2d.global_position - player_pos) * _world_to_minimap_scale
 		
@@ -203,13 +202,8 @@ func _draw_stations(center: Vector2, radius: float, player_pos: Vector2) -> void
 		if offset.length() > radius - 6.0:
 			continue
 		
-		# Determine color based on depletion state
-		var color: Color = COLOR_STATION
-		if station.has_method("is_depleted") and station.is_depleted():
-			color = COLOR_STATION_DEPLETED
-		
 		# Draw station as a larger dot (size 5) to distinguish from other elements
-		draw_circle(center + offset, 5.0, color)
+		draw_circle(center + offset, 5.0, COLOR_STATION)
 
 
 func _find_player() -> void:

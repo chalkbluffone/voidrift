@@ -109,7 +109,6 @@ func activate() -> void:
 	## Acquires first target and starts the beam.
 	_target = _find_nearest_enemy()
 	if _target == null:
-		FileLogger.log_warn("BrokenTractorBeam", "No target found at activation — fizzling")
 		queue_free()
 		return
 
@@ -124,8 +123,6 @@ func activate() -> void:
 	_create_beam_line()
 	_create_beam_particles()
 	_create_impact_particles()
-
-	FileLogger.log_info("BrokenTractorBeam", "Locked onto target — beam active for %.1fs" % duration)
 
 
 func _process(delta: float) -> void:
@@ -195,13 +192,11 @@ func _retarget() -> void:
 	## Instantly snap to the next nearest enemy.  If none found, beam fizzles.
 	_target = _find_nearest_enemy()
 	if _target == null:
-		FileLogger.log_info("BrokenTractorBeam", "No retarget available — beam fizzling")
 		_shutdown()
 		return
 
 	# Burst damage on new lock-on
 	_apply_burst_damage(_target)
-	FileLogger.log_info("BrokenTractorBeam", "Retargeted to new enemy")
 
 
 # =============================================================================

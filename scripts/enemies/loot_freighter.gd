@@ -60,7 +60,6 @@ func _enter_flee_state() -> void:
 		_flee_direction = (global_position - _target.global_position).normalized()
 	else:
 		_flee_direction = Vector2.RIGHT.rotated(randf() * TAU)
-	FileLogger.log_info("LootFreighter", "Freighter hit! Fleeing from player.")
 
 
 func _process_movement(delta: float) -> void:
