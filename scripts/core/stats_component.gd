@@ -306,6 +306,12 @@ func _recalculate_all() -> void:
 		
 		if old_value != new_value:
 			stat_changed.emit(stat_name, old_value, new_value)
+			# Emit typed signals so HUD stays in sync regardless of
+			# which code path modified the stat.
+			if stat_name == STAT_MAX_HP:
+				hp_changed.emit(current_hp, new_value)
+			elif stat_name == STAT_SHIELD:
+				shield_changed.emit(current_shield, new_value)
 	
 	_cache_dirty = false
 

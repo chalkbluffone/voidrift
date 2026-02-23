@@ -3,7 +3,9 @@ extends CanvasLayer
 ## HUD - Displays player stats, XP, level, and run timer.
 ## Scales automatically via project stretch mode (canvas_items).
 
-# Top left - HP bar
+# Top left - Shield + HP bars
+@onready var shield_bar: ProgressBar = $TopLeft/ShieldBar
+@onready var shield_label: Label = $TopLeft/ShieldBar/ShieldLabel
 @onready var hp_bar: ProgressBar = $TopLeft/HPBar
 @onready var hp_label: Label = $TopLeft/HPBar/HPLabel
 
@@ -46,6 +48,7 @@ var _level_tween: Tween = null
 var _level_base_scale: Vector2 = Vector2.ONE
 
 # Synthwave colors
+const COLOR_SHIELD: Color = Color(0.2, 0.6, 1.0, 1.0)  # Neon blue
 const COLOR_HP: Color = Color(1.0, 0.08, 0.4, 1.0)  # Hot pink/magenta
 const COLOR_XP: Color = Color(0.67, 0.2, 0.95, 1.0)  # Neon purple
 const COLOR_TIMER: Color = Color(0.0, 1.0, 0.9, 1.0)  # Cyan
@@ -110,6 +113,29 @@ func _ready() -> void:
 
 
 func _apply_synthwave_theme() -> void:
+	# Shield Bar - Neon blue (hidden by default)
+	var shield_style: StyleBoxFlat = StyleBoxFlat.new()
+	shield_style.bg_color = COLOR_SHIELD
+	shield_style.corner_radius_top_left = 4
+	shield_style.corner_radius_top_right = 4
+	shield_style.corner_radius_bottom_left = 4
+	shield_style.corner_radius_bottom_right = 4
+	shield_bar.add_theme_stylebox_override("fill", shield_style)
+	
+	var shield_bg: StyleBoxFlat = StyleBoxFlat.new()
+	shield_bg.bg_color = Color(0.05, 0.1, 0.2, 0.8)
+	shield_bg.corner_radius_top_left = 4
+	shield_bg.corner_radius_top_right = 4
+	shield_bg.corner_radius_bottom_left = 4
+	shield_bg.corner_radius_bottom_right = 4
+	shield_bar.add_theme_stylebox_override("background", shield_bg)
+	
+	# Shield Label - Same style as HP label
+	shield_label.add_theme_font_override("font", FONT_HEADER)
+	shield_label.add_theme_color_override("font_color", Color(1, 1, 1, 1))
+	shield_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
+	shield_label.add_theme_constant_override("outline_size", 4)
+	
 	# HP Bar - Hot pink
 	var hp_style: StyleBoxFlat = StyleBoxFlat.new()
 	hp_style.bg_color = COLOR_HP
@@ -320,11 +346,14 @@ func _process(_delta: float) -> void:
 	if RunManager.current_state == RunManager.GameState.PLAYING:
 		_update_timer(RunManager.run_data.time_remaining)
 	
-	# Update HP from player stats
+	# Update HP and shield from player stats
 	if _player and _player.stats:
 		var current_hp: float = _player.stats.current_hp
 		var max_hp: float = _player.stats.get_stat("max_hp")
 		_update_hp(current_hp, max_hp)
+		var current_shield: float = _player.stats.current_shield
+		var max_shield: float = _player.stats.get_stat("shield")
+		_update_shield(current_shield, max_shield)
 
 
 func _find_player() -> void:
@@ -342,20 +371,49 @@ func _find_player() -> void:
 			_refresh_weapon_list()
 		_refresh_modules_list()
 		
-		# Initial HP update
+		# Initial HP + shield update
 		if _player.stats:
 			var current_hp: float = _player.stats.current_hp
 			var max_hp: float = _player.stats.get_stat("max_hp")
 			_update_hp(current_hp, max_hp)
+			var current_shield: float = _player.stats.current_shield
+			var max_shield: float = _player.stats.get_stat("shield")
+			_update_shield(current_shield, max_shield)
 			
-			# Connect HP changed signal
+			# Connect HP and shield changed signals
 			_player.stats.hp_changed.connect(_on_hp_changed)
+			_player.stats.shield_changed.connect(_on_shield_changed)
 
 
 func _update_hp(current: float, maximum: float) -> void:
 	hp_bar.max_value = maximum
 	hp_bar.value = maxf(current, 0.0)
 	hp_label.text = "%d / %d" % [maxi(ceili(current), 0), ceili(maximum)]
+
+
+## Update shield bar display. Shows/hides based on max_shield > 0.
+func _update_shield(current: float, maximum: float) -> void:
+	var should_show: bool = maximum > 0.0
+	if shield_bar.visible != should_show:
+		shield_bar.visible = should_show
+		_reposition_bars()
+	shield_bar.max_value = maximum
+	shield_bar.value = maxf(current, 0.0)
+	shield_label.text = "%d / %d" % [maxi(ceili(current), 0), ceili(maximum)]
+
+
+## Repositions HP and shield bars based on shield visibility.
+func _reposition_bars() -> void:
+	if shield_bar.visible:
+		# Shield bar on top, HP bar below
+		shield_bar.offset_top = 8.0
+		shield_bar.offset_bottom = 38.0
+		hp_bar.offset_top = 42.0
+		hp_bar.offset_bottom = 72.0
+	else:
+		# Only HP bar, centered vertically
+		hp_bar.offset_top = 10.0
+		hp_bar.offset_bottom = 50.0
 
 
 func _update_xp(current: float, required: float) -> void:
@@ -486,6 +544,10 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _on_hp_changed(current: float, maximum: float) -> void:
 	_update_hp(current, maximum)
+
+
+func _on_shield_changed(current: float, maximum: float) -> void:
+	_update_shield(current, maximum)
 
 
 func _on_xp_changed(current: float, required: float, level: int) -> void:

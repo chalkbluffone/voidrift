@@ -134,7 +134,7 @@ func _setup_buff_card(card: PanelContainer, option: Dictionary) -> void:
 	# Format the bonus text
 	var bonus_text: String
 	if is_flat:
-		bonus_text = "+%.0f" % [amount * 100.0]  # Display flat as whole number scaled
+		bonus_text = "+%.0f" % [amount]
 	else:
 		bonus_text = "+%.0f%%" % [amount * 100.0]
 	

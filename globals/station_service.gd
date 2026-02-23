@@ -51,11 +51,15 @@ func _generate_single_buff(luck: float, exclude_stats: Array[String]) -> Diction
 	var max_val: float = float(range_data.get("max", 0.04))
 	var amount: float = randf_range(min_val, max_val)
 	
-	# Round to 2 decimal places for cleaner display
-	amount = snappedf(amount, 0.01)
-	
 	# Determine if this is a flat or multiplier stat
 	var is_flat: bool = stat in GameConfig.STATION_FLAT_STATS
+	
+	# Buff ranges are in percentage scale (0.02–0.15). For flat stats, convert
+	# to real values so the stored amount is what actually gets applied.
+	if is_flat:
+		amount = snappedf(amount * 100.0, 1.0)
+	else:
+		amount = snappedf(amount, 0.01)
 	
 	return {
 		"stat": stat,
@@ -134,6 +138,7 @@ func apply_buff(buff: Dictionary, stats_component: Node) -> void:
 	# Apply the bonus
 	if is_flat:
 		stats_component.add_flat_bonus(stat, amount)
+		stats_component._apply_post_gain(stat, amount)
 	else:
 		stats_component.add_multiplier_bonus(stat, amount)
 	

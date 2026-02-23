@@ -9,7 +9,7 @@ script = ExtResource("1_hud")
 [node name="TopLeft" type="Control" parent="."]
 anchors_preset = 0
 offset_right = 320.0
-offset_bottom = 60.0
+offset_bottom = 100.0
 
 [node name="LeftWeapons" type="Control" parent="."]
 anchors_preset = 4
@@ -50,17 +50,38 @@ text = "MODULES"
 layout_mode = 2
 theme_override_constants/separation = 2
 
-[node name="HPBar" type="ProgressBar" parent="TopLeft"]
+[node name="ShieldBar" type="ProgressBar" parent="TopLeft"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 8.0
+offset_right = 308.0
+offset_bottom = 38.0
+max_value = 100.0
+value = 0.0
+show_percentage = false
+visible = false
+
+[node name="ShieldLabel" type="Label" parent="TopLeft/ShieldBar"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 12.0
-offset_top = 10.0
-offset_right = -12.0
-offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 18
+text = "0 / 0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HPBar" type="ProgressBar" parent="TopLeft"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 10.0
+offset_right = 308.0
+offset_bottom = 50.0
 max_value = 100.0
 value = 100.0
 show_percentage = false
