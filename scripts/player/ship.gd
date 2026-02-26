@@ -36,6 +36,8 @@ var _is_phasing: bool = false
 var _phase_timer: float = 0.0
 var _phase_cooldown_timer: float = 0.0
 var _phase_direction: Vector2 = Vector2.ZERO
+var _normal_collision_layer: int = 0
+var _normal_collision_mask: int = 0
 
 # --- I-Frames ---
 var _iframes_timer: float = 0.0
@@ -351,8 +353,11 @@ func _try_phase_shift() -> void:
 	# Grant i-frames
 	_set_invincible(true)
 	
-	# Disable collision during phase
-	collision_shape.set_deferred("disabled", true)
+	# Switch collision to obstacles-only during phase (keep asteroid/station body collisions)
+	_normal_collision_layer = collision_layer
+	_normal_collision_mask = collision_mask
+	set_deferred("collision_layer", 0)    # Nothing can detect us
+	set_deferred("collision_mask", 2)      # We only collide with layer 2 (obstacles)
 	
 	# Visual feedback
 	if sprite:
@@ -376,8 +381,9 @@ func _process_phase_shift(delta: float) -> void:
 func _end_phase_shift() -> void:
 	_is_phasing = false
 	
-	# Re-enable collision
-	collision_shape.set_deferred("disabled", false)
+	# Restore normal collision layers
+	set_deferred("collision_layer", _normal_collision_layer)
+	set_deferred("collision_mask", _normal_collision_mask)
 	
 	# Brief i-frames after phase ends
 	_iframes_timer = GameConfig.POST_PHASE_IFRAMES

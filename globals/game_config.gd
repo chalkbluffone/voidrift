@@ -119,6 +119,16 @@ const ENEMY_KNOCKBACK_FRICTION: float = 8.0   # Knockback decay rate (enemies)
 const ENEMY_CONTACT_DAMAGE_INTERVAL: float = 0.5  # Contact damage tick rate (seconds)
 
 # =============================================================================
+# ENEMY OBSTACLE AVOIDANCE (Flow Field)
+# =============================================================================
+const FLOW_FIELD_CELL_SIZE: float = 64.0           # Grid resolution in pixels
+const FLOW_FIELD_UPDATE_INTERVAL: float = 0.15     # Seconds between BFS recomputes
+const FLOW_FIELD_OBSTACLE_BUFFER: float = 24.0     # Extra clearance around asteroids (pixels)
+const ENEMY_TURN_SPEED: float = 6.0                # Direction smoothing rate (higher = snappier turns)
+const ENEMY_SEPARATION_RADIUS: float = 50.0        # Repulsion radius between enemies (pixels)
+const ENEMY_SEPARATION_STRENGTH: float = 80.0      # Separation push force (pixels/sec)
+
+# =============================================================================
 # COMBAT / STATS
 # =============================================================================
 const SHIELD_RECHARGE_DELAY: float = 5.0   # Seconds before shield starts recharging
@@ -337,6 +347,19 @@ const RADIATION_DAMAGE_PER_SEC: float = 10.0   # DOT when inside radiation belt
 const RADIATION_PUSH_FORCE: float = 150.0      # Force pushing player back toward center
 const PLAYER_SPAWN_SAFE_MARGIN: float = 2000.0 # Spawn within ARENA_RADIUS - this margin
 const ENEMY_DESPAWN_BUFFER: float = 500.0      # Despawn enemies beyond ARENA_RADIUS + buffer
+
+# =============================================================================
+# ASTEROIDS
+# =============================================================================
+const ASTEROID_COUNT: int = 50                     # Number of asteroids per run
+const ASTEROID_SIZE_MIN: float = 30.0              # Smallest asteroid radius (pixels)
+const ASTEROID_SIZE_MAX: float = 256.0             # Largest asteroid radius (pixels)
+const ASTEROID_VERTEX_COUNT_MIN: int = 6           # Minimum polygon vertices
+const ASTEROID_VERTEX_COUNT_MAX: int = 16          # Maximum polygon vertices
+const ASTEROID_MIN_SEPARATION: float = 150.0       # Minimum distance between asteroids
+const ASTEROID_SPAWN_MIN_RADIUS: float = 300.0     # Keeps center area clear
+const ASTEROID_SPAWN_MAX_RADIUS: float = 3000.0    # Stay inside radiation belt
+const ASTEROID_RADIUS_JITTER: float = 0.35         # Per-vertex radius variation (0-1)
 
 # =============================================================================
 # MINIMAP / FOG OF WAR / FULL MAP

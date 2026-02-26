@@ -29,11 +29,18 @@ var _knockback_velocity: Vector2 = Vector2.ZERO
 # --- Contact Damage ---
 var _damage_cooldown: float = 0.0
 
+# --- Flow Field ---
+var _flow_field: FlowField = null
+
+# --- Smoothed Direction ---
+var _current_dir: Vector2 = Vector2.ZERO
+
 
 func _ready() -> void:
 	add_to_group("enemies")
 	current_hp = max_hp
 	_find_player()
+	_find_flow_field()
 	
 	# Ensure HitboxArea is connected and monitoring
 	_hitbox = get_node_or_null("HitboxArea") as Area2D
@@ -87,21 +94,71 @@ func _find_player() -> void:
 		_target = players[0]
 
 
-func _process_movement(_delta: float) -> void:
+func _find_flow_field() -> void:
+	var fields: Array[Node] = get_tree().get_nodes_in_group("flow_field")
+	if fields.size() > 0:
+		_flow_field = fields[0] as FlowField
+
+
+func _process_movement(delta: float) -> void:
 	if not _target:
 		_find_player()
 		return
-	
-	# Chase player
-	var direction: Vector2 = (_target.global_position - global_position).normalized()
-	var chase_velocity: Vector2 = direction * move_speed
-	
-	# Combine with knockback
-	velocity = chase_velocity + _knockback_velocity
-	
+	if not _flow_field:
+		_find_flow_field()
+
+	# Flow field direction (routes around obstacles via precomputed BFS)
+	var desired_dir: Vector2 = Vector2.ZERO
+	if _flow_field:
+		desired_dir = _flow_field.get_direction(global_position)
+
+	# Fallback to direct chase when field has no data for this cell
+	if desired_dir.length_squared() < 0.001:
+		desired_dir = (_target.global_position - global_position).normalized()
+
+	# Smoothly interpolate toward desired direction to avoid jerky turns
+	if _current_dir.length_squared() < 0.001:
+		_current_dir = desired_dir
+	else:
+		_current_dir = _current_dir.lerp(desired_dir, minf(1.0, GameConfig.ENEMY_TURN_SPEED * delta)).normalized()
+
+	var chase_velocity: Vector2 = _current_dir * move_speed
+
+	# Separation force prevents enemy stacking
+	var separation: Vector2 = _get_separation_force()
+
+	velocity = chase_velocity + _knockback_velocity + separation
+
 	# Face movement direction
 	if velocity.length() > 10:
 		rotation = velocity.angle()
+
+
+## Compute a repulsion force away from nearby enemies to prevent stacking.
+## Uses distance-squared checks for performance.
+func _get_separation_force() -> Vector2:
+	var sep_radius: float = GameConfig.ENEMY_SEPARATION_RADIUS
+	var sep_radius_sq: float = sep_radius * sep_radius
+	var sep_strength: float = GameConfig.ENEMY_SEPARATION_STRENGTH
+	var force: Vector2 = Vector2.ZERO
+	var my_pos: Vector2 = global_position
+
+	var enemies: Array[Node] = get_tree().get_nodes_in_group("enemies")
+	for enemy: Node in enemies:
+		if enemy == self:
+			continue
+		if not enemy is Node2D:
+			continue
+		var other_pos: Vector2 = (enemy as Node2D).global_position
+		var diff: Vector2 = my_pos - other_pos
+		var dist_sq: float = diff.length_squared()
+		if dist_sq < sep_radius_sq and dist_sq > 0.01:
+			# Strength inversely proportional to distance
+			var dist: float = sqrt(dist_sq)
+			var proximity: float = 1.0 - (dist / sep_radius)
+			force += diff.normalized() * proximity * sep_strength
+
+	return force
 
 
 func _process_knockback(delta: float) -> void:

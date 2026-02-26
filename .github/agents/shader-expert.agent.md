@@ -25,19 +25,24 @@ Synthwave/neon aesthetic. Key colors:
 
 Use HDR-friendly values (components > 1.0) for bloom/glow effects.
 
-## Current Shader Inventory (9 files)
+## Current Shader Inventory (13 files)
 
-| Shader                                                  | Type       | Description                     |
-| ------------------------------------------------------- | ---------- | ------------------------------- |
-| `shaders/starfield.gdshader`                            | Background | Parallax star layers with dust  |
-| `effects/radiant_arc/radiant_arc.gdshader`              | Weapon     | Arc-shaped photonic melee slash |
-| `effects/space_napalm/space_napalm_projectile.gdshader` | Weapon     | Napalm projectile trail         |
-| `effects/space_napalm/space_napalm_fire.gdshader`       | Weapon     | Napalm ground fire burn area    |
-| `effects/ion_wake/ion_wake.gdshader`                    | Weapon     | Ion trail behind movement       |
-| `effects/nikolas_coil/nikolas_coil.gdshader`            | Weapon     | Tesla coil lightning arcs       |
-| `effects/nope_bubble/nope_bubble.gdshader`              | Weapon     | Defensive bubble force field    |
-| `effects/snarky_comeback/snarky_comeback.gdshader`      | Weapon     | Snarky comeback projectile      |
-| `effects/aoe_base/proximity_tax_aura.gdshader`          | Weapon     | Area proximity damage aura      |
+| Shader                                                  | Type       | Description                              |
+| ------------------------------------------------------- | ---------- | ---------------------------------------- |
+| `shaders/starfield.gdshader`                            | Background | Parallax star layers with dust           |
+| `shaders/fog_of_war.gdshader`                           | World      | Neon purple gas effect with FBM noise    |
+| `shaders/radiation_belt.gdshader`                       | World      | Synthwave grid with pink/cyan neon pulse |
+| `shaders/circle_mask.gdshader`                          | UI         | Circular mask for minimap/maps           |
+| `shaders/station_charge.gdshader`                       | UI         | Radial progress ring, cyan→pink gradient |
+| `shaders/ui_upgrade_card_hover.gdshader`                | UI         | Upgrade card hover effect                |
+| `effects/radiant_arc/radiant_arc.gdshader`              | Weapon     | Arc-shaped photonic melee slash          |
+| `effects/space_napalm/space_napalm_projectile.gdshader` | Weapon     | Napalm projectile trail                  |
+| `effects/space_napalm/space_napalm_fire.gdshader`       | Weapon     | Napalm ground fire burn area             |
+| `effects/ion_wake/ion_wake.gdshader`                    | Weapon     | Ion trail behind movement                |
+| `effects/nikolas_coil/nikolas_coil.gdshader`            | Weapon     | Tesla coil lightning arcs                |
+| `effects/nope_bubble/nope_bubble.gdshader`              | Weapon     | Defensive bubble force field             |
+| `effects/snarky_comeback/snarky_comeback.gdshader`      | Weapon     | Snarky comeback projectile               |
+| `effects/aoe_base/proximity_tax_aura.gdshader`          | Weapon     | Area proximity damage aura               |
 
 ## Shader Conventions
 

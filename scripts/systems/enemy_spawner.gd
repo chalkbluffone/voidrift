@@ -91,6 +91,61 @@ func _get_batch_size() -> int:
 	return 1 + int(extra_minutes * GameConfig.SPAWN_BATCH_SIZE_PER_MINUTE)
 
 
+## Find a spawn position around the player that doesn't overlap with any asteroid.
+## Uses each asteroid's actual effective_radius + buffer for accurate collision checks.
+func _find_spawn_position() -> Vector2:
+	var asteroids: Array[Node] = get_tree().get_nodes_in_group("asteroids")
+	var buffer: float = 30.0  # Extra clearance beyond asteroid edge
+	var max_attempts: int = 30
+
+	for attempt: int in range(max_attempts):
+		var angle: float = randf() * TAU
+		var distance: float = randf_range(GameConfig.SPAWN_RADIUS_MIN, GameConfig.SPAWN_RADIUS_MAX)
+		var candidate: Vector2 = _player.global_position + Vector2.from_angle(angle) * distance
+
+		var overlaps: bool = false
+		for asteroid: Node in asteroids:
+			if not asteroid is Node2D:
+				continue
+			var asteroid_2d: Node2D = asteroid as Node2D
+			var radius: float = GameConfig.ASTEROID_SIZE_MAX
+			if "effective_radius" in asteroid_2d:
+				radius = float(asteroid_2d.get("effective_radius"))
+			if candidate.distance_to(asteroid_2d.global_position) < radius + buffer:
+				overlaps = true
+				break
+
+		if not overlaps:
+			return candidate
+
+	# Fallback: try spawning further away from player to find open space
+	for attempt: int in range(max_attempts):
+		var angle: float = randf() * TAU
+		var distance: float = randf_range(GameConfig.SPAWN_RADIUS_MAX, GameConfig.SPAWN_RADIUS_MAX * 1.5)
+		var candidate: Vector2 = _player.global_position + Vector2.from_angle(angle) * distance
+
+		var overlaps: bool = false
+		for asteroid: Node in asteroids:
+			if not asteroid is Node2D:
+				continue
+			var asteroid_2d: Node2D = asteroid as Node2D
+			var radius: float = GameConfig.ASTEROID_SIZE_MAX
+			if "effective_radius" in asteroid_2d:
+				radius = float(asteroid_2d.get("effective_radius"))
+			if candidate.distance_to(asteroid_2d.global_position) < radius + buffer:
+				overlaps = true
+				break
+
+		if not overlaps:
+			return candidate
+
+	# Last resort: spawn directly behind player (opposite to facing direction)
+	var behind_dir: Vector2 = -_player.global_position.normalized()
+	if behind_dir.length_squared() < 0.01:
+		behind_dir = Vector2.RIGHT
+	return _player.global_position + behind_dir * GameConfig.SPAWN_RADIUS_MIN
+
+
 func _spawn_enemy() -> void:
 	if not _player:
 		return
@@ -106,10 +161,8 @@ func _spawn_enemy() -> void:
 
 	var enemy: CharacterBody2D = enemy_scene.instantiate()
 
-	# Position at random angle around player
-	var angle: float = randf() * TAU
-	var distance: float = randf_range(GameConfig.SPAWN_RADIUS_MIN, GameConfig.SPAWN_RADIUS_MAX)
-	var spawn_pos: Vector2 = _player.global_position + Vector2.from_angle(angle) * distance
+	# Position at random angle around player, avoiding asteroids
+	var spawn_pos: Vector2 = _find_spawn_position()
 
 	enemy.global_position = spawn_pos
 

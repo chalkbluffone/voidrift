@@ -12,6 +12,7 @@ const COLOR_PLAYER: Color = Color(0.0, 1.0, 0.9, 1.0)  # Cyan
 const COLOR_ENEMY: Color = Color(1.0, 0.2, 0.2, 1.0)   # Red
 const COLOR_PICKUP: Color = Color(0.5, 1.0, 0.3, 1.0)  # Green
 const COLOR_STATION: Color = Color(1.0, 0.8, 0.2, 1.0) # Yellow/Gold
+const COLOR_ASTEROID: Color = Color(0.45, 0.45, 0.5, 0.7) # Gray
 const COLOR_BOUNDARY: Color = Color(1.0, 0.0, 1.0, 0.6)  # Pink
 const COLOR_FOG: Color = Color(0.0, 0.0, 0.0, 0.9)
 const COLOR_EXPLORED: Color = Color(0.15, 0.15, 0.2, 0.6)
@@ -102,6 +103,9 @@ func _draw() -> void:
 	
 	# Draw arena boundary ring (relative to player)
 	_draw_arena_boundary(center, radius, player_pos)
+	
+	# Draw asteroids
+	_draw_asteroids(center, radius, player_pos)
 	
 	# Draw stations (always visible on minimap)
 	_draw_stations(center, radius, player_pos)
@@ -204,6 +208,53 @@ func _draw_stations(center: Vector2, radius: float, player_pos: Vector2) -> void
 		
 		# Draw station as a larger dot (size 5) to distinguish from other elements
 		draw_circle(center + offset, 5.0, COLOR_STATION)
+
+
+## Draw asteroid shapes on the minimap (scaled polygons, not dots).
+func _draw_asteroids(center: Vector2, radius: float, player_pos: Vector2) -> void:
+	var asteroids: Array[Node] = get_tree().get_nodes_in_group("asteroids")
+
+	for asteroid: Node in asteroids:
+		if not asteroid is Node2D:
+			continue
+		var asteroid_2d: Node2D = asteroid as Node2D
+		var offset: Vector2 = (asteroid_2d.global_position - player_pos) * _world_to_minimap_scale
+
+		# Skip if outside minimap circle (use effective_radius for early-out)
+		var bounding: float = 0.0
+		if "effective_radius" in asteroid_2d:
+			bounding = float(asteroid_2d.get("effective_radius")) * _world_to_minimap_scale
+		if offset.length() - bounding > radius:
+			continue
+
+		# Skip if in unexplored area
+		if _fog_of_war and not _fog_of_war.is_explored(asteroid_2d.global_position):
+			continue
+
+		# Get actual polygon and color from the asteroid
+		if asteroid_2d.has_method("get_polygon_points"):
+			var points: PackedVector2Array = asteroid_2d.get_polygon_points()
+			if points.size() < 3:
+				continue
+			var color: Color = COLOR_ASTEROID
+			if asteroid_2d.has_method("get_polygon_color"):
+				var base_color: Color = asteroid_2d.get_polygon_color()
+				color = Color(base_color.r, base_color.g, base_color.b, 0.7)
+
+			# Scale polygon points to minimap space and clamp to circle
+			var scaled_points: PackedVector2Array = PackedVector2Array()
+			scaled_points.resize(points.size())
+			for i: int in range(points.size()):
+				var pt: Vector2 = center + offset + points[i] * _world_to_minimap_scale
+				var to_pt: Vector2 = pt - center
+				if to_pt.length() > radius - 1.0:
+					pt = center + to_pt.normalized() * (radius - 1.0)
+				scaled_points[i] = pt
+
+			draw_colored_polygon(scaled_points, color)
+		else:
+			# Fallback: draw dot for non-Asteroid nodes in group
+			draw_circle(center + offset, 4.0, COLOR_ASTEROID)
 
 
 func _find_player() -> void:

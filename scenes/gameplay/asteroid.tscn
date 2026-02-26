@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/systems/asteroid.gd" id="1_asteroid"]
+
+[node name="Asteroid" type="StaticBody2D" groups=["asteroids"]]
+z_index = -1
+collision_layer = 2
+collision_mask = 0
+script = ExtResource("1_asteroid")
+
+[node name="Polygon2D" type="Polygon2D" parent="."]
+color = Color(0.25, 0.22, 0.2, 1)
+polygon = PackedVector2Array(30, 0, 21, 21, 0, 30, -21, 21, -30, 0, -21, -21, 0, -30, 21, -21)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(30, 0, 21, 21, 0, 30, -21, 21, -30, 0, -21, -21, 0, -30, 21, -21)

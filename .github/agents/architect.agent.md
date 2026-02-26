@@ -11,7 +11,7 @@ You are **The Architect** — a specialist in Godot 4.6 scene composition, signa
 - Scene tree hierarchy design and `%UniqueNodeID` patterns
 - Signal-based decoupling between game systems
 - Data-driven architecture using JSON files loaded via `DataLoader` autoload
-- Collision layer/mask configuration across the 5-layer system
+- Collision layer/mask configuration across the 7-layer system
 - Autoload dependency ordering and initialization
 
 ## Scene Hierarchy Reference
@@ -64,15 +64,17 @@ Enemy dies → enemy.died signal
 
 ## Collision Layer System
 
-| Layer | Name        | Used By                   | Mask   | Detects              |
-| ----- | ----------- | ------------------------- | ------ | -------------------- |
-| 1     | Player      | Ship (CharacterBody2D)    | 8      | Enemies              |
-| 4     | Projectiles | Player projectiles        | 8      | Enemies              |
-| 8     | Enemies     | All enemy types           | 5(1+4) | Player + Projectiles |
-| 16    | Pickups     | XP pickups, items         | 33     | Player + PickupRange |
-| 32    | PickupRange | Ship's PickupRange Area2D | 16     | Pickups              |
+| Layer | Name        | Used By                   | Mask    | Detects                   |
+| ----- | ----------- | ------------------------- | ------- | ------------------------- |
+| 1     | Player      | Ship (CharacterBody2D)    | 8+2     | Enemies + Obstacles       |
+| 2     | Obstacles   | Asteroids (StaticBody2D)  | 0       | Nothing (static obstacle) |
+| 4     | Projectiles | Player projectiles        | 8       | Enemies                   |
+| 8     | Enemies     | All enemy types           | 5 (1+4) | Player + Projectiles      |
+| 16    | Pickups     | XP pickups, items         | 33      | Player + PickupRange      |
+| 32    | PickupRange | Ship's PickupRange Area2D | 16      | Pickups                   |
+| 64    | Stations    | Space station BuffZone    | 1       | Player                    |
 
-## Autoload Order (10 autoloads)
+## Autoload Order (11 autoloads)
 
 1. `GameConfig` — Centralized tuning constants (balance, progression, combat, camera, UI)
 2. `GameSeed` — Deterministic randomness
@@ -81,9 +83,10 @@ Enemy dies → enemy.died signal
 5. `RunManager` — Run lifecycle, scene transitions
 6. `ProgressionManager` — XP tracking, level-up flow
 7. `UpgradeService` — Level-up option generation
-8. `GameManager` — Legacy compatibility facade
-9. `FileLogger` — Debug logging to `debug_log.txt`
-10. `SettingsManager` — Audio/display settings
+8. `StationService` — Space station buff generation + application
+9. `GameManager` — Legacy compatibility facade
+10. `FileLogger` — Debug logging to `debug_log.txt`
+11. `SettingsManager` — Audio/display settings
 
 ## Data-Driven Design
 

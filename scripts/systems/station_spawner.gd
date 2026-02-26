@@ -8,11 +8,14 @@ const SPACE_STATION_SCENE: PackedScene = preload("res://scenes/gameplay/space_st
 
 var _spawned_stations: Array[Node2D] = []
 var _rng: RandomNumberGenerator = null
+var _obstacle_positions: Array[Vector2] = []
 
 
 ## Spawn all stations for the run.
 ## @param parent: The node to add stations as children of
-func spawn_stations(parent: Node) -> void:
+## @param obstacle_positions: Pre-placed obstacle positions to avoid (e.g. asteroids)
+func spawn_stations(parent: Node, obstacle_positions: Array[Vector2] = []) -> void:
+	_obstacle_positions = obstacle_positions
 	# Get RNG from GameSeed autoload
 	var game_seed: Node = parent.get_node_or_null("/root/GameSeed")
 	if game_seed and game_seed.has_method("rng"):
@@ -59,6 +62,13 @@ func _generate_spawn_positions() -> Array[Vector2]:
 				if pos.distance_to(existing_pos) < min_separation:
 					valid_position = false
 					break
+			
+			# Check separation from obstacles (asteroids)
+			if valid_position:
+				for obstacle_pos: Vector2 in _obstacle_positions:
+					if pos.distance_to(obstacle_pos) < min_separation:
+						valid_position = false
+						break
 		
 		if valid_position:
 			positions.append(pos)
