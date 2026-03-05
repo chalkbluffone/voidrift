@@ -26,14 +26,21 @@ This project uses a modular agentic workspace. Detailed instructions are distrib
 
 ### Agent & Skill Files
 
-| File                                              | Scope         | Contains                                                    |
-| ------------------------------------------------- | ------------- | ----------------------------------------------------------- |
-| `.github/agents/architect.agent.md`               | Agent persona | Scene composition, signal flow, collision layers, autoloads |
-| `.github/agents/shader-expert.agent.md`           | Agent persona | Shader language, CanvasItem pipeline, visual FX patterns    |
-| `.github/agents/api-specialist.agent.md`          | Agent persona | Godot 4.6 API changes, new nodes, migration patterns        |
-| `.github/agents/qa-researcher.agent.md`           | Agent persona | Playwright-based doc verification, QA workflows             |
-| `.github/skills/docs-researcher/SKILL.md`         | Skill         | Playwright MCP crawling for Godot and Copilot docs          |
-| `.github/skills/state-machine-generator/SKILL.md` | Skill         | Modular GDScript state machine generation                   |
+| File                                                 | Scope         | Contains                                                    |
+| ---------------------------------------------------- | ------------- | ----------------------------------------------------------- |
+| `.github/agents/architect.agent.md`                  | Agent persona | Scene composition, signal flow, collision layers, autoloads |
+| `.github/agents/shader-expert.agent.md`              | Agent persona | Shader language, CanvasItem pipeline, visual FX patterns    |
+| `.github/agents/api-specialist.agent.md`             | Agent persona | Godot 4.6 API changes, new nodes, migration patterns        |
+| `.github/agents/qa-researcher.agent.md`              | Agent persona | Playwright-based doc verification, QA workflows             |
+| `.github/skills/docs-researcher/SKILL.md`            | Skill         | Playwright MCP crawling for Godot and Copilot docs          |
+| `.github/skills/state-machine-generator/SKILL.md`    | Skill         | Modular GDScript state machine generation                   |
+| `.github/skills/megabonk-translator/SKILL.md`        | Skill         | Megabonk → Voidrift concept translation                     |
+| `.github/skills/weapon-effect-creator/SKILL.md`      | Skill         | New weapon effect creation (spawner, scene, JSON, wiring)   |
+| `.github/skills/enemy-type-creator/SKILL.md`         | Skill         | New enemy type creation (script, scene, JSON, scaling)      |
+| `.github/skills/world-interactable-creator/SKILL.md` | Skill         | World interactable creation (stations, shipwrecks, cargo)   |
+| `.github/skills/json-data-validator/SKILL.md`        | Skill         | JSON schema validation for all data/\*.json files           |
+| `.github/skills/pickup-type-creator/SKILL.md`        | Skill         | New pickup type creation (BasePickup pattern)               |
+| `.github/skills/ui-screen-creator/SKILL.md`          | Skill         | UI screen/popup creation (cards, hover FX, styling)         |
 
 ### Other Files
 
@@ -43,14 +50,21 @@ This project uses a modular agentic workspace. Detailed instructions are distrib
 
 ### Persona Routing
 
-| Task Type                                                    | Use                               |
-| ------------------------------------------------------------ | --------------------------------- |
-| Scene tree design, signals, node hierarchy, collision layers | **architect** agent               |
-| `.gdshader` files, visual FX, rendering pipeline             | **shader-expert** agent           |
-| Godot 4.6 API questions, deprecations, new nodes             | **api-specialist** agent          |
-| Verify code against live docs, QA validation                 | **qa-researcher** agent           |
-| Unknown 4.6 API or Copilot feature                           | **docs-researcher** skill         |
-| State machine for enemies, bosses, UI flows                  | **state-machine-generator** skill |
+| Task Type                                                    | Use                                  |
+| ------------------------------------------------------------ | ------------------------------------ |
+| Scene tree design, signals, node hierarchy, collision layers | **architect** agent                  |
+| `.gdshader` files, visual FX, rendering pipeline             | **shader-expert** agent              |
+| Godot 4.6 API questions, deprecations, new nodes             | **api-specialist** agent             |
+| Verify code against live docs, QA validation                 | **qa-researcher** agent              |
+| Unknown 4.6 API or Copilot feature                           | **docs-researcher** skill            |
+| State machine for enemies, bosses, UI flows                  | **state-machine-generator** skill    |
+| User describes features using Megabonk terminology           | **megabonk-translator** skill        |
+| Create new weapon or weapon effect                           | **weapon-effect-creator** skill      |
+| Create new enemy type, variant, or miniboss                  | **enemy-type-creator** skill         |
+| Create world interactable (shipwrecks, cargo, beacons)       | **world-interactable-creator** skill |
+| Create or modify data/\*.json files                          | **json-data-validator** skill        |
+| Create new pickup/collectible type                           | **pickup-type-creator** skill        |
+| Create new UI screen, popup, or overlay                      | **ui-screen-creator** skill          |
 
 ---
 
@@ -108,6 +122,20 @@ When the user says **"lock it in"**, distribute the new knowledge from the curre
 5. **Update this file's workspace structure table** — if new instruction files were created, add them to the table above.
 
 Do **not** append dated session logs. The instruction files should always reflect the **current state** of the project, not a changelog.
+
+---
+
+## Workspace Self-Maintenance (Mandatory)
+
+Whenever you implement a feature, fix a bug, or introduce a new system, **check whether the workspace customization files need updating** and apply changes proactively:
+
+- **Instructions** — If a new domain emerges that isn't covered by an existing `.github/instructions/*.instructions.md` file, create one. If an existing instruction file is missing details about the work just completed, update it.
+- **Skills** — If a new repeatable multi-step workflow is established (e.g., a new entity type, a new integration pattern), create a SKILL.md for it under `.github/skills/`. If an existing skill's procedure no longer matches the codebase, update it.
+- **Agents** — If a new specialist persona would be valuable (e.g., a new rendering pipeline, a new subsystem with unique expertise), create an `.agent.md` file under `.github/agents/`.
+- **Registration** — After creating any new instruction, skill, or agent file, update the corresponding tables in this file (Instruction Files, Agent & Skill Files, Persona Routing) so the workspace structure stays accurate.
+- **TODO.md** — Keep `.github/TODO.md` current with completed items, new known issues, and resolved issues.
+
+This is a continuous obligation, not limited to "lock it in" — do it as part of every non-trivial change.
 
 ---
 
