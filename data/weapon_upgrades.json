@@ -5,13 +5,40 @@
 		"type": "melee",
 		"element": "none",
 		"special": "none",
-		"tags": ["melee", "slash"],
+		"tags": [
+			"melee",
+			"slash"
+		],
 		"strategy_synergies": "Prioritize damage/count then size; knockback helps safety",
 		"tier_stats": {
-			"damage": { "common": 2.0, "uncommon": 2.4, "rare": 2.8, "epic": 3.2, "legendary": 4.0 },
-			"projectile_count": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 },
-			"size": { "common": 0.20, "uncommon": 0.24, "rare": 0.28, "epic": 0.32, "legendary": 0.40 },
-			"knockback": { "common": 0.5, "uncommon": 0.6, "rare": 0.7, "epic": 0.8, "legendary": 1.0 }
+			"damage": {
+				"common": 2.0,
+				"uncommon": 2.4,
+				"rare": 2.8,
+				"epic": 3.2,
+				"legendary": 4.0
+			},
+			"projectile_count": {
+				"common": 1.0,
+				"uncommon": 1.2,
+				"rare": 1.4,
+				"epic": 1.6,
+				"legendary": 2.0
+			},
+			"size": {
+				"common": 0.2,
+				"uncommon": 0.24,
+				"rare": 0.28,
+				"epic": 0.32,
+				"legendary": 0.4
+			},
+			"knockback": {
+				"common": 0.5,
+				"uncommon": 0.6,
+				"rare": 0.7,
+				"epic": 0.8,
+				"legendary": 1.0
+			}
 		}
 	},
 	"ion_wake": {
@@ -20,13 +47,41 @@
 		"type": "aoe",
 		"element": "fire",
 		"special": "burn_trail",
-		"tags": ["fire", "dot", "aoe"],
+		"tags": [
+			"fire",
+			"dot",
+			"aoe"
+		],
 		"strategy_synergies": "Size/quantity boost coverage; great with duration/cooldown tomes",
 		"tier_stats": {
-			"damage": { "common": 2.0, "uncommon": 2.4, "rare": 2.8, "epic": 3.2, "legendary": 4.0 },
-			"projectile_count": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 },
-			"size": { "common": 0.15, "uncommon": 0.18, "rare": 0.21, "epic": 0.24, "legendary": 0.30 },
-			"duration": { "common": 0.18, "uncommon": 0.21, "rare": 0.25, "epic": 0.29, "legendary": 0.36 }
+			"damage": {
+				"common": 2.0,
+				"uncommon": 2.4,
+				"rare": 2.8,
+				"epic": 3.2,
+				"legendary": 4.0
+			},
+			"projectile_count": {
+				"common": 1.0,
+				"uncommon": 1.2,
+				"rare": 1.4,
+				"epic": 1.6,
+				"legendary": 2.0
+			},
+			"size": {
+				"common": 0.15,
+				"uncommon": 0.18,
+				"rare": 0.21,
+				"epic": 0.24,
+				"legendary": 0.3
+			},
+			"duration": {
+				"common": 0.18,
+				"uncommon": 0.21,
+				"rare": 0.25,
+				"epic": 0.29,
+				"legendary": 0.36
+			}
 		}
 	},
 	"nikolas_coil": {
@@ -35,13 +90,41 @@
 		"type": "projectile",
 		"element": "lightning",
 		"special": "chain_bounce",
-		"tags": ["lightning", "bounce", "projectile"],
+		"tags": [
+			"lightning",
+			"bounce",
+			"projectile"
+		],
 		"strategy_synergies": "Stack bounces and size for chaining; quantity for coverage",
 		"tier_stats": {
-			"damage": { "common": 2.0, "uncommon": 2.4, "rare": 2.8, "epic": 3.2, "legendary": 4.0 },
-			"projectile_count": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 },
-			"size": { "common": 0.20, "uncommon": 0.24, "rare": 0.28, "epic": 0.32, "legendary": 0.40 },
-			"projectile_bounces": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 }
+			"damage": {
+				"common": 2.0,
+				"uncommon": 2.4,
+				"rare": 2.8,
+				"epic": 3.2,
+				"legendary": 4.0
+			},
+			"projectile_count": {
+				"common": 1.0,
+				"uncommon": 1.2,
+				"rare": 1.4,
+				"epic": 1.6,
+				"legendary": 2.0
+			},
+			"size": {
+				"common": 0.2,
+				"uncommon": 0.24,
+				"rare": 0.28,
+				"epic": 0.32,
+				"legendary": 0.4
+			},
+			"projectile_bounces": {
+				"common": 1.0,
+				"uncommon": 1.2,
+				"rare": 1.4,
+				"epic": 1.6,
+				"legendary": 2.0
+			}
 		}
 	},
 	"space_napalm": {
@@ -50,13 +133,41 @@
 		"type": "projectile",
 		"element": "fire",
 		"special": "aoe_blast",
-		"tags": ["fire", "aoe", "projectile"],
+		"tags": [
+			"fire",
+			"aoe",
+			"projectile"
+		],
 		"strategy_synergies": "Size/quantity for bigger blasts; damage scaling strong; projectile speed minor",
 		"tier_stats": {
-			"damage": { "common": 2.5, "uncommon": 3.0, "rare": 3.5, "epic": 4.0, "legendary": 5.0 },
-			"projectile_count": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 },
-			"projectile_speed": { "common": 0.10, "uncommon": 0.12, "rare": 0.14, "epic": 0.16, "legendary": 0.20 },
-			"size": { "common": 0.16, "uncommon": 0.19, "rare": 0.22, "epic": 0.26, "legendary": 0.32 }
+			"damage": {
+				"common": 2.5,
+				"uncommon": 3.0,
+				"rare": 3.5,
+				"epic": 4.0,
+				"legendary": 5.0
+			},
+			"projectile_count": {
+				"common": 1.0,
+				"uncommon": 1.2,
+				"rare": 1.4,
+				"epic": 1.6,
+				"legendary": 2.0
+			},
+			"projectile_speed": {
+				"common": 0.1,
+				"uncommon": 0.12,
+				"rare": 0.14,
+				"epic": 0.16,
+				"legendary": 0.2
+			},
+			"size": {
+				"common": 0.16,
+				"uncommon": 0.19,
+				"rare": 0.22,
+				"epic": 0.26,
+				"legendary": 0.32
+			}
 		}
 	},
 	"psp_9000": {
@@ -65,14 +176,48 @@
 		"type": "orbit",
 		"element": "physical",
 		"special": "knockback",
-		"tags": ["orbit", "knockback", "projectile"],
+		"tags": [
+			"orbit",
+			"knockback",
+			"projectile"
+		],
 		"strategy_synergies": "Size/knockback for safety; speed to tighten orbit coverage",
 		"tier_stats": {
-			"damage": { "common": 3.0, "uncommon": 3.6, "rare": 4.2, "epic": 4.8, "legendary": 6.0 },
-			"projectile_count": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 },
-			"projectile_speed": { "common": 0.35, "uncommon": 0.42, "rare": 0.49, "epic": 0.56, "legendary": 0.70 },
-			"size": { "common": 0.20, "uncommon": 0.24, "rare": 0.28, "epic": 0.32, "legendary": 0.40 },
-			"knockback": { "common": 0.7, "uncommon": 0.8, "rare": 0.8, "epic": 1.0, "legendary": 1.3 }
+			"damage": {
+				"common": 3.0,
+				"uncommon": 3.6,
+				"rare": 4.2,
+				"epic": 4.8,
+				"legendary": 6.0
+			},
+			"projectile_count": {
+				"common": 1.0,
+				"uncommon": 1.2,
+				"rare": 1.4,
+				"epic": 1.6,
+				"legendary": 2.0
+			},
+			"projectile_speed": {
+				"common": 0.35,
+				"uncommon": 0.42,
+				"rare": 0.49,
+				"epic": 0.56,
+				"legendary": 0.7
+			},
+			"size": {
+				"common": 0.2,
+				"uncommon": 0.24,
+				"rare": 0.28,
+				"epic": 0.32,
+				"legendary": 0.4
+			},
+			"knockback": {
+				"common": 0.7,
+				"uncommon": 0.8,
+				"rare": 0.8,
+				"epic": 1.0,
+				"legendary": 1.3
+			}
 		}
 	},
 	"straight_line_negotiator": {
@@ -81,15 +226,55 @@
 		"type": "projectile",
 		"element": "physical",
 		"special": "pierce",
-		"tags": ["projectile", "pierce", "crit"],
+		"tags": [
+			"projectile",
+			"pierce",
+			"crit"
+		],
 		"strategy_synergies": "Crit-focused; take crit tomes; projectile count and speed for coverage",
 		"tier_stats": {
-			"damage": { "common": 1.75, "uncommon": 2.1, "rare": 2.45, "epic": 2.8, "legendary": 3.5 },
-			"projectile_count": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 },
-			"projectile_speed": { "common": 0.30, "uncommon": 0.36, "rare": 0.42, "epic": 0.48, "legendary": 0.60 },
-			"size": { "common": 0.20, "uncommon": 0.20, "rare": 0.20, "epic": 0.30, "legendary": 0.30 },
-			"crit_chance": { "common": 0.08, "uncommon": 0.10, "rare": 0.11, "epic": 0.13, "legendary": 0.16 },
-			"crit_damage": { "common": 0.18, "uncommon": 0.22, "rare": 0.25, "epic": 0.29, "legendary": 0.36 }
+			"damage": {
+				"common": 1.75,
+				"uncommon": 2.1,
+				"rare": 2.45,
+				"epic": 2.8,
+				"legendary": 3.5
+			},
+			"projectile_count": {
+				"common": 1.0,
+				"uncommon": 1.2,
+				"rare": 1.4,
+				"epic": 1.6,
+				"legendary": 2.0
+			},
+			"projectile_speed": {
+				"common": 0.3,
+				"uncommon": 0.36,
+				"rare": 0.42,
+				"epic": 0.48,
+				"legendary": 0.6
+			},
+			"size": {
+				"common": 0.2,
+				"uncommon": 0.2,
+				"rare": 0.2,
+				"epic": 0.3,
+				"legendary": 0.3
+			},
+			"crit_chance": {
+				"common": 0.08,
+				"uncommon": 0.1,
+				"rare": 0.11,
+				"epic": 0.13,
+				"legendary": 0.16
+			},
+			"crit_damage": {
+				"common": 0.18,
+				"uncommon": 0.22,
+				"rare": 0.25,
+				"epic": 0.29,
+				"legendary": 0.36
+			}
 		}
 	},
 	"timmy_gun": {
@@ -98,15 +283,55 @@
 		"type": "projectile",
 		"element": "physical",
 		"special": "bounce",
-		"tags": ["projectile", "bounce", "crit"],
+		"tags": [
+			"projectile",
+			"bounce",
+			"crit"
+		],
 		"strategy_synergies": "Bounce first for chaining; crit tomes; keep damage scaling",
 		"tier_stats": {
-			"damage": { "common": 2.5, "uncommon": 3.0, "rare": 3.5, "epic": 4.0, "legendary": 5.0 },
-			"projectile_count": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 },
-			"projectile_speed": { "common": 0.40, "uncommon": 0.50, "rare": 0.60, "epic": 0.60, "legendary": 0.80 },
-			"crit_chance": { "common": 0.10, "uncommon": 0.12, "rare": 0.14, "epic": 0.16, "legendary": 0.20 },
-			"crit_damage": { "common": 0.20, "uncommon": 0.24, "rare": 0.28, "epic": 0.32, "legendary": 0.40 },
-			"projectile_bounces": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 }
+			"damage": {
+				"common": 2.5,
+				"uncommon": 3.0,
+				"rare": 3.5,
+				"epic": 4.0,
+				"legendary": 5.0
+			},
+			"projectile_count": {
+				"common": 1.0,
+				"uncommon": 1.2,
+				"rare": 1.4,
+				"epic": 1.6,
+				"legendary": 2.0
+			},
+			"projectile_speed": {
+				"common": 0.4,
+				"uncommon": 0.5,
+				"rare": 0.6,
+				"epic": 0.6,
+				"legendary": 0.8
+			},
+			"crit_chance": {
+				"common": 0.1,
+				"uncommon": 0.12,
+				"rare": 0.14,
+				"epic": 0.16,
+				"legendary": 0.2
+			},
+			"crit_damage": {
+				"common": 0.2,
+				"uncommon": 0.24,
+				"rare": 0.28,
+				"epic": 0.32,
+				"legendary": 0.4
+			},
+			"projectile_bounces": {
+				"common": 1.0,
+				"uncommon": 1.2,
+				"rare": 1.4,
+				"epic": 1.6,
+				"legendary": 2.0
+			}
 		}
 	},
 	"nope_bubble": {
@@ -115,13 +340,41 @@
 		"type": "aoe",
 		"element": "physical",
 		"special": "block_shockwave",
-		"tags": ["aoe", "defense", "knockback"],
+		"tags": [
+			"aoe",
+			"defense",
+			"knockback"
+		],
 		"strategy_synergies": "Quantity for more shields; knockback for space; cooldown/armor synergies",
 		"tier_stats": {
-			"damage": { "common": 2.0, "uncommon": 2.4, "rare": 2.8, "epic": 3.2, "legendary": 4.0 },
-			"projectile_count": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 },
-			"size": { "common": 0.15, "uncommon": 0.18, "rare": 0.21, "epic": 0.24, "legendary": 0.30 },
-			"knockback": { "common": 0.8, "uncommon": 0.9, "rare": 1.1, "epic": 1.2, "legendary": 1.5 }
+			"damage": {
+				"common": 2.0,
+				"uncommon": 2.4,
+				"rare": 2.8,
+				"epic": 3.2,
+				"legendary": 4.0
+			},
+			"projectile_count": {
+				"common": 1.0,
+				"uncommon": 1.2,
+				"rare": 1.4,
+				"epic": 1.6,
+				"legendary": 2.0
+			},
+			"size": {
+				"common": 0.15,
+				"uncommon": 0.18,
+				"rare": 0.21,
+				"epic": 0.24,
+				"legendary": 0.3
+			},
+			"knockback": {
+				"common": 0.8,
+				"uncommon": 0.9,
+				"rare": 1.1,
+				"epic": 1.2,
+				"legendary": 1.5
+			}
 		}
 	},
 	"snarky_comeback": {
@@ -130,13 +383,40 @@
 		"type": "projectile",
 		"element": "physical",
 		"special": "return_path",
-		"tags": ["projectile", "return"],
+		"tags": [
+			"projectile",
+			"return"
+		],
 		"strategy_synergies": "Count then size; speed for faster cycles; works well with cooldown",
 		"tier_stats": {
-			"damage": { "common": 2.0, "uncommon": 2.4, "rare": 2.8, "epic": 3.2, "legendary": 4.0 },
-			"projectile_count": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 },
-			"projectile_speed": { "common": 0.10, "uncommon": 0.12, "rare": 0.14, "epic": 0.16, "legendary": 0.20 },
-			"size": { "common": 0.14, "uncommon": 0.17, "rare": 0.20, "epic": 0.22, "legendary": 0.28 }
+			"damage": {
+				"common": 2.0,
+				"uncommon": 2.4,
+				"rare": 2.8,
+				"epic": 3.2,
+				"legendary": 4.0
+			},
+			"projectile_count": {
+				"common": 1.0,
+				"uncommon": 1.2,
+				"rare": 1.4,
+				"epic": 1.6,
+				"legendary": 2.0
+			},
+			"projectile_speed": {
+				"common": 0.1,
+				"uncommon": 0.12,
+				"rare": 0.14,
+				"epic": 0.16,
+				"legendary": 0.2
+			},
+			"size": {
+				"common": 0.14,
+				"uncommon": 0.17,
+				"rare": 0.2,
+				"epic": 0.22,
+				"legendary": 0.28
+			}
 		}
 	},
 	"proximity_tax": {
@@ -145,11 +425,26 @@
 		"type": "aoe",
 		"element": "none",
 		"special": "constant_aura",
-		"tags": ["aoe", "dot"],
+		"tags": [
+			"aoe",
+			"dot"
+		],
 		"strategy_synergies": "Pure area scaling; size is main multiplier; pairs with duration/cooldown",
 		"tier_stats": {
-			"damage": { "common": 1.4, "uncommon": 1.7, "rare": 2.0, "epic": 2.2, "legendary": 2.8 },
-			"size": { "common": 0.14, "uncommon": 0.17, "rare": 0.20, "epic": 0.22, "legendary": 0.28 }
+			"damage": {
+				"common": 1.4,
+				"uncommon": 1.7,
+				"rare": 2.0,
+				"epic": 2.2,
+				"legendary": 2.8
+			},
+			"size": {
+				"common": 0.14,
+				"uncommon": 0.17,
+				"rare": 0.2,
+				"epic": 0.22,
+				"legendary": 0.28
+			}
 		}
 	},
 	"spin_cycle": {
@@ -158,13 +453,40 @@
 		"type": "aoe",
 		"element": "physical",
 		"special": "linger",
-		"tags": ["aoe", "linger"],
+		"tags": [
+			"aoe",
+			"linger"
+		],
 		"strategy_synergies": "Size scales ring radius; attack speed scales sweep speed; pairs with damage and cooldown",
 		"tier_stats": {
-			"damage": { "common": 1.5, "uncommon": 1.8, "rare": 2.1, "epic": 2.4, "legendary": 3.0 },
-			"attack_speed": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 },
-			"size": { "common": 0.10, "uncommon": 0.12, "rare": 0.14, "epic": 0.16, "legendary": 0.20 },
-			"duration": { "common": 0.08, "uncommon": 0.10, "rare": 0.11, "epic": 0.13, "legendary": 0.16 }
+			"damage": {
+				"common": 1.5,
+				"uncommon": 1.8,
+				"rare": 2.1,
+				"epic": 2.4,
+				"legendary": 3.0
+			},
+			"attack_speed": {
+				"common": 1.0,
+				"uncommon": 1.2,
+				"rare": 1.4,
+				"epic": 1.6,
+				"legendary": 2.0
+			},
+			"size": {
+				"common": 0.1,
+				"uncommon": 0.12,
+				"rare": 0.14,
+				"epic": 0.16,
+				"legendary": 0.2
+			},
+			"duration": {
+				"common": 0.08,
+				"uncommon": 0.1,
+				"rare": 0.11,
+				"epic": 0.13,
+				"legendary": 0.16
+			}
 		}
 	},
 	"broken_tractor_beam": {
@@ -173,12 +495,33 @@
 		"type": "beam",
 		"element": "none",
 		"special": "lock_target",
-		"tags": ["beam", "channel"],
+		"tags": [
+			"beam",
+			"channel"
+		],
 		"strategy_synergies": "Duration and size to secure kill window; pair with cooldown/defense",
 		"tier_stats": {
-			"damage": { "common": 2.0, "uncommon": 2.4, "rare": 2.8, "epic": 3.2, "legendary": 4.0 },
-			"size": { "common": 0.20, "uncommon": 0.24, "rare": 0.28, "epic": 0.32, "legendary": 0.40 },
-			"duration": { "common": 0.20, "uncommon": 0.24, "rare": 0.28, "epic": 0.32, "legendary": 0.40 }
+			"damage": {
+				"common": 2.0,
+				"uncommon": 2.4,
+				"rare": 2.8,
+				"epic": 3.2,
+				"legendary": 4.0
+			},
+			"size": {
+				"common": 0.2,
+				"uncommon": 0.24,
+				"rare": 0.28,
+				"epic": 0.32,
+				"legendary": 0.4
+			},
+			"duration": {
+				"common": 0.2,
+				"uncommon": 0.24,
+				"rare": 0.28,
+				"epic": 0.32,
+				"legendary": 0.4
+			}
 		}
 	},
 	"space_nukes": {
@@ -187,13 +530,41 @@
 		"type": "projectile",
 		"element": "physical",
 		"special": "homing",
-		"tags": ["projectile", "homing", "crit"],
+		"tags": [
+			"projectile",
+			"homing",
+			"crit"
+		],
 		"strategy_synergies": "Crit chance is strong; count for more rockets; speed for reliability",
 		"tier_stats": {
-			"damage": { "common": 2.0, "uncommon": 2.4, "rare": 2.8, "epic": 3.2, "legendary": 4.0 },
-			"projectile_count": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 },
-			"projectile_speed": { "common": 0.20, "uncommon": 0.24, "rare": 0.28, "epic": 0.32, "legendary": 0.40 },
-			"crit_chance": { "common": 0.08, "uncommon": 0.10, "rare": 0.11, "epic": 0.13, "legendary": 0.16 }
+			"damage": {
+				"common": 2.0,
+				"uncommon": 2.4,
+				"rare": 2.8,
+				"epic": 3.2,
+				"legendary": 4.0
+			},
+			"projectile_count": {
+				"common": 1.0,
+				"uncommon": 1.2,
+				"rare": 1.4,
+				"epic": 1.6,
+				"legendary": 2.0
+			},
+			"projectile_speed": {
+				"common": 0.2,
+				"uncommon": 0.24,
+				"rare": 0.28,
+				"epic": 0.32,
+				"legendary": 0.4
+			},
+			"crit_chance": {
+				"common": 0.08,
+				"uncommon": 0.1,
+				"rare": 0.11,
+				"epic": 0.13,
+				"legendary": 0.16
+			}
 		}
 	},
 	"personal_space_violator": {
@@ -202,14 +573,49 @@
 		"type": "projectile",
 		"element": "physical",
 		"special": "shotgun_falloff",
-		"tags": ["projectile", "cone", "crit", "close_range"],
+		"tags": [
+			"projectile",
+			"cone",
+			"crit",
+			"close_range"
+		],
 		"strategy_synergies": "Count boosts pellet count; damage and crit solid; size for spread control",
 		"tier_stats": {
-			"damage": { "common": 3.0, "uncommon": 3.6, "rare": 4.2, "epic": 4.8, "legendary": 6.0 },
-			"projectile_count": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 },
-			"size": { "common": 0.15, "uncommon": 0.18, "rare": 0.21, "epic": 0.24, "legendary": 0.30 },
-			"crit_chance": { "common": 0.07, "uncommon": 0.08, "rare": 0.10, "epic": 0.11, "legendary": 0.14 },
-			"knockback": { "common": 0.35, "uncommon": 0.42, "rare": 0.49, "epic": 0.56, "legendary": 0.70 }
+			"damage": {
+				"common": 3.0,
+				"uncommon": 3.6,
+				"rare": 4.2,
+				"epic": 4.8,
+				"legendary": 6.0
+			},
+			"projectile_count": {
+				"common": 1.0,
+				"uncommon": 1.2,
+				"rare": 1.4,
+				"epic": 1.6,
+				"legendary": 2.0
+			},
+			"size": {
+				"common": 0.15,
+				"uncommon": 0.18,
+				"rare": 0.21,
+				"epic": 0.24,
+				"legendary": 0.3
+			},
+			"crit_chance": {
+				"common": 0.07,
+				"uncommon": 0.08,
+				"rare": 0.1,
+				"epic": 0.11,
+				"legendary": 0.14
+			},
+			"knockback": {
+				"common": 0.35,
+				"uncommon": 0.42,
+				"rare": 0.49,
+				"epic": 0.56,
+				"legendary": 0.7
+			}
 		}
 	},
 	"tothian_mines": {
@@ -218,13 +624,84 @@
 		"type": "aoe",
 		"element": "physical",
 		"special": "knockback",
-		"tags": ["aoe", "trap", "knockback"],
+		"tags": [
+			"aoe",
+			"trap",
+			"knockback"
+		],
 		"strategy_synergies": "Duration and size for coverage; count accelerates drop cadence; pairs with cooldown",
 		"tier_stats": {
-			"damage": { "common": 3.0, "uncommon": 3.6, "rare": 4.2, "epic": 4.8, "legendary": 6.0 },
-			"projectile_count": { "common": 1.0, "uncommon": 1.2, "rare": 1.4, "epic": 1.6, "legendary": 2.0 },
-			"size": { "common": 0.15, "uncommon": 0.18, "rare": 0.21, "epic": 0.24, "legendary": 0.30 },
-			"duration": { "common": 0.40, "uncommon": 0.48, "rare": 0.56, "epic": 0.64, "legendary": 0.80 }
+			"damage": {
+				"common": 3.0,
+				"uncommon": 3.6,
+				"rare": 4.2,
+				"epic": 4.8,
+				"legendary": 6.0
+			},
+			"projectile_count": {
+				"common": 1.0,
+				"uncommon": 1.2,
+				"rare": 1.4,
+				"epic": 1.6,
+				"legendary": 2.0
+			},
+			"size": {
+				"common": 0.15,
+				"uncommon": 0.18,
+				"rare": 0.21,
+				"epic": 0.24,
+				"legendary": 0.3
+			},
+			"duration": {
+				"common": 0.4,
+				"uncommon": 0.48,
+				"rare": 0.56,
+				"epic": 0.64,
+				"legendary": 0.8
+			}
+		}
+	},
+	"space_lasers": {
+		"display_name": "Space Lasers",
+		"base_behavior": "Fires neon-red laser bolts that bounce between enemies, chaining damage across multiple targets.",
+		"type": "projectile",
+		"element": "laser",
+		"special": "bounce",
+		"tags": [
+			"laser",
+			"bounce",
+			"projectile"
+		],
+		"strategy_synergies": "Bounce count first for chain coverage; projectile count for burst; size for hitbox reach",
+		"tier_stats": {
+			"damage": {
+				"common": 5.0,
+				"uncommon": 6.0,
+				"rare": 7.0,
+				"epic": 8.0,
+				"legendary": 10.0
+			},
+			"projectile_count": {
+				"common": 1.0,
+				"uncommon": 1.2,
+				"rare": 1.4,
+				"epic": 1.6,
+				"legendary": 2.0
+			},
+			"projectile_bounces": {
+				"common": 2.0,
+				"uncommon": 2.4,
+				"rare": 2.8,
+				"epic": 3.2,
+				"legendary": 4.0
+			},
+			"size": {
+				"common": 0.2,
+				"uncommon": 0.24,
+				"rare": 0.28,
+				"epic": 0.32,
+				"legendary": 0.4
+			}
 		}
 	}
 }

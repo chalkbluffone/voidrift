@@ -105,7 +105,9 @@
 		"description": "Blocks hits with rechargeable shield charges, consuming one per block and releasing a staggering shockwave.",
 		"display_name": "Nope Bubble",
 		"enabled": true,
-		"motion": {},
+		"motion": {
+
+		},
 		"scene": "res://effects/nope_bubble/NopeBubble.tscn",
 		"shape": {
 			"shockwave_angle_deg": 45.0,
@@ -164,9 +166,13 @@
 		"description": "Imposes a damaging aura around the ship that harms enemies who get too close. It's like a tax, but in space...and kills bad guys.",
 		"display_name": "Proximity Tax",
 		"enabled": true,
-		"motion": {},
+		"motion": {
+
+		},
 		"scene": "res://effects/aoe_base/AoEBase.tscn",
-		"shape": {},
+		"shape": {
+
+		},
 		"spawner": "res://effects/aoe_base/aoe_base_spawner.gd",
 		"stats": {
 			"cooldown": 0.5,
@@ -175,13 +181,17 @@
 		},
 		"type": "area",
 		"unlock_condition": "default",
-		"visual": {}
+		"visual": {
+
+		}
 	},
 	"psp_9000": {
 		"description": "PSP or Personal Space Program, deploys orbiting security drones that body-check nearby enemies for physical damage and knockback. Not to be confused with a certain handheld gaming device.",
 		"display_name": "PSP-9000",
 		"enabled": true,
-		"motion": {},
+		"motion": {
+
+		},
 		"scene": "res://effects/orbit_base/OrbitBase.tscn",
 		"shape": {
 			"drone_size": 9.0,
@@ -198,7 +208,9 @@
 		},
 		"type": "orbit",
 		"unlock_condition": "default",
-		"visual": {}
+		"visual": {
+
+		}
 	},
 	"radiant_arc": {
 		"description": "Emits a short-range photonic slash in a wide arc from the ship’s forward edge, instantly cutting through and damaging any targets caught in its path. Really cool looking.",
@@ -407,7 +419,9 @@
 		"description": "Creates a swirling vortex of energy around the ship, damaging enemies caught within its radius. It's like a cosmic washing machine for bad guys.",
 		"display_name": "Spin Cycle",
 		"enabled": true,
-		"motion": {},
+		"motion": {
+
+		},
 		"scene": "res://effects/spin_cycle/SpinCycle.tscn",
 		"shape": {
 			"slice_fraction": 0.1
@@ -431,9 +445,13 @@
 		"description": "Fires a magnet-accelerated spike that travels in a perfectly straight line and pierces through multiple enemies. Definitely not a space sniper rifle. Honest.",
 		"display_name": "Straight-Line Negotiator",
 		"enabled": true,
-		"motion": {},
+		"motion": {
+
+		},
 		"scene": "res://effects/straight_line_negotiator/StraightLineNegotiator.tscn",
-		"shape": {},
+		"shape": {
+
+		},
 		"spawner": "res://effects/straight_line_negotiator/straight_line_negotiator_spawner.gd",
 		"stats": {
 			"cooldown": 1.0,
@@ -490,7 +508,9 @@
 		"description": "Deploys proximity-triggered mines that detonate when enemies come near, dealing area damage. Inspired by the ancient Tothian defense systems.",
 		"display_name": "Tothian Mines",
 		"enabled": true,
-		"motion": {},
+		"motion": {
+
+		},
 		"scene": "res://effects/tothian_mines/TothianMine.tscn",
 		"shape": {
 			"trigger_radius": 52.0
@@ -508,6 +528,37 @@
 		"visual": {
 			"explosion_color": "#ff7f2f99",
 			"mine_color": "#ff4d4d"
+		}
+	},
+	"space_lasers": {
+		"description": "Fires focused neon-red laser bolts that lock onto the nearest target and ricochet to additional enemies on impact. Developed by the Crimson Array research division, each bolt seeks a new target after every hit, chaining damage across the battlefield.",
+		"display_name": "Space Lasers",
+		"enabled": true,
+		"motion": {
+			"burst_interval": 0.04
+		},
+		"scene": "res://effects/space_lasers/SpaceLasers.tscn",
+		"shape": {
+			"bounce_range": 400.0
+		},
+		"spawner": "res://effects/space_lasers/space_lasers_spawner.gd",
+		"stats": {
+			"cooldown": 1.0,
+			"damage": 5.0,
+			"lifetime": 1.5,
+			"projectile_bounces": 2.0,
+			"projectile_count": 1.0,
+			"projectile_speed": 750.0
+		},
+		"targeting": "nearest",
+		"type": "projectile",
+		"unlock_condition": "default",
+		"visual": {
+			"bolt_length": 12.0,
+			"bolt_width": 2.0,
+			"color_core": "#ff2222",
+			"color_glow": "#ff0000",
+			"glow_strength": 1.5
 		}
 	}
 }
