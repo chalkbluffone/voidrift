@@ -2,7 +2,7 @@
 applyTo: "scripts/ui/**,scenes/ui/**"
 ---
 
-# UI & HUD — Voidrift Domain
+# UI & HUD — Super Cool Space Game Domain
 
 ## HUD Layout
 

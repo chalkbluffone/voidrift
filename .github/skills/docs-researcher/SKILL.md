@@ -52,7 +52,7 @@ After researching, report:
 
 - **Source**: The URL where the information was found
 - **Finding**: The exact API signature, configuration format, or feature behavior
-- **Relevance to Voidrift**: How this applies to the current task
+- **Relevance to Super Cool Space Game**: How this applies to the current task
 
 ## Important
 

@@ -1,11 +1,11 @@
 ---
 name: ui-screen-creator
-description: Step-by-step procedure for creating new UI screens, popups, and overlays in Voidrift with correct signal wiring, synthwave styling, and hover FX patterns.
+description: Step-by-step procedure for creating new UI screens, popups, and overlays in Super Cool Space Game with correct signal wiring, synthwave styling, and hover FX patterns.
 ---
 
 # UI Screen Creator Skill
 
-Use this skill when asked to create a new UI screen, popup, overlay, or card-based selection interface. All UI in Voidrift follows a CanvasLayer + signal-driven pattern with synthwave styling.
+Use this skill when asked to create a new UI screen, popup, overlay, or card-based selection interface. All UI in Super Cool Space Game follows a CanvasLayer + signal-driven pattern with synthwave styling.
 
 ## When to Activate
 

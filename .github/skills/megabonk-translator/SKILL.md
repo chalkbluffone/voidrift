@@ -1,11 +1,11 @@
 ---
 name: megabonk-translator
-description: Translates Megabonk game concepts to Voidrift equivalents. Activate when the user describes features using Megabonk terminology (pots, chests, tomes, characters, etc.).
+description: Translates Megabonk game concepts to Super Cool Space Game equivalents. Activate when the user describes features using Megabonk terminology (pots, chests, tomes, characters, etc.).
 ---
 
 # Megabonk Translator Skill
 
-Voidrift is inspired by [Megabonk](https://megabonk.wiki/wiki/Main_Page). The user frequently describes features using Megabonk terminology. Use this skill to translate concepts and route to the correct Voidrift systems.
+Super Cool Space Game is inspired by [Megabonk](https://megabonk.wiki/wiki/Main_Page). The user frequently describes features using Megabonk terminology. Use this skill to translate concepts and route to the correct Super Cool Space Game systems.
 
 ## When to Activate
 
@@ -15,7 +15,7 @@ Voidrift is inspired by [Megabonk](https://megabonk.wiki/wiki/Main_Page). The us
 
 ## Concept Mapping Table
 
-| Megabonk Term        | Voidrift Equivalent  | Data File                                              | Key Scripts                                              | Notes                                                                         |
+| Megabonk Term        | Super Cool Space Game Equivalent  | Data File                                              | Key Scripts                                              | Notes                                                                         |
 | -------------------- | -------------------- | ------------------------------------------------------ | -------------------------------------------------------- | ----------------------------------------------------------------------------- |
 | **Pots**             | Shipwrecks           | `data/items.json`                                      | `scripts/systems/`                                       | Static world objects the player flies to and opens for loot                   |
 | **Chests**           | Jettisoned Cargo     | `data/items.json`                                      | `scripts/systems/`                                       | Higher-value world objects, rarer spawns, better loot tables                  |
@@ -39,7 +39,7 @@ Voidrift is inspired by [Megabonk](https://megabonk.wiki/wiki/Main_Page). The us
 
 ### Pots → Shipwrecks
 
-Megabonk pots are destructible world objects that drop items/XP. In Voidrift:
+Megabonk pots are destructible world objects that drop items/XP. In Super Cool Space Game:
 
 - **Placement**: Rejection-sampled positions at run start (like asteroids and stations)
 - **Interaction**: Player flies near → break/open → loot scatter
@@ -49,7 +49,7 @@ Megabonk pots are destructible world objects that drop items/XP. In Voidrift:
 
 ### Chests → Jettisoned Cargo
 
-Megabonk chests are rarer, higher-value containers. In Voidrift:
+Megabonk chests are rarer, higher-value containers. In Super Cool Space Game:
 
 - **Placement**: Fewer than shipwrecks, placed further from center
 - **Interaction**: May require brief proximity charge (like mini-stations) or instant open
@@ -76,15 +76,15 @@ Already implemented. Key reference:
 If the user describes a Megabonk mechanic not listed above:
 
 1. Check the [Megabonk Wiki](https://megabonk.wiki/wiki/Main_Page) for the mechanic details
-2. Identify the closest Voidrift architectural pattern (signal flow, data file, scene hierarchy)
-3. Map the mechanic to Voidrift's conventions before implementing
+2. Identify the closest Super Cool Space Game architectural pattern (signal flow, data file, scene hierarchy)
+3. Map the mechanic to Super Cool Space Game's conventions before implementing
 4. Add the new mapping to this table for future reference
 
 ## Routing
 
 After translation, route to the appropriate domain:
 
-| Voidrift Concept             | Instruction File              | Relevant Skill               |
+| Super Cool Space Game Concept             | Instruction File              | Relevant Skill               |
 | ---------------------------- | ----------------------------- | ---------------------------- |
 | Ships, Captains, Phase Shift | `player.instructions.md`      | —                            |
 | Weapons, Effects             | `combat.instructions.md`      | `weapon-effect-creator`      |

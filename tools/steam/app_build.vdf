@@ -1,0 +1,17 @@
+"appbuild"
+{
+	"appid"		"4502490"
+	"desc"		"Playtest build"
+	"buildoutput"	"..\..\build\steam_output\"
+	"contentroot"	""
+	"setlive"	""
+	"preview"	"0"
+	"local"		""
+
+	"depots"
+	{
+		"4502491"	"depot_build_windows.vdf"
+		"4502492"	"depot_build_linux.vdf"
+		"4502493"	"depot_build_macos.vdf"
+	}
+}

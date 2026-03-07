@@ -1,5 +1,5 @@
 {
-	"$schema": "voidrift-base-player-stats-schema",
+	"$schema": "scsg-base-player-stats-schema",
 	"_comment": "Universal default player stats. Characters inherit these and override only what differs. Loaded by DataLoader and used as the base layer in StatsComponent.",
 	"_section_defensive": "--- Ship Stats (Defensive) ---",
 	"max_hp": 100.0,

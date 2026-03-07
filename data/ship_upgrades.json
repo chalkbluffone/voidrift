@@ -1,5 +1,5 @@
 {
-	"$schema": "voidrift-ship-upgrades-schema",
+	"$schema": "scsg-ship-upgrades-schema",
 	"_comment": "Ship upgrades (equivalent to Megabonk tomes). Passive stat bonuses that level up.",
 	"damage_module": {
 		"id": "damage_module",

@@ -1,5 +1,5 @@
 {
-	"$schema": "voidrift-enemies-schema",
+	"$schema": "scsg-enemies-schema",
 	"_comment": "Enemy definitions. Spawn weights determine frequency in waves. Only enemies with existing scenes are listed here.",
 	"drone": {
 		"id": "drone",

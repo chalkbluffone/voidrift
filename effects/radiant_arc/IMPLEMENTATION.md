@@ -2,7 +2,7 @@
 
 ## ✅ Completed Tasks
 
-All hard requirements have been implemented in **Godot 4.5.1** for the Voidrift project.
+All hard requirements have been implemented in **Godot 4.5.1** for the Super Cool Space Game project.
 
 ### 1. Scene Structure (`RadiantArc.tscn`)
 

@@ -28,7 +28,7 @@ func _ready() -> void:
 		return
 	
 	# Write header
-	var header: String = "=== Voidrift Debug Log ===\n"
+	var header: String = "=== Super Cool Space Game Debug Log ==="
 	header += "Started: %s\n" % Time.get_datetime_string_from_system()
 	header += "Log path: %s\n" % _log_path
 	header += "=" .repeat(40) + "\n\n"

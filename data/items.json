@@ -1,5 +1,5 @@
 {
-  "$schema": "voidrift-items-schema",
+  "$schema": "scsg-items-schema",
   "_comment": "Items that can be found in cargo pods, purchased from vendors, or dropped.",
   
   "shield_battery": {

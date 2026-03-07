@@ -1,6 +1,6 @@
 ---
 name: enemy-type-creator
-description: Step-by-step procedure for creating new enemy types in Voidrift — script, scene, JSON data entry, spawner integration, and difficulty scaling.
+description: Step-by-step procedure for creating new enemy types in Super Cool Space Game — script, scene, JSON data entry, spawner integration, and difficulty scaling.
 ---
 
 # Enemy Type Creator Skill

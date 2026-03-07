@@ -2,7 +2,7 @@
 applyTo: "**/*.gd"
 ---
 
-# GDScript Logic — Voidrift Conventions
+# GDScript Logic — Super Cool Space Game Conventions
 
 ## Explicit Typing (Required)
 
@@ -218,7 +218,7 @@ When implementing new features, verify:
 After any code or data change, run a headless Godot launch:
 
 ```powershell
-& "C:\git\godot\Godot_v4.6-stable_win64\Godot_v4.6-stable_win64.exe" --headless --path "C:\git\voidrift" --import --quit
+& "C:\git\godot\Godot_v4.6-stable_win64\Godot_v4.6-stable_win64.exe" --headless --path "C:\git\Super Cool Space Game" --import --quit
 ```
 
 Or use VS Code task: `godot: headless sanity check` / script: `tools/headless_sanity_check.ps1`

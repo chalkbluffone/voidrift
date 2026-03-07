@@ -1,4 +1,4 @@
-# Voidrift Project Scan Report
+# Super Cool Space Game Project Scan Report
 
 ## UNUSED CODE
 

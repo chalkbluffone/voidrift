@@ -4,3 +4,18 @@
 *.translation
 debug_log.txt
 .vscode/settings.json
+
+# GodotSteam large archives (exceed GitHub 100MB limit)
+addons/gotdotsteam/*.tar.xz
+
+# Build output
+build/
+
+# Steam
+steam_appid.txt
+steam_api64.dll
+libsteam_api.so
+libsteam_api.dylib
+
+# SteamCMD output
+build/steam_output/

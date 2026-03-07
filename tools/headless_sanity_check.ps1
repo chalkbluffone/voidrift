@@ -1,7 +1,7 @@
 $ErrorActionPreference = 'Stop'
 
 $godotExe = "C:\git\godot\Godot_v4.6-stable_win64\Godot_v4.6-stable_win64.exe"
-$projectPath = "C:\git\voidrift"
+$projectPath = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $stdoutLog = Join-Path $projectPath "debug_log_headless_stdout.txt"
 $stderrLog = Join-Path $projectPath "debug_log_headless_stderr.txt"
 

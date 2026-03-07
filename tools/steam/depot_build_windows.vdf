@@ -1,0 +1,13 @@
+"DepotBuildConfig"
+{
+	"DepotID"	"4502491"
+	"contentroot"	"..\..\build\windows\"
+	"FileMapping"
+	{
+		"LocalPath"	"*"
+		"DepotPath"	"."
+		"recursive"	"1"
+	}
+	"FileExclusion"	"steam_appid.txt"
+	"FileExclusion"	"*.pdb"
+}

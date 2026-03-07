@@ -1,6 +1,6 @@
 ---
 name: world-interactable-creator
-description: Step-by-step procedure for creating world-placed interactable objects in Voidrift — shipwrecks, jettisoned cargo, beacons, and other objects the player can interact with.
+description: Step-by-step procedure for creating world-placed interactable objects in Super Cool Space Game — shipwrecks, jettisoned cargo, beacons, and other objects the player can interact with.
 ---
 
 # World Interactable Creator Skill

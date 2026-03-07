@@ -2,7 +2,7 @@
 applyTo: "scripts/enemies/**,scenes/enemies/**"
 ---
 
-# Enemies & Spawning — Voidrift Domain
+# Enemies & Spawning — Super Cool Space Game Domain
 
 ## Enemy Scaling (Over Time)
 

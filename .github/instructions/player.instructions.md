@@ -2,7 +2,7 @@
 applyTo: "scripts/player/**"
 ---
 
-# Player & Ship — Voidrift Domain
+# Player & Ship — Super Cool Space Game Domain
 
 ## Ship + Captain System
 

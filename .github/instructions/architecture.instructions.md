@@ -2,18 +2,19 @@
 applyTo: "**"
 ---
 
-# Architecture — Voidrift Project Structure
+# Architecture — Super Cool Space Game Project Structure
 
 ## Directory Layout
 
 ```
 data/           9 JSON files — all game content (weapons, ships, captains, enemies, etc.)
-globals/        11 autoloads (GameConfig → SettingsManager)
+globals/        12 autoloads (GameConfig → SteamManager)
 scripts/        GDScript organized by domain (core/, combat/, player/, systems/, ui/, pickups/, enemies/)
 scenes/         .tscn files (gameplay/, ui/, pickups/, enemies/)
 effects/        17 weapon effect directories, each with .gd + .tscn + .gdshader
 shaders/        Global shaders (starfield, fog_of_war, radiation_belt, circle_mask, station_charge)
-tools/          headless_sanity_check.ps1, weapon_test_lab/, build_megabonk_csv.py
+tools/          build.ps1, deploy.ps1, headless_sanity_check.ps1, steam/ (VDFs), weapon_test_lab/
+build/          Export output (windows/, linux/, macos/) — gitignored
 ```
 
 ## Autoloads (load order)
@@ -31,6 +32,7 @@ tools/          headless_sanity_check.ps1, weapon_test_lab/, build_megabonk_csv.
 | 9   | `GameManager`        | Legacy compatibility facade                        |
 | 10  | `FileLogger`         | Debug logging to `debug_log.txt`                   |
 | 11  | `SettingsManager`    | Audio/display/monitor selection                    |
+| 12  | `SteamManager`       | GodotSteam init, callbacks, graceful fallback      |
 
 ## Data Files (`data/`)
 

@@ -1,0 +1,12 @@
+"DepotBuildConfig"
+{
+	"DepotID"	"4502493"
+	"contentroot"	"..\..\build\macos\"
+	"FileMapping"
+	{
+		"LocalPath"	"*"
+		"DepotPath"	"."
+		"recursive"	"1"
+	}
+	"FileExclusion"	"steam_appid.txt"
+}

@@ -1,5 +1,5 @@
 {
-	"$schema": "voidrift-captains-schema",
+	"$schema": "scsg-captains-schema",
 	"_comment": "Captain definitions. Each captain has a passive (stat bonuses) and an active ability (template-based). Passive effects are applied as flat bonuses at run start.",
 	"captain_nightmare": {
 		"id": "captain_nightmare",

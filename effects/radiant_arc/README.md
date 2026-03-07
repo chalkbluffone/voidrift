@@ -1,6 +1,6 @@
 # Radiant Arc Effect
 
-A dynamic, procedurally-generated synthwave slash effect for Voidrift, built with Polygon2D and custom shaders.
+A dynamic, procedurally-generated synthwave slash effect for Super Cool Space Game, built with Polygon2D and custom shaders.
 
 ## Overview
 
@@ -207,8 +207,8 @@ Edit **radiant_arc.gdshader** directly. Key uniforms:
 - **follow_mode** not fully implemented (currently always fixed rotation)
 - No particle accents yet (sparks, etc.) — can add via Sparks node in scene
 - Shader uses simple hash noise (could upgrade to Perlin for smoother distortion)
-- Only 2D currently (Voidrift scope)
+- Only 2D currently (Super Cool Space Game scope)
 
 ## Credits
 
-Designed as a dynamic synthwave slash effect for **Voidrift**, using procedural geometry and custom Godot 4.5.1 shaders.
+Designed as a dynamic synthwave slash effect for **Super Cool Space Game**, using procedural geometry and custom Godot 4.5.1 shaders.

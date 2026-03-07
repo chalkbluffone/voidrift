@@ -1,6 +1,6 @@
 ---
 name: weapon-effect-creator
-description: Step-by-step procedure for creating a complete new weapon effect in Voidrift — spawner, effect script, scene, shader, JSON entries, and dispatch wiring.
+description: Step-by-step procedure for creating a complete new weapon effect in Super Cool Space Game — spawner, effect script, scene, shader, JSON entries, and dispatch wiring.
 ---
 
 # Weapon Effect Creator Skill

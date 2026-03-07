@@ -1,11 +1,11 @@
 ---
 name: state-machine-generator
-description: Generate modular GDScript state machines following Voidrift's explicit typing conventions, signal architecture, and data-driven design patterns.
+description: Generate modular GDScript state machines following Super Cool Space Game's explicit typing conventions, signal architecture, and data-driven design patterns.
 ---
 
 # State Machine Generator Skill
 
-Use this skill when asked to create a state machine for any game entity — enemies, bosses, UI flows, or ship behavior modes. All generated code must follow Voidrift's GDScript conventions.
+Use this skill when asked to create a state machine for any game entity — enemies, bosses, UI flows, or ship behavior modes. All generated code must follow Super Cool Space Game's GDScript conventions.
 
 ## State Machine Architecture
 
@@ -108,7 +108,7 @@ Entity (CharacterBody2D)
 └── CollisionShape2D
 ```
 
-## Voidrift Conventions (Required)
+## Super Cool Space Game Conventions (Required)
 
 All generated state machine code MUST follow these rules:
 

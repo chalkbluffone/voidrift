@@ -1,6 +1,6 @@
 ---
 name: pickup-type-creator
-description: Step-by-step procedure for creating new pickup types in Voidrift following the BasePickup pattern — script, scene, and integration.
+description: Step-by-step procedure for creating new pickup types in Super Cool Space Game following the BasePickup pattern — script, scene, and integration.
 ---
 
 # Pickup Type Creator Skill

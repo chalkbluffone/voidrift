@@ -1,7 +1,7 @@
-# Voidrift — Global Constitution
+# Super Cool Space Game — Global Constitution
 
-> **Top-down 2D sci-fi roguelike survival game** | Godot 4.6 | Steam (Windows primary)
-> Players pilot a ship through space, auto-attacking waves of enemies while collecting XP, leveling up, and choosing upgrades during timed survival runs. Inspired by Megabonk.
+> **Top-down 2D sci-fi roguelike survival game** | Godot 4.6 | Steam (Windows primary, Linux + macOS)
+> Players pilot a ship through space, auto-attacking waves of enemies while collecting XP, leveling up, and choosing upgrades during timed survival runs. Deployed as a confidential Steam playtest (App ID 4502490). Inspired by Megabonk.
 
 ---
 
@@ -23,6 +23,7 @@ This project uses a modular agentic workspace. Detailed instructions are distrib
 | `.github/instructions/world.instructions.md`        | `scripts/systems/**,scenes/gameplay/**` | Arena boundary, asteroids, stations, flow field, fog of war                |
 | `.github/instructions/ui.instructions.md`           | `scripts/ui/**,scenes/ui/**`            | HUD, minimap, full map, level-up UI, station buff popup                    |
 | `.github/instructions/progression.instructions.md`  | `globals/**`                            | XP curve, rarity, level-up, station buffs, credits, run structure          |
+| `.github/instructions/steam.instructions.md`        | `globals/steam_manager.gd,tools/**`     | Build pipeline, deploy pipeline, SteamCMD, VDFs, SteamManager autoload     |
 
 ### Agent & Skill Files
 
@@ -34,7 +35,7 @@ This project uses a modular agentic workspace. Detailed instructions are distrib
 | `.github/agents/qa-researcher.agent.md`              | Agent persona | Playwright-based doc verification, QA workflows             |
 | `.github/skills/docs-researcher/SKILL.md`            | Skill         | Playwright MCP crawling for Godot and Copilot docs          |
 | `.github/skills/state-machine-generator/SKILL.md`    | Skill         | Modular GDScript state machine generation                   |
-| `.github/skills/megabonk-translator/SKILL.md`        | Skill         | Megabonk → Voidrift concept translation                     |
+| `.github/skills/megabonk-translator/SKILL.md`        | Skill         | Megabonk → Super Cool Space Game concept translation        |
 | `.github/skills/weapon-effect-creator/SKILL.md`      | Skill         | New weapon effect creation (spawner, scene, JSON, wiring)   |
 | `.github/skills/enemy-type-creator/SKILL.md`         | Skill         | New enemy type creation (script, scene, JSON, scaling)      |
 | `.github/skills/world-interactable-creator/SKILL.md` | Skill         | World interactable creation (stations, shipwrecks, cargo)   |
@@ -66,9 +67,9 @@ This project uses a modular agentic workspace. Detailed instructions are distrib
 | Create new pickup/collectible type                           | **pickup-type-creator** skill        |
 | Create new UI screen, popup, or overlay                      | **ui-screen-creator** skill          |
 
----
+| Build, deploy, or update Steam pipeline | `steam.instructions.md` |
 
-## Research Protocol (Mandatory)
+---
 
 If a Godot 4.6 API, node, method, or a Copilot feature (skills, hooks, agents) is unknown or uncertain, the agent **MUST** use the Playwright MCP to visit official documentation before responding. Do NOT guess.
 
@@ -163,4 +164,4 @@ Use `FileLogger` autoload for all debug output. Writes to `c:\git\voidrift\debug
 - [Godot 4 Docs](https://docs.godotengine.org/en/stable/)
 - [GDQuest](https://www.gdquest.com/)
 
-_Last updated: February 25, 2026_
+_Last updated: March 7, 2026_

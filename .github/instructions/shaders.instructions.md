@@ -2,11 +2,11 @@
 applyTo: "**/*.gdshader"
 ---
 
-# Shader Conventions — Voidrift
+# Shader Conventions — Super Cool Space Game
 
 ## Godot 4.6 Shader Language
 
-All shaders use `.gdshader` files with Godot's GLSL-like shading language. Voidrift uses **CanvasItem** shaders exclusively (2D game).
+All shaders use `.gdshader` files with Godot's GLSL-like shading language. Super Cool Space Game uses **CanvasItem** shaders exclusively (2D game).
 
 ## Shader Header Convention
 
@@ -34,7 +34,7 @@ uniform float thickness : hint_range(0.0, 200.0) = 10.0;
 
 ## Visual Theme: Synthwave Palette
 
-Voidrift uses a neon synthwave aesthetic. Common colors:
+Super Cool Space Game uses a neon synthwave aesthetic. Common colors:
 
 - **Hot Pink**: `vec4(1.0, 0.08, 0.58, 1.0)` — HP bars, damage
 - **Neon Purple**: `vec4(0.58, 0.0, 1.0, 1.0)` — XP, upgrades

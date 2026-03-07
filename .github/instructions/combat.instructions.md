@@ -2,7 +2,7 @@
 applyTo: "scripts/combat/**,effects/**"
 ---
 
-# Combat & Weapons — Voidrift Domain
+# Combat & Weapons — Super Cool Space Game Domain
 
 ## Auto-Attack System
 

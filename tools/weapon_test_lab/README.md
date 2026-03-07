@@ -1,6 +1,6 @@
 # Weapon Test Lab
 
-A development-only tool for testing and tuning weapons in Voidrift.
+A development-only tool for testing and tuning weapons in Super Cool Space Game.
 
 ## Overview
 

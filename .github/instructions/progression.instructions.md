@@ -2,7 +2,7 @@
 applyTo: "globals/**"
 ---
 
-# Progression & Upgrades — Voidrift Domain
+# Progression & Upgrades — Super Cool Space Game Domain
 
 ## XP Curve (Player Leveling)
 

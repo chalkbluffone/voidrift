@@ -2,7 +2,7 @@
 applyTo: "scripts/systems/**,scenes/gameplay/**"
 ---
 
-# World & Environment — Voidrift Domain
+# World & Environment — Super Cool Space Game Domain
 
 ## Arena Boundary
 
