@@ -347,6 +347,8 @@ const RADIATION_DAMAGE_PER_SEC: float = 10.0   # DOT when inside radiation belt
 const RADIATION_PUSH_FORCE: float = 150.0      # Force pushing player back toward center
 const PLAYER_SPAWN_SAFE_MARGIN: float = 2000.0 # Spawn within ARENA_RADIUS - this margin
 const ENEMY_DESPAWN_BUFFER: float = 500.0      # Despawn enemies beyond ARENA_RADIUS + buffer
+const ENEMY_LEASH_RADIUS: float = 1200.0       # Max distance from player before teleport-respawn
+const BOSS_LEASH_RADIUS: float = 2000.0        # Leash radius for boss enemies (wider)
 
 # =============================================================================
 # ASTEROIDS
@@ -417,6 +419,23 @@ const STATION_FLAT_STATS: Array[String] = [
 	"projectile_count", "projectile_bounces", "extra_phase_shifts", "phase_shift_distance",
 	"luck", "difficulty",
 ]
+
+# =============================================================================
+# PERFORMANCE DIAGNOSTICS
+# =============================================================================
+const PERF_LOG_INTERVAL: float = 1.0           # Seconds between diagnostic logs
+
+# =============================================================================
+# GRAVITY WELL (pickup vacuum system)
+# =============================================================================
+const GRAVITY_WELL_VACUUM_SPEED: float = 1200.0            # Speed pickups fly to player during vacuum
+const GRAVITY_WELL_DROP_CHANCE: float = 0.015               # Chance per enemy kill to drop Gravity Well
+const GRAVITY_WELL_MIN_PICKUPS_FOR_DROP: int = 10           # Minimum uncollected pickups before drop can occur
+const GRAVITY_WELL_BEACON_COUNT: int = 4                    # Beacons placed per run
+const GRAVITY_WELL_BEACON_ACTIVATION_RADIUS: float = 80.0   # Proximity to activate beacon
+const GRAVITY_WELL_BEACON_MIN_SEPARATION: float = 500.0     # Minimum distance between beacons
+const GRAVITY_WELL_BEACON_SPAWN_MIN_RADIUS: float = 600.0   # Min distance from arena center
+const GRAVITY_WELL_BEACON_SPAWN_MAX_RADIUS: float = 3000.0  # Max distance from arena center
 
 # Display-friendly stat names for UI
 const STATION_STAT_DISPLAY_NAMES: Dictionary = {

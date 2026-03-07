@@ -74,7 +74,51 @@ Key files:
 - `scripts/systems/fog_of_war.gd` — `FogOfWar` RefCounted class managing exploration grid with gradient reveal
 - `shaders/fog_of_war.gdshader` — Neon purple gas effect with FBM noise animation
 
+### Performance: Fog Texture Caching
+
+Fog texture is rebuilt only when a dirty flag is set (player moves into a new grid cell), not every frame. This avoids per-frame `ImageTexture` rebuilds which were a major performance bottleneck at high enemy counts.
+
+## Gravity Well Beacons
+
+One-time-use world interactables that vacuum all nearby pickups to the player:
+
+- `GRAVITY_WELL_BEACON_COUNT` beacons per run, spawned by `GravityWellBeaconSpawner`
+- Spawn positions avoid asteroids and stations using rejection sampling
+- Drop chance: `GRAVITY_WELL_DROP_CHANCE` when enough uncollected pickups exist (`GRAVITY_WELL_MIN_PICKUPS_FOR_DROP`)
+
+### Beacon Visual
+
+Custom `_draw()` on Node2D (no sprite/texture):
+
+- 50px radius circle with pulsing purple glow (`Color(0.5, 0.15, 0.9, 0.7)`)
+- Border ring outline
+- Centered "GRAVITY\nWELL" text (Orbitron-Bold, 14px)
+- Pulse animation via `sin()` modulating alpha
+
+### Beacon Interaction
+
+Manual activation — player must be in range AND press the `interact` input:
+
+- `Area2D` with `GRAVITY_WELL_BEACON_ACTIVATION_RADIUS` for proximity detection
+- `body_entered`/`body_exited` signals track `_player_in_range` flag
+- `_process()` polls `Input.is_action_just_pressed("interact")` when player is in range
+- Proximity prompt shown: `"[E] Activate"` (keyboard) or `"[X] Activate"` (controller)
+- Controller detection: `Input.get_connected_joypads().size() > 0`
+
+### Input Action: `interact`
+
+Defined in `project.godot`:
+
+- Keyboard: `E` key (physical keycode 69)
+- Gamepad: button index 2 (Square on PS / X on Xbox)
+
+Key files:
+
+- `scripts/systems/gravity_well_beacon.gd` — Beacon node with visual, prompt, and activation logic
+- `scripts/systems/gravity_well_beacon_spawner.gd` — Spawner (RefCounted) for placement
+
 ## Resolved Issues
 
 - **Enemy obstacle avoidance**: Raycast approach caused spinning/clustering. Potential field repulsion caused jitter. Replaced with BFS flow field — globally consistent, deterministic, no per-enemy physics queries.
 - **Station buff flat stats** used percentage-scale amounts (0.02–0.15) applied raw as flat bonuses, making +9 Shield actually +0.09. Fixed by scaling flat amounts ×100 at generation in `StationService._generate_single_buff`.
+- **Gravity Well placeholder visual**: Replaced ColorRect with custom `_draw()` circle (pulsing glow, border ring, centered text) and manual activation via `interact` input with proximity prompt.

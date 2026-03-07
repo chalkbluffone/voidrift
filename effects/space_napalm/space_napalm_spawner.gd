@@ -37,7 +37,7 @@ func spawn(
 
 	# Purge dead references and enforce projectile count limit
 	_active_instances = _active_instances.filter(
-		func(inst: Node) -> bool: return is_instance_valid(inst) and inst.is_inside_tree()
+		func(inst: Variant) -> bool: return is_instance_valid(inst) and inst.is_inside_tree()
 	)
 	var max_count: int = int(params.get("projectile_count", _max_active))
 	if max_count < 1:

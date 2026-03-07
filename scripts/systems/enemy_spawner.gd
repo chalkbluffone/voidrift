@@ -10,9 +10,16 @@ signal swarm_ended
 const XPPickupScene: PackedScene = preload("res://scenes/pickups/xp_pickup.tscn")
 const CreditPickupScene: PackedScene = preload("res://scenes/pickups/credit_pickup.tscn")
 const StardustPickupScene: PackedScene = preload("res://scenes/pickups/stardust_pickup.tscn")
+const GravityWellPickupScene: PackedScene = preload("res://scenes/pickups/gravity_well_pickup.tscn")
 
 var _player: Node2D = null
 var _spawn_timer: float = 0.0
+
+## Spatial hash grid for fast enemy neighbor queries (separation force)
+var _enemy_grid: SpatialHashGrid = null
+
+## Cached asteroid positions + radii for spawn position checks
+var _cached_asteroids: Array[Dictionary] = []
 
 ## Cached enemy pool: Array of { data: Dictionary, scene: PackedScene, weight: float }
 var _enemy_pool: Array[Dictionary] = []
@@ -23,21 +30,41 @@ var _swarm_active: bool = false
 var _swarm_timer: float = 0.0
 var _swarms_triggered: int = 0  # How many swarms have been triggered this run
 
+## Diagnostic logging
+var _perf_log_timer: float = 0.0
+
 @onready var RunManager: Node = get_node("/root/RunManager")
 @onready var GameConfig: Node = get_node("/root/GameConfig")
 @onready var DataLoader: Node = get_node("/root/DataLoader")
+@onready var FileLogger: Node = get_node("/root/FileLogger")
 
 
 func _ready() -> void:
 	add_to_group("enemy_spawner")
 	_find_player()
 	_build_enemy_pool()
+	_cache_asteroid_positions()
+	# Initialize spatial hash grid (cell size = 2× separation radius for good bucket distribution)
+	_enemy_grid = SpatialHashGrid.new(GameConfig.ENEMY_SEPARATION_RADIUS * 2.0)
 
 
 func _process(delta: float) -> void:
 	if not _player:
 		_find_player()
 		return
+	
+	# Rebuild spatial hash grid each frame
+	_enemy_grid.clear()
+	var all_enemies: Array[Node] = get_tree().get_nodes_in_group("enemies")
+	for enemy: Node in all_enemies:
+		if enemy is Node2D:
+			_enemy_grid.insert(enemy as Node2D)
+	
+	# Diagnostic logging
+	_perf_log_timer -= delta
+	if _perf_log_timer <= 0.0:
+		_perf_log_timer = GameConfig.PERF_LOG_INTERVAL
+		_log_diagnostics()
 	
 	# Check for swarm triggers
 	_check_swarm_triggers()
@@ -92,9 +119,8 @@ func _get_batch_size() -> int:
 
 
 ## Find a spawn position around the player that doesn't overlap with any asteroid.
-## Uses each asteroid's actual effective_radius + buffer for accurate collision checks.
+## Uses cached asteroid positions for performance (asteroids are static).
 func _find_spawn_position() -> Vector2:
-	var asteroids: Array[Node] = get_tree().get_nodes_in_group("asteroids")
 	var buffer: float = 30.0  # Extra clearance beyond asteroid edge
 	var max_attempts: int = 30
 
@@ -104,14 +130,10 @@ func _find_spawn_position() -> Vector2:
 		var candidate: Vector2 = _player.global_position + Vector2.from_angle(angle) * distance
 
 		var overlaps: bool = false
-		for asteroid: Node in asteroids:
-			if not asteroid is Node2D:
-				continue
-			var asteroid_2d: Node2D = asteroid as Node2D
-			var radius: float = GameConfig.ASTEROID_SIZE_MAX
-			if "effective_radius" in asteroid_2d:
-				radius = float(asteroid_2d.get("effective_radius"))
-			if candidate.distance_to(asteroid_2d.global_position) < radius + buffer:
+		for asteroid_data: Dictionary in _cached_asteroids:
+			var asteroid_pos: Vector2 = asteroid_data["position"]
+			var radius: float = float(asteroid_data["radius"])
+			if candidate.distance_to(asteroid_pos) < radius + buffer:
 				overlaps = true
 				break
 
@@ -125,14 +147,10 @@ func _find_spawn_position() -> Vector2:
 		var candidate: Vector2 = _player.global_position + Vector2.from_angle(angle) * distance
 
 		var overlaps: bool = false
-		for asteroid: Node in asteroids:
-			if not asteroid is Node2D:
-				continue
-			var asteroid_2d: Node2D = asteroid as Node2D
-			var radius: float = GameConfig.ASTEROID_SIZE_MAX
-			if "effective_radius" in asteroid_2d:
-				radius = float(asteroid_2d.get("effective_radius"))
-			if candidate.distance_to(asteroid_2d.global_position) < radius + buffer:
+		for asteroid_data: Dictionary in _cached_asteroids:
+			var asteroid_pos: Vector2 = asteroid_data["position"]
+			var radius: float = float(asteroid_data["radius"])
+			if candidate.distance_to(asteroid_pos) < radius + buffer:
 				overlaps = true
 				break
 
@@ -253,6 +271,28 @@ func _build_enemy_pool() -> void:
 		_total_weight += weight
 
 
+## Cache asteroid positions and radii at startup (asteroids are static).
+func _cache_asteroid_positions() -> void:
+	_cached_asteroids.clear()
+	# Deferred to run after all asteroids are placed in tree
+	call_deferred("_do_cache_asteroid_positions")
+
+
+func _do_cache_asteroid_positions() -> void:
+	var asteroids: Array[Node] = get_tree().get_nodes_in_group("asteroids")
+	for asteroid: Node in asteroids:
+		if not asteroid is Node2D:
+			continue
+		var asteroid_2d: Node2D = asteroid as Node2D
+		var radius: float = GameConfig.ASTEROID_SIZE_MAX
+		if "effective_radius" in asteroid_2d:
+			radius = float(asteroid_2d.get("effective_radius"))
+		_cached_asteroids.append({
+			"position": asteroid_2d.global_position,
+			"radius": radius,
+		})
+
+
 ## Pick a random enemy from the pool using weighted selection.
 ## Filters out enemies whose min_difficulty hasn't been reached yet.
 func _pick_weighted_enemy() -> Dictionary:
@@ -309,6 +349,13 @@ func _on_enemy_died(enemy: Node, death_position: Vector2) -> void:
 	if stardust > 0:
 		_spawn_burst_stardust(death_position, stardust)
 
+	# Gravity Well drop (rare, only when enough pickups exist on map)
+	if not is_freighter:
+		var pickup_count: int = get_tree().get_nodes_in_group("pickups").size()
+		if pickup_count >= GameConfig.GRAVITY_WELL_MIN_PICKUPS_FOR_DROP:
+			if randf() < GameConfig.GRAVITY_WELL_DROP_CHANCE:
+				_spawn_gravity_well(death_position)
+
 
 func _spawn_xp(pos: Vector2, amount: float) -> void:
 	var xp: Area2D = XPPickupScene.instantiate()
@@ -362,6 +409,13 @@ func _spawn_burst_stardust(pos: Vector2, total_amount: int) -> void:
 		get_tree().current_scene.call_deferred("add_child", stardust)
 
 
+## Spawn a Gravity Well pickup at the given position.
+func _spawn_gravity_well(pos: Vector2) -> void:
+	var gw: Area2D = GravityWellPickupScene.instantiate()
+	gw.global_position = pos
+	get_tree().current_scene.call_deferred("add_child", gw)
+
+
 # =============================================================================
 # SWARM SYSTEM
 # =============================================================================
@@ -396,12 +450,15 @@ func _start_swarm_warning() -> void:
 func _start_swarm() -> void:
 	_swarm_active = true
 	_swarm_timer = randf_range(GameConfig.SWARM_DURATION_MIN, GameConfig.SWARM_DURATION_MAX)
+	FileLogger.log_info("EnemySpawner", "[SWARM] Started — duration=%.1fs" % _swarm_timer)
 	swarm_started.emit()
 
 
 ## End the current swarm event.
 func _end_swarm() -> void:
 	_swarm_active = false
+	var enemy_count: int = get_tree().get_nodes_in_group("enemies").size()
+	FileLogger.log_info("EnemySpawner", "[SWARM] Ended — enemies_alive=%d" % enemy_count)
 	RunManager.record_swarm_completed()
 	swarm_ended.emit()
 
@@ -447,3 +504,20 @@ func _get_player_elite_spawn_rate() -> float:
 	if _player and _player.has_method("get_stat"):
 		return _player.get_stat("elite_spawn_rate")
 	return 1.0
+
+
+# =============================================================================
+# DIAGNOSTICS
+# =============================================================================
+
+## Log performance-relevant counts to FileLogger.
+func _log_diagnostics() -> void:
+	var enemy_count: int = get_tree().get_nodes_in_group("enemies").size()
+	var pickup_count: int = get_tree().get_nodes_in_group("pickups").size()
+	var time_elapsed: float = RunManager.run_data.time_elapsed
+	FileLogger.log_info("EnemySpawner", "[PERF] t=%.0fs enemies=%d pickups=%d swarm=%s" % [time_elapsed, enemy_count, pickup_count, str(_swarm_active)])
+
+
+## Returns the spatial hash grid for enemy neighbor queries.
+func get_enemy_grid() -> SpatialHashGrid:
+	return _enemy_grid

@@ -13,6 +13,13 @@ var _fog_texture: ImageTexture
 var _arena_radius: float = 16000.0
 var _fade_cells: int = 3  # Number of cells for edge gradient
 
+# View texture caching
+var _view_image: Image = null
+var _view_texture: ImageTexture = null
+var _view_dirty: bool = true
+var _last_view_center: Vector2 = Vector2.INF
+var _last_view_radius: float = 0.0
+
 
 func _init() -> void:
 	_grid_size = GameConfig.FOG_GRID_SIZE
@@ -38,16 +45,24 @@ func get_full_texture() -> ImageTexture:
 
 
 ## Returns a fog texture centered on the given world position covering the view range.
-## The texture maps UV (0-1) to the view area around center_pos.
+## Caches the result and only rebuilds when fog state changes or camera moves significantly.
 func get_texture(center_pos: Vector2, view_radius: float) -> ImageTexture:
-	# Create a smaller texture for the viewport
-	var view_size: int = 64  # Texture resolution for view
-	var view_image: Image = Image.create(view_size, view_size, false, Image.FORMAT_L8)
-	
+	# Check if we need to rebuild: dirty flag or camera moved more than half a cell
+	var moved: bool = _last_view_center.distance_squared_to(center_pos) > (_cell_size * _cell_size * 0.25)
+	if not _view_dirty and not moved and _view_texture != null and absf(view_radius - _last_view_radius) < 1.0:
+		return _view_texture
+
+	_last_view_center = center_pos
+	_last_view_radius = view_radius
+	_view_dirty = false
+
+	var view_size: int = 64
+	if _view_image == null:
+		_view_image = Image.create(view_size, view_size, false, Image.FORMAT_L8)
+
 	# Sample the fog grid for the view area
 	for y: int in range(view_size):
 		for x: int in range(view_size):
-			# Map texture pixel to world position
 			var uv_x: float = (float(x) + 0.5) / float(view_size)
 			var uv_y: float = (float(y) + 0.5) / float(view_size)
 			var world_offset: Vector2 = Vector2(
@@ -55,12 +70,15 @@ func get_texture(center_pos: Vector2, view_radius: float) -> ImageTexture:
 				(uv_y - 0.5) * 2.0 * view_radius
 			)
 			var world_pos: Vector2 = center_pos + world_offset
-			
-			# Check if explored
 			var is_exp: bool = is_explored(world_pos)
-			view_image.set_pixel(x, y, Color.WHITE if is_exp else Color.BLACK)
-	
-	return ImageTexture.create_from_image(view_image)
+			_view_image.set_pixel(x, y, Color.WHITE if is_exp else Color.BLACK)
+
+	if _view_texture == null:
+		_view_texture = ImageTexture.create_from_image(_view_image)
+	else:
+		_view_texture.update(_view_image)
+
+	return _view_texture
 
 
 ## Reveal area around a world position with given radius.
@@ -100,6 +118,7 @@ func reveal_radius(world_pos: Vector2, radius: float) -> void:
 					changed = true
 	
 	if changed:
+		_view_dirty = true
 		_update_texture()
 
 

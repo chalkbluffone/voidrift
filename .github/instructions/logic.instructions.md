@@ -128,14 +128,36 @@ for weapon in weapons:
 
 ### "Can't change state while flushing queries" Error
 
-Adding/removing nodes during physics callbacks causes this. Use `call_deferred`:
+Adding/removing nodes or toggling physics properties during physics callbacks causes this. Use `call_deferred` or `set_deferred`:
 
 ```gdscript
 # WRONG
 get_tree().current_scene.add_child(node)
+_hitbox.monitoring = false  # inside body_entered callback
 
 # RIGHT
 get_tree().current_scene.call_deferred("add_child", node)
+_hitbox.set_deferred("monitoring", false)  # deferred property set
+```
+
+### `is_instance_valid()` Before `as` Cast (Critical)
+
+Casting a freed object with `as Node2D` (or any type) crashes **immediately** — before any validity check can run. Always check `is_instance_valid()` first:
+
+```gdscript
+# WRONG — crashes if entity is freed
+for entity: Variant in bucket:
+    var node: Node2D = entity as Node2D
+    if node and is_instance_valid(node):
+        ...
+
+# RIGHT — check validity before cast
+for entity: Variant in bucket:
+    if not is_instance_valid(entity):
+        continue
+    var node: Node2D = entity as Node2D
+    if node:
+        ...
 ```
 
 ### Autoload Not Found at Runtime

@@ -241,17 +241,24 @@ func _draw_asteroids(center: Vector2, radius: float, player_pos: Vector2) -> voi
 				var base_color: Color = asteroid_2d.get_polygon_color()
 				color = Color(base_color.r, base_color.g, base_color.b, 0.7)
 
-			# Scale polygon points to minimap space and clamp to circle
+			# Scale polygon points to minimap space
 			var scaled_points: PackedVector2Array = PackedVector2Array()
 			scaled_points.resize(points.size())
+			var any_clamped: bool = false
 			for i: int in range(points.size()):
 				var pt: Vector2 = center + offset + points[i] * _world_to_minimap_scale
 				var to_pt: Vector2 = pt - center
 				if to_pt.length() > radius - 1.0:
 					pt = center + to_pt.normalized() * (radius - 1.0)
+					any_clamped = true
 				scaled_points[i] = pt
 
-			draw_colored_polygon(scaled_points, color)
+			# Clamping vertices to the circle edge creates degenerate polygons
+			# that fail triangulation. Draw a simple dot for edge asteroids.
+			if any_clamped:
+				draw_circle(center + offset, maxf(bounding, 3.0), color)
+			else:
+				draw_colored_polygon(scaled_points, color)
 		else:
 			# Fallback: draw dot for non-Asteroid nodes in group
 			draw_circle(center + offset, 4.0, COLOR_ASTEROID)

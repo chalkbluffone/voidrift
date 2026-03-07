@@ -25,6 +25,7 @@ The HUD uses Orbitron-Bold font throughout with synthwave neon styling.
 - Shows player (center), enemies, pickups, arena boundary ring
 - Station markers: gold (active), gray (depleted) — always visible (not fog-restricted)
 - Asteroid polygons: actual shapes scaled to minimap coordinates, fog-restricted, clamped to circular boundary
+- **Polygon clamping rule**: If ANY vertex is clamped to the circular boundary, draw a simple `draw_circle()` dot instead of `draw_colored_polygon()`. Only fully-inside asteroids get polygon treatment (avoids degenerate triangulation).
 - World radius visible controlled by `MINIMAP_WORLD_RADIUS` (zoom level)
 - Key file: `scripts/ui/minimap.gd`
 
@@ -64,3 +65,4 @@ Visual XP graph overlay in HUD for debugging progression curve during play.
 
 - **Ship select hover on load**: First card appeared hovered because `grab_focus()` triggers `focus_entered` → hover tween. Fixed by calling `reset_hover()` immediately after `grab_focus()`.
 - **HUD shield bar invisible**: `get_stat("max_shield")` doesn't exist — the stat is `"shield"`. Fixed to `get_stat("shield")`.
+- **Minimap polygon triangulation spam (60K errors)**: Clamping asteroid vertices to circle edge creates degenerate shapes. Fixed by drawing `draw_circle()` dot when any vertex is clamped instead of attempting `draw_colored_polygon()`.

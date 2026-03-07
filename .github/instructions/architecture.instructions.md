@@ -10,6 +10,7 @@ applyTo: "**"
 data/           9 JSON files — all game content (weapons, ships, captains, enemies, etc.)
 globals/        12 autoloads (GameConfig → SteamManager)
 scripts/        GDScript organized by domain (core/, combat/, player/, systems/, ui/, pickups/, enemies/)
+              core/ includes SpatialHashGrid utility for fast neighbor queries
 scenes/         .tscn files (gameplay/, ui/, pickups/, enemies/)
 effects/        17 weapon effect directories, each with .gd + .tscn + .gdshader
 shaders/        Global shaders (starfield, fog_of_war, radiation_belt, circle_mask, station_charge)
@@ -113,3 +114,11 @@ var _targeting_range: float = GameConfig.WEAPON_TARGETING_RANGE
 | PickupRange | 32    | 16        | Pickups                   |
 | BuffZone    | 64    | 1         | Player                    |
 | Asteroid    | 2     | 0         | Nothing (static obstacle) |
+
+## Input Actions Reference
+
+| Action     | Keyboard       | Gamepad             | Used By                        |
+| ---------- | -------------- | ------------------- | ------------------------------ |
+| `interact` | E (keycode 69) | Button 2 (Square/X) | Gravity Well beacon activation |
+
+Movement and phase shift inputs are built-in Godot actions (`ui_up/down/left/right`, `phase_shift`).

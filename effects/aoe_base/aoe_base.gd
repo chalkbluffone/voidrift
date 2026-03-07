@@ -147,13 +147,3 @@ func _deal_tick_damage() -> void:
 			if body.is_in_group("enemies") and body.has_method("take_damage") and not damaged.has(body):
 				body.take_damage(damage, self)
 				damaged.append(body)
-
-	var enemies: Array = get_tree().get_nodes_in_group("enemies")
-	for enemy in enemies:
-		if not is_instance_valid(enemy) or not (enemy is Node2D):
-			continue
-		if damaged.has(enemy):
-			continue
-		var dist: float = global_position.distance_to(enemy.global_position)
-		if dist <= size and enemy.has_method("take_damage"):
-			enemy.take_damage(damage, self)

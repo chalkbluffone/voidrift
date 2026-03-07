@@ -29,5 +29,10 @@
 - **HUD shield bar invisible**: `get_stat("max_shield")` doesn't exist — the stat is `"shield"`. Fixed to `get_stat("shield")`.
 - **Enemy obstacle avoidance**: Raycast approach caused spinning/clustering. Potential field repulsion caused jitter. Replaced with BFS flow field — globally consistent, deterministic, no per-enemy physics queries.
 - **Phase shift into asteroids**: Trapped player. Fixed by keeping `collision_mask=2` (obstacles) during phase shift so `move_and_slide()` slides along asteroid surfaces.
+- **Swarm FPS drop (~3 FPS)**: O(n²) enemy separation force + per-frame fog texture rebuild + AOE group-scan fallbacks. Fixed with: spatial hash grid for O(k) separation, enemy leash teleport system, fog texture caching with dirty flag, AOE fallback removal, asteroid position caching for spawn checks.
+- **SpatialHashGrid freed-object crash**: Casting a freed entity with `as Node2D` crashes before `is_instance_valid()` can protect. Fixed by checking `is_instance_valid(entity)` before the `as Node2D` cast in `query_radius()`.
+- **Minimap polygon triangulation spam (60K errors)**: Clamping asteroid polygon vertices to the circular minimap boundary creates degenerate shapes that fail `draw_colored_polygon()`. Fixed by tracking `any_clamped` flag — if any vertex was clamped, draws a simple `draw_circle()` dot instead.
+- **Space napalm monitoring in physics callback**: Setting `monitoring` directly inside `body_entered` signal causes "Can't change state while flushing queries". Fixed with `set_deferred("monitoring", ...)` in `_begin_impact()`.
+- **Gravity Well beacon redesign**: Replaced placeholder ColorRect with drawn circle visual (50px radius, pulsing purple glow, border ring, centered "GRAVITY WELL" text), manual activation via `interact` input action with proximity prompt.
 
 _Last updated: March 7, 2026_

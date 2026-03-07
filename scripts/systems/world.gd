@@ -11,6 +11,7 @@ var _arena_boundary: Node2D = null
 var _asteroid_spawner: AsteroidSpawner = null
 var _station_spawner: StationSpawner = null
 var _flow_field: FlowField = null
+var _beacon_spawner: GravityWellBeaconSpawner = null
 
 func _enter_tree() -> void:
 	randomize()
@@ -39,6 +40,9 @@ func _ready() -> void:
 	
 	# Spawn space stations (avoids asteroid positions)
 	_setup_stations(asteroid_positions)
+	
+	# Spawn Gravity Well beacons (avoids asteroids + stations)
+	_setup_gravity_well_beacons(asteroid_positions)
 	
 	# Spawn player at random safe position (avoids asteroids)
 	_setup_player_spawn(asteroid_positions)
@@ -127,6 +131,23 @@ func _setup_stations(obstacle_positions: Array[Vector2]) -> void:
 	
 	_station_spawner = StationSpawner.new()
 	_station_spawner.spawn_stations(stations_container, obstacle_positions)
+
+
+## Spawn Gravity Well beacons around the arena, avoiding asteroids and stations.
+func _setup_gravity_well_beacons(obstacle_positions: Array[Vector2]) -> void:
+	# Collect station positions to avoid overlap
+	var avoid_positions: Array[Vector2] = obstacle_positions.duplicate()
+	var stations: Array[Node] = get_tree().get_nodes_in_group("stations")
+	for station: Node in stations:
+		if station is Node2D:
+			avoid_positions.append((station as Node2D).global_position)
+
+	var container: Node2D = Node2D.new()
+	container.name = "GravityWellBeacons"
+	add_child(container)
+
+	_beacon_spawner = GravityWellBeaconSpawner.new()
+	_beacon_spawner.spawn_beacons(container, avoid_positions)
 
 
 func _on_settings_changed() -> void:

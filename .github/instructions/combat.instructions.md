@@ -58,3 +58,21 @@ When making changes to a weapon or its parameters:
 2. Add slider ranges for new parameters in `weapon_test_ui.gd` (`_get_slider_range()`)
 3. Ensure parameter names match exactly between the weapon script's `@export` variables and test lab config keys
 4. Test all new parameters in the weapon test lab before considering the feature complete
+
+## Common Gotcha: `set_deferred` for Monitoring in Physics Callbacks
+
+When toggling `Area2D.monitoring` inside a physics signal callback (e.g., `body_entered`, `body_exited`), use `set_deferred`:
+
+```gdscript
+# WRONG — crashes with "Can't change state while flushing queries"
+func _on_body_entered(body: Node2D) -> void:
+    _proj_hitbox.monitoring = false
+    _aoe_hitbox.monitoring = true
+
+# RIGHT — deferred to avoid physics state conflict
+func _on_body_entered(body: Node2D) -> void:
+    _proj_hitbox.set_deferred("monitoring", false)
+    _aoe_hitbox.set_deferred("monitoring", true)
+```
+
+This applies to any weapon effect that transitions between phases (e.g., Space Napalm: projectile → AOE impact).

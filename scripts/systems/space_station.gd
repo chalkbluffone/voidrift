@@ -96,7 +96,7 @@ func _on_charge_complete() -> void:
 	StationService.trigger_buff_selection(player_luck)
 
 
-func _on_buff_completed(buff: Dictionary) -> void:
+func _on_buff_completed(_buff: Dictionary) -> void:
 	# Only deplete if we were the station that triggered the popup
 	if not _awaiting_selection or _is_depleted:
 		return

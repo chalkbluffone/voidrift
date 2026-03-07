@@ -494,8 +494,8 @@ func equip_weapon(weapon_id: String) -> bool:
 		push_error("WeaponComponent: Unknown weapon ID: " + weapon_id)
 		return false
 
-	var weapon_type: String = weapon_data.get("type", "projectile")
-	var is_new: bool = _inventory.equip_weapon(weapon_id, weapon_data)
+	var _weapon_type: String = weapon_data.get("type", "projectile")
+	var _is_new: bool = _inventory.equip_weapon(weapon_id, weapon_data)
 
 	weapon_equipped.emit(weapon_id)
 	return true

@@ -32,6 +32,9 @@ var _damage_cooldown: float = 0.0
 # --- Flow Field ---
 var _flow_field: FlowField = null
 
+# --- Spatial Hash Grid (from enemy spawner) ---
+var _enemy_grid: SpatialHashGrid = null
+
 # --- Smoothed Direction ---
 var _current_dir: Vector2 = Vector2.ZERO
 
@@ -41,6 +44,7 @@ func _ready() -> void:
 	current_hp = max_hp
 	_find_player()
 	_find_flow_field()
+	_find_enemy_grid()
 	
 	# Ensure HitboxArea is connected and monitoring
 	_hitbox = get_node_or_null("HitboxArea") as Area2D
@@ -100,6 +104,12 @@ func _find_flow_field() -> void:
 		_flow_field = fields[0] as FlowField
 
 
+func _find_enemy_grid() -> void:
+	var spawners: Array[Node] = get_tree().get_nodes_in_group("enemy_spawner")
+	if spawners.size() > 0 and spawners[0].has_method("get_enemy_grid"):
+		_enemy_grid = spawners[0].get_enemy_grid()
+
+
 func _process_movement(delta: float) -> void:
 	if not _target:
 		_find_player()
@@ -135,7 +145,7 @@ func _process_movement(delta: float) -> void:
 
 
 ## Compute a repulsion force away from nearby enemies to prevent stacking.
-## Uses distance-squared checks for performance.
+## Uses spatial hash grid for O(k) neighbor lookup instead of O(n) group scan.
 func _get_separation_force() -> Vector2:
 	var sep_radius: float = GameConfig.ENEMY_SEPARATION_RADIUS
 	var sep_radius_sq: float = sep_radius * sep_radius
@@ -143,20 +153,35 @@ func _get_separation_force() -> Vector2:
 	var force: Vector2 = Vector2.ZERO
 	var my_pos: Vector2 = global_position
 
-	var enemies: Array[Node] = get_tree().get_nodes_in_group("enemies")
-	for enemy: Node in enemies:
-		if enemy == self:
-			continue
-		if not enemy is Node2D:
-			continue
-		var other_pos: Vector2 = (enemy as Node2D).global_position
-		var diff: Vector2 = my_pos - other_pos
-		var dist_sq: float = diff.length_squared()
-		if dist_sq < sep_radius_sq and dist_sq > 0.01:
-			# Strength inversely proportional to distance
-			var dist: float = sqrt(dist_sq)
-			var proximity: float = 1.0 - (dist / sep_radius)
-			force += diff.normalized() * proximity * sep_strength
+	if not _enemy_grid:
+		_find_enemy_grid()
+
+	if _enemy_grid:
+		var nearby: Array[Node2D] = _enemy_grid.query_radius(my_pos, sep_radius)
+		for other: Node2D in nearby:
+			if other == self:
+				continue
+			var diff: Vector2 = my_pos - other.global_position
+			var dist_sq: float = diff.length_squared()
+			if dist_sq < sep_radius_sq and dist_sq > 0.01:
+				var dist: float = sqrt(dist_sq)
+				var proximity: float = 1.0 - (dist / sep_radius)
+				force += diff.normalized() * proximity * sep_strength
+	else:
+		# Fallback: brute-force group scan (only if grid unavailable)
+		var enemies: Array[Node] = get_tree().get_nodes_in_group("enemies")
+		for enemy: Node in enemies:
+			if enemy == self:
+				continue
+			if not enemy is Node2D:
+				continue
+			var other_pos: Vector2 = (enemy as Node2D).global_position
+			var diff: Vector2 = my_pos - other_pos
+			var dist_sq: float = diff.length_squared()
+			if dist_sq < sep_radius_sq and dist_sq > 0.01:
+				var dist: float = sqrt(dist_sq)
+				var proximity: float = 1.0 - (dist / sep_radius)
+				force += diff.normalized() * proximity * sep_strength
 
 	return force
 
@@ -166,10 +191,41 @@ func _process_knockback(delta: float) -> void:
 
 
 ## Despawn enemies that wander too far outside the arena boundary.
+## Also teleports enemies back near the player when they exceed the leash radius.
 func _check_arena_bounds() -> void:
+	# Leash check: teleport back near player if too far away
+	if _target and is_instance_valid(_target):
+		var leash_radius: float = GameConfig.BOSS_LEASH_RADIUS if enemy_type == "boss" else GameConfig.ENEMY_LEASH_RADIUS
+		var dist_to_player: float = global_position.distance_to(_target.global_position)
+		if dist_to_player > leash_radius:
+			_teleport_near_player()
+			return
+
+	# Hard despawn: safety net for enemies outside the arena entirely
 	var despawn_radius: float = GameConfig.ARENA_RADIUS + GameConfig.ENEMY_DESPAWN_BUFFER
 	if global_position.length() > despawn_radius:
 		queue_free()
+
+
+## Teleport this enemy to a new position near the player (leash respawn).
+func _teleport_near_player() -> void:
+	if not _target:
+		return
+	var attempts: int = 10
+	for i: int in range(attempts):
+		var angle: float = randf() * TAU
+		var dist: float = randf_range(GameConfig.SPAWN_RADIUS_MIN, GameConfig.SPAWN_RADIUS_MAX)
+		var candidate: Vector2 = _target.global_position + Vector2.from_angle(angle) * dist
+		# Quick arena bounds check
+		if candidate.length() < GameConfig.ARENA_RADIUS:
+			global_position = candidate
+			_current_dir = (_target.global_position - global_position).normalized()
+			return
+	# Fallback: place behind player relative to center
+	var behind_dir: Vector2 = -_target.global_position.normalized()
+	if behind_dir.length_squared() < 0.01:
+		behind_dir = Vector2.RIGHT
+	global_position = _target.global_position + behind_dir * GameConfig.SPAWN_RADIUS_MIN
 
 
 func take_damage(amount: float, _source: Node = null) -> void:

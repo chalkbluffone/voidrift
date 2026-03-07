@@ -205,7 +205,7 @@ func _begin_impact() -> void:
 	_proj_mesh.visible = false
 	_trail_particles.emitting = false
 	if _proj_hitbox:
-		_proj_hitbox.monitoring = false
+		_proj_hitbox.set_deferred("monitoring", false)
 
 	# Trigger explosion burst
 	_burst_particles.global_position = global_position
@@ -214,9 +214,9 @@ func _begin_impact() -> void:
 	# Show fire
 	_fire_mesh.visible = true
 
-	# Enable AoE hitbox immediately so physics can start detecting overlaps
+	# Enable AoE hitbox so physics can start detecting overlaps
 	if _aoe_hitbox:
-		_aoe_hitbox.monitoring = true
+		_aoe_hitbox.set_deferred("monitoring", true)
 		_update_aoe_radius(aoe_radius * size_mult * 0.5)  # Start at 50% for impact
 
 	# Deal impact damage to anything at the blast site
@@ -353,18 +353,6 @@ func _deal_aoe_damage() -> void:
 		if parent_node and parent_node.is_in_group("enemies") and parent_node.has_method("take_damage") and not damaged.has(parent_node):
 			parent_node.take_damage(burn_damage)
 			damaged.append(parent_node)
-
-	# Fallback: distance-based group check (catches anything the area overlap missed)
-	var enemies: Array = get_tree().get_nodes_in_group("enemies")
-	for enemy in enemies:
-		if not is_instance_valid(enemy) or not enemy is Node2D:
-			continue
-		if damaged.has(enemy):
-			continue
-		var dist: float = global_position.distance_to(enemy.global_position)
-		if dist <= effective_radius and enemy.has_method("take_damage"):
-			enemy.take_damage(burn_damage)
-			damaged.append(enemy)
 
 
 # ══════════════════════════════════════════════════════════════════════════

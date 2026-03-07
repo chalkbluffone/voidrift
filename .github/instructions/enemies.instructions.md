@@ -60,6 +60,24 @@ Enemies use the `FlowField` system for pathfinding (see `world.instructions.md` 
 - Soft `_get_separation_force()` provides gentle visual spread without hard blocking
 - Enemies do **not** collide with each other (collision mask excludes layer 8) — standard for the survivors genre
 
+### Separation via SpatialHashGrid
+
+Separation force uses `SpatialHashGrid` for O(k) neighbor queries instead of O(n²) brute force:
+
+- `SpatialHashGrid` (`scripts/core/spatial_hash_grid.gd`) uses fixed-size cells for fast radius queries
+- Entities register/unregister on spawn/despawn
+- `query_radius()` returns nearby entities within a given radius
+- **Critical**: `is_instance_valid(entity)` must be checked BEFORE `entity as Node2D` cast — casting a freed object crashes immediately
+
+### Enemy Leash System
+
+Enemies too far from the player are teleported back to prevent unbounded world spread:
+
+- `ENEMY_LEASH_RADIUS` — max distance from player before teleport-respawn (normal enemies)
+- `BOSS_LEASH_RADIUS` — larger leash for bosses
+- Teleported enemies are repositioned to a valid spawn point near the player
+- Prevents enemy count from growing unboundedly at arena edges
+
 ## Enemy Spawn Avoidance
 
 Enemy spawn positions use rejection sampling to avoid asteroids:
@@ -71,3 +89,4 @@ Enemy spawn positions use rejection sampling to avoid asteroids:
 ## Resolved Issues
 
 - **Raycast obstacle avoidance** caused spinning/clustering (surface normals inconsistent between frames/enemies). Potential field repulsion also caused jitter. Both replaced with BFS flow field — globally consistent, deterministic, no per-enemy physics queries.
+- **SpatialHashGrid freed-object crash**: `entity as Node2D` cast on a freed object crashes before `is_instance_valid()` can protect. Fixed by checking validity before the cast in `query_radius()`.
