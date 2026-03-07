@@ -35,5 +35,7 @@
 - **Space napalm monitoring in physics callback**: Setting `monitoring` directly inside `body_entered` signal causes "Can't change state while flushing queries". Fixed with `set_deferred("monitoring", ...)` in `_begin_impact()`.
 - **Gravity Well beacon redesign**: Replaced placeholder ColorRect with drawn circle visual (50px radius, pulsing purple glow, border ring, centered "GRAVITY WELL" text), manual activation via `interact` input action with proximity prompt.
 - **Title screen overhaul**: Replaced plain dark background with gameplay starfield (reusing existing shader materials), title text with animated PNG image (scanlines, chromatic aberration, glow pulse, GPU vertex bob), random nebula per load, entrance animation, buttons repositioned below title.
+- **Weapons Lab button hidden in exports**: Added `OS.has_feature("editor")` guard in `main_menu.gd` to hide the Weapons Lab button in all exported builds. The `tools/*` directory was already excluded from exports, this prevents the orphaned button from appearing.
+- **Deploy task fixed**: Added `-Username chalkbluffmedia` and `-SteamCmdExe` parameters to the VS Code deploy task so it works without manual input.
 
 _Last updated: March 7, 2026_

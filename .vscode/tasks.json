@@ -54,7 +54,11 @@
 				"-ExecutionPolicy",
 				"Bypass",
 				"-File",
-				"tools/deploy.ps1"
+				"tools/deploy.ps1",
+				"-Username",
+				"chalkbluffmedia",
+				"-SteamCmdExe",
+				"F:\\SteamCMD\\steamcmd.exe"
 			],
 			"isBackground": false,
 			"group": "none",

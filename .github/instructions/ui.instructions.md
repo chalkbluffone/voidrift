@@ -89,6 +89,7 @@ The title screen (`scenes/ui/main_menu.tscn`, `scripts/ui/main_menu.gd`) feature
 
 - Buttons (Play, Options, Weapons Lab, Quit) in a VBoxContainer positioned directly below the title image with a 50px gap.
 - Same synthwave styling as all other buttons (via `card_hover_fx.gd`).
+- **Weapons Lab button is editor-only**: Hidden via `OS.has_feature("editor")` check in `_ready()`. In exported builds (debug or release), the button is invisible, unstyled, unconnected, and excluded from the entrance animation. The `VBoxContainer` layout collapses the gap automatically. The `tools/*` directory is excluded from exports via `exclude_filter`, so the weapon test lab scene doesn't exist in builds.
 
 ### Gotcha: Control Node Float Animation
 

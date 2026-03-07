@@ -114,12 +114,14 @@ All depot VDFs exclude `steam_appid.txt` via `FileExclusion`.
 
 ## VS Code Tasks
 
-| Task                  | Command                                      |
-| --------------------- | -------------------------------------------- |
-| Build All Platforms   | `tools/build.ps1`                            |
-| Build Windows Only    | `tools/build.ps1 -PlatformsToExport Windows` |
-| Deploy to Steamworks  | `tools/deploy.ps1`                           |
-| Headless Sanity Check | `tools/headless_sanity_check.ps1`            |
+| Task                  | Command                                                                              |
+| --------------------- | ------------------------------------------------------------------------------------ |
+| Build All Platforms   | `tools/build.ps1`                                                                    |
+| Build Windows Only    | `tools/build.ps1 -PlatformsToExport Windows`                                         |
+| Deploy to Steamworks  | `tools/deploy.ps1 -Username chalkbluffmedia -SteamCmdExe "F:\SteamCMD\steamcmd.exe"` |
+| Headless Sanity Check | `tools/headless_sanity_check.ps1`                                                    |
+
+The deploy VS Code task includes `-Username` and `-SteamCmdExe` so it runs without manual prompts. SteamCMD is NOT on PATH — always specify the full path via `-SteamCmdExe`.
 
 ## Post-Deploy Checklist
 

@@ -60,14 +60,24 @@ var _button_hover_tweens: Dictionary = {}
 
 
 func _ready() -> void:
+	# Hide Weapons Lab button in exported builds (tools/* excluded from exports)
+	var _show_weapons_lab: bool = OS.has_feature("editor")
+	if not _show_weapons_lab:
+		weapons_lab_button.visible = false
+
 	# Connect button signals
 	play_button.pressed.connect(_on_play_pressed)
 	options_button.pressed.connect(_on_options_pressed)
-	weapons_lab_button.pressed.connect(_on_weapons_lab_pressed)
+	if _show_weapons_lab:
+		weapons_lab_button.pressed.connect(_on_weapons_lab_pressed)
 	quit_button.pressed.connect(_on_quit_pressed)
 
 	# Style all buttons with synthwave focus/hover support
-	for button: Button in [play_button, options_button, weapons_lab_button, quit_button]:
+	var _styled_buttons: Array[Button] = [play_button, options_button]
+	if _show_weapons_lab:
+		_styled_buttons.append(weapons_lab_button)
+	_styled_buttons.append(quit_button)
+	for button: Button in _styled_buttons:
 		CARD_HOVER_FX_SCRIPT.style_synthwave_button(button, UiColors.BUTTON_PRIMARY, _button_hover_tweens, 4)
 
 	# Randomize nebula texture
@@ -150,7 +160,10 @@ func _play_entrance_animation() -> void:
 	title_image.scale = Vector2(ENTRANCE_START_SCALE, ENTRANCE_START_SCALE)
 	title_image.modulate.a = 0.0
 
-	var buttons: Array[Button] = [play_button, options_button, weapons_lab_button, quit_button]
+	var buttons: Array[Button] = [play_button, options_button]
+	if OS.has_feature("editor"):
+		buttons.append(weapons_lab_button)
+	buttons.append(quit_button)
 	for btn: Button in buttons:
 		btn.modulate.a = 0.0
 
