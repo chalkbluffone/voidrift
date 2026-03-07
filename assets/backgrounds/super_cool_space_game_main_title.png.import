@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://5cfpcpbfvhen"
-path="res://.godot/imported/Blue_Nebula_07-1024x1024.png-fca62b2f5ae99ee05cf6ec0fa0469a27.ctex"
+uid="uid://bihjwqerr2jq7"
+path="res://.godot/imported/super_cool_space_game_main_title.png-53689429ed4b80cd60573785dd779e18.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/backgrounds/Blue Nebula/Blue_Nebula_07-1024x1024.png"
-dest_files=["res://.godot/imported/Blue_Nebula_07-1024x1024.png-fca62b2f5ae99ee05cf6ec0fa0469a27.ctex"]
+source_file="res://assets/backgrounds/super_cool_space_game_main_title.png"
+dest_files=["res://.godot/imported/super_cool_space_game_main_title.png-53689429ed4b80cd60573785dd779e18.ctex"]
 
 [params]
 

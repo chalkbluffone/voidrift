@@ -34,5 +34,6 @@
 - **Minimap polygon triangulation spam (60K errors)**: Clamping asteroid polygon vertices to the circular minimap boundary creates degenerate shapes that fail `draw_colored_polygon()`. Fixed by tracking `any_clamped` flag — if any vertex was clamped, draws a simple `draw_circle()` dot instead.
 - **Space napalm monitoring in physics callback**: Setting `monitoring` directly inside `body_entered` signal causes "Can't change state while flushing queries". Fixed with `set_deferred("monitoring", ...)` in `_begin_impact()`.
 - **Gravity Well beacon redesign**: Replaced placeholder ColorRect with drawn circle visual (50px radius, pulsing purple glow, border ring, centered "GRAVITY WELL" text), manual activation via `interact` input action with proximity prompt.
+- **Title screen overhaul**: Replaced plain dark background with gameplay starfield (reusing existing shader materials), title text with animated PNG image (scanlines, chromatic aberration, glow pulse, GPU vertex bob), random nebula per load, entrance animation, buttons repositioned below title.
 
 _Last updated: March 7, 2026_

@@ -13,7 +13,7 @@ scripts/        GDScript organized by domain (core/, combat/, player/, systems/,
               core/ includes SpatialHashGrid utility for fast neighbor queries
 scenes/         .tscn files (gameplay/, ui/, pickups/, enemies/)
 effects/        17 weapon effect directories, each with .gd + .tscn + .gdshader
-shaders/        Global shaders (starfield, fog_of_war, radiation_belt, circle_mask, station_charge)
+shaders/        Global shaders (starfield, fog_of_war, radiation_belt, circle_mask, station_charge, title_glow)
 tools/          build.ps1, deploy.ps1, headless_sanity_check.ps1, steam/ (VDFs), weapon_test_lab/
 build/          Export output (windows/, linux/, macos/) — gitignored
 ```

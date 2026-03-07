@@ -1,7 +1,11 @@
-[gd_scene load_steps=3 format=3 uid="uid://dmainmenu00001"]
+[gd_scene load_steps=7 format=3 uid="uid://dmainmenu00001"]
 
 [ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_menu"]
 [ext_resource type="FontFile" path="res://assets/fonts/Orbitron-Bold.ttf" id="2_orbitron"]
+[ext_resource type="Material" uid="uid://byvccfmo8fywt" path="res://materials/stars_far.tres" id="3_starsfar"]
+[ext_resource type="Material" uid="uid://bc1yjbx4pki81" path="res://materials/stars_near.tres" id="4_starsnear"]
+[ext_resource type="Texture2D" uid="uid://bihjwqerr2jq7" path="res://assets/backgrounds/super_cool_space_game_main_title.png" id="5_title"]
+[ext_resource type="Shader" uid="uid://5inwhawvmwt3" path="res://shaders/title_glow.gdshader" id="6_titleglow"]
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -12,42 +16,70 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_menu")
 
-[node name="Background" type="ColorRect" parent="."]
-layout_mode = 1
+[node name="Starfield" type="Node2D" parent="."]
+z_index = -100
+
+[node name="Nebula" type="Parallax2D" parent="Starfield"]
+scroll_scale = Vector2(0.05, 0.05)
+repeat_size = Vector2(1024, 1024)
+autoscroll = Vector2(5, 0)
+
+[node name="NebulaSprite" type="Sprite2D" parent="Starfield/Nebula"]
+texture_repeat = 2
+region_enabled = true
+region_rect = Rect2(0, 0, 8192, 8192)
+
+[node name="StarsFar" type="Parallax2D" parent="Starfield"]
+scroll_scale = Vector2(0.12, 0.12)
+repeat_size = Vector2(4096, 4096)
+autoscroll = Vector2(15, 0)
+repeat_times = 3
+
+[node name="StarsFarRect" type="ColorRect" parent="Starfield/StarsFar"]
+material = ExtResource("3_starsfar")
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_right = 4096.0
+offset_bottom = 4096.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.05, 0.05, 0.12, 1)
+color = Color(0, 0, 0, 1)
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -150.0
-offset_top = -120.0
-offset_right = 150.0
-offset_bottom = 120.0
+[node name="StarsNear" type="Parallax2D" parent="Starfield"]
+scroll_scale = Vector2(0.35, 0.35)
+repeat_size = Vector2(4096, 4096)
+autoscroll = Vector2(30, 0)
+repeat_times = 3
+
+[node name="StarsNearRect" type="ColorRect" parent="Starfield/StarsNear"]
+material = ExtResource("4_starsnear")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 4096.0
+offset_bottom = 4096.0
 grow_horizontal = 2
 grow_vertical = 2
+color = Color(0, 0, 0, 1)
+
+[node name="TitleImage" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 0
+texture = ExtResource("5_title")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ButtonContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 300.0
+offset_bottom = 220.0
 theme_override_constants/separation = 15
 
-[node name="TitleLabel" type="Label" parent="VBoxContainer"]
-layout_mode = 2
-theme_override_fonts/font = ExtResource("2_orbitron")
-theme_override_font_sizes/font_size = 48
-text = "SUPER COOL SPACE GAME"
-horizontal_alignment = 1
-
-[node name="Spacer" type="Control" parent="VBoxContainer"]
-custom_minimum_size = Vector2(0, 20)
-layout_mode = 2
-
-[node name="PlayButton" type="Button" parent="VBoxContainer"]
+[node name="PlayButton" type="Button" parent="ButtonContainer"]
 custom_minimum_size = Vector2(300, 40)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -55,7 +87,7 @@ theme_override_fonts/font = ExtResource("2_orbitron")
 theme_override_font_sizes/font_size = 24
 text = "▶ Play"
 
-[node name="OptionsButton" type="Button" parent="VBoxContainer"]
+[node name="OptionsButton" type="Button" parent="ButtonContainer"]
 custom_minimum_size = Vector2(300, 40)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -63,7 +95,7 @@ theme_override_fonts/font = ExtResource("2_orbitron")
 theme_override_font_sizes/font_size = 24
 text = "⚙ Options"
 
-[node name="WeaponsLabButton" type="Button" parent="VBoxContainer"]
+[node name="WeaponsLabButton" type="Button" parent="ButtonContainer"]
 custom_minimum_size = Vector2(300, 40)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -71,7 +103,7 @@ theme_override_fonts/font = ExtResource("2_orbitron")
 theme_override_font_sizes/font_size = 24
 text = "🔧 Weapons Lab"
 
-[node name="QuitButton" type="Button" parent="VBoxContainer"]
+[node name="QuitButton" type="Button" parent="ButtonContainer"]
 custom_minimum_size = Vector2(300, 40)
 layout_mode = 2
 size_flags_horizontal = 4

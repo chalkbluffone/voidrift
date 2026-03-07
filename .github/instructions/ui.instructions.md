@@ -57,6 +57,44 @@ The HUD uses Orbitron-Bold font throughout with synthwave neon styling.
 - `GAME_OVER_DELAY` controls delay before showing screen
 - Displays run stats summary
 
+## Main Menu / Title Screen
+
+The title screen (`scenes/ui/main_menu.tscn`, `scripts/ui/main_menu.gd`) features:
+
+### Starfield Background
+
+- Reuses the gameplay starfield from `world.tscn` — three Parallax2D layers (Nebula, StarsFar, StarsNear) using the same `materials/stars_far.tres` and `materials/stars_near.tres` shader materials.
+- Purely horizontal `autoscroll` creates the illusion of a camera panning through space. Speeds increase with layer depth for correct parallax: Nebula `(5, 0)`, StarsFar `(15, 0)`, StarsNear `(30, 0)`.
+- Respects `SettingsManager.background_quality`: Low hides near star layer and disables twinkle on far layer (mirrors `world.gd` logic).
+
+### Random Nebula
+
+- On each menu load, picks a random nebula texture from Blue and Purple nebula pools (no Green — clashes with title aesthetics).
+- 15 textures total across `assets/backgrounds/Blue Nebula/` and `Purple Nebula/` folders.
+
+### Title Image
+
+- `assets/backgrounds/super_cool_space_game_main_title.png` displayed via `TextureRect`.
+- Sized to 30% of viewport height, fully centered horizontally, offset slightly upward.
+- Uses `shaders/title_glow.gdshader` for scanlines, chromatic aberration, glow pulse, and vertex-driven 2D float bob (Lissajous-like drift).
+- **Float motion is in the vertex shader** — avoids Control layout jerkiness from per-frame `position` updates in GDScript.
+
+### Entrance Animation
+
+- Title scales from 1.15→1.0 with alpha fade-in over 0.8s (ease-out cubic).
+- Buttons fade in staggered (0.1s delay each) after title entrance.
+- First button grabs focus for gamepad/keyboard nav after animation completes.
+
+### Button Layout
+
+- Buttons (Play, Options, Weapons Lab, Quit) in a VBoxContainer positioned directly below the title image with a 50px gap.
+- Same synthwave styling as all other buttons (via `card_hover_fx.gd`).
+
+### Gotcha: Control Node Float Animation
+
+- Do **NOT** animate Control node `position` in `_process()` for smooth float effects — the layout system recalculates and causes jerkiness.
+- Use vertex shader `VERTEX` offset instead for buttery-smooth GPU-driven motion.
+
 ## Debug XP Graph
 
 Visual XP graph overlay in HUD for debugging progression curve during play.
