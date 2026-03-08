@@ -39,5 +39,7 @@
 - **Deploy task fixed**: Added `-Username chalkbluffmedia` and `-SteamCmdExe` parameters to the VS Code deploy task so it works without manual input.
 - **Damage numbers implemented**: Floating `DamageNumber` (`RichTextLabel`) spawns at enemy position on every `take_damage()` call. Normal=white, Crit=gold+bounce, Overcrit=hot pink+shake+bounce. Soft cap of 30 labels. Controlled by `show_damage_numbers` persistence setting.
 - **Performance diagnostics removed**: Removed `PERF_LOG_INTERVAL` constant from GameConfig and periodic `_log_diagnostics()` polling from `EnemySpawner`. Event-based swarm logging retained.
+- **Power-up system implemented**: New `BasePowerUp` class extending `BasePickup` with magnet/vacuum immunity (collision_mask=1, attract_to no-op, "powerups" group). Four power-ups: Health (red heart, 25% max HP), Speed (blue lightning, +300% for 10s), Stopwatch (gold, freeze all enemies 10s), Gravity Well (purple, vacuum drops). 1.5% shared pool per kill. Shared glow shader. Credits changed to guaranteed 1 per kill. Removed `CREDIT_DROP_CHANCE`, `CREDIT_SCALE_PER_MINUTE`, `GRAVITY_WELL_DROP_CHANCE`, `GRAVITY_WELL_MIN_PICKUPS_FOR_DROP` from GameConfig.
+- **Stopwatch global freeze**: `BaseEnemy.is_frozen` flag stops movement. SceneTree meta `stopwatch_freeze_active` ensures newly spawned enemies (including freighters) spawn frozen. `LootFreighter._process_movement()` has its own freeze guard since it overrides without calling super.
 
 _Last updated: March 8, 2026_

@@ -1,46 +1,29 @@
-extends BasePickup
+extends BasePowerUp
 
-## GravityWellPickup - Rare enemy drop that instantly vacuums ALL uncollected
-## pickups on the map to the player. Space-themed adaptation of Megabonk's magnet powerup.
-
-var _player_ref: Node2D = null
+## GravityWellPickup - Power-up that instantly vacuums ALL uncollected drops
+## on the map to the player. Skips other power-ups (they require physical touch).
+## Purple neon visual. Space-themed adaptation of Megabonk's magnet powerup.
 
 
 func _on_pickup_ready() -> void:
-	# Find player for fixed-radius attraction check
-	var players: Array[Node] = get_tree().get_nodes_in_group("player")
-	if players.size() > 0:
-		_player_ref = players[0] as Node2D
+	_symbol = "\u25CE"
+	_symbol_font_size = 22
+	super._on_pickup_ready()
 
 
-func _process(delta: float) -> void:
-	super._process(delta)
-	# Use fixed magnet radius — Gravity Well orbs are easy to grab
-	if _player_ref and is_instance_valid(_player_ref):
-		_check_fixed_radius_attraction(_player_ref)
-
-
-func _get_fixed_magnet_radius() -> float:
-	return GameConfig.PICKUP_MAGNET_RADIUS * 2.0
-
-
-func _apply_effect() -> void:
-	## Vacuum ALL pickups on the map to the player.
-	if not _player_ref or not is_instance_valid(_player_ref):
-		var players: Array[Node] = get_tree().get_nodes_in_group("player")
-		if players.size() > 0:
-			_player_ref = players[0] as Node2D
-	if not _player_ref:
-		return
-
+func _apply_powerup_effect(player: Node2D, _multiplier: float) -> void:
+	## Vacuum all drops (XP, Credits, Stardust) to the player. Skip other power-ups.
 	var all_pickups: Array[Node] = get_tree().get_nodes_in_group("pickups")
 	for pickup: Node in all_pickups:
 		if pickup == self:
 			continue
 		if not is_instance_valid(pickup):
 			continue
+		# Skip other power-ups — they require physical touch
+		if pickup.is_in_group("powerups"):
+			continue
 		if pickup is BasePickup:
 			var bp: BasePickup = pickup as BasePickup
-			bp.attract_to(_player_ref)
+			bp.attract_to(player)
 			# Boost speed for satisfying vacuum effect
 			bp._current_speed = GameConfig.GRAVITY_WELL_VACUUM_SPEED * 0.5

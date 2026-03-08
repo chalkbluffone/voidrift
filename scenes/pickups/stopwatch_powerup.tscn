@@ -1,32 +1,32 @@
 [gd_scene load_steps=4 format=3]
 
-[ext_resource type="Script" path="res://scripts/pickups/gravity_well_pickup.gd" id="1_gw"]
+[ext_resource type="Script" path="res://scripts/pickups/stopwatch_powerup.gd" id="1_sw"]
 [ext_resource type="Shader" path="res://effects/powerup_glow/powerup_glow.gdshader" id="2_sh"]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_gw"]
+[sub_resource type="CircleShape2D" id="CircleShape2D_sw"]
 radius = 24.0
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_gw"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_sw"]
 shader = ExtResource("2_sh")
-shader_parameter/powerup_color = Color(0.6, 0.2, 1, 1)
+shader_parameter/powerup_color = Color(1, 0.85, 0.1, 1)
 shader_parameter/glow_intensity = 1.5
 shader_parameter/pulse_speed = 2.0
 shader_parameter/pulse_min = 0.6
 shader_parameter/pulse_max = 1.0
 shader_parameter/ring_width = 0.08
 
-[node name="GravityWellPickup" type="Area2D"]
+[node name="StopwatchPowerUp" type="Area2D"]
 collision_layer = 16
 collision_mask = 1
 monitoring = true
 monitorable = true
-script = ExtResource("1_gw")
+script = ExtResource("1_sw")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-shape = SubResource("CircleShape2D_gw")
+shape = SubResource("CircleShape2D_sw")
 
 [node name="ColorRect" type="ColorRect" parent="."]
-material = SubResource("ShaderMaterial_gw")
+material = SubResource("ShaderMaterial_sw")
 offset_left = -24.0
 offset_top = -24.0
 offset_right = 24.0

@@ -145,11 +145,13 @@ func _activate() -> void:
 	_player_in_range = false
 	_prompt_label.visible = false
 
-	# Vacuum ALL pickups on the map to the player
+	# Vacuum ALL drops on the map to the player (skip power-ups — they require physical touch)
 	if _player_ref and is_instance_valid(_player_ref):
 		var all_pickups: Array[Node] = get_tree().get_nodes_in_group("pickups")
 		for pickup: Node in all_pickups:
 			if not is_instance_valid(pickup):
+				continue
+			if pickup.is_in_group("powerups"):
 				continue
 			if pickup is BasePickup:
 				var bp: BasePickup = pickup as BasePickup

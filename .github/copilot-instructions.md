@@ -103,6 +103,7 @@ Detailed mechanics live in the domain instruction files. This is the high-level 
 - **Auto-attack**: All weapons fire automatically. No manual aiming. → `combat.instructions.md`
 - **Phase Shift**: Dash with i-frames, 3–4 charges, slides along asteroids. → `player.instructions.md`
 - **XP → Level Up**: Static XP drops (1 normal, 3 elite) → polynomial curve → choose 1 of 3 upgrades. → `progression.instructions.md`
+- **Drops vs Power-Ups**: Drops (XP, Credits, Stardust) use magnet; Power-ups (Health, Speed, Stopwatch, Gravity Well) require physical touch. → `progression.instructions.md`
 - **Enemy Scaling**: Polynomial HP + linear damage over time, difficulty stat multiplier, elites, swarms. → `enemies.instructions.md`
 - **Rarity System**: Common → Uncommon → Rare → Epic → Legendary. → `progression.instructions.md`
 - **Ship + Captain**: Independent selection per run, hidden synergy combos. → `player.instructions.md`

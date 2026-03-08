@@ -10,7 +10,15 @@ signal swarm_ended
 const XPPickupScene: PackedScene = preload("res://scenes/pickups/xp_pickup.tscn")
 const CreditPickupScene: PackedScene = preload("res://scenes/pickups/credit_pickup.tscn")
 const StardustPickupScene: PackedScene = preload("res://scenes/pickups/stardust_pickup.tscn")
-const GravityWellPickupScene: PackedScene = preload("res://scenes/pickups/gravity_well_pickup.tscn")
+
+## Power-up scenes (randomly chosen from pool on enemy kill)
+const HealthPowerUpScene: PackedScene = preload("res://scenes/pickups/health_powerup.tscn")
+const SpeedPowerUpScene: PackedScene = preload("res://scenes/pickups/speed_powerup.tscn")
+const StopwatchPowerUpScene: PackedScene = preload("res://scenes/pickups/stopwatch_powerup.tscn")
+const GravityWellPowerUpScene: PackedScene = preload("res://scenes/pickups/gravity_well_pickup.tscn")
+
+## Pool of power-up scenes (equal weight random selection)
+var _powerup_pool: Array[PackedScene] = []
 
 var _player: Node2D = null
 var _spawn_timer: float = 0.0
@@ -43,6 +51,8 @@ func _ready() -> void:
 	_cache_asteroid_positions()
 	# Initialize spatial hash grid (cell size = 2× separation radius for good bucket distribution)
 	_enemy_grid = SpatialHashGrid.new(GameConfig.ENEMY_SEPARATION_RADIUS * 2.0)
+	# Initialize power-up pool (equal weight random selection)
+	_powerup_pool = [HealthPowerUpScene, SpeedPowerUpScene, StopwatchPowerUpScene, GravityWellPowerUpScene]
 
 
 func _process(delta: float) -> void:
@@ -320,32 +330,20 @@ func _on_enemy_died(enemy: Node, death_position: Vector2) -> void:
 		if drop_type == "xp" and enemy.get_xp_value() > 0:
 			_spawn_burst_xp(death_position, enemy.get_xp_value(), burst_count)
 		elif drop_type == "credits" and enemy.get_credit_value() > 0:
-			var time_minutes: float = RunManager.run_data.time_elapsed / 60.0
-			var scaled_credits: int = int(enemy.get_credit_value() * (1.0 + time_minutes * GameConfig.CREDIT_SCALE_PER_MINUTE))
-			_spawn_burst_credits(death_position, scaled_credits, burst_count)
+			_spawn_burst_credits(death_position, enemy.get_credit_value(), burst_count)
 	else:
-		# Normal enemy drops
+		# Normal enemy drops: XP + guaranteed 1 credit
 		_spawn_xp(death_position, enemy.get_xp_value())
-
-		# Random chance to drop credits
-		var roll: float = randf()
-		if roll < GameConfig.CREDIT_DROP_CHANCE:
-			var credit_amount: int = enemy.get_credit_value()
-			var time_minutes: float = RunManager.run_data.time_elapsed / 60.0
-			credit_amount = int(credit_amount * (1.0 + time_minutes * GameConfig.CREDIT_SCALE_PER_MINUTE))
-			_spawn_credits(death_position, credit_amount)
+		_spawn_credits(death_position, enemy.get_credit_value())
 
 	# Stardust drops (any enemy with stardust_value > 0)
 	var stardust: int = enemy.get_stardust_value()
 	if stardust > 0:
 		_spawn_burst_stardust(death_position, stardust)
 
-	# Gravity Well drop (rare, only when enough pickups exist on map)
+	# Power-up drop (rare, from shared pool)
 	if not is_freighter:
-		var pickup_count: int = get_tree().get_nodes_in_group("pickups").size()
-		if pickup_count >= GameConfig.GRAVITY_WELL_MIN_PICKUPS_FOR_DROP:
-			if randf() < GameConfig.GRAVITY_WELL_DROP_CHANCE:
-				_spawn_gravity_well(death_position)
+		_try_spawn_powerup(death_position)
 
 
 func _spawn_xp(pos: Vector2, amount: float) -> void:
@@ -400,11 +398,24 @@ func _spawn_burst_stardust(pos: Vector2, total_amount: int) -> void:
 		get_tree().current_scene.call_deferred("add_child", stardust)
 
 
-## Spawn a Gravity Well pickup at the given position.
-func _spawn_gravity_well(pos: Vector2) -> void:
-	var gw: Area2D = GravityWellPickupScene.instantiate()
-	gw.global_position = pos
-	get_tree().current_scene.call_deferred("add_child", gw)
+## Roll for a power-up drop and spawn a random one from the pool.
+func _try_spawn_powerup(pos: Vector2) -> void:
+	if _powerup_pool.is_empty():
+		return
+	var drop_chance: float = GameConfig.POWERUP_BASE_DROP_CHANCE
+	if _player and _player.has_method("get_stat"):
+		drop_chance *= _player.get_stat("powerup_drop_chance")
+	if randf() >= drop_chance:
+		return
+	# Random equal-weight selection from pool
+	var scene: PackedScene = _powerup_pool[randi() % _powerup_pool.size()]
+	var powerup: Area2D = scene.instantiate()
+	var offset: Vector2 = Vector2(
+		randf_range(-GameConfig.POWERUP_SCATTER, GameConfig.POWERUP_SCATTER),
+		randf_range(-GameConfig.POWERUP_SCATTER, GameConfig.POWERUP_SCATTER)
+	)
+	powerup.global_position = pos + offset
+	get_tree().current_scene.call_deferred("add_child", powerup)
 
 
 # =============================================================================

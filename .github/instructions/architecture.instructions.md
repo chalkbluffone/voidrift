@@ -12,7 +12,7 @@ globals/        12 autoloads (GameConfig → SteamManager)
 scripts/        GDScript organized by domain (core/, combat/, player/, systems/, ui/, pickups/, enemies/)
               core/ includes SpatialHashGrid utility for fast neighbor queries
 scenes/         .tscn files (gameplay/, ui/, pickups/, enemies/)
-effects/        17 weapon effect directories, each with .gd + .tscn + .gdshader
+effects/        17 weapon effect directories + powerup_glow/, each with .gd + .tscn + .gdshader
 shaders/        Global shaders (starfield, fog_of_war, radiation_belt, circle_mask, station_charge, title_glow)
 tools/          build.ps1, deploy.ps1, headless_sanity_check.ps1, steam/ (VDFs), weapon_test_lab/
 build/          Export output (windows/, linux/, macos/) — gitignored
@@ -78,7 +78,7 @@ var _targeting_range: float = GameConfig.WEAPON_TARGETING_RANGE
 - XP curve parameters, loadout slot counts
 - Camera zoom behavior
 - Upgrade offer weights (weapon vs module frequency)
-- Pickup scatter offsets, credit drop chance/scaling
+- Pickup scatter offsets, power-up drop chance/duration/sizes
 - UI timing (game over delay, level-up queue flash)
 - Ability defaults, ship visual fallbacks
 - Rarity weights, weapon tier upgrade parameters

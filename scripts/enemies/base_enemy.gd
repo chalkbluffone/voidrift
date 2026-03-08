@@ -17,6 +17,9 @@ var current_hp: float = 25.0
 var _is_dying: bool = false
 var enemy_type: String = "normal"  # "normal", "elite", "boss"
 
+## When true, enemy stops moving (frozen by Stopwatch power-up).
+var is_frozen: bool = false
+
 # --- References ---
 var _target: Node2D = null
 var _hitbox: Area2D = null
@@ -51,6 +54,10 @@ func _ready() -> void:
 	if _hitbox:
 		_hitbox.monitoring = true
 		_hitbox.monitorable = true
+
+	# Spawn frozen if a stopwatch freeze is currently active
+	if get_tree().has_meta("stopwatch_freeze_active"):
+		is_frozen = true
 
 
 
@@ -111,6 +118,9 @@ func _find_enemy_grid() -> void:
 
 
 func _process_movement(delta: float) -> void:
+	if is_frozen:
+		velocity = _knockback_velocity  # Still allow knockback but no chase
+		return
 	if not _target:
 		_find_player()
 		return

@@ -80,11 +80,11 @@ Fog texture is rebuilt only when a dirty flag is set (player moves into a new gr
 
 ## Gravity Well Beacons
 
-One-time-use world interactables that vacuum all nearby pickups to the player:
+One-time-use world interactables that vacuum all drops (not power-ups) to the player:
 
 - `GRAVITY_WELL_BEACON_COUNT` beacons per run, spawned by `GravityWellBeaconSpawner`
 - Spawn positions avoid asteroids and stations using rejection sampling
-- Drop chance: `GRAVITY_WELL_DROP_CHANCE` when enough uncollected pickups exist (`GRAVITY_WELL_MIN_PICKUPS_FOR_DROP`)
+- Vacuum skips nodes in `"powerups"` group — power-ups require physical touch
 
 ### Beacon Visual
 
@@ -122,3 +122,5 @@ Key files:
 - **Enemy obstacle avoidance**: Raycast approach caused spinning/clustering. Potential field repulsion caused jitter. Replaced with BFS flow field — globally consistent, deterministic, no per-enemy physics queries.
 - **Station buff flat stats** used percentage-scale amounts (0.02–0.15) applied raw as flat bonuses, making +9 Shield actually +0.09. Fixed by scaling flat amounts ×100 at generation in `StationService._generate_single_buff`.
 - **Gravity Well placeholder visual**: Replaced ColorRect with custom `_draw()` circle (pulsing glow, border ring, centered text) and manual activation via `interact` input with proximity prompt.
+- **Gravity Well vacuum exemption**: Beacons and Gravity Well power-ups now skip nodes in the `"powerups"` group when vacuuming, so power-ups always require physical touch.
+- **Gravity Well refactored to power-up**: `GravityWellPickup` now extends `BasePowerUp` (was `BasePickup`). Dropped from shared power-up pool instead of independent RNG. Scene updated to 48×48 with shader glow.

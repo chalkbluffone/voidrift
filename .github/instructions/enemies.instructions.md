@@ -51,6 +51,17 @@ Signals: `swarm_warning_started`, `swarm_started`, `swarm_ended`
 
 HUD displays "A MASSIVE FLEET IS INBOUND" during the warning phase (`SWARM_WARNING_DURATION` seconds before swarm starts).
 
+## Stopwatch Freeze (`is_frozen`)
+
+The Stopwatch power-up freezes all enemies in place:
+
+- `BaseEnemy.is_frozen: bool = false` — when true, `_process_movement()` skips chase/flee logic
+- Frozen enemies still process knockback, contact damage, and `move_and_slide()`
+- `LootFreighter` overrides `_process_movement()` without calling `super` — has its own `is_frozen` guard
+- Global freeze flag: `SceneTree.set_meta("stopwatch_freeze_active", true)` set by `StopwatchPowerUp`
+- **New enemy spawns** check `get_tree().has_meta("stopwatch_freeze_active")` in `_ready()` and spawn frozen
+- Unfreeze timer uses generation-counter pattern — collecting another stopwatch refreshes the duration
+
 ## Enemy Movement & Flow Field
 
 Enemies use the `FlowField` system for pathfinding (see `world.instructions.md` for flow field details). Key behavior:

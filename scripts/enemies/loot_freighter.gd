@@ -64,6 +64,9 @@ func _enter_flee_state() -> void:
 
 
 func _process_movement(delta: float) -> void:
+	if is_frozen:
+		velocity = _knockback_velocity  # Still allow knockback but no chase/flee
+		return
 	if not _target:
 		_find_player()
 		return

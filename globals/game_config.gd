@@ -72,8 +72,19 @@ const PICKUP_MAGNET_ACCELERATION: float = 800.0  # How fast pickups accelerate
 # =============================================================================
 # CREDITS
 # =============================================================================
-const CREDIT_DROP_CHANCE: float = 0.40  # 40% chance enemies drop credits
-const CREDIT_SCALE_PER_MINUTE: float = 0.1  # +10% credit value per minute
+# Credits now guaranteed 1 per kill (no RNG). credits_gain stat still multiplies via ProgressionManager.
+
+# =============================================================================
+# POWER-UPS (dropped by enemies, rare)
+# =============================================================================
+const POWERUP_BASE_DROP_CHANCE: float = 0.015          # 1.5% chance per kill to drop a power-up
+const POWERUP_HEALTH_RESTORE_FRACTION: float = 0.25    # 25% of max HP restored (scaled by powerup_multiplier)
+const POWERUP_SPEED_BOOST_AMOUNT: float = 3.0          # +300% movement speed bonus
+const POWERUP_SPEED_BOOST_DURATION: float = 10.0       # Duration in seconds (scaled by powerup_multiplier)
+const POWERUP_STOPWATCH_DURATION: float = 10.0         # Enemy freeze duration in seconds (scaled by powerup_multiplier)
+const POWERUP_SCATTER: float = 20.0                    # Power-up random offset from death position (pixels)
+const POWERUP_COLLISION_RADIUS: float = 24.0           # Collision circle radius for 48×48 power-ups
+const POWERUP_VISUAL_SIZE: float = 48.0                # Power-up visual size in pixels
 
 # =============================================================================
 # RUN
@@ -438,8 +449,6 @@ const STATION_FLAT_STATS: Array[String] = [
 # GRAVITY WELL (pickup vacuum system)
 # =============================================================================
 const GRAVITY_WELL_VACUUM_SPEED: float = 1200.0            # Speed pickups fly to player during vacuum
-const GRAVITY_WELL_DROP_CHANCE: float = 0.015               # Chance per enemy kill to drop Gravity Well
-const GRAVITY_WELL_MIN_PICKUPS_FOR_DROP: int = 10           # Minimum uncollected pickups before drop can occur
 const GRAVITY_WELL_BEACON_COUNT: int = 4                    # Beacons placed per run
 const GRAVITY_WELL_BEACON_ACTIVATION_RADIUS: float = 80.0   # Proximity to activate beacon
 const GRAVITY_WELL_BEACON_MIN_SEPARATION: float = 500.0     # Minimum distance between beacons
