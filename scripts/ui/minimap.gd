@@ -17,6 +17,8 @@ const COLOR_BOUNDARY: Color = Color(1.0, 0.0, 1.0, 0.6)  # Pink
 const COLOR_FOG: Color = Color(0.0, 0.0, 0.0, 0.9)
 const COLOR_EXPLORED: Color = Color(0.15, 0.15, 0.2, 0.6)
 
+@onready var FrameCache: Node = get_node("/root/FrameCache")
+
 var _player: Node2D = null
 var _fog_of_war: RefCounted = null
 var _minimap_size: float = 180.0
@@ -147,7 +149,7 @@ func _draw_arena_boundary(center: Vector2, radius: float, player_pos: Vector2) -
 
 ## Draw enemy dots on the minimap.
 func _draw_enemies(center: Vector2, radius: float, player_pos: Vector2) -> void:
-	var enemies: Array[Node] = get_tree().get_nodes_in_group("enemies")
+	var enemies: Array[Node] = FrameCache.enemies
 	
 	for enemy: Node in enemies:
 		if not enemy is Node2D:

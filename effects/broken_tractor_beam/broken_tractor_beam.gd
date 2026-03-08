@@ -27,6 +27,8 @@ class_name BrokenTractorBeam
 @export var particle_lifetime: float = 0.4
 @export var beam_width: float = 12.0
 
+@onready var FrameCache: Node = get_node("/root/FrameCache")
+
 # --- Pull ---
 @export var pull_speed: float = 80.0  ## How fast the beam drags enemies toward the ship (px/s)
 
@@ -175,7 +177,7 @@ func _process(delta: float) -> void:
 func _find_nearest_enemy() -> Node2D:
 	## Scan the "enemies" group for the closest enemy within search_radius.
 	var origin: Vector2 = _follow_source.global_position if is_instance_valid(_follow_source) else global_position
-	var enemies: Array[Node] = get_tree().get_nodes_in_group("enemies")
+	var enemies: Array[Node] = FrameCache.enemies
 	var best: Node2D = null
 	var best_dist: float = search_radius
 	for enemy: Node in enemies:

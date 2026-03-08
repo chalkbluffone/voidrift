@@ -11,7 +11,7 @@ func _on_pickup_ready() -> void:
 	super._on_pickup_ready()
 
 
-func _apply_powerup_effect(player: Node2D, multiplier: float) -> void:
+func _apply_powerup_effect(_player: Node2D, multiplier: float) -> void:
 	var duration: float = GameConfig.POWERUP_STOPWATCH_DURATION * multiplier
 	var tree: SceneTree = get_tree()
 

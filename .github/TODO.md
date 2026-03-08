@@ -50,5 +50,6 @@
 - **Stardust drop rate not in GameConfig**: Drop chance was implicit. Added `STARDUST_BASE_DROP_CHANCE = 0.03` (3%) to GameConfig. Normal enemies now roll for stardust drop; freighters always drop full `stardust_value`.
 - **Damage number exclamation marks removed**: Removed `!` (crit) and `!!` (overcrit) suffixes from floating damage numbers for cleaner visuals.
 - **Damage number z-index layering**: All damage numbers shared z_index=100. Added per-tier z-index: heal=99, normal=100, crit=101, overcrit=102, ensuring crits render above normal hits.
+- **FrameCache performance optimization**: 17+ weapon effects + enemies + UI each calling `get_nodes_in_group("enemies")` every frame caused single-threaded CPU bottleneck (one core maxed while total CPU looked low). Created `FrameCache` autoload (process_priority=-100) that caches enemy list, damage number list, and SpatialHashGrid once per frame. All 17 effect scripts, base_enemy, enemy_spawner, weapon_component, HUD, minimap, full_map_overlay, and effect_utils now read from FrameCache instead of individual group queries. Removed redundant per-frame `enemy_grid.clear()/rebuild` from enemy_spawner.
 
 _Last updated: March 8, 2026_

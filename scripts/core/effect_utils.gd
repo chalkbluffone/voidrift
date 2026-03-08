@@ -21,12 +21,22 @@ static func get_white_pixel_texture(size: int = 4) -> ImageTexture:
 	return tex
 
 
+## Return the cached enemy list from the FrameCache autoload.
+## Return the cached enemy list from the FrameCache autoload.
+## Falls back to get_nodes_in_group if cache is empty.
+static func _get_enemies(tree: SceneTree) -> Array[Node]:
+	var cache: Node = tree.root.get_node_or_null("/root/FrameCache")
+	if cache and cache.enemies.size() > 0:
+		return cache.enemies
+	return tree.get_nodes_in_group("enemies")
+
+
 ## Return the nearest Node2D in the "enemies" group to [param origin],
 ## or null if the group is empty / all members are invalid.
 static func find_nearest_enemy(tree: SceneTree, origin: Vector2) -> Node2D:
 	var nearest: Node2D = null
 	var nearest_dist: float = INF
-	for enemy in tree.get_nodes_in_group("enemies"):
+	for enemy in _get_enemies(tree):
 		if not enemy is Node2D or not is_instance_valid(enemy):
 			continue
 		var dist: float = origin.distance_to((enemy as Node2D).global_position)
@@ -40,7 +50,7 @@ static func find_nearest_enemy(tree: SceneTree, origin: Vector2) -> Node2D:
 ## [param radius] of [param origin].  Useful for pre-checks that skip
 ## spawning when no targets exist nearby (e.g. nikolas coil, tractor beam).
 static func has_enemy_in_range(tree: SceneTree, origin: Vector2, radius: float) -> bool:
-	for enemy in tree.get_nodes_in_group("enemies"):
+	for enemy in _get_enemies(tree):
 		if enemy is Node2D and is_instance_valid(enemy):
 			if origin.distance_to((enemy as Node2D).global_position) < radius:
 				return true
@@ -51,7 +61,7 @@ static func has_enemy_in_range(tree: SceneTree, origin: Vector2, radius: float) 
 ## nearest-first.  Used by multi-target weapons like Space Nukes.
 static func find_enemies_in_range(tree: SceneTree, center: Vector2, radius: float) -> Array[Node2D]:
 	var out: Array[Node2D] = []
-	for enemy_any in tree.get_nodes_in_group("enemies"):
+	for enemy_any in _get_enemies(tree):
 		if not enemy_any is Node2D or not is_instance_valid(enemy_any):
 			continue
 		var enemy: Node2D = enemy_any as Node2D

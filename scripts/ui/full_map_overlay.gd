@@ -19,6 +19,7 @@ const COLOR_GRID: Color = Color(0.1, 0.1, 0.15, 0.5)
 
 var _player: Node2D = null
 var _fog_of_war: FogOfWar = null  # Reference from minimap (shared)
+@onready var FrameCache: Node = get_node("/root/FrameCache")
 var _map_size: float = 400.0  # Size of the map panel
 var _world_to_map_scale: float = 0.01  # Arena radius to map radius scale
 var _is_visible: bool = false
@@ -156,7 +157,7 @@ func _draw_grid(center: Vector2, radius: float) -> void:
 
 
 func _draw_enemies(center: Vector2) -> void:
-	var enemies: Array[Node] = get_tree().get_nodes_in_group("enemies")
+	var enemies: Array[Node] = FrameCache.enemies
 	var radius: float = _map_size * 0.5
 	
 	for enemy: Node in enemies:

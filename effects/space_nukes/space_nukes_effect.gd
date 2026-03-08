@@ -2,6 +2,7 @@ extends Node2D
 class_name SpaceNukesEffect
 
 @onready var RunManager: Node = get_node_or_null("/root/RunManager")
+@onready var FrameCache: Node = get_node("/root/FrameCache")
 
 @export var damage: float = 12.0
 @export var projectile_speed: float = 520.0
@@ -124,7 +125,7 @@ func _update_target_position() -> void:
 		_target_pos = _target_node.global_position
 		return
 
-	var enemies: Array = get_tree().get_nodes_in_group("enemies")
+	var enemies: Array = FrameCache.enemies
 	var nearest: Node2D = null
 	var nearest_dist: float = INF
 	for enemy_any in enemies:
@@ -143,7 +144,7 @@ func _update_target_position() -> void:
 
 func _check_enemy_contact() -> bool:
 	var contact_radius: float = maxf(14.0, 12.0 * size_mult)
-	var enemies: Array = get_tree().get_nodes_in_group("enemies")
+	var enemies: Array = FrameCache.enemies
 	for enemy_any in enemies:
 		if not enemy_any is Node2D or not is_instance_valid(enemy_any):
 			continue
@@ -168,7 +169,7 @@ func _explode(origin: Vector2) -> void:
 
 func _apply_burst_damage(origin: Vector2) -> void:
 	var effective_radius: float = explosion_radius * size_mult
-	var enemies: Array = get_tree().get_nodes_in_group("enemies")
+	var enemies: Array = FrameCache.enemies
 
 	for enemy_any in enemies:
 		if not enemy_any is Node2D or not is_instance_valid(enemy_any):

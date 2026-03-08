@@ -13,6 +13,8 @@ extends Node2D
 @export var drone_size: float = 9.0
 @export var hit_cooldown: float = 0.35
 
+@onready var FrameCache: Node = get_node("/root/FrameCache")
+
 var _follow_source: Node2D = null
 var _orbit_phase: float = 0.0
 var _drones: Array[Node2D] = []
@@ -113,7 +115,7 @@ func _check_contacts() -> void:
 	if _drones.is_empty():
 		return
 
-	var enemies: Array[Node] = get_tree().get_nodes_in_group("enemies")
+	var enemies: Array[Node] = FrameCache.enemies
 	var contact_radius: float = maxf(8.0, drone_size * size * 1.2)
 
 	for enemy in enemies:

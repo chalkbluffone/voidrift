@@ -27,6 +27,7 @@ var _spawners: WeaponSpawnerCache = WeaponSpawnerCache.new()
 
 @onready var DataLoader: Node = get_node_or_null("/root/DataLoader")
 @onready var RunManager: Node = get_node_or_null("/root/RunManager")
+@onready var FrameCache: Node = get_node_or_null("/root/FrameCache")
 
 
 # ---------------------------------------------------------------------------
@@ -470,7 +471,7 @@ func _find_nearest_enemy() -> Node2D:
 	var nearest: Node2D = null
 	var nearest_dist: float = _targeting_range
 
-	var enemies: Array[Node] = get_tree().get_nodes_in_group("enemies")
+	var enemies: Array[Node] = FrameCache.enemies
 
 	for enemy in enemies:
 		if not enemy is Node2D:

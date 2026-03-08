@@ -25,6 +25,7 @@ var _target: Node2D = null
 var _hitbox: Area2D = null
 @onready var RunManager: Node = get_node("/root/RunManager")
 @onready var GameConfig: Node = get_node("/root/GameConfig")
+@onready var FrameCache: Node = get_node("/root/FrameCache")
 
 # --- Knockback ---
 var _knockback_velocity: Vector2 = Vector2.ZERO
@@ -35,7 +36,7 @@ var _damage_cooldown: float = 0.0
 # --- Flow Field ---
 var _flow_field: FlowField = null
 
-# --- Spatial Hash Grid (from enemy spawner) ---
+# --- Spatial Hash Grid (from FrameCache autoload) ---
 var _enemy_grid: SpatialHashGrid = null
 
 # --- Smoothed Direction ---
@@ -112,9 +113,7 @@ func _find_flow_field() -> void:
 
 
 func _find_enemy_grid() -> void:
-	var spawners: Array[Node] = get_tree().get_nodes_in_group("enemy_spawner")
-	if spawners.size() > 0 and spawners[0].has_method("get_enemy_grid"):
-		_enemy_grid = spawners[0].get_enemy_grid()
+	_enemy_grid = FrameCache.enemy_grid
 
 
 func _process_movement(delta: float) -> void:
@@ -179,7 +178,7 @@ func _get_separation_force() -> Vector2:
 				force += diff.normalized() * proximity * sep_strength
 	else:
 		# Fallback: brute-force group scan (only if grid unavailable)
-		var enemies: Array[Node] = get_tree().get_nodes_in_group("enemies")
+		var enemies: Array[Node] = FrameCache.enemies
 		for enemy: Node in enemies:
 			if enemy == self:
 				continue
@@ -263,7 +262,7 @@ func _spawn_damage_number(amount: float, damage_info: Dictionary) -> void:
 		return
 	
 	# Enforce soft cap — remove oldest if exceeded
-	var existing: Array[Node] = get_tree().get_nodes_in_group("damage_numbers")
+	var existing: Array[Node] = FrameCache.damage_numbers
 	if existing.size() >= GameConfig.DAMAGE_NUMBER_MAX_COUNT:
 		if is_instance_valid(existing[0]):
 			existing[0].queue_free()

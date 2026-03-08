@@ -50,6 +50,23 @@ When adding or changing any weapon, verify ALL of:
 - [ ] Persistent effects clean up correctly on unequip/remove
 - [ ] `get_errors` shows no new script/JSON errors
 
+## Enemy Queries in Effects (FrameCache)
+
+**All weapon effects and combat scripts must use `FrameCache` for enemy queries** instead of calling `get_nodes_in_group("enemies")` directly. With 17+ weapon effects potentially active, each querying the enemy list every frame, this avoids redundant group scans.
+
+```gdscript
+# In effect scripts:
+@onready var FrameCache: Node = get_node("/root/FrameCache")
+
+# Use FrameCache.enemies for targeting, AOE checks, etc.
+var enemies: Array[Node] = FrameCache.enemies
+
+# Use FrameCache.enemy_grid for spatial neighbor queries (separation, range checks)
+var nearby: Array = FrameCache.enemy_grid.query_radius(position, radius)
+```
+
+The static utility class `EffectUtils` (`scripts/core/effect_utils.gd`) routes all its helpers (`find_nearest_enemy()`, `has_enemy_in_range()`, `find_enemies_in_range()`) through FrameCache automatically.
+
 ## Weapon Test Lab Maintenance
 
 When making changes to a weapon or its parameters:

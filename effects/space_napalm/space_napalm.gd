@@ -27,6 +27,8 @@ class_name SpaceNapalm
 @export var fire_flame_speed: float = 3.0
 @export var fire_flame_turbulence: float = 0.6
 
+@onready var FrameCache: Node = get_node("/root/FrameCache")
+
 # ── Stats Exports ─────────────────────────────────────────────────────────
 
 @export var damage: float = 12.0        ## Impact damage
@@ -173,7 +175,7 @@ func _process_projectile(delta: float) -> void:
 
 	# Detonate on first enemy contact (distance check — reliable at any speed)
 	var hit_radius: float = proj_size * 2.0
-	var enemies: Array = get_tree().get_nodes_in_group("enemies")
+	var enemies: Array = FrameCache.enemies
 	for enemy in enemies:
 		if not is_instance_valid(enemy) or not enemy is Node2D:
 			continue
@@ -327,7 +329,7 @@ func _cleanup() -> void:
 func _deal_impact_damage() -> void:
 	## Deal impact damage to enemies near the detonation point.
 	# Distance-based check — generous radius for the initial blast
-	var enemies: Array = get_tree().get_nodes_in_group("enemies")
+	var enemies: Array = FrameCache.enemies
 	var effective_radius: float = aoe_radius * size_mult * 0.7
 	for enemy in enemies:
 		if not is_instance_valid(enemy) or not enemy is Node2D:
@@ -343,7 +345,7 @@ func _deal_aoe_damage() -> void:
 	if not _aoe_hitbox or not _aoe_hitbox.monitoring:
 		return
 
-	var effective_radius: float = aoe_radius * size_mult
+	var _effective_radius: float = aoe_radius * size_mult
 	var damaged: Array = []
 
 	# Primary: Area2D overlap — detects enemy HitboxArea children (proven pattern)

@@ -8,7 +8,7 @@ applyTo: "**"
 
 ```
 data/           9 JSON files — all game content (weapons, ships, captains, enemies, etc.)
-globals/        12 autoloads (GameConfig → SteamManager)
+globals/        13 autoloads (GameConfig → FrameCache)
 scripts/        GDScript organized by domain (core/, combat/, player/, systems/, ui/, pickups/, enemies/)
               core/ includes SpatialHashGrid utility for fast neighbor queries
 scenes/         .tscn files (gameplay/, ui/, pickups/, enemies/)
@@ -20,20 +20,21 @@ build/          Export output (windows/, linux/, macos/) — gitignored
 
 ## Autoloads (load order)
 
-| #   | Autoload             | Purpose                                            |
-| --- | -------------------- | -------------------------------------------------- |
-| 1   | `GameConfig`         | Centralized tuning constants (balance, combat, UI) |
-| 2   | `GameSeed`           | Deterministic randomness                           |
-| 3   | `DataLoader`         | JSON loading + mod merge                           |
-| 4   | `PersistenceManager` | Save/load persistent data                          |
-| 5   | `RunManager`         | Run lifecycle, scene transitions                   |
-| 6   | `ProgressionManager` | XP tracking + level-up flow                        |
-| 7   | `UpgradeService`     | Level-up option generation                         |
-| 8   | `StationService`     | Space station buff generation + application        |
-| 9   | `GameManager`        | Legacy compatibility facade                        |
-| 10  | `FileLogger`         | Debug logging to `debug_log.txt`                   |
-| 11  | `SettingsManager`    | Audio/display/monitor selection                    |
-| 12  | `SteamManager`       | GodotSteam init, callbacks, graceful fallback      |
+| #   | Autoload             | Purpose                                                             |
+| --- | -------------------- | ------------------------------------------------------------------- |
+| 1   | `GameConfig`         | Centralized tuning constants (balance, combat, UI)                  |
+| 2   | `GameSeed`           | Deterministic randomness                                            |
+| 3   | `DataLoader`         | JSON loading + mod merge                                            |
+| 4   | `PersistenceManager` | Save/load persistent data                                           |
+| 5   | `RunManager`         | Run lifecycle, scene transitions                                    |
+| 6   | `ProgressionManager` | XP tracking + level-up flow                                         |
+| 7   | `UpgradeService`     | Level-up option generation                                          |
+| 8   | `StationService`     | Space station buff generation + application                         |
+| 9   | `GameManager`        | Legacy compatibility facade                                         |
+| 10  | `FileLogger`         | Debug logging to `debug_log.txt`                                    |
+| 11  | `SettingsManager`    | Audio/display/monitor selection                                     |
+| 12  | `SteamManager`       | GodotSteam init, callbacks, graceful fallback                       |
+| 13  | `FrameCache`         | Per-frame group query cache (enemies, damage numbers, spatial grid) |
 
 ## Data Files (`data/`)
 

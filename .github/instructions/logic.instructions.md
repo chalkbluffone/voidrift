@@ -102,6 +102,36 @@ signal damage_taken(amount: int)
 
 > **Moved**: GameConfig rule, collision layers, and most domain-specific mechanics now live in dedicated instruction files. See `architecture.instructions.md`, `gameconfig.instructions.md`, `combat.instructions.md`, `enemies.instructions.md`, `player.instructions.md`, `world.instructions.md`, `ui.instructions.md`, and `progression.instructions.md`.
 
+## FrameCache Rule (Mandatory)
+
+**Never call `get_nodes_in_group("enemies")` or `get_nodes_in_group("damage_numbers")` directly.** Use the `FrameCache` autoload instead. It rebuilds once per frame (`process_priority = -100`) so all systems share a single query.
+
+### How to Reference FrameCache
+
+```gdscript
+# In scene scripts (effects, enemies, UI, etc.):
+@onready var FrameCache: Node = get_node("/root/FrameCache")
+
+# Then use cached arrays:
+var enemies: Array[Node] = FrameCache.enemies
+var damage_nums: Array[Node] = FrameCache.damage_numbers
+var grid: SpatialHashGrid = FrameCache.enemy_grid
+
+# In static utility functions (no @onready available):
+var cache: Node = tree.root.get_node_or_null("/root/FrameCache")
+if cache:
+    return cache.enemies
+return tree.get_nodes_in_group("enemies")  # fallback
+```
+
+### What FrameCache Provides
+
+| Property         | Type              | Contents                                       |
+| ---------------- | ----------------- | ---------------------------------------------- |
+| `enemies`        | `Array[Node]`     | All nodes in `"enemies"` group                 |
+| `damage_numbers` | `Array[Node]`     | All nodes in `"damage_numbers"` group          |
+| `enemy_grid`     | `SpatialHashGrid` | Spatial hash grid rebuilt from enemy positions |
+
 ---
 
 The following gotchas remain here because they are GDScript-engine-level issues, not domain-specific.

@@ -27,6 +27,8 @@ const PROJECTILE_SCENE: PackedScene = preload("res://scenes/gameplay/projectile.
 @export var bolt_length: float = 12.0
 @export var bolt_width: float = 2.0
 
+@onready var FrameCache: Node = get_node("/root/FrameCache")
+
 # --- Internal ---
 var _stats_component: Node = null
 var _active_projectiles: Array = []
@@ -135,7 +137,7 @@ func _on_bolt_hit(enemy: Node2D, _damage_info: Dictionary, source_projectile: No
 	# Find nearest enemy within bounce range, excluding the one we just hit
 	var nearest: Node2D = null
 	var nearest_dist: float = bounce_range
-	var enemies: Array = get_tree().get_nodes_in_group("enemies")
+	var enemies: Array = FrameCache.enemies
 	for enemy_any in enemies:
 		if not enemy_any is Node2D or not is_instance_valid(enemy_any):
 			continue

@@ -15,6 +15,8 @@ extends Node2D
 @export var ring_color: Color = Color(1.0, 1.0, 1.0, 0.15)
 @export var wedge_color: Color = Color(0.4, 0.8, 1.0, 0.5)
 
+@onready var FrameCache: Node = get_node("/root/FrameCache")
+
 var _follow_source: Node2D = null
 var _sweep_angle: float = 0.0  # current leading edge of the slice in radians
 var _enemy_hit_cooldowns: Dictionary = {}  # enemy_instance_id -> remaining cooldown
@@ -130,7 +132,7 @@ func _tick_cooldowns(delta: float) -> void:
 
 func _check_slice_damage() -> void:
 	var radius: float = base_radius * size
-	var enemies: Array = get_tree().get_nodes_in_group("enemies")
+	var enemies: Array = FrameCache.enemies
 
 	for enemy in enemies:
 		if not (enemy is Node2D) or not is_instance_valid(enemy):

@@ -165,4 +165,4 @@ Use `FileLogger` autoload for all debug output. Writes to `c:\git\voidrift\debug
 - [Godot 4 Docs](https://docs.godotengine.org/en/stable/)
 - [GDQuest](https://www.gdquest.com/)
 
-_Last updated: March 7, 2026_
+_Last updated: March 8, 2026_

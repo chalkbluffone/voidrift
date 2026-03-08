@@ -32,6 +32,7 @@ FileLogger="*res://globals/file_logger.gd"
 SettingsManager="*res://globals/settings_manager.gd"
 StationService="*res://globals/station_service.gd"
 SteamManager="*res://globals/steam_manager.gd"
+FrameCache="*res://globals/frame_cache.gd"
 
 [display]
 

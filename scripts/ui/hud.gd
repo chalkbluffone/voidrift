@@ -42,6 +42,7 @@ var vram_label: Label = null
 @onready var SettingsManager: Node = get_node("/root/SettingsManager")
 @onready var DataLoader: Node = get_node("/root/DataLoader")
 @onready var GameConfig: Node = get_node("/root/GameConfig")
+@onready var FrameCache: Node = get_node("/root/FrameCache")
 
 var _player: Node = null
 var _level_tween: Tween = null
@@ -585,7 +586,7 @@ func _on_lifesteal_healed(amount: float, world_pos: Vector2) -> void:
 		return
 
 	# Enforce soft cap — remove oldest if exceeded
-	var existing: Array[Node] = get_tree().get_nodes_in_group("damage_numbers")
+	var existing: Array[Node] = FrameCache.damage_numbers
 	if existing.size() >= GameConfig.DAMAGE_NUMBER_MAX_COUNT:
 		if is_instance_valid(existing[0]):
 			existing[0].queue_free()

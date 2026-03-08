@@ -2,6 +2,7 @@ extends Node2D
 class_name TothianMine
 
 @onready var RunManager: Node = get_node_or_null("/root/RunManager")
+@onready var FrameCache: Node = get_node("/root/FrameCache")
 
 @export var damage: float = 15.0
 @export var duration: float = 3.0
@@ -149,7 +150,7 @@ func _explode() -> void:
 
 func _apply_aoe_damage() -> void:
 	var hit_radius: float = maxf(8.0, size)
-	var enemies: Array = get_tree().get_nodes_in_group("enemies")
+	var enemies: Array = FrameCache.enemies
 	for enemy_any in enemies:
 		if not enemy_any is Node2D or not is_instance_valid(enemy_any):
 			continue

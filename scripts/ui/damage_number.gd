@@ -6,7 +6,7 @@ extends RichTextLabel
 
 const DAMAGE_NUMBER_FONT: Font = preload("res://assets/fonts/Orbitron-Bold.ttf")
 
-@onready var _game_config: Node = get_node("/root/GameConfig")
+# GameConfig accessed via autoload name at class level
 
 
 func _ready() -> void:

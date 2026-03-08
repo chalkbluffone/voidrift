@@ -148,7 +148,7 @@ func update_field(player_position: Vector2) -> void:
 		head += 1
 
 		var cx: int = cur_idx % _grid_w
-		var cy: int = int(cur_idx / _grid_w)
+		var cy: int = int(cur_idx / float(_grid_w))
 
 		for i: int in range(8):
 			var nx: int = cx + _ndx[i]

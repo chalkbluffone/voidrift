@@ -23,7 +23,7 @@ var _powerup_pool: Array[PackedScene] = []
 var _player: Node2D = null
 var _spawn_timer: float = 0.0
 
-## Spatial hash grid for fast enemy neighbor queries (separation force)
+## Spatial hash grid reference (owned by FrameCache autoload)
 var _enemy_grid: SpatialHashGrid = null
 
 ## Cached asteroid positions + radii for spawn position checks
@@ -45,6 +45,7 @@ var _freighter_cooldown: float = 0.0
 @onready var GameConfig: Node = get_node("/root/GameConfig")
 @onready var DataLoader: Node = get_node("/root/DataLoader")
 @onready var FileLogger: Node = get_node("/root/FileLogger")
+@onready var FrameCache: Node = get_node("/root/FrameCache")
 
 
 func _ready() -> void:
@@ -52,8 +53,8 @@ func _ready() -> void:
 	_find_player()
 	_build_enemy_pool()
 	_cache_asteroid_positions()
-	# Initialize spatial hash grid (cell size = 2× separation radius for good bucket distribution)
-	_enemy_grid = SpatialHashGrid.new(GameConfig.ENEMY_SEPARATION_RADIUS * 2.0)
+	# Use shared spatial hash grid from FrameCache autoload
+	_enemy_grid = FrameCache.enemy_grid
 	# Initialize power-up pool (equal weight random selection)
 	_powerup_pool = [HealthPowerUpScene, SpeedPowerUpScene, StopwatchPowerUpScene, GravityWellPowerUpScene]
 
@@ -62,13 +63,6 @@ func _process(delta: float) -> void:
 	if not _player:
 		_find_player()
 		return
-	
-	# Rebuild spatial hash grid each frame
-	_enemy_grid.clear()
-	var all_enemies: Array[Node] = get_tree().get_nodes_in_group("enemies")
-	for enemy: Node in all_enemies:
-		if enemy is Node2D:
-			_enemy_grid.insert(enemy as Node2D)
 	
 	# Tick freighter cooldown
 	if _freighter_cooldown > 0.0:
@@ -313,7 +307,7 @@ func _pick_weighted_enemy() -> Dictionary:
 	var time_minutes: float = RunManager.run_data.time_elapsed / 60.0
 	# Count active freighters to enforce cap
 	var active_freighter_count: int = 0
-	for node: Node in get_tree().get_nodes_in_group("enemies"):
+	for node: Node in FrameCache.enemies:
 		if node is LootFreighter:
 			active_freighter_count += 1
 	var freighter_blocked: bool = active_freighter_count >= GameConfig.FREIGHTER_MAX_ACTIVE or _freighter_cooldown > 0.0

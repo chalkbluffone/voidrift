@@ -33,6 +33,8 @@ class_name NikolasCoil
 @export var branch_intensity: float = 0.3
 @export var flicker_speed: float = 30.0
 
+@onready var FrameCache: Node = get_node("/root/FrameCache")
+
 # Fork branches
 @export var fork_count: int = 3           # Forks per junction point
 @export var fork_length_min: float = 20.0
@@ -276,7 +278,7 @@ func _find_chain_targets(origin: Vector2, max_bounces: int, radius: float) -> Ar
 	var targets: Array[Node2D] = []
 	var visited: Array[Node2D] = []
 	var current_pos: Vector2 = origin
-	var enemies: Array[Node] = get_tree().get_nodes_in_group("enemies")
+	var enemies: Array[Node] = FrameCache.enemies
 
 	for _i in range(max_bounces):
 		var best_target: Node2D = null

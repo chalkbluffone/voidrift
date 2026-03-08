@@ -22,6 +22,8 @@ extends Node2D
 @export var color: Color = Color(0.65, 0.2, 1.0, 0.75)
 @export var cooldown: float = 3.0  # Used for display only; spawner handles regen timing
 
+@onready var FrameCache: Node = get_node("/root/FrameCache")
+
 # --- Internal state ---
 var _current_layers: int = 2
 var _max_layers: int = 2
@@ -175,7 +177,7 @@ func _process(delta: float) -> void:
 	# Also do direct distance check against all enemies as a reliable fallback
 	if _current_layers > 0:
 		var bubble_radius: float = size * 1.3
-		for enemy in get_tree().get_nodes_in_group("enemies"):
+		for enemy in FrameCache.enemies:
 			if enemy is Node2D and is_instance_valid(enemy):
 				var dist: float = global_position.distance_to(enemy.global_position)
 				if dist < bubble_radius + 22.0:  # 22 = enemy collision radius
@@ -463,7 +465,7 @@ func _spawn_hit_particles(source: Node2D) -> void:
 		"emitting": true,
 		"one_shot": true,
 		"explosiveness": 0.9,
-		"amount": maxi(particle_count / 3, 4),
+		"amount": maxi(int(particle_count / 3.0), 4),
 		"lifetime": 0.4,
 		"emission_shape": CPUParticles2D.EMISSION_SHAPE_RING,
 		"emission_ring_radius": size * 1.0,
