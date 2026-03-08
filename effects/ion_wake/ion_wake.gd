@@ -134,56 +134,38 @@ func _explode_into_particles() -> void:
 	if _hitbox:
 		_hitbox.monitoring = false
 	
-	# Use CPUParticles2D for reliable particle lifecycle (same approach as Radiant Arc)
-	var particles: CPUParticles2D = CPUParticles2D.new()
-	get_parent().add_child(particles)
-	particles.global_position = global_position
-	particles.z_index = -2  # Render below enemies and ship
-	particles.z_as_relative = false
-	
-	# One-shot explosion burst
-	particles.emitting = true
-	particles.one_shot = true
-	particles.explosiveness = 1.0  # All emit at once
-	particles.amount = particles_count
-	particles.lifetime = particles_lifetime
-	
-	# Movement: firefly-like wandering controlled by excitement
-	particles.direction = Vector2.ZERO
-	particles.spread = 180.0
-	particles.initial_velocity_min = particles_excitement * 0.3
-	particles.initial_velocity_max = particles_excitement
-	particles.gravity = Vector2(0, particles_gravity)
-	# Angular velocity for swirling firefly motion
-	particles.angular_velocity_min = -particles_excitement * 3.0
-	particles.angular_velocity_max = particles_excitement * 3.0
-	# Randomness makes each particle wander differently
-	particles.randomness = 1.0
-	# Damping so particles don't fly away
-	particles.damping_min = particles_excitement * 0.5
-	particles.damping_max = particles_excitement * 1.5
-	
-	# Scale: 1px sparks
-	particles.scale_amount_min = 1.0
-	particles.scale_amount_max = 1.0
-	
-	# Emit from entire circle area
-	particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_SPHERE
-	particles.emission_sphere_radius = _current_radius
-	
-	# Color: base circle_color with slight variation
-	particles.color = circle_color
-	
-	# Color ramp: fade out
-	var color_ramp: Gradient = Gradient.new()
-	color_ramp.set_color(0, Color(1.0, 1.0, 1.0, 1.0))  # Full opacity at start
-	color_ramp.set_color(1, Color(1.0, 1.0, 1.0, 0.0))  # Fully transparent at end
-	particles.color_ramp = color_ramp
-	
-	# Slight hue variation
-	particles.color_initial_ramp = null
-	particles.hue_variation_min = -0.04
-	particles.hue_variation_max = 0.04
+	# Use EffectUtils.create_particles for GPU/CPU particle selection
+	var particles: Node2D = EffectUtils.create_particles(get_parent(), {
+		"global_position": global_position,
+		"z_index": -2,
+		"z_as_relative": false,
+		"emitting": true,
+		"one_shot": true,
+		"explosiveness": 1.0,
+		"amount": particles_count,
+		"lifetime": particles_lifetime,
+		"direction": Vector2.ZERO,
+		"spread": 180.0,
+		"initial_velocity_min": particles_excitement * 0.3,
+		"initial_velocity_max": particles_excitement,
+		"gravity": Vector2(0, particles_gravity),
+		"angular_velocity_min": -particles_excitement * 3.0,
+		"angular_velocity_max": particles_excitement * 3.0,
+		"randomness": 1.0,
+		"damping_min": particles_excitement * 0.5,
+		"damping_max": particles_excitement * 1.5,
+		"scale_amount_min": 1.0,
+		"scale_amount_max": 1.0,
+		"emission_shape": CPUParticles2D.EMISSION_SHAPE_SPHERE,
+		"emission_sphere_radius": _current_radius,
+		"color": circle_color,
+		"color_ramp": EffectUtils.make_gradient([
+			[0.0, Color(1.0, 1.0, 1.0, 1.0)],
+			[1.0, Color(1.0, 1.0, 1.0, 0.0)],
+		]),
+		"hue_variation_min": -0.04,
+		"hue_variation_max": 0.04,
+	})
 	
 	# Clean up after particles finish
 	get_tree().create_timer(particles_lifetime + 0.5).timeout.connect(particles.queue_free)

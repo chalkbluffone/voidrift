@@ -62,7 +62,7 @@
 			"projectile_count": 1.0
 		},
 		"type": "melee",
-		"unlock_condition": "none",
+		"unlock_condition": "default",
 		"visual": {
 			"circle_color": "#ff141480"
 		}
@@ -252,7 +252,7 @@
 			"duration": 1.0
 		},
 		"type": "melee",
-		"unlock_condition": "none",
+		"unlock_condition": "default",
 		"visual": {
 			"chromatic_aberration": 1.45,
 			"color_a": "#ff0000",

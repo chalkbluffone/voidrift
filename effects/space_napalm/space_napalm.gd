@@ -62,17 +62,17 @@ var _is_active: bool = true
 # Projectile visuals
 var _proj_mesh: MeshInstance2D = null
 var _proj_material: ShaderMaterial = null
-var _trail_particles: CPUParticles2D = null
+var _trail_particles: Node2D = null
 
 # Fire AoE visuals
 var _fire_mesh: MeshInstance2D = null
 var _fire_material: ShaderMaterial = null
-var _flame_particles: CPUParticles2D = null
-var _ember_particles: CPUParticles2D = null
-var _smoke_particles: CPUParticles2D = null
+var _flame_particles: Node2D = null
+var _ember_particles: Node2D = null
+var _smoke_particles: Node2D = null
 
 # Impact burst
-var _burst_particles: CPUParticles2D = null
+var _burst_particles: Node2D = null
 
 # Hitboxes
 var _proj_hitbox: Area2D = null
@@ -252,10 +252,10 @@ func _process_impact(_delta: float) -> void:
 
 		# Second burst for dramatic "aftershock" as fire spreads
 		_burst_particles.emitting = false  # Reset
-		_burst_particles.amount = 50
-		_burst_particles.lifetime = 0.35
-		_burst_particles.initial_velocity_min = 40.0
-		_burst_particles.initial_velocity_max = 150.0
+		_burst_particles.set("amount", 50)
+		_burst_particles.set("lifetime", 0.35)
+		EffectUtils.set_particle_prop(_burst_particles, "initial_velocity_min", 40.0)
+		EffectUtils.set_particle_prop(_burst_particles, "initial_velocity_max", 150.0)
 		_burst_particles.emitting = true
 
 		# AoE hitbox already enabled from _begin_impact
@@ -476,7 +476,7 @@ func _update_fire_shader(radius_frac: float, burn_intensity: float) -> void:
 # ══════════════════════════════════════════════════════════════════════════
 
 func _create_trail_particles() -> void:
-	_trail_particles = EffectUtils.create_cpu_particles(self, {
+	_trail_particles = EffectUtils.create_particles(self, {
 		"emitting": true,
 		"amount": 35,
 		"lifetime": 0.35,
@@ -509,7 +509,7 @@ func _create_trail_particles() -> void:
 # ══════════════════════════════════════════════════════════════════════════
 
 func _create_burst_particles() -> void:
-	_burst_particles = EffectUtils.create_cpu_particles(self, {
+	_burst_particles = EffectUtils.create_particles(self, {
 		"emitting": false,
 		"amount": 80,
 		"lifetime": 0.5,
@@ -544,7 +544,7 @@ func _create_burst_particles() -> void:
 # ══════════════════════════════════════════════════════════════════════════
 
 func _create_flame_particles() -> void:
-	_flame_particles = EffectUtils.create_cpu_particles(self, {
+	_flame_particles = EffectUtils.create_particles(self, {
 		"emitting": false,
 		"amount": 70,
 		"lifetime": 0.8,
@@ -580,7 +580,7 @@ func _create_flame_particles() -> void:
 # ══════════════════════════════════════════════════════════════════════════
 
 func _create_ember_particles() -> void:
-	_ember_particles = EffectUtils.create_cpu_particles(self, {
+	_ember_particles = EffectUtils.create_particles(self, {
 		"emitting": false,
 		"amount": 35,
 		"lifetime": 0.6,
@@ -615,7 +615,7 @@ func _create_ember_particles() -> void:
 # ══════════════════════════════════════════════════════════════════════════
 
 func _create_smoke_particles() -> void:
-	_smoke_particles = EffectUtils.create_cpu_particles(self, {
+	_smoke_particles = EffectUtils.create_particles(self, {
 		"emitting": false,
 		"amount": 20,
 		"lifetime": 1.5,
@@ -690,11 +690,11 @@ func _update_aoe_radius(new_radius: float) -> void:
 func _update_particle_emission_radius(pixel_radius: float) -> void:
 	## Update all fire particle emitters to match the current fire spread.
 	if _flame_particles:
-		_flame_particles.emission_sphere_radius = pixel_radius * 0.7
+		EffectUtils.set_particle_prop(_flame_particles, "emission_sphere_radius", pixel_radius * 0.7)
 	if _ember_particles:
-		_ember_particles.emission_sphere_radius = pixel_radius * 0.5
+		EffectUtils.set_particle_prop(_ember_particles, "emission_sphere_radius", pixel_radius * 0.5)
 	if _smoke_particles:
-		_smoke_particles.emission_sphere_radius = pixel_radius * 0.4
+		EffectUtils.set_particle_prop(_smoke_particles, "emission_sphere_radius", pixel_radius * 0.4)
 
 
 # ══════════════════════════════════════════════════════════════════════════

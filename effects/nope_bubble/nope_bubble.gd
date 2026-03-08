@@ -41,11 +41,11 @@ var _regen_timer: float = 0.0
 var _regen_active: bool = false
 
 # --- Ambient flow particles ---
-var _ambient_particles: CPUParticles2D = null
+var _ambient_particles: Node2D = null
 var _ambient_time: float = 0.0
 
 # --- Swirl particles (orbit the shell edge) ---
-var _swirl_particles: CPUParticles2D = null
+var _swirl_particles: Node2D = null
 
 # --- Shockwave tracking ---
 var _active_shockwaves: Array[Node2D] = []
@@ -148,7 +148,7 @@ func _process(delta: float) -> void:
 		# Rotate the emission direction to create a swirling flow
 		var orbit_speed: float = 0.6  # Radians per second
 		var angle: float = _ambient_time * orbit_speed
-		_ambient_particles.direction = Vector2(cos(angle), sin(angle))
+		EffectUtils.set_particle_prop(_ambient_particles, "direction", Vector2(cos(angle), sin(angle)))
 		# Breathing effect for ambient particles
 		var breath: float = 0.5 + 0.5 * sin(_ambient_time * 1.8)
 		_ambient_particles.modulate.a = clampf(0.3 + breath * 0.4, 0.1, 0.8)
@@ -158,7 +158,7 @@ func _process(delta: float) -> void:
 		var swirl_speed: float = 2.5  # Radians per second (fast orbit)
 		var swirl_angle: float = -_ambient_time * swirl_speed  # Negative = clockwise
 		# Tangential direction for clockwise orbital motion
-		_swirl_particles.direction = Vector2(-sin(swirl_angle), cos(swirl_angle))
+		EffectUtils.set_particle_prop(_swirl_particles, "direction", Vector2(-sin(swirl_angle), cos(swirl_angle)))
 
 	# Clean up finished shockwaves
 	_active_shockwaves = _active_shockwaves.filter(func(sw): return is_instance_valid(sw))
@@ -245,7 +245,7 @@ func _create_visuals() -> void:
 
 	# --- Ambient flow particles (persistent swirling motes inside the bubble) ---
 	var swirl_radius: float = size * 1.05
-	_ambient_particles = EffectUtils.create_cpu_particles(self, {
+	_ambient_particles = EffectUtils.create_particles(self, {
 		"emitting": true,
 		"one_shot": false,
 		"amount": ambient_particle_count,
@@ -280,7 +280,7 @@ func _create_visuals() -> void:
 	})
 
 	# --- Swirl particles (tiny 1px motes orbiting tightly around the shell edge) ---
-	_swirl_particles = EffectUtils.create_cpu_particles(self, {
+	_swirl_particles = EffectUtils.create_particles(self, {
 		"emitting": true,
 		"one_shot": false,
 		"amount": 40,
@@ -357,18 +357,18 @@ func _update_visuals() -> void:
 
 	# Update ambient particle emission to match bubble size and count
 	if _ambient_particles:
-		if _ambient_particles.amount != ambient_particle_count:
+		if _ambient_particles.get("amount") != ambient_particle_count:
 			_ambient_particles.emitting = false
-			_ambient_particles.amount = ambient_particle_count
+			_ambient_particles.set("amount", ambient_particle_count)
 			_ambient_particles.emitting = true
-		_ambient_particles.emission_ring_radius = size * 0.85
-		_ambient_particles.emission_ring_inner_radius = size * 0.2
+		EffectUtils.set_particle_prop(_ambient_particles, "emission_ring_radius", size * 0.85)
+		EffectUtils.set_particle_prop(_ambient_particles, "emission_ring_inner_radius", size * 0.2)
 
 	# Update swirl particle ring to match bubble size
 	if _swirl_particles:
 		var swirl_r: float = size * 1.05
-		_swirl_particles.emission_ring_radius = swirl_r
-		_swirl_particles.emission_ring_inner_radius = swirl_r * 0.98
+		EffectUtils.set_particle_prop(_swirl_particles, "emission_ring_radius", swirl_r)
+		EffectUtils.set_particle_prop(_swirl_particles, "emission_ring_inner_radius", swirl_r * 0.98)
 
 
 ## Enemy Area2D entered the shield bubble
@@ -461,7 +461,7 @@ func _spawn_hit_particles(source: Node2D) -> void:
 	var c1: Color = SYNTHWAVE_COLORS[randi() % SYNTHWAVE_COLORS.size()]
 	var c2: Color = SYNTHWAVE_COLORS[randi() % SYNTHWAVE_COLORS.size()]
 
-	var particles: CPUParticles2D = EffectUtils.create_cpu_particles(self, {
+	var particles: Node2D = EffectUtils.create_particles(self, {
 		"emitting": true,
 		"one_shot": true,
 		"explosiveness": 0.9,
@@ -490,13 +490,13 @@ func _spawn_hit_particles(source: Node2D) -> void:
 		"z_index": 1,
 	})
 
-	var timer: SceneTreeTimer = get_tree().create_timer(particles.lifetime + 0.1)
+	var timer: SceneTreeTimer = get_tree().create_timer(float(particles.get("lifetime")) + 0.1)
 	timer.timeout.connect(particles.queue_free)
 
 
 ## Spawn a burst of particles when the shield fully breaks
 func _spawn_break_particles() -> void:
-	var particles: CPUParticles2D = EffectUtils.create_cpu_particles(self, {
+	var particles: Node2D = EffectUtils.create_particles(self, {
 		"emitting": true,
 		"one_shot": true,
 		"explosiveness": 1.0,
@@ -531,7 +531,7 @@ func _spawn_break_particles() -> void:
 	})
 
 	# Auto-cleanup after particles finish
-	var timer: SceneTreeTimer = get_tree().create_timer(particles.lifetime + 0.1)
+	var timer: SceneTreeTimer = get_tree().create_timer(float(particles.get("lifetime")) + 0.1)
 	timer.timeout.connect(particles.queue_free)
 
 

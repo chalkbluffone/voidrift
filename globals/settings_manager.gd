@@ -43,6 +43,7 @@ var primary_display: int = 0  ## Index of the monitor to use (0-based)
 # ── Graphics ───────────────────────────────────────────────────────────
 var screen_shake_intensity: float = 1.0
 var particle_density: int = 2  ## 0=Off, 1=Low, 2=Medium, 3=High
+var use_gpu_particles: bool = true  ## true=GPUParticles2D, false=CPUParticles2D fallback
 var background_quality: int = 1  ## 0=Low, 1=High
 
 # ── Debug ──────────────────────────────────────────────────────────────
@@ -164,6 +165,12 @@ func set_particle_density(value: int) -> void:
 	settings_changed.emit()
 
 
+func set_use_gpu_particles(enabled: bool) -> void:
+	use_gpu_particles = enabled
+	save_settings()
+	settings_changed.emit()
+
+
 func set_background_quality(value: int) -> void:
 	background_quality = clampi(value, 0, 1)
 	save_settings()
@@ -206,6 +213,7 @@ func save_settings() -> void:
 	# Graphics
 	config.set_value("graphics", "screen_shake_intensity", screen_shake_intensity)
 	config.set_value("graphics", "particle_density", particle_density)
+	config.set_value("graphics", "use_gpu_particles", use_gpu_particles)
 	config.set_value("graphics", "background_quality", background_quality)
 	# Debug
 	config.set_value("debug", "show_debug_overlay", show_debug_overlay)
@@ -241,6 +249,7 @@ func load_settings() -> void:
 	# Graphics
 	screen_shake_intensity = float(config.get_value("graphics", "screen_shake_intensity", 1.0))
 	particle_density = int(config.get_value("graphics", "particle_density", 2))
+	use_gpu_particles = bool(config.get_value("graphics", "use_gpu_particles", true))
 	background_quality = int(config.get_value("graphics", "background_quality", 1))
 
 	# Debug

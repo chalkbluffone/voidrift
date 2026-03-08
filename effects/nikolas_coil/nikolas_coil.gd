@@ -556,7 +556,7 @@ func _create_impact_effect(impact_pos: Vector2, incoming_dir: Vector2) -> Dictio
 	var spray_dir: Vector2 = -incoming_dir  # Away from bolt source
 
 	# --- Layer 1: Molten spray (fast, bright, directional) ---
-	result["molten"] = EffectUtils.create_cpu_particles(self, {
+	result["molten"] = EffectUtils.create_particles(self, {
 		"global_position": impact_pos,
 		"emitting": false,
 		"one_shot": true,
@@ -587,7 +587,7 @@ func _create_impact_effect(impact_pos: Vector2, incoming_dir: Vector2) -> Dictio
 	})
 
 	# --- Layer 2: Slow ember drops (heavier, fall with gravity) ---
-	result["embers"] = EffectUtils.create_cpu_particles(self, {
+	result["embers"] = EffectUtils.create_particles(self, {
 		"global_position": impact_pos,
 		"emitting": false,
 		"one_shot": true,
@@ -617,7 +617,7 @@ func _create_impact_effect(impact_pos: Vector2, incoming_dir: Vector2) -> Dictio
 	})
 
 	# --- Layer 3: Hot glow burst (few large soft particles at center) ---
-	result["glow_particles"] = EffectUtils.create_cpu_particles(self, {
+	result["glow_particles"] = EffectUtils.create_particles(self, {
 		"global_position": impact_pos,
 		"emitting": false,
 		"one_shot": true,
@@ -647,7 +647,7 @@ func _create_impact_effect(impact_pos: Vector2, incoming_dir: Vector2) -> Dictio
 	})
 
 	# --- Layer 4: Flash particles (tiny bright white sparks, very fast) ---
-	result["flash"] = EffectUtils.create_cpu_particles(self, {
+	result["flash"] = EffectUtils.create_particles(self, {
 		"global_position": impact_pos,
 		"emitting": false,
 		"one_shot": true,
@@ -699,7 +699,7 @@ func _activate_impact(index: int) -> void:
 	impact["light_timer"] = 0.0
 
 	for key in ["molten", "embers", "glow_particles", "flash"]:
-		var p: CPUParticles2D = impact.get(key) as CPUParticles2D
+		var p: Node2D = impact.get(key) as Node2D
 		if p:
 			p.emitting = true
 
@@ -712,7 +712,7 @@ func _update_impact_position(index: int, pos: Vector2) -> void:
 	## Move all impact sub-nodes to follow the target.
 	var impact: Dictionary = _impact_effects[index]
 	for key in ["molten", "embers", "glow_particles", "flash"]:
-		var p: CPUParticles2D = impact.get(key) as CPUParticles2D
+		var p: Node2D = impact.get(key) as Node2D
 		if p:
 			p.global_position = pos
 	var light: PointLight2D = impact.get("light") as PointLight2D

@@ -683,28 +683,28 @@ func _play_card_reject_particles(card: PanelContainer) -> void:
 	var scaled_amount: int = maxi(1, int(float(base_amount) * density_mult))
 
 	for i: int in range(synth_colors.size()):
-		var particles: CPUParticles2D = CPUParticles2D.new()
-		particles.one_shot = true
-		particles.amount = scaled_amount
-		particles.lifetime = 0.46
-		particles.explosiveness = 1.0
-		particles.randomness = 0.45
-		particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
-		particles.emission_rect_extents = card_rect.size * 0.42
-		particles.direction = Vector2.UP
-		particles.spread = 180.0
-		particles.gravity = Vector2(0.0, 192.0)
-		particles.initial_velocity_min = 136.0 + (i * 16.0)
-		particles.initial_velocity_max = 288.0 + (i * 24.0)
-		particles.angular_velocity_min = -280.0
-		particles.angular_velocity_max = 280.0
-		particles.scale_amount_min = 1.35
-		particles.scale_amount_max = 2.4
-		particles.color = synth_colors[i].lightened(0.12)
-		particles.global_position = card_center
-		particles.z_index = 200
-		add_child(particles)
-		particles.emitting = true
+		var particles: Node2D = EffectUtils.create_particles(self, {
+			"one_shot": true,
+			"amount": scaled_amount,
+			"lifetime": 0.46,
+			"explosiveness": 1.0,
+			"randomness": 0.45,
+			"emission_shape": CPUParticles2D.EMISSION_SHAPE_RECTANGLE,
+			"emission_rect_extents": card_rect.size * 0.42,
+			"direction": Vector2.UP,
+			"spread": 180.0,
+			"gravity": Vector2(0.0, 192.0),
+			"initial_velocity_min": 136.0 + (i * 16.0),
+			"initial_velocity_max": 288.0 + (i * 24.0),
+			"angular_velocity_min": -280.0,
+			"angular_velocity_max": 280.0,
+			"scale_amount_min": 1.35,
+			"scale_amount_max": 2.4,
+			"color": synth_colors[i].lightened(0.12),
+			"global_position": card_center,
+			"z_index": 200,
+			"emitting": true,
+		})
 
 		var cleanup_timer: SceneTreeTimer = get_tree().create_timer(0.82)
 		cleanup_timer.timeout.connect(func() -> void:

@@ -94,6 +94,50 @@ func _on_body_entered(body: Node2D) -> void:
 
 This applies to any weapon effect that transitions between phases (e.g., Space Napalm: projectile → AOE impact).
 
+## GPU Particle Migration (EffectUtils)
+
+Weapon effects use `EffectUtils.create_particles()` to spawn particle systems. This dispatcher reads `SettingsManager.use_gpu_particles` and delegates to either `create_cpu_particles()` or `create_gpu_particles()`, allowing a global CPU/GPU toggle.
+
+### Migrated Effects
+
+| Effect               | Systems Migrated                          | Notes                        |
+| -------------------- | ----------------------------------------- | ---------------------------- |
+| Ion Wake             | 1 (explosion burst)                       | One-shot                     |
+| Space Napalm         | 5 (trail, burst, flame, ember, smoke)     | Mix of continuous + one-shot |
+| Nikola's Coil        | 4 (impact layers)                         | One-shot bursts              |
+| Nope Bubble          | 5 (ambient, swirl, hit, break, + visuals) | Continuous + one-shot        |
+| Level-up card reject | 1 (reject particles)                      | UI particle                  |
+
+### Not Yet Migrated (DIRECTED_POINTS)
+
+- **Broken Tractor Beam** — uses `EMISSION_SHAPE_DIRECTED_POINTS`, no GPU equivalent
+- **Arc Effect Base** (Radiant Arc, Snarky Comeback) — same issue
+
+### Runtime Property Routing
+
+When setting particle properties at runtime on nodes typed as `Node2D` (which may be either CPUParticles2D or GPUParticles2D), use `EffectUtils.set_particle_prop()` instead of direct assignment:
+
+```gdscript
+# WRONG — fails on GPUParticles2D (direction is on ParticleProcessMaterial)
+particles.direction = Vector2(1, 0)
+particles.emission_ring_radius = 50.0
+
+# RIGHT — routes to correct target with type conversion
+EffectUtils.set_particle_prop(particles, "direction", Vector2(1, 0))
+EffectUtils.set_particle_prop(particles, "emission_ring_radius", 50.0)
+```
+
+`set_particle_prop()` handles:
+
+- **Vector2→Vector3 conversion** for `direction` and `gravity` (material properties)
+- **CPU→GPU property name remapping** (e.g., `scale_amount_min` → `scale_min`)
+- **Material vs node routing** — properties like `spread`, `initial_velocity_min/max`, `damping_min/max` live on `ParticleProcessMaterial` for GPU particles
+
+### Key Files
+
+- `scripts/core/effect_utils.gd` — `create_particles()`, `create_gpu_particles()`, `set_particle_prop()`
+- `globals/settings_manager.gd` — `use_gpu_particles` toggle (persisted in config)
+
 ## Damage Numbers
 
 Floating damage numbers appear at the enemy's position whenever `take_damage()` is called. The system is driven from `BaseEnemy`, not individual weapon effects, so all damage sources are automatically covered.

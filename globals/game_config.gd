@@ -94,7 +94,7 @@ const DEFAULT_RUN_DURATION: float = 600.0  # Run timer in seconds (600 = 10 minu
 # =============================================================================
 # LEVEL UP / PROGRESSION
 # =============================================================================
-const LEVEL_UP_REFRESH_COST: int = 25  # Credits to refresh upgrade cards
+const LEVEL_UP_REFRESH_COST: int = 0  # Credits to refresh upgrade cards
 
 # How many cards appear per level-up.
 const LEVEL_UP_OPTION_COUNT: int = 3

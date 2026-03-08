@@ -11,7 +11,7 @@
 			"name": "Combat Focus",
 			"description": "+50% crit chance, +10% damage",
 			"effects": {
-				"crit_chance": 0.50,
+				"crit_chance": 0.5,
 				"damage": 0.1
 			}
 		},
@@ -68,7 +68,7 @@
 			"name": "Resourceful",
 			"description": "+10% luck, +15% XP gain",
 			"effects": {
-				"luck": 0.10,
+				"luck": 0.1,
 				"xp_gain": 0.15
 			}
 		},
@@ -101,7 +101,7 @@
 			"description": "+15% attack speed, +10% projectile speed",
 			"effects": {
 				"attack_speed": 0.15,
-				"projectile_speed": 0.10
+				"projectile_speed": 0.1
 			}
 		},
 		"active_ability": {

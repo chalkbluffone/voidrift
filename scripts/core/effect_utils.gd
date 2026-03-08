@@ -123,6 +123,159 @@ static func create_cpu_particles(parent: Node, config: Dictionary) -> CPUParticl
 	return p
 
 
+## Create a GPUParticles2D node with a ParticleProcessMaterial, translating
+## CPUParticles2D-style config keys so callers can use the same dictionary
+## format as create_cpu_particles(). Returns the configured GPUParticles2D.
+static func create_gpu_particles(parent: Node, config: Dictionary) -> GPUParticles2D:
+	var p: GPUParticles2D = GPUParticles2D.new()
+	var mat: ParticleProcessMaterial = ParticleProcessMaterial.new()
+	p.process_material = mat
+	parent.add_child(p)
+
+	for key in config:
+		var value: Variant = config[key]
+		# --- Properties that live on the GPUParticles2D node itself ---
+		if key in ["amount", "lifetime", "one_shot", "explosiveness", "randomness",
+				"emitting", "texture", "z_index", "z_as_relative", "global_position",
+				"position", "visible", "local_coords"]:
+			# local_coords maps directly (GPUParticles2D has the same property)
+			p.set(key, value)
+		# --- Emission shape enum translation ---
+		elif key == "emission_shape":
+			mat.emission_shape = _cpu_to_gpu_emission_shape(int(value)) as ParticleProcessMaterial.EmissionShape
+		elif key == "emission_sphere_radius":
+			mat.emission_sphere_radius = float(value)
+		elif key == "emission_rect_extents":
+			var v2: Vector2 = value as Vector2
+			mat.emission_box_extents = Vector3(v2.x, v2.y, 0.0)
+		elif key == "emission_ring_radius":
+			mat.emission_ring_radius = float(value)
+		elif key == "emission_ring_inner_radius":
+			mat.emission_ring_inner_radius = float(value)
+		# --- Vector2 → Vector3 translations ---
+		elif key == "direction":
+			var v2: Vector2 = value as Vector2
+			mat.direction = Vector3(v2.x, v2.y, 0.0)
+		elif key == "gravity":
+			var v2: Vector2 = value as Vector2
+			mat.gravity = Vector3(v2.x, v2.y, 0.0)
+		# --- Renamed properties ---
+		elif key == "spread":
+			mat.spread = float(value)
+		elif key == "initial_velocity_min":
+			mat.initial_velocity_min = float(value)
+		elif key == "initial_velocity_max":
+			mat.initial_velocity_max = float(value)
+		elif key == "angular_velocity_min":
+			mat.angular_velocity_min = float(value)
+		elif key == "angular_velocity_max":
+			mat.angular_velocity_max = float(value)
+		elif key == "damping_min":
+			mat.damping_min = float(value)
+		elif key == "damping_max":
+			mat.damping_max = float(value)
+		elif key == "scale_amount_min":
+			mat.scale_min = float(value)
+		elif key == "scale_amount_max":
+			mat.scale_max = float(value)
+		elif key == "hue_variation_min":
+			mat.hue_variation_min = float(value)
+		elif key == "hue_variation_max":
+			mat.hue_variation_max = float(value)
+		# --- Resource wrappers (Gradient → GradientTexture1D, Curve → CurveTexture) ---
+		elif key == "color":
+			mat.color = value as Color
+		elif key == "color_ramp":
+			var grad_tex: GradientTexture1D = GradientTexture1D.new()
+			grad_tex.gradient = value as Gradient
+			mat.color_ramp = grad_tex
+		elif key == "color_initial_ramp":
+			var grad_tex: GradientTexture1D = GradientTexture1D.new()
+			grad_tex.gradient = value as Gradient
+			mat.color_initial_ramp = grad_tex
+		elif key == "scale_amount_curve":
+			var curve_tex: CurveTexture = CurveTexture.new()
+			curve_tex.curve = value as Curve
+			mat.scale_curve = curve_tex
+		# --- Fallback: try setting on material first, then node ---
+		else:
+			mat.set(key, value)
+
+	return p
+
+
+## Map CPUParticles2D.EMISSION_SHAPE_* → ParticleProcessMaterial.EMISSION_SHAPE_*
+static func _cpu_to_gpu_emission_shape(cpu_shape: int) -> int:
+	match cpu_shape:
+		CPUParticles2D.EMISSION_SHAPE_POINT:
+			return ParticleProcessMaterial.EMISSION_SHAPE_POINT
+		CPUParticles2D.EMISSION_SHAPE_SPHERE, CPUParticles2D.EMISSION_SHAPE_SPHERE_SURFACE:
+			return ParticleProcessMaterial.EMISSION_SHAPE_SPHERE
+		CPUParticles2D.EMISSION_SHAPE_RECTANGLE:
+			return ParticleProcessMaterial.EMISSION_SHAPE_BOX
+		CPUParticles2D.EMISSION_SHAPE_RING:
+			return ParticleProcessMaterial.EMISSION_SHAPE_RING
+		_:
+			return ParticleProcessMaterial.EMISSION_SHAPE_POINT
+
+
+## Create a particle system node using GPU or CPU based on SettingsManager.
+## Accepts the same config dictionary as create_cpu_particles().
+## Returns Node2D (the common base); callers use .emitting to control it.
+static func create_particles(parent: Node, config: Dictionary) -> Node2D:
+	var settings: Node = Engine.get_main_loop().root.get_node_or_null("/root/SettingsManager") if Engine.get_main_loop() else null
+	var use_gpu: bool = true
+	if settings:
+		use_gpu = bool(settings.use_gpu_particles)
+	if use_gpu:
+		return create_gpu_particles(parent, config)
+	else:
+		return create_cpu_particles(parent, config)
+
+
+## Set a particle property at runtime on either CPUParticles2D or GPUParticles2D.
+## Handles routing material-level properties (velocity, damping, emission radius,
+## etc.) to ParticleProcessMaterial when the node is a GPUParticles2D.
+## Properties that exist on both node types directly (amount, lifetime, emitting)
+## are set on the node itself.
+static var _gpu_material_props: Array[String] = [
+	"initial_velocity_min", "initial_velocity_max",
+	"angular_velocity_min", "angular_velocity_max",
+	"damping_min", "damping_max",
+	"emission_sphere_radius", "emission_ring_radius", "emission_ring_inner_radius",
+	"spread",
+	"scale_min", "scale_max",
+	"hue_variation_min", "hue_variation_max",
+]
+
+## CPU→GPU property name remap for runtime sets
+static var _cpu_to_gpu_prop: Dictionary = {
+	"scale_amount_min": "scale_min",
+	"scale_amount_max": "scale_max",
+}
+
+static func set_particle_prop(node: Node2D, prop: String, value: Variant) -> void:
+	if node is GPUParticles2D:
+		var gpu: GPUParticles2D = node as GPUParticles2D
+		var mat: ParticleProcessMaterial = gpu.process_material as ParticleProcessMaterial
+		# Properties that live on the material and need Vector2→Vector3 conversion
+		if mat and prop in ["direction", "gravity"]:
+			if value is Vector2:
+				var v2: Vector2 = value as Vector2
+				mat.set(prop, Vector3(v2.x, v2.y, 0.0))
+			else:
+				mat.set(prop, value)
+			return
+		# Remap CPU property names to GPU equivalents
+		var gpu_prop: String = String(_cpu_to_gpu_prop.get(prop, prop))
+		if mat and gpu_prop in _gpu_material_props:
+			mat.set(gpu_prop, value)
+		else:
+			gpu.set(prop, value)
+	else:
+		node.set(prop, value)
+
+
 ## Create a cached radial-gradient ImageTexture with configurable falloff.
 ## Used for soft glow blobs and point-light textures.
 static var _radial_tex_cache: Dictionary = {}

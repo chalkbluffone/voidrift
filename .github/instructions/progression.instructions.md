@@ -111,6 +111,16 @@ Enemy kills produce two categories of collectibles:
 
 **Stopwatch global freeze**: Sets `stopwatch_freeze_active` meta on SceneTree. Newly spawned enemies check this in `_ready()` and spawn frozen. Timer unfreeze uses generation-counter pattern.
 
+## Weapon Unlock Conditions
+
+Weapons in `data/weapons.json` use `unlock_condition` to control availability:
+
+- `"default"` — Always available in the weapon offer pool
+- `"none"` — **Never offered** (excluded from level-up rolls and loadout)
+- Other values — Reserved for future unlock mechanics (achievements, milestones)
+
+The filter is in `DataLoader.get_available_weapons()` which requires `unlock_condition == "default"`. If a weapon never appears in level-up offers, check this field first.
+
 ## Run Structure
 
 - Timed survival, default 10 min (`GameConfig.DEFAULT_RUN_DURATION`)
