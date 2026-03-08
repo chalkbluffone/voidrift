@@ -14,4 +14,10 @@
 
 - Godot shows "invalid UID" warnings on load (cosmetic)
 
+## Completed
+
+- Ability ring indicator HUD (phase shift charges + captain ability cooldown)
+- Captain ability charge-up system (starts uncharged, GPUParticles2D spiral, ready glow shader, flash burst)
+- Controller rebinding (RT for captain ability, LT for full map)
+
 _Last updated: March 8, 2026_

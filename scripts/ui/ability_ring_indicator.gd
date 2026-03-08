@@ -3,7 +3,10 @@ extends Control
 ## AbilityRingIndicator — Combined HUD element showing captain ability cooldown
 ## (center circle) surrounded by a 360° ring of phase shift charge segments.
 ## Two keybind badges: below center (ability) and bottom-left (phase shift).
-## All rendering via _draw() — no external textures.
+## Features a charge-up visual system: spiraling particles during charging,
+## pulsing glow shader when ready, flash burst on charge completion.
+
+const EffectUtils: GDScript = preload("res://scripts/core/effect_utils.gd")
 
 # =============================================================================
 # CONSTANTS
@@ -29,8 +32,19 @@ const COLOR_ACTIVE_GLOW: Color = Color(1.0, 0.2, 0.8, 1.0)        # Neon magenta
 const COLOR_BADGE_BG: Color = Color(0.05, 0.05, 0.1, 0.85)        # Dark badge bg
 const COLOR_BADGE_TEXT: Color = Color(1.0, 1.0, 1.0, 0.95)         # White text
 const COLOR_COOLDOWN_TEXT: Color = Color(1.0, 1.0, 1.0, 0.9)       # Cooldown seconds
+const COLOR_CHARGING_BG: Color = Color(0.06, 0.06, 0.1, 0.85)     # Dark desaturated bg
+
+# Charging color ramp: blue → purple → pink
+const COLOR_CHARGE_START: Color = Color(0.3, 0.5, 1.0, 1.0)
+const COLOR_CHARGE_MID: Color = Color(0.67, 0.2, 0.95, 1.0)
+const COLOR_CHARGE_END: Color = Color(1.0, 0.08, 0.4, 1.0)
+
+# Particle configuration
+const CHARGE_PARTICLE_MAX: int = 24
+const CHARGE_PARTICLE_MIN: int = 4
 
 const FONT_PATH: String = "res://assets/fonts/Orbitron-Bold.ttf"
+const READY_GLOW_SHADER_PATH: String = "res://shaders/ability_ready_glow.gdshader"
 
 # =============================================================================
 # STATE
@@ -45,6 +59,7 @@ var _ability_duration_remaining: float = 0.0
 var _ability_cooldown_remaining: float = 0.0
 var _ability_name: String = ""
 var _has_ability: bool = false
+var _was_charging: bool = false               # Track transition to ready
 
 var _input_device: String = "keyboard"
 var _ability_keybind: String = "Q"
@@ -54,6 +69,13 @@ var _ship: Node = null
 var _font: Font = null
 var _glow_pulse: float = 0.0  # 0–1 oscillation for active glow
 
+# Charge-up visuals
+var _charge_particles: GPUParticles2D = null
+var _charge_material: ParticleProcessMaterial = null
+var _ready_glow_rect: ColorRect = null
+var _ready_glow_material: ShaderMaterial = null
+var _flash_tween: Tween = null
+
 
 func _ready() -> void:
 	custom_minimum_size = Vector2(INDICATOR_SIZE, INDICATOR_SIZE)
@@ -62,6 +84,9 @@ func _ready() -> void:
 		_font = load(FONT_PATH) as Font
 	else:
 		_font = ThemeDB.fallback_font
+
+	# Create ready glow shader ColorRect (behind _draw content)
+	_setup_ready_glow()
 
 
 ## Wire this indicator to a player ship. Connects all signals and reads initial state.
@@ -98,6 +123,9 @@ func setup(ship: Node) -> void:
 		_ability_name = ability.ability_name
 		_ability_active = ability._is_active
 		_ability_cooldown_progress = ability.get_cooldown_percent()
+		_ability_cooldown_remaining = ability._cooldown_remaining
+		# Track if we start charging (ability starts uncharged)
+		_was_charging = _ability_cooldown_progress > 0.001
 	else:
 		_has_ability = false
 		_ability_name = ""
@@ -105,6 +133,12 @@ func setup(ship: Node) -> void:
 	# Resolve keybinds
 	_ability_keybind = _resolve_keybind_label("captain_ability", _input_device)
 	_phase_keybind = _resolve_keybind_label("phase_shift", _input_device)
+
+	# Setup charging particles
+	_setup_charge_particles()
+
+	# Set initial visual states
+	_update_charge_visuals()
 
 	queue_redraw()
 
@@ -146,6 +180,9 @@ func _process(delta: float) -> void:
 		if _glow_pulse > TAU:
 			_glow_pulse -= TAU
 		needs_redraw = true
+
+	# Update charge-up visuals (particles, glow) every frame for smooth animation
+	_update_charge_visuals()
 
 	if needs_redraw:
 		queue_redraw()
@@ -200,12 +237,21 @@ func _draw_ring_segments(center: Vector2) -> void:
 # ABILITY CIRCLE (Center)
 # =============================================================================
 func _draw_ability_circle(center: Vector2) -> void:
-	# Background circle
-	draw_circle(center, INNER_RADIUS, COLOR_ABILITY_BG)
+	var is_charging: bool = _ability_cooldown_progress > 0.001 and not _ability_active
 
-	# Cooldown pie overlay (sweeps clockwise from top)
-	if _ability_cooldown_progress > 0.001 and not _ability_active:
-		_draw_cooldown_pie(center, INNER_RADIUS, _ability_cooldown_progress)
+	# Background circle — darker when charging
+	var bg_color: Color = COLOR_CHARGING_BG if is_charging else COLOR_ABILITY_BG
+	draw_circle(center, INNER_RADIUS, bg_color)
+
+	# Charging state: thin progress ring around the circle edge (no pie, no text)
+	if is_charging:
+		var charge_progress: float = 1.0 - _ability_cooldown_progress
+		var charge_color: Color = _get_charge_color(charge_progress)
+		# Draw a partial arc showing how much is charged
+		if charge_progress > 0.005:
+			var arc_end: float = -PI / 2.0 + TAU * charge_progress
+			draw_arc(center, INNER_RADIUS - 2.0, -PI / 2.0, arc_end, 32, charge_color, 3.0, true)
+		return
 
 	# Ability text (name or cooldown seconds)
 	if _font:
@@ -215,9 +261,6 @@ func _draw_ability_circle(center: Vector2) -> void:
 		if _ability_active:
 			display_text = "%d" % ceili(_ability_duration_remaining)
 			text_color = COLOR_ACTIVE_GLOW
-		elif _ability_cooldown_progress > 0.001:
-			display_text = "%d" % ceili(_ability_cooldown_remaining)
-			text_color = COLOR_COOLDOWN_TEXT
 		elif _has_ability:
 			# Show full ability name, scaled to fit
 			display_text = _ability_name.to_upper() if _ability_name.length() > 0 else "?"
@@ -428,16 +471,24 @@ func _on_phase_energy_changed(current: int, maximum: int) -> void:
 func _on_ability_activated() -> void:
 	_ability_active = true
 	_glow_pulse = 0.0
+	_update_charge_visuals()
 	queue_redraw()
 
 
 func _on_ability_expired() -> void:
 	_ability_active = false
+	_was_charging = true  # Will be charging again after ability ends
+	_update_charge_visuals()
 	queue_redraw()
 
 
 func _on_ability_ready() -> void:
 	_ability_cooldown_progress = 0.0
+	# Flash burst + scale pop if we were charging
+	if _was_charging:
+		_play_ready_flash()
+	_was_charging = false
+	_update_charge_visuals()
 	queue_redraw()
 
 
@@ -446,3 +497,154 @@ func _on_input_device_changed(device: String) -> void:
 	_ability_keybind = _resolve_keybind_label("captain_ability", _input_device)
 	_phase_keybind = _resolve_keybind_label("phase_shift", _input_device)
 	queue_redraw()
+
+
+# =============================================================================
+# CHARGE-UP VISUAL SYSTEM
+# =============================================================================
+
+## Setup the ready glow shader ColorRect — renders behind _draw() content.
+func _setup_ready_glow() -> void:
+	if not ResourceLoader.exists(READY_GLOW_SHADER_PATH):
+		return
+	var shader: Shader = load(READY_GLOW_SHADER_PATH) as Shader
+	if not shader:
+		return
+
+	_ready_glow_material = ShaderMaterial.new()
+	_ready_glow_material.shader = shader
+	_ready_glow_material.set_shader_parameter("glow_intensity", 1.5)
+
+	_ready_glow_rect = ColorRect.new()
+	_ready_glow_rect.material = _ready_glow_material
+	_ready_glow_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_ready_glow_rect.visible = false
+	# Insert at index 0 so it renders behind our _draw() content
+	add_child(_ready_glow_rect)
+	move_child(_ready_glow_rect, 0)
+
+
+## Setup charging spiral particles using GPUParticles2D.
+func _setup_charge_particles() -> void:
+	if not _has_ability:
+		return
+
+	_charge_particles = GPUParticles2D.new()
+	add_child(_charge_particles)
+
+	# Position at ring center (relative to our Control origin)
+	_charge_particles.position = Vector2(size.x * 0.5, size.y - 40.0)
+	_charge_particles.emitting = false
+	_charge_particles.amount = CHARGE_PARTICLE_MIN
+	_charge_particles.lifetime = 1.2
+	_charge_particles.one_shot = false
+	_charge_particles.explosiveness = 0.0
+
+	# Use a small white texture
+	_charge_particles.texture = EffectUtils.get_white_pixel_texture(4)
+
+	# Configure via ParticleProcessMaterial
+	_charge_material = ParticleProcessMaterial.new()
+	_charge_particles.process_material = _charge_material
+
+	# Emission ring shape
+	_charge_material.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_RING
+	_charge_material.emission_ring_radius = RING_OUTER
+	_charge_material.emission_ring_inner_radius = RING_INNER
+	_charge_material.emission_ring_height = 0.0
+	_charge_material.emission_ring_axis = Vector3(0, 0, 1)
+
+	# Particles spiral inward
+	_charge_material.direction = Vector3.ZERO
+	_charge_material.spread = 180.0
+	_charge_material.initial_velocity_min = 5.0
+	_charge_material.initial_velocity_max = 15.0
+	_charge_material.gravity = Vector3.ZERO
+	_charge_material.radial_accel_min = -60.0
+	_charge_material.radial_accel_max = -40.0
+	_charge_material.tangential_accel_min = 30.0
+	_charge_material.tangential_accel_max = 50.0
+
+	# Scale down particles over lifetime
+	_charge_material.scale_min = 2.0
+	_charge_material.scale_max = 4.0
+	var scale_curve_tex: CurveTexture = CurveTexture.new()
+	var curve: Curve = Curve.new()
+	curve.add_point(Vector2(0.0, 1.0))
+	curve.add_point(Vector2(1.0, 0.0))
+	scale_curve_tex.curve = curve
+	_charge_material.scale_curve = scale_curve_tex
+
+	# Start with blue color
+	_charge_material.color = COLOR_CHARGE_START
+
+
+## Update all charge-up visual elements based on current state.
+func _update_charge_visuals() -> void:
+	var is_charging: bool = _ability_cooldown_progress > 0.001 and not _ability_active
+	var is_ready: bool = _ability_cooldown_progress <= 0.001 and not _ability_active and _has_ability
+
+	# --- Particles: visible only while charging ---
+	if _charge_particles:
+		if is_charging:
+			_charge_particles.emitting = true
+			_was_charging = true
+
+			# Scale particle count and speed with charge progress
+			var charge_progress: float = 1.0 - _ability_cooldown_progress
+			var particle_count: int = CHARGE_PARTICLE_MIN + int(float(CHARGE_PARTICLE_MAX - CHARGE_PARTICLE_MIN) * charge_progress)
+			_charge_particles.amount = particle_count
+
+			# Increase inward pull as charge builds
+			var accel_mult: float = 1.0 + charge_progress * 2.0
+			_charge_material.radial_accel_min = -60.0 * accel_mult
+			_charge_material.radial_accel_max = -40.0 * accel_mult
+			_charge_material.tangential_accel_min = 30.0 + charge_progress * 40.0
+			_charge_material.tangential_accel_max = 50.0 + charge_progress * 60.0
+
+			# Color ramp: blue → purple → pink based on charge
+			_charge_material.color = _get_charge_color(charge_progress)
+		else:
+			_charge_particles.emitting = false
+
+	# --- Ready glow: visible only when ready ---
+	if _ready_glow_rect:
+		_ready_glow_rect.visible = is_ready
+		if is_ready:
+			# Position and size the glow rect to cover the ability circle area with padding
+			var center: Vector2 = Vector2(size.x * 0.5, size.y - 40.0)
+			var glow_size: float = INNER_RADIUS * 3.0
+			_ready_glow_rect.position = center - Vector2(glow_size * 0.5, glow_size * 0.5)
+			_ready_glow_rect.size = Vector2(glow_size, glow_size)
+
+
+## Get the interpolated charge color based on progress (0.0 = start, 1.0 = complete).
+func _get_charge_color(progress: float) -> Color:
+	if progress < 0.5:
+		return COLOR_CHARGE_START.lerp(COLOR_CHARGE_MID, progress * 2.0)
+	else:
+		return COLOR_CHARGE_MID.lerp(COLOR_CHARGE_END, (progress - 0.5) * 2.0)
+
+
+## Play the flash burst + scale pop when charge completes.
+func _play_ready_flash() -> void:
+	# Kill any existing flash tween
+	if _flash_tween and _flash_tween.is_valid():
+		_flash_tween.kill()
+
+	_flash_tween = create_tween()
+	_flash_tween.set_parallel(true)
+
+	# Flash: boost glow intensity high, then settle
+	if _ready_glow_material:
+		_ready_glow_material.set_shader_parameter("glow_intensity", 5.0)
+		_flash_tween.tween_method(_set_glow_intensity, 5.0, 1.5, 0.5).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_EXPO)
+
+	# Scale pop: 1.0 → 1.2 → 1.0
+	_flash_tween.tween_property(self, "scale", Vector2(1.2, 1.2), 0.15).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	_flash_tween.chain().tween_property(self, "scale", Vector2.ONE, 0.25).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+
+
+func _set_glow_intensity(value: float) -> void:
+	if _ready_glow_material:
+		_ready_glow_material.set_shader_parameter("glow_intensity", value)

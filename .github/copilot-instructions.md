@@ -11,19 +11,19 @@ This project uses a modular agentic workspace. Detailed instructions are distrib
 
 ### Instruction Files
 
-| File                                                | Scope                                   | Contains                                                                   |
-| --------------------------------------------------- | --------------------------------------- | -------------------------------------------------------------------------- |
-| `.github/instructions/logic.instructions.md`        | `**/*.gd`                               | GDScript style rules, typing, naming, gotchas, FileLogger, testing         |
-| `.github/instructions/shaders.instructions.md`      | `**/*.gdshader`                         | Shader conventions, uniform naming, synthwave palette, inventory           |
-| `.github/instructions/architecture.instructions.md` | `**`                                    | Directory layout, autoloads, data files, collision layers, GameConfig rule |
-| `.github/instructions/gameconfig.instructions.md`   | `**`                                    | Full GameConfig constant inventory by section                              |
-| `.github/instructions/combat.instructions.md`       | `scripts/combat/**,effects/**`          | Weapons, auto-attack, weapon tiers, test lab, verification                 |
-| `.github/instructions/enemies.instructions.md`      | `scripts/enemies/**,scenes/enemies/**`  | Enemy scaling, elites, swarms, flow field movement, spawning               |
-| `.github/instructions/player.instructions.md`       | `scripts/player/**`                     | Phase shift, ship+captain, synergies, stats, survivability                 |
-| `.github/instructions/world.instructions.md`        | `scripts/systems/**,scenes/gameplay/**` | Arena boundary, asteroids, stations, flow field, fog of war                |
-| `.github/instructions/ui.instructions.md`           | `scripts/ui/**,scenes/ui/**`            | HUD, minimap, full map, level-up UI, station buff popup                    |
-| `.github/instructions/progression.instructions.md`  | `globals/**`                            | XP curve, rarity, level-up, station buffs, credits, run structure          |
-| `.github/instructions/steam.instructions.md`        | `globals/steam_manager.gd,tools/**`     | Build pipeline, deploy pipeline, SteamCMD, VDFs, SteamManager autoload     |
+| File                                                | Scope                                   | Contains                                                                        |
+| --------------------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------- |
+| `.github/instructions/logic.instructions.md`        | `**/*.gd`                               | GDScript style rules, typing, naming, gotchas, FileLogger, testing              |
+| `.github/instructions/shaders.instructions.md`      | `**/*.gdshader`                         | Shader conventions, uniform naming, synthwave palette, inventory                |
+| `.github/instructions/architecture.instructions.md` | `**`                                    | Directory layout, autoloads, data files, collision layers, GameConfig rule      |
+| `.github/instructions/gameconfig.instructions.md`   | `**`                                    | Full GameConfig constant inventory by section                                   |
+| `.github/instructions/combat.instructions.md`       | `scripts/combat/**,effects/**`          | Weapons, auto-attack, weapon tiers, test lab, verification                      |
+| `.github/instructions/enemies.instructions.md`      | `scripts/enemies/**,scenes/enemies/**`  | Enemy scaling, elites, swarms, flow field movement, spawning                    |
+| `.github/instructions/player.instructions.md`       | `scripts/player/**`                     | Phase shift, ship+captain, synergies, stats, survivability                      |
+| `.github/instructions/world.instructions.md`        | `scripts/systems/**,scenes/gameplay/**` | Arena boundary, asteroids, stations, flow field, fog of war                     |
+| `.github/instructions/ui.instructions.md`           | `scripts/ui/**,scenes/ui/**`            | HUD, minimap, full map, level-up UI, ability ring indicator, station buff popup |
+| `.github/instructions/progression.instructions.md`  | `globals/**`                            | XP curve, rarity, level-up, station buffs, credits, run structure               |
+| `.github/instructions/steam.instructions.md`        | `globals/steam_manager.gd,tools/**`     | Build pipeline, deploy pipeline, SteamCMD, VDFs, SteamManager autoload          |
 
 ### Agent & Skill Files
 

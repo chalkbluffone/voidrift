@@ -38,6 +38,8 @@ func configure(ability_data: Dictionary, ship: Node, stats: Node) -> void:
 	vfx_id = ability_data.get("vfx", "")
 	_owner_ship = ship
 	_owner_stats = stats
+	# Ability starts uncharged — must charge up before first use
+	_cooldown_remaining = cooldown
 
 
 ## Attempt to activate the ability. Returns true if successful.

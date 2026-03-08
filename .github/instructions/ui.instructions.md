@@ -54,6 +54,30 @@ The HUD uses Orbitron-Bold font throughout with synthwave neon styling.
 - `LEVEL_UP_OPTION_COUNT` controls number of options shown
 - Upgrade card hover shader: `shaders/ui_upgrade_card_hover.gdshader`
 
+## Ability Ring Indicator
+
+Combined HUD element at bottom-center, 50% overlapping the XP bar. Shows captain ability cooldown (center circle) surrounded by a 360° ring of phase shift charge segments. Two keybind badges: below center (ability key), bottom-left (phase shift key).
+
+### Charge-Up System
+
+The captain ability starts **uncharged** at run start (full cooldown duration, typically 75s). Three visual states:
+
+1. **Charging**: Dark desaturated circle with a thin progress arc (blue → purple → pink color ramp). Spiraling `GPUParticles2D` (with `ParticleProcessMaterial`) emit from the ring inward, intensifying as charge progresses (4 → 24 particles, increasing tangential + radial acceleration). No text shown.
+2. **Ready**: Ability name displayed in center. Pulsing synthwave glow shader (`shaders/ability_ready_glow.gdshader`) with magenta/cyan/purple color cycling and shimmer. On first charge completion, a flash burst (glow intensity 5.0 → 1.5) and scale pop (1.0 → 1.2 → 1.0) plays.
+3. **Active**: Magenta glow pulse around circle with duration countdown number.
+
+Key files:
+
+- `scripts/ui/ability_ring_indicator.gd` — all rendering via `_draw()` + GPUParticles2D + shader ColorRect
+- `scenes/ui/ability_ring_indicator.tscn` — Control wrapper
+- `shaders/ability_ready_glow.gdshader` — ready-state glow (layered smoothstep: halo + ring + dual shimmer + color cycle)
+
+Constants: `INNER_RADIUS=50`, `RING_INNER=60`, `RING_OUTER=72`, `RING_WIDTH=12`. Ring center at `size.y - 40.0` (XP bar top edge).
+
+### Keybind Badges
+
+Auto-detect keyboard vs controller via `InputMap` and `input_device_changed` signal. Keyboard shows key names (Q, Space), controller shows button/axis names (RT, A). Font dynamically sizes ability name to fit circle.
+
 ## Station Buff Popup
 
 3-choice buff selection matching the level-up UI pattern. Triggered when station charge completes. Uses `GameState.STATION_BUFF` to pause gameplay during selection.

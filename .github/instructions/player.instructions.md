@@ -38,6 +38,15 @@ Dash mechanic with i-frames:
 - **Visual feedback**: HUD spawns a green `+N` floating number at the player's position on each lifesteal proc (see `ui.instructions.md`).
 - Base `lifesteal` stat in `base_player_stats.json` (set to desired default; 5.0 = testing value).
 
+## Captain Abilities
+
+- Configured from `data/captains.json` `active_ability` entries
+- `BaseAbility` (`scripts/core/abilities/base_ability.gd`) handles cooldown, activation, expiration
+- **Abilities start uncharged** — `_cooldown_remaining = cooldown` in `configure()`, requiring a full charge-up before first use
+- Default cooldown: `ABILITY_DEFAULT_COOLDOWN` (75s), default duration: `ABILITY_DEFAULT_DURATION` (5s)
+- Signals: `ability_activated`, `ability_expired`, `ability_ready`, `cooldown_updated(remaining, total)`
+- Ship forwards these signals via `captain_ability_activated`, `captain_ability_expired`, `captain_ability_ready`
+
 ## Survivability
 
 - **I-Frames**: `DAMAGE_IFRAMES` duration after taking damage

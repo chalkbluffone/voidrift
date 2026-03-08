@@ -62,6 +62,7 @@ Use glow/bloom-friendly values (components > 1.0 for HDR glow).
 | `shaders/fog_of_war.gdshader`                           | Minimap fog (neon purple gas with FBM noise)                            |
 | `shaders/station_charge.gdshader`                       | Station charge progress ring (radial cyan→pink)                         |
 | `shaders/title_glow.gdshader`                           | Title image FX: scanlines, chromatic aberration, glow pulse, vertex bob |
+| `shaders/ability_ready_glow.gdshader`                   | Ability ring ready-state glow (synthwave color cycle + dual shimmer)    |
 
 ## Performance Guidelines
 
