@@ -66,12 +66,14 @@ const FONT_SWARM: Font = preload("res://assets/fonts/Orbitron-ExtraBold.ttf")
 const DEBUG_XP_GRAPH_SCENE: PackedScene = preload("res://scenes/ui/debug_xp_graph.tscn")
 const MINIMAP_SCENE: PackedScene = preload("res://scenes/ui/minimap.tscn")
 const FullMapOverlayScript: GDScript = preload("res://scripts/ui/full_map_overlay.gd")
+const STATS_PANEL_SCENE: PackedScene = preload("res://scenes/ui/stats_panel.tscn")
 const HEAL_NUMBER_SCENE: PackedScene = preload("res://scenes/ui/damage_number.tscn")
 
 var _debug_xp_graph: Control = null
 var _swarm_warning_label: Label = null
 var _minimap: Control = null
 var _full_map_overlay: Control = null
+var _map_stats_panel: PanelContainer = null
 
 
 func _ready() -> void:
@@ -89,6 +91,9 @@ func _ready() -> void:
 	
 	# Build full map overlay (shown on Tab/RT)
 	_build_full_map_overlay()
+	
+	# Build stats panel for full map view (right side)
+	_build_map_stats_panel()
 	
 	# Build swarm warning label (centered at top)
 	_build_swarm_warning_label()
@@ -550,6 +555,28 @@ func _build_full_map_overlay() -> void:
 			_full_map_overlay.set_fog_of_war(fog)
 
 
+## Build the stats panel shown alongside the full map overlay.
+func _build_map_stats_panel() -> void:
+	_map_stats_panel = STATS_PANEL_SCENE.instantiate() as PanelContainer
+	_map_stats_panel.name = "MapStatsPanel"
+	var anchor: Control = Control.new()
+	anchor.name = "MapStatsPanelAnchor"
+	anchor.set_anchors_preset(Control.PRESET_CENTER_RIGHT)
+	anchor.anchor_left = 1.0
+	anchor.anchor_right = 1.0
+	anchor.anchor_top = 0.5
+	anchor.anchor_bottom = 0.5
+	anchor.offset_left = -300.0
+	anchor.offset_right = -20.0
+	anchor.offset_top = -400.0
+	anchor.offset_bottom = 400.0
+	anchor.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	anchor.z_index = 100
+	add_child(anchor)
+	anchor.add_child(_map_stats_panel)
+	_map_stats_panel.visible = false
+
+
 ## Handle input for full map toggle.
 func _unhandled_input(event: InputEvent) -> void:
 	# Tab key or right trigger to show/hide full map
@@ -558,16 +585,32 @@ func _unhandled_input(event: InputEvent) -> void:
 		if key_event.keycode == KEY_TAB:
 			if key_event.pressed:
 				_full_map_overlay.show_map()
+				_show_map_stats_panel()
 			else:
 				_full_map_overlay.hide_map()
+				_hide_map_stats_panel()
 	elif event is InputEventJoypadButton:
 		var joy_event: InputEventJoypadButton = event as InputEventJoypadButton
 		# Right trigger (button 7 on most controllers)
 		if joy_event.button_index == JOY_BUTTON_RIGHT_SHOULDER:
 			if joy_event.pressed:
 				_full_map_overlay.show_map()
+				_show_map_stats_panel()
 			else:
 				_full_map_overlay.hide_map()
+				_hide_map_stats_panel()
+
+
+func _show_map_stats_panel() -> void:
+	if _map_stats_panel:
+		_map_stats_panel.snapshot()
+		_map_stats_panel.refresh()
+		_map_stats_panel.visible = true
+
+
+func _hide_map_stats_panel() -> void:
+	if _map_stats_panel:
+		_map_stats_panel.visible = false
 
 
 func _on_hp_changed(current: float, maximum: float) -> void:

@@ -170,18 +170,20 @@ get_tree().current_scene.call_deferred("add_child", node)
 _hitbox.set_deferred("monitoring", false)  # deferred property set
 ```
 
-### `is_instance_valid()` Before `as` Cast (Critical)
+### `is_instance_valid()` Before `as` Cast or `is` Check (Critical)
 
-Casting a freed object with `as Node2D` (or any type) crashes **immediately** — before any validity check can run. Always check `is_instance_valid()` first:
+Using `as Node2D` or `is Node2D` on a freed object crashes **immediately** — before any validity check can run. Both `as` and `is` trigger the crash. Always check `is_instance_valid()` first:
 
 ```gdscript
-# WRONG — crashes if entity is freed
+# WRONG — crashes if entity is freed (both `is` and `as` fail)
 for entity: Variant in bucket:
-    var node: Node2D = entity as Node2D
+    if not entity is Node2D:  # crashes here
+        continue
+    var node: Node2D = entity as Node2D  # or crashes here
     if node and is_instance_valid(node):
         ...
 
-# RIGHT — check validity before cast
+# RIGHT — check validity before any type operation
 for entity: Variant in bucket:
     if not is_instance_valid(entity):
         continue

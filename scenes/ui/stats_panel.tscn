@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://dstatspanel00001"]
+
+[ext_resource type="Script" uid="uid://bustvyf2iy3y0" path="res://scripts/ui/stats_panel.gd" id="1_stats"]
+
+[node name="StatsPanel" type="PanelContainer"]
+custom_minimum_size = Vector2(280, 0)
+mouse_filter = 2
+script = ExtResource("1_stats")

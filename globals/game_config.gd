@@ -450,7 +450,7 @@ const STATION_BUFFABLE_STATS: Array[String] = [
 const STATION_FLAT_STATS: Array[String] = [
 	"max_hp", "hp_regen", "overheal", "shield", "crit_chance", "crit_damage",
 	"projectile_count", "projectile_bounces", "extra_phase_shifts", "phase_shift_distance",
-	"luck", "difficulty",
+	"luck", "difficulty", "lifesteal",
 ]
 
 # =============================================================================

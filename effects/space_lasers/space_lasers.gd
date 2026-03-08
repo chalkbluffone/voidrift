@@ -139,9 +139,11 @@ func _on_bolt_hit(enemy: Node2D, _damage_info: Dictionary, source_projectile: No
 	var nearest_dist: float = bounce_range
 	var enemies: Array = FrameCache.enemies
 	for enemy_any in enemies:
-		if not enemy_any is Node2D or not is_instance_valid(enemy_any):
+		if not is_instance_valid(enemy_any):
 			continue
 		var e: Node2D = enemy_any as Node2D
+		if not e:
+			continue
 		if e == enemy:
 			continue
 		var dist: float = hit_pos.distance_to(e.global_position)

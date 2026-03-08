@@ -20,6 +20,7 @@ const COLOR_BUTTON: Color = UiColors.BUTTON_PRIMARY
 const FONT_HEADER: Font = preload("res://assets/fonts/Orbitron-Bold.ttf")
 const CARD_HOVER_SHADER: Shader = preload("res://shaders/ui_upgrade_card_hover.gdshader")
 const CARD_HOVER_FX_SCRIPT: Script = preload("res://scripts/ui/card_hover_fx.gd")
+const STATS_PANEL_SCENE: PackedScene = preload("res://scenes/ui/stats_panel.tscn")
 
 @onready var GameConfig: Node = get_node("/root/GameConfig")
 @onready var RunManager: Node = get_node("/root/RunManager")
@@ -46,6 +47,9 @@ var _button_hover_tweens: Dictionary = {}
 
 ## Tracks the in-flight hide tween so we can kill it if a new level-up arrives.
 var _hide_tween: Tween = null
+
+## Stats panel (right side, shows player stats during level-up selection).
+var _stats_panel: PanelContainer = null
 
 ## Label showing "X remaining" when multiple level-ups are queued.
 var _pending_label: Label = null
@@ -98,10 +102,33 @@ func _ready() -> void:
 
 	# Apply synthwave styling
 	_apply_synthwave_theme()
-	
+
+	# Build stats panel (right side)
+	_build_stats_panel()
+
 	# Hide initially
 	hide()
 	set_process_input(false)
+
+
+func _build_stats_panel() -> void:
+	_stats_panel = STATS_PANEL_SCENE.instantiate() as PanelContainer
+	_stats_panel.name = "StatsPanel"
+	var anchor: Control = Control.new()
+	anchor.name = "StatsPanelAnchor"
+	anchor.set_anchors_preset(Control.PRESET_CENTER_RIGHT)
+	anchor.anchor_left = 1.0
+	anchor.anchor_right = 1.0
+	anchor.anchor_top = 0.5
+	anchor.anchor_bottom = 0.5
+	anchor.offset_left = -300.0
+	anchor.offset_right = -20.0
+	anchor.offset_top = -400.0
+	anchor.offset_bottom = 400.0
+	anchor.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(anchor)
+	anchor.add_child(_stats_panel)
+	_stats_panel.visible = false
 
 
 func _apply_synthwave_theme() -> void:
@@ -220,6 +247,12 @@ func _on_level_up_triggered(current_level: int, available_upgrades: Array) -> vo
 	# Ensure CanvasItem children are fully opaque (in case the old tween was mid-fade)
 	root_container.modulate.a = 1.0
 	background.modulate.a = 1.0
+
+	# Snapshot + show stats panel
+	if _stats_panel:
+		_stats_panel.snapshot()
+		_stats_panel.refresh()
+		_stats_panel.visible = true
 
 	_current_options = available_upgrades
 	_is_selecting = false
@@ -710,6 +743,8 @@ func _check_queue_after_hide() -> void:
 func _hide_ui() -> void:
 	_is_showing = false
 	set_process_input(false)
+	if _stats_panel:
+		_stats_panel.visible = false
 
 	# Kill any previous hide tween that might still be running
 	if _hide_tween and _hide_tween.is_valid():

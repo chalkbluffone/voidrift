@@ -203,6 +203,7 @@ func _apply_effect(stat_name: String, per_level_raw: float) -> void:
 		STAT_CRIT_CHANCE: true,
 		STAT_LUCK: true,
 		STAT_DIFFICULTY: true,
+		STAT_LIFESTEAL: true,
 	}
 
 	if flat_stats.has(stat_name) or percent_point_stats.has(stat_name):

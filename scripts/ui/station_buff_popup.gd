@@ -6,6 +6,7 @@ extends CanvasLayer
 const FONT_HEADER: Font = preload("res://assets/fonts/Orbitron-Bold.ttf")
 const CARD_HOVER_SHADER: Shader = preload("res://shaders/ui_upgrade_card_hover.gdshader")
 const CARD_HOVER_FX_SCRIPT: Script = preload("res://scripts/ui/card_hover_fx.gd")
+const STATS_PANEL_SCENE: PackedScene = preload("res://scenes/ui/stats_panel.tscn")
 
 @onready var RunManager: Node = get_node("/root/RunManager")
 @onready var StationService: Node = get_node("/root/StationService")
@@ -21,6 +22,7 @@ var _cards: Array[PanelContainer] = []
 var _current_options: Array[Dictionary] = []
 var _card_hover_tweens: Dictionary = {}
 var _button_hover_tweens: Dictionary = {}
+var _stats_panel: PanelContainer = null
 
 
 func _ready() -> void:
@@ -55,10 +57,33 @@ func _ready() -> void:
 	
 	# Apply styling
 	_apply_synthwave_theme()
-	
+
+	# Build stats panel (right side)
+	_build_stats_panel()
+
 	# Hide initially
 	hide()
 	set_process_input(false)
+
+
+func _build_stats_panel() -> void:
+	_stats_panel = STATS_PANEL_SCENE.instantiate() as PanelContainer
+	_stats_panel.name = "StatsPanel"
+	var anchor: Control = Control.new()
+	anchor.name = "StatsPanelAnchor"
+	anchor.set_anchors_preset(Control.PRESET_CENTER_RIGHT)
+	anchor.anchor_left = 1.0
+	anchor.anchor_right = 1.0
+	anchor.anchor_top = 0.5
+	anchor.anchor_bottom = 0.5
+	anchor.offset_left = -300.0
+	anchor.offset_right = -20.0
+	anchor.offset_top = -400.0
+	anchor.offset_bottom = 400.0
+	anchor.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(anchor)
+	anchor.add_child(_stats_panel)
+	_stats_panel.visible = false
 
 
 func _apply_synthwave_theme() -> void:
@@ -169,6 +194,10 @@ func _setup_buff_card(card: PanelContainer, option: Dictionary) -> void:
 func _show_popup() -> void:
 	show()
 	set_process_input(true)
+	if _stats_panel:
+		_stats_panel.snapshot()
+		_stats_panel.refresh()
+		_stats_panel.visible = true
 	
 	# Focus first card
 	if _cards.size() > 0 and _cards[0].visible:
@@ -178,6 +207,8 @@ func _show_popup() -> void:
 func _hide_popup() -> void:
 	hide()
 	set_process_input(false)
+	if _stats_panel:
+		_stats_panel.visible = false
 	_current_options.clear()
 
 

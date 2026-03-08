@@ -8,6 +8,7 @@ signal resumed
 
 const MAIN_MENU_SCENE: String = "res://scenes/ui/main_menu.tscn"
 const CARD_HOVER_FX_SCRIPT: Script = preload("res://scripts/ui/card_hover_fx.gd")
+const STATS_PANEL_SCENE: PackedScene = preload("res://scenes/ui/stats_panel.tscn")
 
 @onready var RunManager: Node = get_node("/root/RunManager")
 @onready var resume_button: Button = $Panel/VBoxContainer/ResumeButton
@@ -21,6 +22,7 @@ const CARD_HOVER_FX_SCRIPT: Script = preload("res://scripts/ui/card_hover_fx.gd"
 var _is_paused: bool = false
 var _options_visible: bool = false
 var _button_hover_tweens: Dictionary = {}
+var _stats_panel: PanelContainer = null
 
 
 func _ready() -> void:
@@ -37,6 +39,9 @@ func _ready() -> void:
 
 	# Connect shared options panel back signal
 	options_panel.back_pressed.connect(_close_options)
+
+	# Build stats panel (right side)
+	_build_stats_panel()
 
 	# Start hidden
 	visible = false
@@ -70,6 +75,10 @@ func _pause() -> void:
 	_is_paused = true
 	visible = true
 	get_tree().paused = true
+	if _stats_panel:
+		_stats_panel.snapshot()
+		_stats_panel.refresh()
+		_stats_panel.visible = true
 	resume_button.grab_focus()
 
 
@@ -79,6 +88,8 @@ func _unpause() -> void:
 	visible = false
 	panel.visible = true
 	options_panel.visible = false
+	if _stats_panel:
+		_stats_panel.visible = false
 	get_tree().paused = false
 	resumed.emit()
 
@@ -114,6 +125,27 @@ func _on_exit_pressed() -> void:
 
 
 # --- Inline Options ---
+
+func _build_stats_panel() -> void:
+	_stats_panel = STATS_PANEL_SCENE.instantiate() as PanelContainer
+	_stats_panel.name = "StatsPanel"
+	# Position on right side, vertically centered
+	var anchor_control: Control = Control.new()
+	anchor_control.name = "StatsPanelAnchor"
+	anchor_control.set_anchors_preset(Control.PRESET_CENTER_RIGHT)
+	anchor_control.anchor_left = 1.0
+	anchor_control.anchor_right = 1.0
+	anchor_control.anchor_top = 0.5
+	anchor_control.anchor_bottom = 0.5
+	anchor_control.offset_left = -300.0
+	anchor_control.offset_right = -20.0
+	anchor_control.offset_top = -400.0
+	anchor_control.offset_bottom = 400.0
+	anchor_control.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(anchor_control)
+	anchor_control.add_child(_stats_panel)
+	_stats_panel.visible = false
+
 
 func _show_options() -> void:
 	_options_visible = true

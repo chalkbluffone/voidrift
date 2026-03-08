@@ -45,9 +45,9 @@ This project uses a modular agentic workspace. Detailed instructions are distrib
 
 ### Other Files
 
-| File              | Purpose                                  |
-| ----------------- | ---------------------------------------- |
-| `.github/TODO.md` | TODO list, known/resolved issues tracker |
+| File              | Purpose                               |
+| ----------------- | ------------------------------------- |
+| `.github/TODO.md` | TODO list and known issues scratchpad |
 
 ### Persona Routing
 
@@ -120,7 +120,7 @@ When the user says **"lock it in"**, distribute the new knowledge from the curre
 1. **Identify affected domains** — determine which instruction files cover the newly implemented features.
 2. **Update existing instruction files** — add the new mechanics, constants, resolved issues, or gotchas to the relevant domain file(s).
 3. **Create new instruction files** — if the work covers a domain that doesn't have an instruction file yet, create one following the established pattern (YAML frontmatter with `applyTo` glob, domain heading, structured sections).
-4. **Update `.github/TODO.md`** — move completed TODO items, add new known issues, add new resolved issues.
+4. **Update `.github/TODO.md`** — move completed TODO items and add new known issues. Do **not** append resolved-issue entries; lessons learned belong in instruction files.
 5. **Update this file's workspace structure table** — if new instruction files were created, add them to the table above.
 
 Do **not** append dated session logs. The instruction files should always reflect the **current state** of the project, not a changelog.
@@ -135,7 +135,7 @@ Whenever you implement a feature, fix a bug, or introduce a new system, **check 
 - **Skills** — If a new repeatable multi-step workflow is established (e.g., a new entity type, a new integration pattern), create a SKILL.md for it under `.github/skills/`. If an existing skill's procedure no longer matches the codebase, update it.
 - **Agents** — If a new specialist persona would be valuable (e.g., a new rendering pipeline, a new subsystem with unique expertise), create an `.agent.md` file under `.github/agents/`.
 - **Registration** — After creating any new instruction, skill, or agent file, update the corresponding tables in this file (Instruction Files, Agent & Skill Files, Persona Routing) so the workspace structure stays accurate.
-- **TODO.md** — Keep `.github/TODO.md` current with completed items, new known issues, and resolved issues.
+- **TODO.md** — Keep `.github/TODO.md` current with completed items and new known issues. Do not use it as a changelog — resolved issues and lessons learned belong in instruction files.
 
 This is a continuous obligation, not limited to "lock it in" — do it as part of every non-trivial change.
 
