@@ -57,12 +57,15 @@ const COLOR_LEVEL_GLOW: Color = Color(1.0, 0.4, 0.8, 1.0)  # Pink glow for level
 const COLOR_CREDITS: Color = Color(1.0, 0.85, 0.1, 1.0)  # Gold for credits
 const COLOR_STARDUST: Color = Color(0.6, 0.85, 1.0, 1.0)  # Icy blue for stardust
 const COLOR_WEAPONS: Color = Color(0.2, 1.0, 0.9, 1.0)  # Cyan-ish
+const COLOR_OVERHEAL: Color = Color(0.85, 0.2, 1.0, 1.0)  # Bright magenta for overheal
+const COLOR_LIFESTEAL: Color = Color(0.2, 1.0, 0.4, 1.0)  # Green for lifesteal heal
 
 const FONT_HEADER: Font = preload("res://assets/fonts/Orbitron-Bold.ttf")
 const FONT_SWARM: Font = preload("res://assets/fonts/Orbitron-ExtraBold.ttf")
 const DEBUG_XP_GRAPH_SCENE: PackedScene = preload("res://scenes/ui/debug_xp_graph.tscn")
 const MINIMAP_SCENE: PackedScene = preload("res://scenes/ui/minimap.tscn")
 const FullMapOverlayScript: GDScript = preload("res://scripts/ui/full_map_overlay.gd")
+const HEAL_NUMBER_SCENE: PackedScene = preload("res://scenes/ui/damage_number.tscn")
 
 var _debug_xp_graph: Control = null
 var _swarm_warning_label: Label = null
@@ -383,12 +386,36 @@ func _find_player() -> void:
 			# Connect HP and shield changed signals
 			_player.stats.hp_changed.connect(_on_hp_changed)
 			_player.stats.shield_changed.connect(_on_shield_changed)
+			if _player.stats.has_signal("lifesteal_healed"):
+				_player.stats.lifesteal_healed.connect(_on_lifesteal_healed)
 
 
 func _update_hp(current: float, maximum: float) -> void:
-	hp_bar.max_value = maximum
+	var overheal_cap: float = 0.0
+	if _player and _player.stats:
+		overheal_cap = _player.stats.get_stat("overheal")
+	var is_overhealed: bool = current > maximum and overheal_cap > 0.0
+
+	# Expand bar to show overheal headroom when player has overheal stat
+	if overheal_cap > 0.0:
+		hp_bar.max_value = maximum + overheal_cap
+	else:
+		hp_bar.max_value = maximum
 	hp_bar.value = maxf(current, 0.0)
-	hp_label.text = "%d / %d" % [maxi(ceili(current), 0), ceili(maximum)]
+
+	# Swap fill color: magenta when overhealed, hot pink normally
+	var hp_fill: StyleBoxFlat = hp_bar.get_theme_stylebox("fill") as StyleBoxFlat
+	if hp_fill:
+		if is_overhealed:
+			hp_fill.bg_color = COLOR_OVERHEAL
+		else:
+			hp_fill.bg_color = COLOR_HP
+
+	# Label shows actual HP / max_hp (overheal visible as exceeding max)
+	if is_overhealed:
+		hp_label.text = "%d / %d" % [maxi(ceili(current), 0), ceili(maximum)]
+	else:
+		hp_label.text = "%d / %d" % [maxi(ceili(current), 0), ceili(maximum)]
 
 
 ## Update shield bar display. Shows/hides based on max_shield > 0.
@@ -548,6 +575,25 @@ func _on_hp_changed(current: float, maximum: float) -> void:
 
 func _on_shield_changed(current: float, maximum: float) -> void:
 	_update_shield(current, maximum)
+
+
+func _on_lifesteal_healed(amount: float, world_pos: Vector2) -> void:
+	## Spawn a green "+N" floating number at the player position.
+	@warning_ignore("unsafe_property_access")
+	var show_numbers: bool = get_node("/root/PersistenceManager").persistent_data.settings.get("show_damage_numbers", true)
+	if not show_numbers:
+		return
+
+	# Enforce soft cap — remove oldest if exceeded
+	var existing: Array[Node] = get_tree().get_nodes_in_group("damage_numbers")
+	if existing.size() >= GameConfig.DAMAGE_NUMBER_MAX_COUNT:
+		if is_instance_valid(existing[0]):
+			existing[0].queue_free()
+
+	var label: DamageNumber = HEAL_NUMBER_SCENE.instantiate() as DamageNumber
+	get_tree().current_scene.add_child(label)
+	# Pass heal-specific damage_info so setup knows this is a heal number
+	label.setup(amount, {"is_heal": true}, world_pos)
 
 
 func _on_xp_changed(current: float, required: float, level: int) -> void:

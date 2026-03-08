@@ -12,11 +12,11 @@
 		"strategy_synergies": "Prioritize damage/count then size; knockback helps safety",
 		"tier_stats": {
 			"damage": {
-				"common": 2.0,
-				"uncommon": 2.4,
-				"rare": 2.8,
-				"epic": 3.2,
-				"legendary": 4.0
+				"common": 0.2,
+				"uncommon": 0.24,
+				"rare": 0.28,
+				"epic": 0.32,
+				"legendary": 0.4
 			},
 			"projectile_count": {
 				"common": 1.0,
@@ -55,11 +55,11 @@
 		"strategy_synergies": "Size/quantity boost coverage; great with duration/cooldown tomes",
 		"tier_stats": {
 			"damage": {
-				"common": 2.0,
-				"uncommon": 2.4,
-				"rare": 2.8,
-				"epic": 3.2,
-				"legendary": 4.0
+				"common": 0.2,
+				"uncommon": 0.24,
+				"rare": 0.28,
+				"epic": 0.32,
+				"legendary": 0.4
 			},
 			"projectile_count": {
 				"common": 1.0,
@@ -98,11 +98,11 @@
 		"strategy_synergies": "Stack bounces and size for chaining; quantity for coverage",
 		"tier_stats": {
 			"damage": {
-				"common": 2.0,
-				"uncommon": 2.4,
-				"rare": 2.8,
-				"epic": 3.2,
-				"legendary": 4.0
+				"common": 0.2,
+				"uncommon": 0.24,
+				"rare": 0.28,
+				"epic": 0.32,
+				"legendary": 0.4
 			},
 			"projectile_count": {
 				"common": 1.0,
@@ -141,11 +141,11 @@
 		"strategy_synergies": "Size/quantity for bigger blasts; damage scaling strong; projectile speed minor",
 		"tier_stats": {
 			"damage": {
-				"common": 2.5,
-				"uncommon": 3.0,
-				"rare": 3.5,
-				"epic": 4.0,
-				"legendary": 5.0
+				"common": 0.25,
+				"uncommon": 0.3,
+				"rare": 0.35,
+				"epic": 0.4,
+				"legendary": 0.5
 			},
 			"projectile_count": {
 				"common": 1.0,
@@ -184,11 +184,11 @@
 		"strategy_synergies": "Size/knockback for safety; speed to tighten orbit coverage",
 		"tier_stats": {
 			"damage": {
-				"common": 3.0,
-				"uncommon": 3.6,
-				"rare": 4.2,
-				"epic": 4.8,
-				"legendary": 6.0
+				"common": 0.3,
+				"uncommon": 0.36,
+				"rare": 0.42,
+				"epic": 0.48,
+				"legendary": 0.6
 			},
 			"projectile_count": {
 				"common": 1.0,
@@ -234,11 +234,11 @@
 		"strategy_synergies": "Crit-focused; take crit tomes; projectile count and speed for coverage",
 		"tier_stats": {
 			"damage": {
-				"common": 1.75,
-				"uncommon": 2.1,
-				"rare": 2.45,
-				"epic": 2.8,
-				"legendary": 3.5
+				"common": 0.175,
+				"uncommon": 0.21,
+				"rare": 0.245,
+				"epic": 0.28,
+				"legendary": 0.35
 			},
 			"projectile_count": {
 				"common": 1.0,
@@ -291,11 +291,11 @@
 		"strategy_synergies": "Bounce first for chaining; crit tomes; keep damage scaling",
 		"tier_stats": {
 			"damage": {
-				"common": 2.5,
-				"uncommon": 3.0,
-				"rare": 3.5,
-				"epic": 4.0,
-				"legendary": 5.0
+				"common": 0.25,
+				"uncommon": 0.3,
+				"rare": 0.35,
+				"epic": 0.4,
+				"legendary": 0.5
 			},
 			"projectile_count": {
 				"common": 1.0,
@@ -348,11 +348,11 @@
 		"strategy_synergies": "Quantity for more shields; knockback for space; cooldown/armor synergies",
 		"tier_stats": {
 			"damage": {
-				"common": 2.0,
-				"uncommon": 2.4,
-				"rare": 2.8,
-				"epic": 3.2,
-				"legendary": 4.0
+				"common": 0.2,
+				"uncommon": 0.24,
+				"rare": 0.28,
+				"epic": 0.32,
+				"legendary": 0.4
 			},
 			"projectile_count": {
 				"common": 1.0,
@@ -390,11 +390,11 @@
 		"strategy_synergies": "Count then size; speed for faster cycles; works well with cooldown",
 		"tier_stats": {
 			"damage": {
-				"common": 2.0,
-				"uncommon": 2.4,
-				"rare": 2.8,
-				"epic": 3.2,
-				"legendary": 4.0
+				"common": 0.2,
+				"uncommon": 0.24,
+				"rare": 0.28,
+				"epic": 0.32,
+				"legendary": 0.4
 			},
 			"projectile_count": {
 				"common": 1.0,
@@ -432,11 +432,11 @@
 		"strategy_synergies": "Pure area scaling; size is main multiplier; pairs with duration/cooldown",
 		"tier_stats": {
 			"damage": {
-				"common": 1.4,
-				"uncommon": 1.7,
-				"rare": 2.0,
-				"epic": 2.2,
-				"legendary": 2.8
+				"common": 0.14,
+				"uncommon": 0.17,
+				"rare": 0.2,
+				"epic": 0.22,
+				"legendary": 0.28
 			},
 			"size": {
 				"common": 0.14,
@@ -460,11 +460,11 @@
 		"strategy_synergies": "Size scales ring radius; attack speed scales sweep speed; pairs with damage and cooldown",
 		"tier_stats": {
 			"damage": {
-				"common": 1.5,
-				"uncommon": 1.8,
-				"rare": 2.1,
-				"epic": 2.4,
-				"legendary": 3.0
+				"common": 0.15,
+				"uncommon": 0.18,
+				"rare": 0.21,
+				"epic": 0.24,
+				"legendary": 0.3
 			},
 			"attack_speed": {
 				"common": 1.0,
@@ -502,11 +502,11 @@
 		"strategy_synergies": "Duration and size to secure kill window; pair with cooldown/defense",
 		"tier_stats": {
 			"damage": {
-				"common": 2.0,
-				"uncommon": 2.4,
-				"rare": 2.8,
-				"epic": 3.2,
-				"legendary": 4.0
+				"common": 0.2,
+				"uncommon": 0.24,
+				"rare": 0.28,
+				"epic": 0.32,
+				"legendary": 0.4
 			},
 			"size": {
 				"common": 0.2,
@@ -538,11 +538,11 @@
 		"strategy_synergies": "Crit chance is strong; count for more rockets; speed for reliability",
 		"tier_stats": {
 			"damage": {
-				"common": 2.0,
-				"uncommon": 2.4,
-				"rare": 2.8,
-				"epic": 3.2,
-				"legendary": 4.0
+				"common": 0.2,
+				"uncommon": 0.24,
+				"rare": 0.28,
+				"epic": 0.32,
+				"legendary": 0.4
 			},
 			"projectile_count": {
 				"common": 1.0,
@@ -582,11 +582,11 @@
 		"strategy_synergies": "Count boosts pellet count; damage and crit solid; size for spread control",
 		"tier_stats": {
 			"damage": {
-				"common": 3.0,
-				"uncommon": 3.6,
-				"rare": 4.2,
-				"epic": 4.8,
-				"legendary": 6.0
+				"common": 0.3,
+				"uncommon": 0.36,
+				"rare": 0.42,
+				"epic": 0.48,
+				"legendary": 0.6
 			},
 			"projectile_count": {
 				"common": 1.0,
@@ -632,11 +632,11 @@
 		"strategy_synergies": "Duration and size for coverage; count accelerates drop cadence; pairs with cooldown",
 		"tier_stats": {
 			"damage": {
-				"common": 3.0,
-				"uncommon": 3.6,
-				"rare": 4.2,
-				"epic": 4.8,
-				"legendary": 6.0
+				"common": 0.3,
+				"uncommon": 0.36,
+				"rare": 0.42,
+				"epic": 0.48,
+				"legendary": 0.6
 			},
 			"projectile_count": {
 				"common": 1.0,
@@ -675,11 +675,11 @@
 		"strategy_synergies": "Bounce count first for chain coverage; projectile count for burst; size for hitbox reach",
 		"tier_stats": {
 			"damage": {
-				"common": 5.0,
-				"uncommon": 6.0,
-				"rare": 7.0,
-				"epic": 8.0,
-				"legendary": 10.0
+				"common": 0.5,
+				"uncommon": 0.6,
+				"rare": 0.7,
+				"epic": 0.8,
+				"legendary": 1.0
 			},
 			"projectile_count": {
 				"common": 1.0,

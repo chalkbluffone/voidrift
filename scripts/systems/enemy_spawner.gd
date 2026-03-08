@@ -360,10 +360,22 @@ func _on_enemy_died(enemy: Node, death_position: Vector2) -> void:
 		_spawn_xp(death_position, enemy.get_xp_value())
 		_spawn_credits(death_position, enemy.get_credit_value())
 
-	# Stardust drops (any enemy with stardust_value > 0)
+	# Stardust drops (chance-based for normal enemies, guaranteed for enemies with stardust_value > 0)
 	var stardust: int = enemy.get_stardust_value()
-	if stardust > 0:
-		_spawn_burst_stardust(death_position, stardust)
+	if is_freighter:
+		# Freighters always drop their stardust value
+		if stardust > 0:
+			_spawn_burst_stardust(death_position, stardust)
+	else:
+		# Normal enemies: roll for stardust drop
+		if stardust > 0:
+			_spawn_burst_stardust(death_position, stardust)
+		else:
+			var stardust_chance: float = GameConfig.STARDUST_BASE_DROP_CHANCE
+			if _player and _player.stats:
+				stardust_chance *= _player.stats.get_stat("stardust_gain")
+			if randf() < stardust_chance:
+				_spawn_burst_stardust(death_position, 1)
 
 	# Power-up drop (rare, from shared pool)
 	if not is_freighter:

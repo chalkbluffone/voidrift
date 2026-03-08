@@ -59,7 +59,7 @@ const OVERTIME_SPAWN_RATE_GROWTH: float = 0.8  # Extra enemies/sec per overtime 
 const SWARM_TIMES: Array[float] = [240.0, 420.0]  # Swarm at 4 min (240s) and 7 min (420s)
 const SWARM_DURATION_MIN: float = 45.0            # Minimum swarm duration (seconds)
 const SWARM_DURATION_MAX: float = 60.0            # Maximum swarm duration (seconds)
-const SWARM_SPAWN_MULTIPLIER: float = 3.0         # Spawn rate multiplier during swarm
+const SWARM_SPAWN_MULTIPLIER: float = 2.0         # Spawn rate multiplier during swarm
 const SWARM_WARNING_DURATION: float = 2.0         # How long to show "Fleet inbound" warning
 
 # =============================================================================
@@ -205,6 +205,11 @@ const PICKUP_SCATTER_XP: float = 10.0       # XP pickup random offset (pixels)
 const PICKUP_SCATTER_CREDIT: float = 15.0   # Credit pickup random offset (pixels)
 const PICKUP_SCATTER_BURST: float = 30.0    # Burst pickup random offset (pixels)
 const PICKUP_SCATTER_STARDUST: float = 25.0 # Stardust random offset (pixels)
+
+# =============================================================================
+# STARDUST
+# =============================================================================
+const STARDUST_BASE_DROP_CHANCE: float = 0.03  # 3% base chance per non-freighter kill to drop stardust
 
 # =============================================================================
 # UI COSMETIC

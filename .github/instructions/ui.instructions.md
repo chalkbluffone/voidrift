@@ -11,8 +11,18 @@ The HUD uses Orbitron-Bold font throughout with synthwave neon styling.
 ### Health & Shield Bars
 
 - **Shield bar**: Neon blue `ProgressBar` above HP bar. Auto-shows when `max_shield > 0` (uses `get_stat("shield")` — the stat name is `"shield"`, not `"max_shield"`). Repositions HP bar dynamically.
-- **HP bar**: Hot pink `ProgressBar` below shield bar.
+- **HP bar**: Hot pink `ProgressBar` below shield bar. When overhealed, the bar's `max_value` expands to `max_hp + overheal_cap` and the fill switches to magenta (`COLOR_OVERHEAL = Color(0.85, 0.2, 1.0, 1.0)`). Reverts to hot pink when overheal drains back to normal HP.
 - `StatsComponent._recalculate_all()` emits `hp_changed`/`shield_changed` signals to keep HUD in sync.
+
+### Lifesteal Heal Numbers
+
+- When lifesteal procs, HUD spawns a green `DamageNumber` at the player's world position showing `+N`.
+- Color: `COLOR_LIFESTEAL = Color(0.2, 1.0, 0.4, 1.0)` via `self_modulate`.
+- Uses `is_heal: true` flag in `damage_info` dict passed to `DamageNumber.setup()`.
+- Scene: same `HEAL_NUMBER_SCENE` as combat damage numbers.
+- Connected via `StatsComponent.lifesteal_healed(amount, position)` signal.
+- Respects `show_damage_numbers` persistence setting.
+- Soft cap: same `DAMAGE_NUMBER_MAX_COUNT` group limit as combat numbers (shared `"damage_numbers"` group).
 
 ### Ship Avatar
 
@@ -102,13 +112,15 @@ Visual XP graph overlay in HUD for debugging progression curve during play.
 
 ## Damage Numbers
 
-Floating `RichTextLabel` nodes spawned in world space at enemy hit positions. See `combat.instructions.md` for full details.
+Floating `RichTextLabel` nodes spawned in world space at enemy hit positions or player position (heals). See `combat.instructions.md` for full details.
 
-- Scene: `scenes/ui/damage_number.tscn` (z_index=100, bbcode_enabled, fit_content, mouse_filter=IGNORE)
+- Scene: `scenes/ui/damage_number.tscn` (bbcode_enabled, fit_content, mouse_filter=IGNORE)
 - Script: `scripts/ui/damage_number.gd` (`DamageNumber` class)
 - Font: Orbitron-Bold with 3px black outline for readability
 - Animation: rise upward (`DAMAGE_NUMBER_RISE_DISTANCE`) + fade out over `DAMAGE_NUMBER_DURATION`
-- Crit/overcrit: bounce scale via `create_tween()`, BBCode bold/shake
+- Crit/overcrit: bounce scale via `create_tween()`, BBCode bold/shake. No exclamation mark suffixes.
+- **Heal numbers**: Green `+N` text for lifesteal procs via `is_heal` flag in `damage_info`
+- **Z-index layering**: heal=99, normal=100, crit=101, overcrit=102 — ensures crits render above normal hits
 - Soft cap: 30 simultaneous labels (`"damage_numbers"` group), oldest removed when exceeded
 - Setting: `PersistenceManager.persistent_data.settings.show_damage_numbers` (default `true`)
 - Added to `get_tree().current_scene` (not enemy child) so labels survive enemy death

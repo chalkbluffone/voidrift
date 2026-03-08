@@ -83,8 +83,8 @@ Enemy kills produce two categories of collectibles:
 - Attracted by player's magnet/PickupRange (collision mask includes layer 32)
 - Vacuumed by Gravity Well beacons and Gravity Well power-ups
 - **XP**: Static amount per kill (`ENEMY_XP_NORMAL`, `ENEMY_XP_ELITE`), no time scaling
-- **Credits**: Guaranteed 1 per kill (base `credit_value` from enemy data). `credits_gain` stat multiplies final amount via ProgressionManager
-- **Stardust**: Only from enemies with `stardust_value > 0`
+- **Credits**: Guaranteed 1 per kill (base `credit_value` from enemy data). `credits_gain` stat multiplies final amount via ProgressionManager. **Credits instantly attract to the player on spawn** — no magnet range delay.
+- **Stardust**: Chance-based drop for normal enemies (`STARDUST_BASE_DROP_CHANCE` × `stardust_gain` stat). Enemies must have `stardust_value > 0` in `enemies.json`. Loot Freighters always drop their full `stardust_value` (no chance roll).
 
 ### Power-Ups (Health, Speed, Stopwatch, Gravity Well)
 

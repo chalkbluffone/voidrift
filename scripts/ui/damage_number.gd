@@ -17,6 +17,7 @@ func setup(amount: float, damage_info: Dictionary, world_pos: Vector2) -> void:
 	## Configure text, style, and animation based on damage type.
 	var is_crit: bool = damage_info.get("is_crit", false)
 	var is_overcrit: bool = damage_info.get("is_overcrit", false)
+	var is_heal: bool = damage_info.get("is_heal", false)
 
 	# Random offset to prevent stacking
 	var offset: Vector2 = Vector2(
@@ -25,22 +26,28 @@ func setup(amount: float, damage_info: Dictionary, world_pos: Vector2) -> void:
 	)
 	global_position = world_pos + offset
 
-	# Determine style
+	# Determine style and z-index layering
 	var font_size: int = GameConfig.DAMAGE_NUMBER_FONT_SIZE_NORMAL
 	var color: Color = Color.WHITE
-	var suffix: String = ""
+	var prefix: String = ""
 
-	if is_overcrit:
+	if is_heal:
+		color = Color(0.2, 1.0, 0.4, 1.0)  # Green
+		prefix = "+"
+		z_index = 99  # Below damage numbers
+	elif is_overcrit:
 		font_size = GameConfig.DAMAGE_NUMBER_FONT_SIZE_OVERCRIT
 		color = UiColors.HOT_PINK
-		suffix = "!!"
+		z_index = 102  # Above crits
 	elif is_crit:
 		font_size = GameConfig.DAMAGE_NUMBER_FONT_SIZE_CRIT
 		color = UiColors.GOLD
-		suffix = "!"
+		z_index = 101  # Above normal
+	else:
+		z_index = 100  # Normal damage
 
 	# Format display text — round to int for clean appearance
-	var display_text: String = str(int(round(amount))) + suffix
+	var display_text: String = prefix + str(int(round(amount)))
 
 	# Apply font settings via theme overrides
 	add_theme_font_override("bold_font", DAMAGE_NUMBER_FONT)
@@ -58,7 +65,7 @@ func setup(amount: float, damage_info: Dictionary, world_pos: Vector2) -> void:
 	# Build BBCode
 	if is_overcrit:
 		text = "[shake rate=20.0 level=5 connected=1][b]" + display_text + "[/b][/shake]"
-	elif is_crit:
+	elif is_crit or is_heal:
 		text = "[b]" + display_text + "[/b]"
 	else:
 		text = display_text

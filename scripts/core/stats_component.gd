@@ -8,6 +8,7 @@ signal stat_changed(stat_name: String, old_value: float, new_value: float)
 signal hp_changed(current: float, maximum: float)
 signal shield_changed(current: float, maximum: float)
 signal died
+signal lifesteal_healed(amount: float, position: Vector2)
 
 # Autoload references
 var DataLoader: Node
@@ -471,18 +472,22 @@ func calculate_damage(base_damage: float, weapon_crit_chance: float = 0.0, weapo
 	}
 
 
-## Roll for lifesteal proc. Returns true if should heal 1 HP.
+## Roll for lifesteal proc. Returns true if healed. Heals into overheal.
 func roll_lifesteal() -> bool:
 	var lifesteal: float = get_stat(STAT_LIFESTEAL)
 	if lifesteal <= 0:
 		return false
-	
+
 	var roll: float = randf() * 100.0
 	if roll < lifesteal:
-		heal(1)
+		var heal_amount: float = 1.0
 		# Check for double heal (lifesteal > 100%)
 		if lifesteal > 100.0 and roll < (lifesteal - 100.0):
-			heal(1)
+			heal_amount = 2.0
+		heal(heal_amount, true)
+		var owner_node: Node2D = get_parent() as Node2D
+		var pos: Vector2 = owner_node.global_position if owner_node else Vector2.ZERO
+		lifesteal_healed.emit(heal_amount, pos)
 		return true
 	return false
 

@@ -43,5 +43,12 @@
 - **Stopwatch global freeze**: `BaseEnemy.is_frozen` flag stops movement. SceneTree meta `stopwatch_freeze_active` ensures newly spawned enemies (including freighters) spawn frozen. `LootFreighter._process_movement()` has its own freeze guard since it overrides without calling super.
 
 - **Freighter spawn limiting**: Freighters were spawning too frequently and could appear as elites. Fixed by adding `FREIGHTER_MAX_ACTIVE` (1), cooldown of 60–90s between spawns, and skipping elite roll for `LootFreighter` instances.
+- **Overheal HP bar invisible**: Overheal had no visual indication on the health bar. Fixed by expanding HP bar `max_value` to `max_hp + overheal_cap` and swapping fill color to magenta (`COLOR_OVERHEAL`) when current HP exceeds max HP.
+- **Lifesteal not healing into overheal**: `roll_lifesteal()` called `heal()` without `allow_overheal=true`. Fixed to pass `allow_overheal=true` and always emit `lifesteal_healed` signal for visual feedback regardless of actual healing amount.
+- **Lifesteal no visual feedback**: No indication when lifesteal procs. Added green `+N` floating `DamageNumber` at player position, spawned by HUD via `StatsComponent.lifesteal_healed` signal.
+- **Credits left behind**: Credits used magnet range like XP, often ignored by player. Fixed by calling `attract_to(player)` immediately on spawn in `credit_pickup.gd` so credits always fly to player instantly.
+- **Stardust drop rate not in GameConfig**: Drop chance was implicit. Added `STARDUST_BASE_DROP_CHANCE = 0.03` (3%) to GameConfig. Normal enemies now roll for stardust drop; freighters always drop full `stardust_value`.
+- **Damage number exclamation marks removed**: Removed `!` (crit) and `!!` (overcrit) suffixes from floating damage numbers for cleaner visuals.
+- **Damage number z-index layering**: All damage numbers shared z_index=100. Added per-tier z-index: heal=99, normal=100, crit=101, overcrit=102, ensuring crits render above normal hits.
 
 _Last updated: March 8, 2026_

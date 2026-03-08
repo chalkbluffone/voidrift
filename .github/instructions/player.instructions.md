@@ -31,6 +31,13 @@ Dash mechanic with i-frames:
 - `StatsComponent` (`scripts/core/stats_component.gd`) manages HP, shield, all stat modifiers
 - `_recalculate_all()` emits `hp_changed`/`shield_changed` signals when those stats change, ensuring HUD stays in sync regardless of modification path (flat bonus, multiplier, base stat)
 
+## Lifesteal & Overheal
+
+- **Lifesteal**: On hit, `StatsComponent.roll_lifesteal()` rolls against the `lifesteal` stat (% chance). On success, heals the player with `allow_overheal=true` and emits `lifesteal_healed(amount, position)` signal.
+- **Overheal**: `heal(amount, true)` caps at `max_hp + overheal` stat. HP bar expands and turns magenta when overhealed (see `ui.instructions.md`).
+- **Visual feedback**: HUD spawns a green `+N` floating number at the player's position on each lifesteal proc (see `ui.instructions.md`).
+- Base `lifesteal` stat in `base_player_stats.json` (set to desired default; 5.0 = testing value).
+
 ## Survivability
 
 - **I-Frames**: `DAMAGE_IFRAMES` duration after taking damage

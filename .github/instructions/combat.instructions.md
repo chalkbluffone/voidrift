@@ -99,13 +99,22 @@ Projectiles pass a full `damage_info` dict with crit status:
 {"damage": float, "is_crit": bool, "is_overcrit": bool}
 ```
 
+Heal numbers (lifesteal) pass:
+
+```gdscript
+{"is_heal": true}
+```
+
 Non-projectile sources (AoE, beams, mines) pass `{}` (default parameter) → displayed as normal white hits.
 
 ### Styling
 
-- **Normal**: White text, `DAMAGE_NUMBER_FONT_SIZE_NORMAL` (16)
-- **Crit**: Gold (`UiColors.GOLD`) via `self_modulate`, `[b]` BBCode, "!" suffix, bounce scale (`DAMAGE_NUMBER_CRIT_SCALE`)
-- **Overcrit**: Hot pink (`UiColors.HOT_PINK`) via `self_modulate`, `[b]` + `[shake]` BBCode, "!!" suffix, larger bounce (`DAMAGE_NUMBER_OVERCRIT_SCALE`)
+- **Normal**: White text, `DAMAGE_NUMBER_FONT_SIZE_NORMAL` (16), z_index=100
+- **Crit**: Gold (`UiColors.GOLD`) via `self_modulate`, `[b]` BBCode, bounce scale (`DAMAGE_NUMBER_CRIT_SCALE`), z_index=101
+- **Overcrit**: Hot pink (`UiColors.HOT_PINK`) via `self_modulate`, `[b]` + `[shake]` BBCode, larger bounce (`DAMAGE_NUMBER_OVERCRIT_SCALE`), z_index=102
+- **Heal**: Green (`COLOR_LIFESTEAL`) via `self_modulate`, `[b]` BBCode, `+N` prefix, z_index=99
+
+No exclamation mark suffixes on any tier. Z-index layering ensures crits render above normal hits and overcrits render above crits.
 
 ### Key Files
 
