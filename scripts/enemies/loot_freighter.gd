@@ -36,11 +36,12 @@ func _ready() -> void:
 	_state = FreighterState.CHASE
 
 
-func take_damage(amount: float, _source: Node = null) -> void:
+func take_damage(amount: float, _source: Node = null, damage_info: Dictionary = {}) -> void:
 	if _is_dying:
 		return
 
 	current_hp -= amount
+	_spawn_damage_number(amount, damage_info)
 	_flash_damage()
 
 	# Transition to FLEE on first hit

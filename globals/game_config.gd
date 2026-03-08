@@ -200,6 +200,20 @@ const HUD_AVATAR_SIZE: float = 72.0        # Captain portrait diameter (pixels)
 const HUD_AVATAR_CROP_FRACTION: float = 0.65  # How much of captain sprite to show (0-1)
 
 # =============================================================================
+# DAMAGE NUMBERS
+# =============================================================================
+const DAMAGE_NUMBER_FONT_SIZE_NORMAL: int = 16     # Base font size for normal hits
+const DAMAGE_NUMBER_FONT_SIZE_CRIT: int = 22       # Font size for critical hits
+const DAMAGE_NUMBER_FONT_SIZE_OVERCRIT: int = 28   # Font size for overcritical hits
+const DAMAGE_NUMBER_DURATION: float = 0.7          # Total lifetime of damage number (seconds)
+const DAMAGE_NUMBER_RISE_DISTANCE: float = 40.0    # Pixels the number floats upward
+const DAMAGE_NUMBER_OFFSET_RANGE: float = 20.0     # Random spawn offset radius (pixels)
+const DAMAGE_NUMBER_MAX_COUNT: int = 30             # Soft cap — oldest removed when exceeded
+const DAMAGE_NUMBER_CRIT_SCALE: float = 1.4         # Peak bounce scale for crit numbers
+const DAMAGE_NUMBER_OVERCRIT_SCALE: float = 1.6     # Peak bounce scale for overcrit numbers
+const DAMAGE_NUMBER_OUTLINE_SIZE: int = 3           # Dark outline thickness for readability (pixels)
+
+# =============================================================================
 # ABILITY DEFAULTS
 # =============================================================================
 const ABILITY_DEFAULT_COOLDOWN: float = 75.0  # Fallback cooldown if captain JSON omits it
@@ -419,11 +433,6 @@ const STATION_FLAT_STATS: Array[String] = [
 	"projectile_count", "projectile_bounces", "extra_phase_shifts", "phase_shift_distance",
 	"luck", "difficulty",
 ]
-
-# =============================================================================
-# PERFORMANCE DIAGNOSTICS
-# =============================================================================
-const PERF_LOG_INTERVAL: float = 1.0           # Seconds between diagnostic logs
 
 # =============================================================================
 # GRAVITY WELL (pickup vacuum system)

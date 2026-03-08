@@ -8,7 +8,7 @@
 4. Miniboss spawning at intervals
 5. Final boss beacon mechanic
 6. Sound effects
-7. Visual polish (screen shake, particles, damage numbers)
+7. Visual polish (screen shake, particles)
 
 ## Known Issues
 
@@ -37,5 +37,7 @@
 - **Title screen overhaul**: Replaced plain dark background with gameplay starfield (reusing existing shader materials), title text with animated PNG image (scanlines, chromatic aberration, glow pulse, GPU vertex bob), random nebula per load, entrance animation, buttons repositioned below title.
 - **Weapons Lab button hidden in exports**: Added `OS.has_feature("editor")` guard in `main_menu.gd` to hide the Weapons Lab button in all exported builds. The `tools/*` directory was already excluded from exports, this prevents the orphaned button from appearing.
 - **Deploy task fixed**: Added `-Username chalkbluffmedia` and `-SteamCmdExe` parameters to the VS Code deploy task so it works without manual input.
+- **Damage numbers implemented**: Floating `DamageNumber` (`RichTextLabel`) spawns at enemy position on every `take_damage()` call. Normal=white, Crit=gold+bounce, Overcrit=hot pink+shake+bounce. Soft cap of 30 labels. Controlled by `show_damage_numbers` persistence setting.
+- **Performance diagnostics removed**: Removed `PERF_LOG_INTERVAL` constant from GameConfig and periodic `_log_diagnostics()` polling from `EnemySpawner`. Event-based swarm logging retained.
 
-_Last updated: March 7, 2026_
+_Last updated: March 8, 2026_

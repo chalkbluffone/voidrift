@@ -30,9 +30,6 @@ var _swarm_active: bool = false
 var _swarm_timer: float = 0.0
 var _swarms_triggered: int = 0  # How many swarms have been triggered this run
 
-## Diagnostic logging
-var _perf_log_timer: float = 0.0
-
 @onready var RunManager: Node = get_node("/root/RunManager")
 @onready var GameConfig: Node = get_node("/root/GameConfig")
 @onready var DataLoader: Node = get_node("/root/DataLoader")
@@ -59,12 +56,6 @@ func _process(delta: float) -> void:
 	for enemy: Node in all_enemies:
 		if enemy is Node2D:
 			_enemy_grid.insert(enemy as Node2D)
-	
-	# Diagnostic logging
-	_perf_log_timer -= delta
-	if _perf_log_timer <= 0.0:
-		_perf_log_timer = GameConfig.PERF_LOG_INTERVAL
-		_log_diagnostics()
 	
 	# Check for swarm triggers
 	_check_swarm_triggers()
@@ -504,18 +495,6 @@ func _get_player_elite_spawn_rate() -> float:
 	if _player and _player.has_method("get_stat"):
 		return _player.get_stat("elite_spawn_rate")
 	return 1.0
-
-
-# =============================================================================
-# DIAGNOSTICS
-# =============================================================================
-
-## Log performance-relevant counts to FileLogger.
-func _log_diagnostics() -> void:
-	var enemy_count: int = get_tree().get_nodes_in_group("enemies").size()
-	var pickup_count: int = get_tree().get_nodes_in_group("pickups").size()
-	var time_elapsed: float = RunManager.run_data.time_elapsed
-	FileLogger.log_info("EnemySpawner", "[PERF] t=%.0fs enemies=%d pickups=%d swarm=%s" % [time_elapsed, enemy_count, pickup_count, str(_swarm_active)])
 
 
 ## Returns the spatial hash grid for enemy neighbor queries.

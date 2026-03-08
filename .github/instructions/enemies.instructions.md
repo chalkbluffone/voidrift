@@ -86,6 +86,18 @@ Enemy spawn positions use rejection sampling to avoid asteroids:
 - If no valid position found in normal range, an extended range fallback is attempted
 - Spawn positions are also constrained to the arena boundary
 
+## take_damage() Signature
+
+All enemy `take_damage()` methods accept an optional `damage_info` dictionary:
+
+```gdscript
+func take_damage(amount: float, _source: Node = null, damage_info: Dictionary = {}) -> void:
+```
+
+Projectiles pass `{"damage": float, "is_crit": bool, "is_overcrit": bool}`. Non-projectile sources pass `{}` (default). The `damage_info` is forwarded to `_spawn_damage_number()` for visual styling.
+
+When overriding `take_damage()` in an enemy subclass (e.g., `LootFreighter`), call `_spawn_damage_number(amount, damage_info)` in the override body — it's defined in `BaseEnemy` and handles setting checks + soft cap.
+
 ## Resolved Issues
 
 - **Raycast obstacle avoidance** caused spinning/clustering (surface normals inconsistent between frames/enemies). Potential field repulsion also caused jitter. Both replaced with BFS flow field — globally consistent, deterministic, no per-enemy physics queries.

@@ -228,16 +228,39 @@ func _teleport_near_player() -> void:
 	global_position = _target.global_position + behind_dir * GameConfig.SPAWN_RADIUS_MIN
 
 
-func take_damage(amount: float, _source: Node = null) -> void:
+func take_damage(amount: float, _source: Node = null, damage_info: Dictionary = {}) -> void:
 	if _is_dying:
 		return
 	current_hp -= amount
+	
+	# Floating damage number
+	_spawn_damage_number(amount, damage_info)
 	
 	# Visual feedback
 	_flash_damage()
 	
 	if current_hp <= 0:
 		_die()
+
+
+const _DAMAGE_NUMBER_SCENE: PackedScene = preload("res://scenes/ui/damage_number.tscn")
+
+
+func _spawn_damage_number(amount: float, damage_info: Dictionary) -> void:
+	@warning_ignore("unsafe_property_access")
+	var show_numbers: bool = get_node("/root/PersistenceManager").persistent_data.settings.get("show_damage_numbers", true)
+	if not show_numbers:
+		return
+	
+	# Enforce soft cap — remove oldest if exceeded
+	var existing: Array[Node] = get_tree().get_nodes_in_group("damage_numbers")
+	if existing.size() >= GameConfig.DAMAGE_NUMBER_MAX_COUNT:
+		if is_instance_valid(existing[0]):
+			existing[0].queue_free()
+	
+	var label: DamageNumber = _DAMAGE_NUMBER_SCENE.instantiate() as DamageNumber
+	get_tree().current_scene.add_child(label)
+	label.setup(amount, damage_info, global_position)
 
 
 func _flash_damage() -> void:

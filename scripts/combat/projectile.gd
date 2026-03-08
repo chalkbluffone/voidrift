@@ -108,7 +108,7 @@ func _hit_enemy(enemy: Node2D) -> void:
 	
 	# Apply damage to enemy
 	if enemy.has_method("take_damage"):
-		enemy.take_damage(damage_info.damage, self)
+		enemy.take_damage(damage_info.damage, self, damage_info)
 		RunManager.record_damage_dealt(damage_info.damage)
 	
 	hit_enemy.emit(enemy, damage_info)

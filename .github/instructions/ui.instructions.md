@@ -100,6 +100,19 @@ The title screen (`scenes/ui/main_menu.tscn`, `scripts/ui/main_menu.gd`) feature
 
 Visual XP graph overlay in HUD for debugging progression curve during play.
 
+## Damage Numbers
+
+Floating `RichTextLabel` nodes spawned in world space at enemy hit positions. See `combat.instructions.md` for full details.
+
+- Scene: `scenes/ui/damage_number.tscn` (z_index=100, bbcode_enabled, fit_content, mouse_filter=IGNORE)
+- Script: `scripts/ui/damage_number.gd` (`DamageNumber` class)
+- Font: Orbitron-Bold with 3px black outline for readability
+- Animation: rise upward (`DAMAGE_NUMBER_RISE_DISTANCE`) + fade out over `DAMAGE_NUMBER_DURATION`
+- Crit/overcrit: bounce scale via `create_tween()`, BBCode bold/shake
+- Soft cap: 30 simultaneous labels (`"damage_numbers"` group), oldest removed when exceeded
+- Setting: `PersistenceManager.persistent_data.settings.show_damage_numbers` (default `true`)
+- Added to `get_tree().current_scene` (not enemy child) so labels survive enemy death
+
 ## Resolved Issues
 
 - **Ship select hover on load**: First card appeared hovered because `grab_focus()` triggers `focus_entered` → hover tween. Fixed by calling `reset_hover()` immediately after `grab_focus()`.

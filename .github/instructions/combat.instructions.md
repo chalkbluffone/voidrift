@@ -76,3 +76,43 @@ func _on_body_entered(body: Node2D) -> void:
 ```
 
 This applies to any weapon effect that transitions between phases (e.g., Space Napalm: projectile → AOE impact).
+
+## Damage Numbers
+
+Floating damage numbers appear at the enemy's position whenever `take_damage()` is called. The system is driven from `BaseEnemy`, not individual weapon effects, so all damage sources are automatically covered.
+
+### Flow
+
+```
+Projectile._hit_enemy() → stats.calculate_damage() → enemy.take_damage(amount, source, damage_info)
+                                                          ↓
+                                                  _spawn_damage_number(amount, damage_info)
+                                                          ↓
+                                                  DamageNumber.setup() → tween → queue_free()
+```
+
+### damage_info Dictionary
+
+Projectiles pass a full `damage_info` dict with crit status:
+
+```gdscript
+{"damage": float, "is_crit": bool, "is_overcrit": bool}
+```
+
+Non-projectile sources (AoE, beams, mines) pass `{}` (default parameter) → displayed as normal white hits.
+
+### Styling
+
+- **Normal**: White text, `DAMAGE_NUMBER_FONT_SIZE_NORMAL` (16)
+- **Crit**: Gold (`UiColors.GOLD`) via `self_modulate`, `[b]` BBCode, "!" suffix, bounce scale (`DAMAGE_NUMBER_CRIT_SCALE`)
+- **Overcrit**: Hot pink (`UiColors.HOT_PINK`) via `self_modulate`, `[b]` + `[shake]` BBCode, "!!" suffix, larger bounce (`DAMAGE_NUMBER_OVERCRIT_SCALE`)
+
+### Key Files
+
+- `scripts/ui/damage_number.gd` — `DamageNumber` class (RichTextLabel)
+- `scenes/ui/damage_number.tscn` — Scene with z_index=100, bbcode_enabled, fit_content
+- `scripts/enemies/base_enemy.gd` — `_spawn_damage_number()` method
+
+### Gotcha: Color via self_modulate
+
+Do **not** use `add_theme_color_override("default_color", color)` or BBCode `[color]` tags — the global Exo2 theme overrides them. Use `self_modulate` on the RichTextLabel node to tint reliably.
