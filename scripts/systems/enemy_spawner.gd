@@ -38,6 +38,9 @@ var _swarm_active: bool = false
 var _swarm_timer: float = 0.0
 var _swarms_triggered: int = 0  # How many swarms have been triggered this run
 
+## Freighter spawn control
+var _freighter_cooldown: float = 0.0
+
 @onready var RunManager: Node = get_node("/root/RunManager")
 @onready var GameConfig: Node = get_node("/root/GameConfig")
 @onready var DataLoader: Node = get_node("/root/DataLoader")
@@ -67,6 +70,10 @@ func _process(delta: float) -> void:
 		if enemy is Node2D:
 			_enemy_grid.insert(enemy as Node2D)
 	
+	# Tick freighter cooldown
+	if _freighter_cooldown > 0.0:
+		_freighter_cooldown -= delta
+
 	# Check for swarm triggers
 	_check_swarm_triggers()
 	
@@ -199,8 +206,10 @@ func _spawn_enemy() -> void:
 	if enemy is LootFreighter and base_stats.has("drop_burst_count"):
 		enemy.drop_burst_count = int(base_stats.get("drop_burst_count", 5))
 
-	# --- Determine if this is an elite ---
-	var is_elite: bool = _roll_for_elite()
+	# --- Determine if this is an elite (freighters are never elite) ---
+	var is_elite: bool = false
+	if not (enemy is LootFreighter):
+		is_elite = _roll_for_elite()
 	if is_elite:
 		enemy.enemy_type = "elite"
 	
@@ -242,6 +251,10 @@ func _spawn_enemy() -> void:
 	# Apply elite visuals (color tint + size)
 	if is_elite:
 		_apply_elite_visuals(enemy)
+
+	# Start freighter cooldown when one spawns
+	if enemy is LootFreighter:
+		_freighter_cooldown = randf_range(GameConfig.FREIGHTER_SPAWN_COOLDOWN_MIN, GameConfig.FREIGHTER_SPAWN_COOLDOWN_MAX)
 
 	# Connect death signal for drops
 	enemy.died.connect(_on_enemy_died)
@@ -298,15 +311,26 @@ func _do_cache_asteroid_positions() -> void:
 ## Filters out enemies whose min_difficulty hasn't been reached yet.
 func _pick_weighted_enemy() -> Dictionary:
 	var time_minutes: float = RunManager.run_data.time_elapsed / 60.0
-	# Build a filtered pool respecting min_difficulty
+	# Count active freighters to enforce cap
+	var active_freighter_count: int = 0
+	for node: Node in get_tree().get_nodes_in_group("enemies"):
+		if node is LootFreighter:
+			active_freighter_count += 1
+	var freighter_blocked: bool = active_freighter_count >= GameConfig.FREIGHTER_MAX_ACTIVE or _freighter_cooldown > 0.0
+	# Build a filtered pool respecting min_difficulty and freighter limits
 	var eligible: Array[Dictionary] = []
 	var eligible_weight: float = 0.0
 	for entry: Dictionary in _enemy_pool:
 		var enemy_data: Dictionary = entry.get("data", {})
 		var min_diff: float = float(enemy_data.get("min_difficulty", 0.0))
-		if time_minutes >= min_diff:
-			eligible.append(entry)
-			eligible_weight += float(entry.get("weight", 0.0))
+		if time_minutes < min_diff:
+			continue
+		# Skip freighter entries when at cap or on cooldown
+		var tags: Array = enemy_data.get("tags", []) as Array
+		if freighter_blocked and tags.has("freighter"):
+			continue
+		eligible.append(entry)
+		eligible_weight += float(entry.get("weight", 0.0))
 	if eligible.is_empty():
 		return _enemy_pool[0]
 	var roll: float = randf() * eligible_weight

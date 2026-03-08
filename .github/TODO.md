@@ -42,4 +42,6 @@
 - **Power-up system implemented**: New `BasePowerUp` class extending `BasePickup` with magnet/vacuum immunity (collision_mask=1, attract_to no-op, "powerups" group). Four power-ups: Health (red heart, 25% max HP), Speed (blue lightning, +300% for 10s), Stopwatch (gold, freeze all enemies 10s), Gravity Well (purple, vacuum drops). 1.5% shared pool per kill. Shared glow shader. Credits changed to guaranteed 1 per kill. Removed `CREDIT_DROP_CHANCE`, `CREDIT_SCALE_PER_MINUTE`, `GRAVITY_WELL_DROP_CHANCE`, `GRAVITY_WELL_MIN_PICKUPS_FOR_DROP` from GameConfig.
 - **Stopwatch global freeze**: `BaseEnemy.is_frozen` flag stops movement. SceneTree meta `stopwatch_freeze_active` ensures newly spawned enemies (including freighters) spawn frozen. `LootFreighter._process_movement()` has its own freeze guard since it overrides without calling super.
 
+- **Freighter spawn limiting**: Freighters were spawning too frequently and could appear as elites. Fixed by adding `FREIGHTER_MAX_ACTIVE` (1), cooldown of 60–90s between spawns, and skipping elite roll for `LootFreighter` instances.
+
 _Last updated: March 8, 2026_

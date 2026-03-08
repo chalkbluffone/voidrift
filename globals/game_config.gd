@@ -194,6 +194,9 @@ const OFFER_WEIGHT_MODULE_EMPTY_NEW: float = 5.0
 # =============================================================================
 const FREIGHTER_FLEE_DRIFT_INTERVAL: float = 2.0  # Seconds between random flee direction changes
 const FREIGHTER_FLEE_DRIFT_ANGLE: float = 0.3     # Radians of random drift
+const FREIGHTER_MAX_ACTIVE: int = 1               # Maximum freighters alive at once
+const FREIGHTER_SPAWN_COOLDOWN_MIN: float = 60.0   # Minimum seconds between freighter spawns
+const FREIGHTER_SPAWN_COOLDOWN_MAX: float = 90.0   # Maximum seconds between freighter spawns
 
 # =============================================================================
 # PICKUP SCATTER (cosmetic feel)

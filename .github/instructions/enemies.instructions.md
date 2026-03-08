@@ -36,6 +36,8 @@ Elites get:
 - `enemy_type = "elite"` for tracking
 - Drop 3 XP (vs 1 XP for normal enemies)
 
+**Exception**: `LootFreighter` enemies are **never** rolled as elites — the elite check is skipped entirely for freighter spawns.
+
 ## Swarm Events
 
 Temporary spawn rate boost at fixed times during a run:
@@ -96,6 +98,15 @@ Enemy spawn positions use rejection sampling to avoid asteroids:
 - Each asteroid has an `effective_radius` property used for clearance checks
 - If no valid position found in normal range, an extended range fallback is attempted
 - Spawn positions are also constrained to the arena boundary
+
+## Loot Freighter Spawn Control
+
+Freighter spawns are rate-limited to keep them feeling special:
+
+- **Max active**: Only `FREIGHTER_MAX_ACTIVE` (1) freighter can be alive at a time
+- **Cooldown**: After a freighter spawns, a random cooldown of `FREIGHTER_SPAWN_COOLDOWN_MIN`–`FREIGHTER_SPAWN_COOLDOWN_MAX` (60–90s) must elapse before another can spawn
+- **Implementation**: `_pick_weighted_enemy()` filters out pool entries with the `"freighter"` tag when at cap or on cooldown
+- **Never elite**: Elite roll is skipped entirely for `LootFreighter` instances
 
 ## take_damage() Signature
 
