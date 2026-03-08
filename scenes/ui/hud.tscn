@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://dhud0000000001"]
+[gd_scene load_steps=3 format=3 uid="uid://dhud0000000001"]
 
 [ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/ability_ring_indicator.tscn" id="2_ability_ring"]
 
 [node name="HUD" type="CanvasLayer"]
 layer = 10
@@ -190,6 +191,28 @@ offset_top = -40.0
 grow_horizontal = 2
 grow_vertical = 0
 
+[node name="BottomCenter" type="Control" parent="."]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -140.0
+offset_top = 0.0
+offset_right = 140.0
+offset_bottom = -120.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="AbilityRingIndicator" parent="BottomCenter" instance=ExtResource("2_ability_ring")]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
 [node name="BottomLeftDebug" type="VBoxContainer" parent="."]
 anchors_preset = 12
 anchor_top = 1.0
@@ -216,18 +239,3 @@ grow_vertical = 2
 max_value = 100.0
 value = 0.0
 show_percentage = false
-
-[node name="XPLabel" type="Label" parent="BottomXP/XPBar"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 3
-theme_override_font_sizes/font_size = 22
-text = "XP: 0 / 100"
-horizontal_alignment = 1
-vertical_alignment = 1

@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/ability_ring_indicator.gd" id="1_script"]
+
+[node name="AbilityRingIndicator" type="Control"]
+custom_minimum_size = Vector2(280, 120)
+offset_right = 280.0
+offset_bottom = 120.0
+mouse_filter = 2
+script = ExtResource("1_script")

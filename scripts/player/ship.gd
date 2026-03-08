@@ -10,6 +10,8 @@ signal phase_energy_changed(current: int, maximum: int)
 signal captain_ability_activated
 signal captain_ability_expired
 signal captain_ability_ready
+signal captain_ability_cooldown_updated(remaining: float, total: float)
+signal input_device_changed(device: String)
 signal died
 
 # --- Preloads ---
@@ -205,6 +207,7 @@ func _setup_captain_ability(captain_data: Dictionary) -> void:
 	ability.ability_activated.connect(func(): captain_ability_activated.emit())
 	ability.ability_expired.connect(func(): captain_ability_expired.emit())
 	ability.ability_ready.connect(func(): captain_ability_ready.emit())
+	ability.cooldown_updated.connect(func(remaining: float, total: float): captain_ability_cooldown_updated.emit(remaining, total))
 	
 	_captain_ability = ability
 
@@ -316,10 +319,13 @@ func _process_camera_zoom(delta: float) -> void:
 
 
 func _input(event: InputEvent) -> void:
+	var prev_device: String = _last_input_device
 	if event is InputEventJoypadMotion or event is InputEventJoypadButton:
 		_last_input_device = "joypad"
 	elif event is InputEventKey or event is InputEventMouseMotion or event is InputEventMouseButton:
 		_last_input_device = "keyboard"
+	if _last_input_device != prev_device:
+		input_device_changed.emit(_last_input_device)
 
 	if event.is_action_pressed("phase_shift"):
 		_try_phase_shift()
@@ -331,6 +337,25 @@ func _input(event: InputEvent) -> void:
 func _try_captain_ability() -> void:
 	if _captain_ability and _captain_ability.try_activate():
 		pass
+
+
+## Returns 0.0–1.0 progress of the currently recharging phase shift charge.
+func get_phase_recharge_progress() -> float:
+	if phase_energy >= max_phase_energy:
+		return 0.0
+	if phase_recharge_time <= 0.0:
+		return 0.0
+	return _phase_recharge_timer / phase_recharge_time
+
+
+## Returns the captain ability node (BaseAbility), or null if none.
+func get_captain_ability() -> Node:
+	return _captain_ability
+
+
+## Returns the last input device type: "keyboard" or "joypad".
+func get_input_device() -> String:
+	return _last_input_device
 
 
 func _try_phase_shift() -> void:

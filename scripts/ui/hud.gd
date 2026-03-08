@@ -27,7 +27,10 @@ var vram_label: Label = null
 
 # Bottom - XP bar stretched across screen
 @onready var xp_bar: ProgressBar = $BottomXP/XPBar
-@onready var xp_label: Label = $BottomXP/XPBar/XPLabel
+var xp_label: Label = null
+
+# Bottom center - ability ring indicator
+@onready var ability_ring: Control = $BottomCenter/AbilityRingIndicator
 
 # Left side - weapons list
 @onready var left_weapons: Control = $LeftWeapons
@@ -224,6 +227,7 @@ func _apply_synthwave_theme() -> void:
 
 ## Create debug stat labels programmatically in the bottom-left VBoxContainer.
 func _build_debug_labels() -> void:
+	xp_label = _make_debug_label("XP: 0 / 7")
 	fps_label = _make_debug_label("FPS: 0")
 	nodes_label = _make_debug_label("NODES: 0")
 	draw_calls_label = _make_debug_label("DRAW: 0")
@@ -394,6 +398,10 @@ func _find_player() -> void:
 			_player.stats.shield_changed.connect(_on_shield_changed)
 			if _player.stats.has_signal("lifesteal_healed"):
 				_player.stats.lifesteal_healed.connect(_on_lifesteal_healed)
+
+		# Wire ability ring indicator
+		if ability_ring and ability_ring.has_method("setup"):
+			ability_ring.setup(_player)
 
 
 func _update_hp(current: float, maximum: float) -> void:
@@ -579,7 +587,7 @@ func _build_map_stats_panel() -> void:
 
 ## Handle input for full map toggle.
 func _unhandled_input(event: InputEvent) -> void:
-	# Tab key or right trigger to show/hide full map
+	# Tab key or left trigger to show/hide full map
 	if event is InputEventKey:
 		var key_event: InputEventKey = event as InputEventKey
 		if key_event.keycode == KEY_TAB:
@@ -589,16 +597,18 @@ func _unhandled_input(event: InputEvent) -> void:
 			else:
 				_full_map_overlay.hide_map()
 				_hide_map_stats_panel()
-	elif event is InputEventJoypadButton:
-		var joy_event: InputEventJoypadButton = event as InputEventJoypadButton
-		# Right trigger (button 7 on most controllers)
-		if joy_event.button_index == JOY_BUTTON_RIGHT_SHOULDER:
-			if joy_event.pressed:
-				_full_map_overlay.show_map()
-				_show_map_stats_panel()
+	elif event is InputEventJoypadMotion:
+		var joy_event: InputEventJoypadMotion = event as InputEventJoypadMotion
+		# Left trigger (axis 4 = JOY_AXIS_TRIGGER_LEFT)
+		if joy_event.axis == JOY_AXIS_TRIGGER_LEFT:
+			if joy_event.axis_value >= 0.8:
+				if not _full_map_overlay.visible:
+					_full_map_overlay.show_map()
+					_show_map_stats_panel()
 			else:
-				_full_map_overlay.hide_map()
-				_hide_map_stats_panel()
+				if _full_map_overlay.visible:
+					_full_map_overlay.hide_map()
+					_hide_map_stats_panel()
 
 
 func _show_map_stats_panel() -> void:
