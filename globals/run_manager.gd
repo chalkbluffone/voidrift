@@ -49,6 +49,19 @@ func _process(delta: float) -> void:
 		time_updated.emit(run_data.time_elapsed, run_data.time_remaining)
 
 
+## Returns the current overtime difficulty multiplier (1.0 during countdown).
+## Steps up by INCREMENT every INTERVAL seconds after the countdown hits zero, capped at CAP.
+func get_overtime_multiplier() -> float:
+	var overtime_seconds: float = maxf(0.0, -run_data.time_remaining)
+	if overtime_seconds <= 0.0:
+		return 1.0
+	var steps: float = floorf(overtime_seconds / GameConfig.OVERTIME_MULTIPLIER_INTERVAL)
+	return minf(
+		GameConfig.OVERTIME_MULTIPLIER_START + steps * GameConfig.OVERTIME_MULTIPLIER_INCREMENT,
+		GameConfig.OVERTIME_MULTIPLIER_CAP
+	)
+
+
 # --- Scene Management ---
 
 func go_to_main_menu() -> void:

@@ -18,6 +18,30 @@ var time_damage_mult: float = 1.0 + (time_minutes * GameConfig.ENEMY_DAMAGE_SCAL
 
 The **difficulty stat** (a player stat, 0.0–1.0+) further multiplies these scaling factors. See `progression.instructions.md` for difficulty stat formulas.
 
+### Overtime Difficulty Multiplier
+
+After the run countdown reaches zero (overtime), enemies spawn with an escalating multiplier that affects HP, contact damage, and move speed:
+
+```gdscript
+# Computed at spawn time for each enemy
+var overtime_mult: float = RunManager.get_overtime_multiplier()
+if overtime_mult > 1.0:
+    enemy.max_hp *= overtime_mult
+    enemy.contact_damage *= overtime_mult
+    enemy.move_speed *= overtime_mult
+```
+
+**Multiplier progression**:
+
+- Starts at `OVERTIME_MULTIPLIER_START` (1.0x) when overtime begins
+- Increases by `OVERTIME_MULTIPLIER_INCREMENT` (0.5) every `OVERTIME_MULTIPLIER_INTERVAL` (30 seconds)
+- Caps at `OVERTIME_MULTIPLIER_CAP` (10.0) after 9 minutes of overtime
+- Example: 1.0x → 1.5x → 2.0x → … → 10.0x
+
+**HUD feedback**: New `OvertimeLabel` below the player level displays the current multiplier ("1.0x", "2.5x", etc.) with color-coded feedback (cyan → orange → red as multiplier increases).
+
+**Note**: Enemy move speed is still capped at `PLAYER_BASE_SPEED` to prevent enemies from outrunning the player.
+
 ## Elite Enemies
 
 Rolled per spawn with the player's `elite_spawn_rate` modifier:

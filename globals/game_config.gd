@@ -14,8 +14,13 @@ const PLAYER_TURN_RATE: float = 6.0     # Radians/sec. How fast the ship turns (
 # =============================================================================
 const ENEMY_BASE_SPEED: float = 70.0  # Base movement speed (slower than player's 150)
 
-# Overtime speed scaling — only activates after the countdown hits zero
-const ENEMY_OVERTIME_SPEED_PER_MINUTE: float = 8.0  # +8 speed per overtime minute
+# --- Overtime Difficulty Multiplier ---
+# After countdown hits zero, enemies get a stacking multiplier every INTERVAL seconds.
+# Affects HP, contact damage, and move speed of newly spawned enemies.
+const OVERTIME_MULTIPLIER_START: float = 1.0       # Starting multiplier when overtime begins
+const OVERTIME_MULTIPLIER_INCREMENT: float = 0.5   # Added per interval (1.0x → 1.5x → 2.0x …)
+const OVERTIME_MULTIPLIER_INTERVAL: float = 30.0   # Seconds between increments
+const OVERTIME_MULTIPLIER_CAP: float = 10.0        # Maximum multiplier (reached at 9 min overtime)
 
 # --- Enemy Stat Scaling (polynomial, over time) ---
 # HP formula: hp_mult = 1 + pow(time_minutes, ENEMY_HP_EXPONENT)
@@ -51,8 +56,8 @@ const SPAWN_RATE_GROWTH: float = 0.3  # Additional enemies/sec per minute (durin
 const SPAWN_BATCH_MIN_MINUTE: float = 3.0  # Minutes before batch spawns begin
 const SPAWN_BATCH_SIZE_PER_MINUTE: float = 0.5  # Extra enemies per batch per minute
 
-# Overtime spawn scaling — additional ramp after the countdown hits zero
-const OVERTIME_SPAWN_RATE_GROWTH: float = 0.8  # Extra enemies/sec per overtime minute
+# Overtime spawn scaling removed — overtime difficulty multiplier handles escalation via
+# OVERTIME_MULTIPLIER_* constants in the Enemies section above.
 
 # --- Swarm Events ---
 # Swarms temporarily boost spawn rate. Triggered at specific times during the run.

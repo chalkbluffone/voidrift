@@ -11,8 +11,18 @@ The HUD uses Orbitron-Bold font throughout with synthwave neon styling.
 ### Health & Shield Bars
 
 - **Shield bar**: Neon blue `ProgressBar` above HP bar. Auto-shows when `max_shield > 0` (uses `get_stat("shield")` — the stat name is `"shield"`, not `"max_shield"`). Repositions HP bar dynamically.
-- **HP bar**: Hot pink `ProgressBar` below shield bar. When overhealed, the bar's `max_value` expands to `max_hp + overheal_cap` and the fill switches to magenta (`COLOR_OVERHEAL = Color(0.85, 0.2, 1.0, 1.0)`). Reverts to hot pink when overheal drains back to normal HP.
+- **HP bar**: Hot pink `ProgressBar` below shield bar. When overhealed, the bar's `max_value` expands to `max_hp + overheal_cap` and the fill switches to synthwave yellow (`COLOR_OVERHEAL = Color(1.0, 0.95, 0.2, 1.0)`). Reverts to hot pink when overheal drains back to normal HP.
 - `StatsComponent._recalculate_all()` emits `hp_changed`/`shield_changed` signals to keep HUD in sync.
+
+### Overtime Multiplier Label
+
+- **Position**: Top-center, below the player level label ("LV X")
+- **Display**: Shows during overtime only (hidden during countdown). Format: "1.0x", "2.5x", etc.
+- **Color coding**: Synthwave cyan (1.0x–2.0x) → orange (2.5x–5.0x) → red (5.5x–10.0x)
+- **Source**: `RunManager.get_overtime_multiplier()` called every frame
+- **Scene node**: `TopCenter/OvertimeLabel` in `hud.tscn`
+- **Font**: Orbitron-Bold, 18px, with outline
+- See `enemies.instructions.md` for overtime multiplier escalation mechanics
 
 ### Lifesteal Heal Numbers
 

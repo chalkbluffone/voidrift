@@ -11,6 +11,7 @@ extends CanvasLayer
 
 # Top center - Level
 @onready var level_label: Label = $TopCenter/LevelLabel
+@onready var overtime_label: Label = $TopCenter/OvertimeLabel
 
 # Top right
 @onready var timer_label: Label = $TopRight/HBoxContainer/VBoxContainer/TimerLabel
@@ -61,7 +62,7 @@ const COLOR_LEVEL_GLOW: Color = Color(1.0, 0.4, 0.8, 1.0)  # Pink glow for level
 const COLOR_CREDITS: Color = Color(1.0, 0.85, 0.1, 1.0)  # Gold for credits
 const COLOR_STARDUST: Color = Color(0.6, 0.85, 1.0, 1.0)  # Icy blue for stardust
 const COLOR_WEAPONS: Color = Color(0.2, 1.0, 0.9, 1.0)  # Cyan-ish
-const COLOR_OVERHEAL: Color = Color(0.85, 0.2, 1.0, 1.0)  # Bright magenta for overheal
+const COLOR_OVERHEAL: Color = Color(1.0, 0.95, 0.2, 1.0)  # Synthwave yellow for overheal
 const COLOR_LIFESTEAL: Color = Color(0.2, 1.0, 0.4, 1.0)  # Green for lifesteal heal
 
 const FONT_HEADER: Font = preload("res://assets/fonts/Orbitron-Bold.ttf")
@@ -203,6 +204,10 @@ func _apply_synthwave_theme() -> void:
 	level_label.add_theme_color_override("font_outline_color", Color(1.0, 0.5, 0.0, 0.8))
 	level_label.add_theme_constant_override("outline_size", 3)
 	_level_base_scale = level_label.scale
+
+	# Overtime multiplier label - styled dynamically via _update_overtime_label()
+	overtime_label.add_theme_font_override("font", FONT_HEADER)
+	overtime_label.add_theme_constant_override("outline_size", 3)
 	
 	# Credits - Gold
 	credits_label.add_theme_font_override("font", FONT_HEADER)
@@ -358,6 +363,7 @@ func _process(_delta: float) -> void:
 	# Update timer (countdown)
 	if RunManager.current_state == RunManager.GameState.PLAYING:
 		_update_timer(RunManager.run_data.time_remaining)
+		_update_overtime_label()
 	
 	# Update HP and shield from player stats
 	if _player and _player.stats:
@@ -510,6 +516,28 @@ func _update_timer(time_remaining: float) -> void:
 			timer_label.modulate = Color(1.0, 0.6, 0.1, 1.0)
 		else:
 			timer_label.modulate = Color.WHITE
+
+
+## Update the overtime difficulty multiplier label (shown only during overtime).
+func _update_overtime_label() -> void:
+	if RunManager.run_data.time_remaining > 0.0:
+		overtime_label.visible = false
+		return
+
+	var mult: float = RunManager.get_overtime_multiplier()
+	overtime_label.visible = true
+	overtime_label.text = "%.1fx" % mult
+
+	# Color shifts: white/cyan → orange → red based on multiplier severity
+	if mult >= 5.5:
+		overtime_label.add_theme_color_override("font_color", Color(1.0, 0.2, 0.2, 1.0))
+		overtime_label.add_theme_color_override("font_outline_color", Color(0.4, 0.0, 0.0, 0.8))
+	elif mult >= 2.5:
+		overtime_label.add_theme_color_override("font_color", Color(1.0, 0.6, 0.1, 1.0))
+		overtime_label.add_theme_color_override("font_outline_color", Color(0.4, 0.15, 0.0, 0.8))
+	else:
+		overtime_label.add_theme_color_override("font_color", Color(0.0, 1.0, 0.9, 1.0))
+		overtime_label.add_theme_color_override("font_outline_color", Color(0.0, 0.3, 0.4, 0.8))
 
 
 # --- Signal Handlers ---

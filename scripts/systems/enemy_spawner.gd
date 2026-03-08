@@ -95,11 +95,6 @@ func _get_spawn_interval() -> float:
 	var time_minutes: float = RunManager.run_data.time_elapsed / 60.0
 	var current_rate: float = GameConfig.BASE_SPAWN_RATE + (GameConfig.SPAWN_RATE_GROWTH * time_minutes)
 	
-	# Overtime: extra spawn ramp after countdown hits zero
-	var overtime_seconds: float = maxf(0.0, -RunManager.run_data.time_remaining)
-	if overtime_seconds > 0.0:
-		current_rate += GameConfig.OVERTIME_SPAWN_RATE_GROWTH * (overtime_seconds / 60.0)
-	
 	# Difficulty stat scales spawn rate
 	var difficulty_stat: float = _get_player_difficulty_stat()
 	current_rate *= (1.0 + difficulty_stat * GameConfig.DIFFICULTY_SPAWN_WEIGHT)
@@ -229,16 +224,18 @@ func _spawn_enemy() -> void:
 	
 	# Apply final stats
 	enemy.max_hp *= hp_mult
-	enemy.current_hp = enemy.max_hp
 	enemy.contact_damage *= damage_mult
 	
 	# XP is static (no scaling) — set based on enemy type
 	enemy.xp_value = GameConfig.ENEMY_XP_ELITE if is_elite else GameConfig.ENEMY_XP_NORMAL
 
-	# Speed only increases in overtime (after countdown hits zero)
-	var overtime_seconds: float = maxf(0.0, -RunManager.run_data.time_remaining)
-	if overtime_seconds > 0.0:
-		enemy.move_speed += GameConfig.ENEMY_OVERTIME_SPEED_PER_MINUTE * (overtime_seconds / 60.0)
+	# Overtime difficulty multiplier — scales HP, damage, and speed after countdown hits zero
+	var overtime_mult: float = RunManager.get_overtime_multiplier()
+	if overtime_mult > 1.0:
+		enemy.max_hp *= overtime_mult
+		enemy.contact_damage *= overtime_mult
+		enemy.move_speed *= overtime_mult
+	enemy.current_hp = enemy.max_hp
 	# Cap enemy speed at player base speed — never outrun the player
 	enemy.move_speed = minf(enemy.move_speed, GameConfig.PLAYER_BASE_SPEED)
 	

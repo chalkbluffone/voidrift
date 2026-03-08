@@ -23,5 +23,7 @@
 - EffectUtils.create_particles() dispatcher + set_particle_prop() runtime routing
 - SettingsManager.use_gpu_particles toggle with persistence
 - Fixed Ion Wake and Radiant Arc never appearing in level-up offers (unlock_condition was "none")
+- Overtime difficulty multiplier system (1.0x → 10.0x over 9 min overtime, scales enemy HP/damage/speed, HUD label with color feedback)
+- Overheal HP bar color changed to synthwave yellow (opaque, matching level label)
 
 _Last updated: March 8, 2026_
