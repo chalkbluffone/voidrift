@@ -69,8 +69,9 @@ func generate_level_up_options() -> Array[Dictionary]:
 		w_existing_weapon = GameConfig.OFFER_WEIGHT_WEAPON_FULL_EXISTING
 		w_new_weapon = 0.0
 	else:
-		# Slots still open — only offer new weapons until loadout is full.
-		w_existing_weapon = 0.0
+		# Slots still open — offer BOTH existing-weapon upgrades and new weapons.
+		# This avoids forcing only-new options until all weapon slots are filled.
+		w_existing_weapon = GameConfig.OFFER_WEIGHT_EXISTING_WEAPON
 		w_new_weapon = GameConfig.OFFER_WEIGHT_WEAPON_OPEN_NEW
 
 	if module_slots_full:

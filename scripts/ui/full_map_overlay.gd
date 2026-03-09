@@ -14,6 +14,10 @@ const COLOR_ENEMY: Color = Color(1.0, 0.2, 0.2, 1.0)   # Red
 const COLOR_PICKUP: Color = Color(0.5, 1.0, 0.3, 1.0)  # Green
 const COLOR_STATION: Color = Color(1.0, 0.8, 0.2, 1.0) # Yellow/Gold
 const COLOR_ASTEROID: Color = Color(0.45, 0.45, 0.5, 0.7) # Gray
+const COLOR_POWERUP_HEALTH: Color = Color(1.0, 0.25, 0.25, 1.0)
+const COLOR_POWERUP_SPEED: Color = Color(0.3, 0.7, 1.0, 1.0)
+const COLOR_POWERUP_STOPWATCH: Color = Color(1.0, 0.85, 0.25, 1.0)
+const COLOR_POWERUP_GRAVITY: Color = Color(0.75, 0.45, 1.0, 1.0)
 const COLOR_BOUNDARY: Color = Color(1.0, 0.0, 1.0, 0.8)  # Pink
 const COLOR_GRID: Color = Color(0.1, 0.1, 0.15, 0.5)
 
@@ -124,6 +128,9 @@ func _draw() -> void:
 	
 	# Draw pickups
 	_draw_pickups(center)
+
+	# Draw power-ups with unique icon/color markers
+	_draw_powerups(center)
 	
 	# Draw player
 	if _player:
@@ -184,6 +191,8 @@ func _draw_pickups(center: Vector2) -> void:
 	for pickup: Node in pickups:
 		if not pickup is Node2D:
 			continue
+		if pickup.is_in_group("powerups"):
+			continue
 		var pickup_2d: Node2D = pickup as Node2D
 		var offset: Vector2 = pickup_2d.global_position * _world_to_map_scale
 		
@@ -196,6 +205,78 @@ func _draw_pickups(center: Vector2) -> void:
 			continue
 		
 		draw_circle(center + offset, 2.0, COLOR_PICKUP)
+
+
+func _draw_powerups(center: Vector2) -> void:
+	var powerups: Array[Node] = get_tree().get_nodes_in_group("powerups")
+	var radius: float = _map_size * 0.5
+
+	for powerup: Node in powerups:
+		if not powerup is Node2D:
+			continue
+		var powerup_2d: Node2D = powerup as Node2D
+		var offset: Vector2 = powerup_2d.global_position * _world_to_map_scale
+
+		# Skip if outside map
+		if offset.length() > radius - 6.0:
+			continue
+
+		# Skip if in unexplored area
+		if _fog_of_war and not _fog_of_war.is_explored(powerup_2d.global_position):
+			continue
+
+		var marker_info: Dictionary = _get_powerup_marker_info(powerup_2d)
+		var marker_type: String = String(marker_info.get("marker_type", "unknown"))
+		var marker_color: Color = Color(marker_info.get("color", COLOR_PICKUP))
+		var marker_pos: Vector2 = center + offset
+
+		draw_circle(marker_pos, 5.0, marker_color)
+		draw_circle(marker_pos, 2.7, Color(0.05, 0.05, 0.08, 0.95))
+		_draw_powerup_icon(marker_pos, marker_type, marker_color, 1.2)
+
+
+func _draw_powerup_icon(marker_pos: Vector2, marker_type: String, marker_color: Color, icon_scale: float) -> void:
+	if marker_type == "health":
+		draw_line(marker_pos + Vector2(-2.0, 0.0) * icon_scale, marker_pos + Vector2(2.0, 0.0) * icon_scale, Color.WHITE, 1.4)
+		draw_line(marker_pos + Vector2(0.0, -2.0) * icon_scale, marker_pos + Vector2(0.0, 2.0) * icon_scale, Color.WHITE, 1.4)
+	elif marker_type == "speed":
+		var bolt_points: PackedVector2Array = PackedVector2Array([
+			marker_pos + Vector2(-1.4, -2.0) * icon_scale,
+			marker_pos + Vector2(0.3, -2.0) * icon_scale,
+			marker_pos + Vector2(-0.6, 0.2) * icon_scale,
+			marker_pos + Vector2(1.4, 0.2) * icon_scale,
+			marker_pos + Vector2(-0.4, 2.1) * icon_scale,
+			marker_pos + Vector2(0.2, 0.6) * icon_scale
+		])
+		draw_colored_polygon(bolt_points, Color.WHITE)
+	elif marker_type == "stopwatch":
+		draw_circle(marker_pos, 2.0 * icon_scale, Color.WHITE)
+		draw_line(marker_pos + Vector2(0.0, -2.8) * icon_scale, marker_pos + Vector2(0.0, -1.9) * icon_scale, marker_color, 1.1)
+		draw_line(marker_pos, marker_pos + Vector2(0.0, -1.1) * icon_scale, marker_color, 1.1)
+		draw_line(marker_pos, marker_pos + Vector2(0.9, 0.6) * icon_scale, marker_color, 1.1)
+	elif marker_type == "gravity":
+		draw_arc(marker_pos, 2.2 * icon_scale, 0.0, TAU, 16, Color.WHITE, 1.2)
+		draw_circle(marker_pos, 0.65 * icon_scale, Color.WHITE)
+	else:
+		draw_circle(marker_pos, 1.3 * icon_scale, Color.WHITE)
+
+
+func _get_powerup_marker_info(powerup: Node2D) -> Dictionary:
+	var script_path: String = ""
+	var script_ref: Script = powerup.get_script() as Script
+	if script_ref:
+		script_path = String(script_ref.resource_path)
+
+	if script_path.ends_with("health_powerup.gd"):
+		return {"marker_type": "health", "color": COLOR_POWERUP_HEALTH}
+	if script_path.ends_with("speed_powerup.gd"):
+		return {"marker_type": "speed", "color": COLOR_POWERUP_SPEED}
+	if script_path.ends_with("stopwatch_powerup.gd"):
+		return {"marker_type": "stopwatch", "color": COLOR_POWERUP_STOPWATCH}
+	if script_path.ends_with("gravity_well_pickup.gd"):
+		return {"marker_type": "gravity", "color": COLOR_POWERUP_GRAVITY}
+
+	return {"marker_type": "unknown", "color": COLOR_PICKUP}
 
 
 ## Draw space station icons (only if revealed by fog of war).

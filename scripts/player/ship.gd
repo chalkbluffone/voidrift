@@ -35,6 +35,7 @@ const _DAMAGE_NUMBER_SCENE: PackedScene = preload("res://scenes/ui/damage_number
 # --- Phase Shift ---
 @export var max_phase_energy: int = 3
 var phase_energy: int = 3
+var _base_phase_energy: int = 3
 var phase_recharge_time: float = GameConfig.PHASE_RECHARGE_TIME
 var _phase_recharge_timer: float = 0.0
 var _is_phasing: bool = false
@@ -93,6 +94,7 @@ func _ready() -> void:
 		stats.died.connect(_on_died)
 	
 	phase_energy = max_phase_energy
+	_base_phase_energy = max_phase_energy
 	phase_energy_changed.emit(phase_energy, max_phase_energy)
 	
 	# Cache camera reference
@@ -119,9 +121,8 @@ func _initialize_from_loadout(ship_data: Dictionary, captain_data: Dictionary, s
 	# Set phase shift from ship data
 	var phase_shift: Dictionary = ship_data.get("phase_shift", {})
 	var base_charges: int = phase_shift.get("charges", 3)
-	var extra_shifts: int = stats.get_stat_int(StatsComponentScript.STAT_EXTRA_PHASE_SHIFTS)
-	max_phase_energy = base_charges + extra_shifts
-	phase_energy = max_phase_energy
+	_base_phase_energy = base_charges
+	_refresh_phase_capacity(true)
 	
 	# Get base speed from ship
 	_base_speed = float(ship_data.get("base_speed", 100.0))
@@ -253,6 +254,25 @@ func _update_pickup_range() -> void:
 func _on_stat_changed(stat_name: String, _old_value: float, _new_value: float) -> void:
 	if stat_name == StatsComponentScript.STAT_PICKUP_RANGE:
 		_update_pickup_range()
+	elif stat_name == StatsComponentScript.STAT_EXTRA_PHASE_SHIFTS:
+		_refresh_phase_capacity(true)
+
+
+func _refresh_phase_capacity(grant_on_increase: bool) -> void:
+	var extra_shifts: int = 0
+	if stats:
+		extra_shifts = stats.get_stat_int(StatsComponentScript.STAT_EXTRA_PHASE_SHIFTS)
+	var new_max: int = maxi(1, _base_phase_energy + extra_shifts)
+	if new_max == max_phase_energy:
+		return
+
+	var previous_max: int = max_phase_energy
+	max_phase_energy = new_max
+
+	if grant_on_increase and new_max > previous_max:
+		phase_energy += (new_max - previous_max)
+	phase_energy = clampi(phase_energy, 0, max_phase_energy)
+	phase_energy_changed.emit(phase_energy, max_phase_energy)
 
 
 func _physics_process(delta: float) -> void:
@@ -585,6 +605,7 @@ func _on_level_up_completed(option: Dictionary) -> void:
 			stats.apply_level_up_upgrade(option)
 		else:
 			stats.apply_ship_upgrade(id)
+		_refresh_phase_capacity(true)
 	elif type == "weapon":
 		if weapons and weapons.has_method("equip_weapon"):
 			weapons.equip_weapon(id)

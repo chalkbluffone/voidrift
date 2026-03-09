@@ -13,6 +13,10 @@ const COLOR_ENEMY: Color = Color(1.0, 0.2, 0.2, 1.0)   # Red
 const COLOR_PICKUP: Color = Color(0.5, 1.0, 0.3, 1.0)  # Green
 const COLOR_STATION: Color = Color(1.0, 0.8, 0.2, 1.0) # Yellow/Gold
 const COLOR_ASTEROID: Color = Color(0.45, 0.45, 0.5, 0.7) # Gray
+const COLOR_POWERUP_HEALTH: Color = Color(1.0, 0.25, 0.25, 1.0)
+const COLOR_POWERUP_SPEED: Color = Color(0.3, 0.7, 1.0, 1.0)
+const COLOR_POWERUP_STOPWATCH: Color = Color(1.0, 0.85, 0.25, 1.0)
+const COLOR_POWERUP_GRAVITY: Color = Color(0.75, 0.45, 1.0, 1.0)
 const COLOR_BOUNDARY: Color = Color(1.0, 0.0, 1.0, 0.6)  # Pink
 const COLOR_FOG: Color = Color(0.0, 0.0, 0.0, 0.9)
 const COLOR_EXPLORED: Color = Color(0.15, 0.15, 0.2, 0.6)
@@ -117,6 +121,9 @@ func _draw() -> void:
 	
 	# Draw pickups
 	_draw_pickups(center, radius, player_pos)
+
+	# Draw power-ups with unique icon/color markers
+	_draw_powerups(center, radius, player_pos)
 	
 	# Draw player (always at center)
 	draw_circle(center, 4.0, COLOR_PLAYER)
@@ -175,6 +182,8 @@ func _draw_pickups(center: Vector2, radius: float, player_pos: Vector2) -> void:
 	for pickup: Node in pickups:
 		if not pickup is Node2D:
 			continue
+		if pickup.is_in_group("powerups"):
+			continue
 		var pickup_2d: Node2D = pickup as Node2D
 		var offset: Vector2 = (pickup_2d.global_position - player_pos) * _world_to_minimap_scale
 		
@@ -187,6 +196,79 @@ func _draw_pickups(center: Vector2, radius: float, player_pos: Vector2) -> void:
 			continue
 		
 		draw_circle(center + offset, 2.0, COLOR_PICKUP)
+
+
+## Draw power-up markers with type-specific icon and color.
+func _draw_powerups(center: Vector2, radius: float, player_pos: Vector2) -> void:
+	var powerups: Array[Node] = get_tree().get_nodes_in_group("powerups")
+
+	for powerup: Node in powerups:
+		if not powerup is Node2D:
+			continue
+		var powerup_2d: Node2D = powerup as Node2D
+		var offset: Vector2 = (powerup_2d.global_position - player_pos) * _world_to_minimap_scale
+
+		# Skip if outside minimap circle
+		if offset.length() > radius - 6.0:
+			continue
+
+		# Skip if in unexplored area
+		if _fog_of_war and not _fog_of_war.is_explored(powerup_2d.global_position):
+			continue
+
+		var marker_info: Dictionary = _get_powerup_marker_info(powerup_2d)
+		var marker_type: String = String(marker_info.get("marker_type", "unknown"))
+		var marker_color: Color = Color(marker_info.get("color", COLOR_PICKUP))
+		var marker_pos: Vector2 = center + offset
+
+		# Colored outer ring + icon gives quick readability at small minimap sizes.
+		draw_circle(marker_pos, 4.0, marker_color)
+		draw_circle(marker_pos, 2.2, Color(0.05, 0.05, 0.08, 0.95))
+		_draw_powerup_icon(marker_pos, marker_type, marker_color, 1.0)
+
+
+func _draw_powerup_icon(marker_pos: Vector2, marker_type: String, marker_color: Color, icon_scale: float) -> void:
+	if marker_type == "health":
+		draw_line(marker_pos + Vector2(-1.6, 0.0) * icon_scale, marker_pos + Vector2(1.6, 0.0) * icon_scale, Color.WHITE, 1.2)
+		draw_line(marker_pos + Vector2(0.0, -1.6) * icon_scale, marker_pos + Vector2(0.0, 1.6) * icon_scale, Color.WHITE, 1.2)
+	elif marker_type == "speed":
+		var bolt_points: PackedVector2Array = PackedVector2Array([
+			marker_pos + Vector2(-1.2, -1.6) * icon_scale,
+			marker_pos + Vector2(0.2, -1.6) * icon_scale,
+			marker_pos + Vector2(-0.5, 0.1) * icon_scale,
+			marker_pos + Vector2(1.1, 0.1) * icon_scale,
+			marker_pos + Vector2(-0.3, 1.8) * icon_scale,
+			marker_pos + Vector2(0.1, 0.5) * icon_scale
+		])
+		draw_colored_polygon(bolt_points, Color.WHITE)
+	elif marker_type == "stopwatch":
+		draw_circle(marker_pos, 1.7 * icon_scale, Color.WHITE)
+		draw_line(marker_pos + Vector2(0.0, -2.4) * icon_scale, marker_pos + Vector2(0.0, -1.6) * icon_scale, marker_color, 1.0)
+		draw_line(marker_pos, marker_pos + Vector2(0.0, -0.9) * icon_scale, marker_color, 1.0)
+		draw_line(marker_pos, marker_pos + Vector2(0.7, 0.5) * icon_scale, marker_color, 1.0)
+	elif marker_type == "gravity":
+		draw_arc(marker_pos, 1.8 * icon_scale, 0.0, TAU, 16, Color.WHITE, 1.0)
+		draw_circle(marker_pos, 0.55 * icon_scale, Color.WHITE)
+	else:
+		draw_circle(marker_pos, 1.1 * icon_scale, Color.WHITE)
+
+
+func _get_powerup_marker_info(powerup: Node2D) -> Dictionary:
+	var script_path: String = ""
+	var script_ref: Script = powerup.get_script() as Script
+	if script_ref:
+		script_path = String(script_ref.resource_path)
+
+	if script_path.ends_with("health_powerup.gd"):
+		return {"marker_type": "health", "color": COLOR_POWERUP_HEALTH}
+	if script_path.ends_with("speed_powerup.gd"):
+		return {"marker_type": "speed", "color": COLOR_POWERUP_SPEED}
+	if script_path.ends_with("stopwatch_powerup.gd"):
+		return {"marker_type": "stopwatch", "color": COLOR_POWERUP_STOPWATCH}
+	if script_path.ends_with("gravity_well_pickup.gd"):
+		return {"marker_type": "gravity", "color": COLOR_POWERUP_GRAVITY}
+
+	return {"marker_type": "unknown", "color": COLOR_PICKUP}
 
 
 ## Draw space station icons on the minimap (active stations only).
@@ -255,10 +337,9 @@ func _draw_asteroids(center: Vector2, radius: float, player_pos: Vector2) -> voi
 					any_clamped = true
 				scaled_points[i] = pt
 
-			# Clamping vertices to the circle edge creates degenerate polygons
-			# that fail triangulation. Draw a simple dot for edge asteroids.
+			# Keep shape readability at minimap edge instead of degrading to circles.
 			if any_clamped:
-				draw_circle(center + offset, maxf(bounding, 3.0), color)
+				draw_polyline(scaled_points, color, 1.4, true)
 			else:
 				draw_colored_polygon(scaled_points, color)
 		else:

@@ -64,6 +64,9 @@ On level up, player chooses 1 of `LEVEL_UP_OPTION_COUNT` (default 3) upgrade opt
 - `UpgradeService.generate_level_up_options()` rolls rarity, picks stats
 - `OFFER_WEIGHT_*` constants control weapon vs module frequency
 - `MAX_WEAPON_SLOTS` and `MAX_MODULE_SLOTS` limit loadout size
+- While weapon slots are still open, offer pool includes both:
+- Existing weapon level-up options for currently owned weapons
+- New weapon offers for unlocked, unequipped weapons
 
 ## Station Buffs
 
@@ -84,7 +87,7 @@ Enemy kills produce two categories of collectibles:
 - Attracted by player's magnet/PickupRange (collision mask includes layer 32)
 - Vacuumed by Gravity Well beacons and Gravity Well power-ups
 - **XP**: Static amount per kill (`ENEMY_XP_NORMAL`, `ENEMY_XP_ELITE`), no time scaling
-- **Credits**: Guaranteed 1 per kill (base `credit_value` from enemy data). `credits_gain` stat multiplies final amount via ProgressionManager. **Credits instantly attract to the player on spawn** — no magnet range delay.
+- **Credits**: Guaranteed 1 per kill (base `credit_value` from enemy data). `credits_gain` stat multiplies final amount via ProgressionManager. **No physical credit pickup is spawned** — credits are granted instantly on enemy death (including freighter jackpots) for performance.
 - **Stardust**: Chance-based drop for normal enemies (`STARDUST_BASE_DROP_CHANCE` × `stardust_gain` stat). Enemies must have `stardust_value > 0` in `enemies.json`. Loot Freighters always drop their full `stardust_value` (no chance roll).
 
 ### Power-Ups (Health, Speed, Stopwatch, Gravity Well)

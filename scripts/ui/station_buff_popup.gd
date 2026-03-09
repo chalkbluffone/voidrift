@@ -111,9 +111,26 @@ func _apply_synthwave_theme() -> void:
 	ignore_button.custom_minimum_size.x = 180
 	
 	# Focus navigation
-	if _cards.size() > 0:
-		_cards[_cards.size() - 1].focus_neighbor_bottom = ignore_button.get_path()
-		ignore_button.focus_neighbor_top = _cards[0].get_path()
+	_setup_focus_navigation()
+
+
+func _setup_focus_navigation() -> void:
+	if _cards.is_empty():
+		return
+
+	for i: int in range(_cards.size()):
+		var card: PanelContainer = _cards[i]
+		var up_index: int = (i - 1 + _cards.size()) % _cards.size()
+		var down_index: int = (i + 1) % _cards.size()
+		card.focus_neighbor_top = _cards[up_index].get_path()
+		card.focus_neighbor_bottom = _cards[down_index].get_path()
+		card.focus_neighbor_left = card.get_path()
+		card.focus_neighbor_right = card.get_path()
+
+	_cards[_cards.size() - 1].focus_neighbor_bottom = ignore_button.get_path()
+	ignore_button.focus_neighbor_top = _cards[0].get_path()
+	ignore_button.focus_neighbor_left = ignore_button.get_path()
+	ignore_button.focus_neighbor_right = ignore_button.get_path()
 
 
 func _style_card(card: PanelContainer) -> void:
@@ -194,6 +211,7 @@ func _setup_buff_card(card: PanelContainer, option: Dictionary) -> void:
 func _show_popup() -> void:
 	show()
 	set_process_input(true)
+	_setup_focus_navigation()
 	if _stats_panel:
 		_stats_panel.snapshot()
 		_stats_panel.refresh()
@@ -261,13 +279,25 @@ func _input(event: InputEvent) -> void:
 	if not visible:
 		return
 	
-	# Handle confirm on focused card
+	# Handle confirm on focused card/button (controller + keyboard)
 	if event.is_action_pressed("ui_accept"):
+		if ignore_button.has_focus():
+			_on_ignore_pressed()
+			get_viewport().set_input_as_handled()
+			return
 		for i: int in range(_cards.size()):
 			if _cards[i].has_focus():
 				_select_option(i)
 				get_viewport().set_input_as_handled()
 				return
+
+		# Safety fallback: if no card is focused, focus the first visible card.
+		for card: PanelContainer in _cards:
+			if card.visible:
+				card.grab_focus()
+				break
+		get_viewport().set_input_as_handled()
+		return
 	
 	# Handle cancel to ignore
 	if event.is_action_pressed("ui_cancel"):

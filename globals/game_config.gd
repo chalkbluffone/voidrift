@@ -25,15 +25,15 @@ const OVERTIME_MULTIPLIER_CAP: float = 10.0        # Maximum multiplier (reached
 # --- Enemy Stat Scaling (polynomial, over time) ---
 # HP formula: hp_mult = 1 + pow(time_minutes, ENEMY_HP_EXPONENT)
 # Damage formula: damage_mult = 1 + (time_minutes * ENEMY_DAMAGE_SCALE_PER_MINUTE)
-const ENEMY_HP_EXPONENT: float = 1.25     # Polynomial exponent for HP scaling (1.25 ≈ 18× at 10 min)
-const ENEMY_DAMAGE_SCALE_PER_MINUTE: float = 0.10  # +10% damage per minute (mild threat)
+const ENEMY_HP_EXPONENT: float = 1.15     # Polynomial exponent for HP scaling (subtler ramp over a 10 min run)
+const ENEMY_DAMAGE_SCALE_PER_MINUTE: float = 0.07  # +7% damage per minute
 
 # --- Difficulty Stat Scaling ---
 # Player's "difficulty" stat (0.0 = 0%, 1.0 = 100%) multiplies enemy stats and spawn rate.
 # Formula: stat_mult *= (1.0 + difficulty * WEIGHT)
-const DIFFICULTY_HP_WEIGHT: float = 1.0       # How much difficulty affects HP
-const DIFFICULTY_DAMAGE_WEIGHT: float = 0.5   # How much difficulty affects damage
-const DIFFICULTY_SPAWN_WEIGHT: float = 1.0    # How much difficulty affects spawn rate
+const DIFFICULTY_HP_WEIGHT: float = 0.4       # How much difficulty affects HP
+const DIFFICULTY_DAMAGE_WEIGHT: float = 0.2   # How much difficulty affects damage
+const DIFFICULTY_SPAWN_WEIGHT: float = 0.4    # How much difficulty affects spawn rate
 
 # --- XP Drops (static, no scaling) ---
 const ENEMY_XP_NORMAL: float = 1.0   # XP dropped by normal enemies
@@ -52,7 +52,7 @@ const ELITE_COLOR: Color = Color(1.0, 0.4, 0.2, 1.0)  # Orange tint for elites
 const SPAWN_RADIUS_MIN: float = 400.0
 const SPAWN_RADIUS_MAX: float = 600.0
 const BASE_SPAWN_RATE: float = 0.4  # Enemies per second at start (slow burn)
-const SPAWN_RATE_GROWTH: float = 0.3  # Additional enemies/sec per minute (during countdown)
+const SPAWN_RATE_GROWTH: float = 0.2  # Additional enemies/sec per minute (during countdown)
 const SPAWN_BATCH_MIN_MINUTE: float = 3.0  # Minutes before batch spawns begin
 const SPAWN_BATCH_SIZE_PER_MINUTE: float = 0.5  # Extra enemies per batch per minute
 
@@ -143,6 +143,11 @@ const FLOW_FIELD_OBSTACLE_BUFFER: float = 24.0     # Extra clearance around aste
 const ENEMY_TURN_SPEED: float = 6.0                # Direction smoothing rate (higher = snappier turns)
 const ENEMY_SEPARATION_RADIUS: float = 50.0        # Repulsion radius between enemies (pixels)
 const ENEMY_SEPARATION_STRENGTH: float = 80.0      # Separation push force (pixels/sec)
+const ENEMY_STUCK_MIN_INTENT_SPEED: float = 30.0   # Minimum intended speed before anti-stuck checks run
+const ENEMY_STUCK_DISTANCE_THRESHOLD: float = 2.0  # Moved distance threshold per physics frame to count as stuck
+const ENEMY_STUCK_TIME: float = 0.6                # Seconds blocked before anti-stuck recovery triggers
+const ENEMY_UNSTUCK_PUSH: float = 180.0            # Tangential push strength used for anti-stuck recovery
+const ENEMY_UNSTUCK_COOLDOWN: float = 0.4          # Minimum time between anti-stuck recoveries
 
 # =============================================================================
 # COMBAT / STATS
@@ -463,7 +468,8 @@ const STATION_FLAT_STATS: Array[String] = [
 # GRAVITY WELL (pickup vacuum system)
 # =============================================================================
 const GRAVITY_WELL_VACUUM_SPEED: float = 1200.0            # Speed pickups fly to player during vacuum
-const GRAVITY_WELL_BEACON_COUNT: int = 4                    # Beacons placed per run
+const GRAVITY_WELL_BEACON_COUNT_MIN: int = 2                # Minimum beacons placed per run
+const GRAVITY_WELL_BEACON_COUNT_MAX: int = 5                # Maximum beacons placed per run
 const GRAVITY_WELL_BEACON_ACTIVATION_RADIUS: float = 80.0   # Proximity to activate beacon
 const GRAVITY_WELL_BEACON_MIN_SEPARATION: float = 500.0     # Minimum distance between beacons
 const GRAVITY_WELL_BEACON_SPAWN_MIN_RADIUS: float = 600.0   # Min distance from arena center

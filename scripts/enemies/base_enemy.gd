@@ -43,6 +43,9 @@ var _enemy_grid: SpatialHashGrid = null
 # --- Smoothed Direction ---
 var _current_dir: Vector2 = Vector2.ZERO
 var _rng: RandomNumberGenerator = null
+var _last_position: Vector2 = Vector2.ZERO
+var _stuck_timer: float = 0.0
+var _unstuck_cooldown: float = 0.0
 
 
 func _ready() -> void:
@@ -62,6 +65,7 @@ func _ready() -> void:
 	# Spawn frozen if a stopwatch freeze is currently active
 	if get_tree().has_meta("stopwatch_freeze_active"):
 		is_frozen = true
+	_last_position = global_position
 
 
 
@@ -69,6 +73,7 @@ func _physics_process(delta: float) -> void:
 	_process_knockback(delta)
 	_process_movement(delta)
 	move_and_slide()
+	_process_stuck_recovery(delta)
 	_process_contact_damage(delta)
 	_check_arena_bounds()
 
@@ -154,6 +159,58 @@ func _process_movement(delta: float) -> void:
 	# Face movement direction
 	if velocity.length() > 10:
 		rotation = velocity.angle()
+
+
+func _process_stuck_recovery(delta: float) -> void:
+	if _unstuck_cooldown > 0.0:
+		_unstuck_cooldown = maxf(0.0, _unstuck_cooldown - delta)
+
+	var moved_distance: float = global_position.distance_to(_last_position)
+	_last_position = global_position
+
+	if is_frozen:
+		_stuck_timer = 0.0
+		return
+
+	var intended_velocity: Vector2 = velocity - _knockback_velocity
+	if intended_velocity.length() < GameConfig.ENEMY_STUCK_MIN_INTENT_SPEED:
+		_stuck_timer = 0.0
+		return
+
+	if moved_distance <= GameConfig.ENEMY_STUCK_DISTANCE_THRESHOLD:
+		_stuck_timer += delta
+	else:
+		_stuck_timer = maxf(0.0, _stuck_timer - delta * 0.5)
+
+	if _stuck_timer < GameConfig.ENEMY_STUCK_TIME:
+		return
+	if _unstuck_cooldown > 0.0:
+		return
+
+	_apply_unstuck_impulse()
+	_stuck_timer = 0.0
+	_unstuck_cooldown = GameConfig.ENEMY_UNSTUCK_COOLDOWN
+
+
+func _apply_unstuck_impulse() -> void:
+	var escape_dir: Vector2 = _current_dir
+
+	if get_slide_collision_count() > 0:
+		var collision: KinematicCollision2D = get_slide_collision(0)
+		if collision:
+			var normal: Vector2 = collision.get_normal()
+			var tangent: Vector2 = Vector2(-normal.y, normal.x)
+			if tangent.dot(_current_dir) < 0.0:
+				tangent = -tangent
+			escape_dir = tangent.normalized()
+
+	if escape_dir.length_squared() < 0.001 and _target and is_instance_valid(_target):
+		escape_dir = (global_position - _target.global_position).normalized()
+	if escape_dir.length_squared() < 0.001:
+		escape_dir = Vector2.RIGHT.rotated(_rng.randf() * TAU)
+
+	_knockback_velocity += escape_dir * GameConfig.ENEMY_UNSTUCK_PUSH
+	_current_dir = escape_dir
 
 
 ## Compute a repulsion force away from nearby enemies to prevent stacking.

@@ -88,9 +88,21 @@ Constants: `INNER_RADIUS=50`, `RING_INNER=60`, `RING_OUTER=72`, `RING_WIDTH=12`.
 
 Auto-detect keyboard vs controller via `InputMap` and `input_device_changed` signal. Keyboard shows key names (Q, Space), controller shows button/axis names (RT, A). Font dynamically sizes ability name to fit circle.
 
+### Phase Charge Segment Sync
+
+- When `extra_phase_shifts` changes (level-up or station buff), ship phase capacity is recalculated immediately.
+- `phase_energy_changed(current, max)` is emitted with the updated max so `AbilityRingIndicator` redraws segment count right away.
+- On capacity increases, newly gained charge slots are filled immediately (current charges increase by the delta).
+
 ## Station Buff Popup
 
 3-choice buff selection matching the level-up UI pattern. Triggered when station charge completes. Uses `GameState.STATION_BUFF` to pause gameplay during selection.
+
+Controller support details:
+
+- Explicit focus-neighbor wiring for station cards and Ignore button ensures reliable D-pad/left-stick navigation.
+- `ui_accept` now works on both focused station cards and focused Ignore button.
+- If focus is lost, popup recovers by focusing the first visible card.
 
 ## Swarm Warning
 

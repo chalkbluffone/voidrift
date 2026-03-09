@@ -82,7 +82,7 @@ Fog texture is rebuilt only when a dirty flag is set (player moves into a new gr
 
 One-time-use world interactables that vacuum all drops (not power-ups) to the player:
 
-- `GRAVITY_WELL_BEACON_COUNT` beacons per run, spawned by `GravityWellBeaconSpawner`
+- Beacon count is rolled per run in range `GRAVITY_WELL_BEACON_COUNT_MIN`..`GRAVITY_WELL_BEACON_COUNT_MAX` (currently 2-5), spawned by `GravityWellBeaconSpawner`
 - Spawn positions avoid asteroids and stations using rejection sampling
 - Vacuum skips nodes in `"powerups"` group — power-ups require physical touch
 - Vacuum speed uses `GameConfig.GRAVITY_WELL_VACUUM_SPEED` directly (no half-speed multiplier)
@@ -104,7 +104,7 @@ Manual activation — player must be in range AND press the `interact` input:
 - `body_entered`/`body_exited` signals track `_player_in_range` flag
 - `_process()` polls `Input.is_action_just_pressed("interact")` when player is in range
 - Proximity prompt shown: `"[E] Activate"` (keyboard) or `"[X] Activate"` (controller)
-- Controller detection: `Input.get_connected_joypads().size() > 0`
+- Prompt mode follows last input device event (keyboard/mouse vs controller), with fallback to keyboard prompt when no controller is connected
 
 ### Input Action: `interact`
 

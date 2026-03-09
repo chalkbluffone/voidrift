@@ -30,7 +30,10 @@ func spawn_beacons(parent: Node, obstacle_positions: Array[Vector2] = []) -> voi
 
 func _generate_positions(rng: RandomNumberGenerator, obstacle_positions: Array[Vector2]) -> Array[Vector2]:
 	var positions: Array[Vector2] = []
-	var count: int = GameConfig.GRAVITY_WELL_BEACON_COUNT
+	var count: int = rng.randi_range(
+		GameConfig.GRAVITY_WELL_BEACON_COUNT_MIN,
+		GameConfig.GRAVITY_WELL_BEACON_COUNT_MAX
+	)
 	var min_radius: float = GameConfig.GRAVITY_WELL_BEACON_SPAWN_MIN_RADIUS
 	var max_radius: float = GameConfig.GRAVITY_WELL_BEACON_SPAWN_MAX_RADIUS
 	var min_separation: float = GameConfig.GRAVITY_WELL_BEACON_MIN_SEPARATION

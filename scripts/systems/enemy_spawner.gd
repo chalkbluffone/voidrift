@@ -8,7 +8,6 @@ signal swarm_started
 signal swarm_ended
 
 const XPPickupScene: PackedScene = preload("res://scenes/pickups/xp_pickup.tscn")
-const CreditPickupScene: PackedScene = preload("res://scenes/pickups/credit_pickup.tscn")
 const StardustPickupScene: PackedScene = preload("res://scenes/pickups/stardust_pickup.tscn")
 
 ## Power-up scenes (randomly chosen from pool on enemy kill)
@@ -48,6 +47,7 @@ var _rng: RandomNumberGenerator = null
 @onready var FileLogger: Node = get_node("/root/FileLogger")
 @onready var FrameCache: Node = get_node("/root/FrameCache")
 @onready var GameSeed: Node = get_node("/root/GameSeed")
+@onready var ProgressionManager: Node = get_node("/root/ProgressionManager")
 
 
 func _ready() -> void:
@@ -389,15 +389,10 @@ func _spawn_xp(pos: Vector2, amount: float) -> void:
 
 
 func _spawn_credits(pos: Vector2, amount: int) -> void:
-	var credit: Area2D = CreditPickupScene.instantiate()
-	credit.global_position = pos
-	credit.initialize(amount)
-
-	# Slight random offset (different from XP so they don't overlap)
-	credit.position += Vector2(_rng.randf_range(-GameConfig.PICKUP_SCATTER_CREDIT, GameConfig.PICKUP_SCATTER_CREDIT), _rng.randf_range(-GameConfig.PICKUP_SCATTER_CREDIT, GameConfig.PICKUP_SCATTER_CREDIT))
-
-	# Use call_deferred to avoid physics query flushing error
-	get_tree().current_scene.call_deferred("add_child", credit)
+	if amount <= 0:
+		return
+	# Performance optimization: grant credits instantly instead of spawning pickup nodes.
+	ProgressionManager.add_credits(amount)
 
 
 ## Spawn a burst of XP pickups scattered around a position (for freighter jackpot).
@@ -409,13 +404,11 @@ func _spawn_burst_xp(pos: Vector2, total_amount: float, count: int) -> void:
 
 
 ## Spawn a burst of credit pickups scattered around a position (for freighter jackpot).
-func _spawn_burst_credits(pos: Vector2, total_amount: int, count: int) -> void:
-	var per_orb: int = maxi(1, int(float(total_amount) / float(count)))
-	var remainder: int = total_amount - (per_orb * count)
-	for i: int in range(count):
-		var extra: int = 1 if i < remainder else 0
-		var offset: Vector2 = Vector2(_rng.randf_range(-GameConfig.PICKUP_SCATTER_BURST, GameConfig.PICKUP_SCATTER_BURST), _rng.randf_range(-GameConfig.PICKUP_SCATTER_BURST, GameConfig.PICKUP_SCATTER_BURST))
-		_spawn_credits(pos + offset, per_orb + extra)
+func _spawn_burst_credits(_pos: Vector2, total_amount: int, _count: int) -> void:
+	if total_amount <= 0:
+		return
+	# Performance optimization: freighter credit jackpots are granted instantly.
+	ProgressionManager.add_credits(total_amount)
 
 
 ## Spawn stardust pickups scattered around a position.

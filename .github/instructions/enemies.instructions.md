@@ -106,6 +106,17 @@ Separation force uses `SpatialHashGrid` for O(k) neighbor queries instead of O(n
 - `query_radius()` returns nearby entities within a given radius
 - **Critical**: `is_instance_valid(entity)` must be checked BEFORE `entity as Node2D` cast — casting a freed object crashes immediately
 
+### Anti-Stuck Recovery (Asteroids)
+
+Enemies and Loot Freighters keep flow-field/flee logic, but now apply a lightweight unstuck recovery when movement intent is high and real movement stays near-zero while colliding with obstacles:
+
+- `ENEMY_STUCK_MIN_INTENT_SPEED` gates checks so idle/slow movement does not trigger recovery
+- `ENEMY_STUCK_DISTANCE_THRESHOLD` + `ENEMY_STUCK_TIME` detect persistent blocking
+- Recovery applies a tangential push using collision normal (`ENEMY_UNSTUCK_PUSH`) and updates direction
+- `ENEMY_UNSTUCK_COOLDOWN` prevents repeated rapid-fire corrections
+
+This avoids full pathing rewrites while reducing asteroid pinning for both standard enemies and fleeing freighters.
+
 ### Enemy Leash System
 
 Enemies too far from the player are teleported back to prevent unbounded world spread:

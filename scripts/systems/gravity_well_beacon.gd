@@ -12,6 +12,7 @@ var _prompt_label: Label = null
 var _circle_visual: Node2D = null
 var _title_label: Label = null
 var _pulse_time: float = 0.0
+var _using_controller: bool = false
 
 @onready var GameConfig: Node = get_node("/root/GameConfig")
 
@@ -25,6 +26,8 @@ const PROMPT_COLOR: Color = Color(1.0, 1.0, 0.5, 1.0)
 func _ready() -> void:
 	add_to_group("gravity_well_beacons")
 	add_to_group("minimap_objects")
+	_using_controller = _has_connected_controller()
+	set_process_unhandled_input(true)
 	_create_activation_zone()
 	_create_visual()
 	_create_prompt()
@@ -82,20 +85,46 @@ func _create_prompt() -> void:
 
 
 func _update_prompt_text() -> void:
-	if _is_using_controller():
+	if _using_controller:
 		_prompt_label.text = "[X] Activate"
 	else:
 		_prompt_label.text = "[E] Activate"
 
 
-func _is_using_controller() -> bool:
+func _has_connected_controller() -> bool:
 	var joypads: Array[int] = Input.get_connected_joypads()
 	return joypads.size() > 0
+
+
+func _set_using_controller(using_controller: bool) -> void:
+	if _using_controller == using_controller:
+		return
+	_using_controller = using_controller
+	if _prompt_label:
+		_update_prompt_text()
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventJoypadButton:
+		_set_using_controller(true)
+		return
+	if event is InputEventJoypadMotion:
+		var joy_event: InputEventJoypadMotion = event as InputEventJoypadMotion
+		if absf(joy_event.axis_value) > 0.2:
+			_set_using_controller(true)
+		return
+	if event is InputEventKey:
+		_set_using_controller(false)
+		return
+	if event is InputEventMouseButton or event is InputEventMouseMotion:
+		_set_using_controller(false)
 
 
 func _process(delta: float) -> void:
 	if _is_depleted:
 		return
+	if _using_controller and not _has_connected_controller():
+		_set_using_controller(false)
 
 	# Pulse animation
 	_pulse_time += delta
