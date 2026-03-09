@@ -719,6 +719,32 @@ func _on_weapon_changed(_weapon_id: String = "") -> void:
 	_refresh_weapon_list()
 
 
+func _format_id_fallback(raw_id: String) -> String:
+	if raw_id == "":
+		return "Unknown"
+	return raw_id.replace("_", " ").capitalize()
+
+
+func _resolve_weapon_display_name(weapon_id: String) -> String:
+	var fallback: String = _format_id_fallback(weapon_id)
+	if not DataLoader:
+		return fallback
+	var weapon_data: Dictionary = DataLoader.get_weapon(weapon_id)
+	if weapon_data.is_empty():
+		return fallback
+	return String(weapon_data.get("display_name", fallback))
+
+
+func _resolve_module_display_name(module_id: String) -> String:
+	var fallback: String = _format_id_fallback(module_id)
+	if not DataLoader:
+		return fallback
+	var module_data: Dictionary = DataLoader.get_ship_upgrade(module_id)
+	if module_data.is_empty():
+		return fallback
+	return String(module_data.get("name", module_data.get("display_name", fallback)))
+
+
 func _refresh_weapon_list() -> void:
 	if not _player or not _player.has_node("WeaponComponent"):
 		left_weapons.visible = false
@@ -742,10 +768,7 @@ func _refresh_weapon_list() -> void:
 	for s in summaries:
 		var id: String = String(s.get("id", ""))
 		var level: int = int(s.get("level", 1))
-		var weapon_name: String = id
-		if DataLoader:
-			var w: Dictionary = DataLoader.get_weapon(id)
-			weapon_name = String(w.get("name", id))
+		var weapon_name: String = _resolve_weapon_display_name(id)
 		var label: Label = Label.new()
 		label.text = "%s  LV %d" % [weapon_name.to_upper(), level]
 		label.clip_text = true
@@ -755,7 +778,7 @@ func _refresh_weapon_list() -> void:
 		label.add_theme_constant_override("outline_size", 2)
 		label.add_theme_font_override("font", FONT_HEADER)
 		label.add_theme_font_size_override("font_size", 14)
-		label.tooltip_text = "%s (LV %d)" % [id, level]
+		label.tooltip_text = "%s (LV %d)" % [weapon_name, level]
 		weapons_list.add_child(label)
 
 
@@ -791,10 +814,7 @@ func _refresh_modules_list() -> void:
 	for u in upgrades:
 		var id: String = String(u.get("id", ""))
 		var level: int = int(u.get("stacks", 1))
-		var display_name: String = id
-		if DataLoader:
-			var data: Dictionary = DataLoader.get_ship_upgrade(id)
-			display_name = String(data.get("name", id))
+		var display_name: String = _resolve_module_display_name(id)
 		var label: Label = Label.new()
 		label.text = "%s  LV %d" % [display_name.to_upper(), level]
 		label.clip_text = true
@@ -804,7 +824,7 @@ func _refresh_modules_list() -> void:
 		label.add_theme_constant_override("outline_size", 2)
 		label.add_theme_font_override("font", FONT_HEADER)
 		label.add_theme_font_size_override("font_size", 13)
-		label.tooltip_text = "%s (LV %d)" % [id, level]
+		label.tooltip_text = "%s (LV %d)" % [display_name, level]
 		modules_list.add_child(label)
 
 

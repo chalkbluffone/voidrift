@@ -74,6 +74,7 @@ var _fork_jitter_timer: float = 0.0
 var _zigzag_seed: float = 0.0
 const ZIGZAG_JITTER_INTERVAL: float = 0.04
 var _zigzag_timer: float = 0.0
+var _rng: RandomNumberGenerator = null
 
 
 func load_from_data(data: Dictionary) -> void:
@@ -128,6 +129,9 @@ func set_max_bounces(bounces: int) -> NikolasCoil:
 
 
 func fire_from(origin_pos: Vector2) -> NikolasCoil:
+	if _rng == null:
+		var game_seed: Node = get_node_or_null("/root/GameSeed")
+		_rng = game_seed.rng("nikolas_coil") if game_seed else RandomNumberGenerator.new()
 	_origin = origin_pos
 	global_position = Vector2.ZERO  # World space
 
@@ -259,7 +263,7 @@ func _process(delta: float) -> void:
 	_zigzag_timer += delta
 	if _zigzag_timer >= ZIGZAG_JITTER_INTERVAL:
 		_zigzag_timer = 0.0
-		_zigzag_seed = randf() * 1000.0
+		_zigzag_seed = _rng.randf() * 1000.0
 
 	# Fade impact lights
 	_update_impact_lights()
@@ -424,8 +428,8 @@ func _create_fork_branches() -> void:
 			fork_mesh.material = mat
 			fork_mesh.visible = false
 
-			var angle_offset: float = randf_range(-PI * 0.6, PI * 0.6)
-			var fork_length: float = randf_range(fork_length_min, fork_length_max)
+			var angle_offset: float = _rng.randf_range(-PI * 0.6, PI * 0.6)
+			var fork_length: float = _rng.randf_range(fork_length_min, fork_length_max)
 
 			_fork_segments.append({
 				"mesh": fork_mesh,
@@ -448,8 +452,8 @@ func _update_fork_branches(chain_points: Array[Vector2], do_jitter: bool) -> voi
 
 		# Re-randomise direction periodically for a flickery look
 		if do_jitter:
-			fork["angle_offset"] = randf_range(-PI * 0.6, PI * 0.6)
-			fork["fork_length"] = randf_range(fork_length_min, fork_length_max)
+			fork["angle_offset"] = _rng.randf_range(-PI * 0.6, PI * 0.6)
+			fork["fork_length"] = _rng.randf_range(fork_length_min, fork_length_max)
 
 		# Fork alpha follows parent segment, dimmed by branch_intensity
 		var seg_hold: float = hold_time

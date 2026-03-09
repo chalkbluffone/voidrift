@@ -14,8 +14,8 @@ var _flow_field: FlowField = null
 var _beacon_spawner: GravityWellBeaconSpawner = null
 
 func _enter_tree() -> void:
-	randomize()
-	GameSeed.set_seed_from_int(randi())
+	# Seed is now set by RunManager before world loads
+	pass
 
 func _ready() -> void:
 	_set_star_seed(stars_far_rect_path, "stars_far")

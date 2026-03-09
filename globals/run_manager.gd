@@ -99,6 +99,11 @@ func start_run(ship_id: String, captain_id: String) -> void:
 	var starting_weapon: String = ship.get("starting_weapon", "plasma_cannon")
 	run_data.weapons.append(starting_weapon)
 	
+	# Set deterministic run seed (use timestamp for now, could be user-provided seed later)
+	var seed_value: int = Time.get_ticks_msec()
+	GameSeed.set_seed_from_int(seed_value)
+	seed(GameSeed.seed_int)
+	
 	current_state = GameState.PLAYING
 	get_tree().change_scene_to_file(GAMEPLAY_SCENE)
 	run_started.emit()

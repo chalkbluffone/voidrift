@@ -19,7 +19,7 @@ func spawn_asteroids(parent: Node) -> Array[Vector2]:
 		rng = game_seed.rng("asteroids")
 	else:
 		rng = RandomNumberGenerator.new()
-		rng.randomize()
+		rng.seed = 1
 
 	var count: int = GameConfig.ASTEROID_COUNT
 	var min_radius: float = GameConfig.ASTEROID_SPAWN_MIN_RADIUS

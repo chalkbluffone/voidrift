@@ -40,16 +40,19 @@ var _swarms_triggered: int = 0  # How many swarms have been triggered this run
 
 ## Freighter spawn control
 var _freighter_cooldown: float = 0.0
+var _rng: RandomNumberGenerator = null
 
 @onready var RunManager: Node = get_node("/root/RunManager")
 @onready var GameConfig: Node = get_node("/root/GameConfig")
 @onready var DataLoader: Node = get_node("/root/DataLoader")
 @onready var FileLogger: Node = get_node("/root/FileLogger")
 @onready var FrameCache: Node = get_node("/root/FrameCache")
+@onready var GameSeed: Node = get_node("/root/GameSeed")
 
 
 func _ready() -> void:
 	add_to_group("enemy_spawner")
+	_rng = GameSeed.rng("enemy_spawner")
 	_find_player()
 	_build_enemy_pool()
 	_cache_asteroid_positions()
@@ -122,8 +125,8 @@ func _find_spawn_position() -> Vector2:
 	var max_attempts: int = 30
 
 	for attempt: int in range(max_attempts):
-		var angle: float = randf() * TAU
-		var distance: float = randf_range(GameConfig.SPAWN_RADIUS_MIN, GameConfig.SPAWN_RADIUS_MAX)
+		var angle: float = _rng.randf() * TAU
+		var distance: float = _rng.randf_range(GameConfig.SPAWN_RADIUS_MIN, GameConfig.SPAWN_RADIUS_MAX)
 		var candidate: Vector2 = _player.global_position + Vector2.from_angle(angle) * distance
 
 		var overlaps: bool = false
@@ -139,8 +142,8 @@ func _find_spawn_position() -> Vector2:
 
 	# Fallback: try spawning further away from player to find open space
 	for attempt: int in range(max_attempts):
-		var angle: float = randf() * TAU
-		var distance: float = randf_range(GameConfig.SPAWN_RADIUS_MAX, GameConfig.SPAWN_RADIUS_MAX * 1.5)
+		var angle: float = _rng.randf() * TAU
+		var distance: float = _rng.randf_range(GameConfig.SPAWN_RADIUS_MAX, GameConfig.SPAWN_RADIUS_MAX * 1.5)
 		var candidate: Vector2 = _player.global_position + Vector2.from_angle(angle) * distance
 
 		var overlaps: bool = false
@@ -245,7 +248,7 @@ func _spawn_enemy() -> void:
 
 	# Start freighter cooldown when one spawns
 	if enemy is LootFreighter:
-		_freighter_cooldown = randf_range(GameConfig.FREIGHTER_SPAWN_COOLDOWN_MIN, GameConfig.FREIGHTER_SPAWN_COOLDOWN_MAX)
+		_freighter_cooldown = _rng.randf_range(GameConfig.FREIGHTER_SPAWN_COOLDOWN_MIN, GameConfig.FREIGHTER_SPAWN_COOLDOWN_MAX)
 
 	# Connect death signal for drops
 	enemy.died.connect(_on_enemy_died)
@@ -324,7 +327,7 @@ func _pick_weighted_enemy() -> Dictionary:
 		eligible_weight += float(entry.get("weight", 0.0))
 	if eligible.is_empty():
 		return _enemy_pool[0]
-	var roll: float = randf() * eligible_weight
+	var roll: float = _rng.randf() * eligible_weight
 	var cumulative: float = 0.0
 	for entry: Dictionary in eligible:
 		cumulative += float(entry.get("weight", 0.0))
@@ -365,7 +368,7 @@ func _on_enemy_died(enemy: Node, death_position: Vector2) -> void:
 			var stardust_chance: float = GameConfig.STARDUST_BASE_DROP_CHANCE
 			if _player and _player.stats:
 				stardust_chance *= _player.stats.get_stat("stardust_gain")
-			if randf() < stardust_chance:
+			if _rng.randf() < stardust_chance:
 				_spawn_burst_stardust(death_position, 1)
 
 	# Power-up drop (rare, from shared pool)
@@ -379,7 +382,7 @@ func _spawn_xp(pos: Vector2, amount: float) -> void:
 	xp.initialize(amount)
 	
 	# Slight random offset
-	xp.position += Vector2(randf_range(-GameConfig.PICKUP_SCATTER_XP, GameConfig.PICKUP_SCATTER_XP), randf_range(-GameConfig.PICKUP_SCATTER_XP, GameConfig.PICKUP_SCATTER_XP))
+	xp.position += Vector2(_rng.randf_range(-GameConfig.PICKUP_SCATTER_XP, GameConfig.PICKUP_SCATTER_XP), _rng.randf_range(-GameConfig.PICKUP_SCATTER_XP, GameConfig.PICKUP_SCATTER_XP))
 	
 	# Use call_deferred to avoid physics query flushing error
 	get_tree().current_scene.call_deferred("add_child", xp)
@@ -391,7 +394,7 @@ func _spawn_credits(pos: Vector2, amount: int) -> void:
 	credit.initialize(amount)
 
 	# Slight random offset (different from XP so they don't overlap)
-	credit.position += Vector2(randf_range(-GameConfig.PICKUP_SCATTER_CREDIT, GameConfig.PICKUP_SCATTER_CREDIT), randf_range(-GameConfig.PICKUP_SCATTER_CREDIT, GameConfig.PICKUP_SCATTER_CREDIT))
+	credit.position += Vector2(_rng.randf_range(-GameConfig.PICKUP_SCATTER_CREDIT, GameConfig.PICKUP_SCATTER_CREDIT), _rng.randf_range(-GameConfig.PICKUP_SCATTER_CREDIT, GameConfig.PICKUP_SCATTER_CREDIT))
 
 	# Use call_deferred to avoid physics query flushing error
 	get_tree().current_scene.call_deferred("add_child", credit)
@@ -401,7 +404,7 @@ func _spawn_credits(pos: Vector2, amount: int) -> void:
 func _spawn_burst_xp(pos: Vector2, total_amount: float, count: int) -> void:
 	var per_orb: float = total_amount / float(count)
 	for i: int in range(count):
-		var offset: Vector2 = Vector2(randf_range(-GameConfig.PICKUP_SCATTER_BURST, GameConfig.PICKUP_SCATTER_BURST), randf_range(-GameConfig.PICKUP_SCATTER_BURST, GameConfig.PICKUP_SCATTER_BURST))
+		var offset: Vector2 = Vector2(_rng.randf_range(-GameConfig.PICKUP_SCATTER_BURST, GameConfig.PICKUP_SCATTER_BURST), _rng.randf_range(-GameConfig.PICKUP_SCATTER_BURST, GameConfig.PICKUP_SCATTER_BURST))
 		_spawn_xp(pos + offset, per_orb)
 
 
@@ -411,7 +414,7 @@ func _spawn_burst_credits(pos: Vector2, total_amount: int, count: int) -> void:
 	var remainder: int = total_amount - (per_orb * count)
 	for i: int in range(count):
 		var extra: int = 1 if i < remainder else 0
-		var offset: Vector2 = Vector2(randf_range(-GameConfig.PICKUP_SCATTER_BURST, GameConfig.PICKUP_SCATTER_BURST), randf_range(-GameConfig.PICKUP_SCATTER_BURST, GameConfig.PICKUP_SCATTER_BURST))
+		var offset: Vector2 = Vector2(_rng.randf_range(-GameConfig.PICKUP_SCATTER_BURST, GameConfig.PICKUP_SCATTER_BURST), _rng.randf_range(-GameConfig.PICKUP_SCATTER_BURST, GameConfig.PICKUP_SCATTER_BURST))
 		_spawn_credits(pos + offset, per_orb + extra)
 
 
@@ -419,7 +422,7 @@ func _spawn_burst_credits(pos: Vector2, total_amount: int, count: int) -> void:
 func _spawn_burst_stardust(pos: Vector2, total_amount: int) -> void:
 	for i: int in range(total_amount):
 		var stardust: Area2D = StardustPickupScene.instantiate()
-		var offset: Vector2 = Vector2(randf_range(-GameConfig.PICKUP_SCATTER_STARDUST, GameConfig.PICKUP_SCATTER_STARDUST), randf_range(-GameConfig.PICKUP_SCATTER_STARDUST, GameConfig.PICKUP_SCATTER_STARDUST))
+		var offset: Vector2 = Vector2(_rng.randf_range(-GameConfig.PICKUP_SCATTER_STARDUST, GameConfig.PICKUP_SCATTER_STARDUST), _rng.randf_range(-GameConfig.PICKUP_SCATTER_STARDUST, GameConfig.PICKUP_SCATTER_STARDUST))
 		stardust.global_position = pos + offset
 		stardust.initialize(1)
 		get_tree().current_scene.call_deferred("add_child", stardust)
@@ -432,14 +435,14 @@ func _try_spawn_powerup(pos: Vector2) -> void:
 	var drop_chance: float = GameConfig.POWERUP_BASE_DROP_CHANCE
 	if _player and _player.has_method("get_stat"):
 		drop_chance *= _player.get_stat("powerup_drop_chance")
-	if randf() >= drop_chance:
+	if _rng.randf() >= drop_chance:
 		return
 	# Random equal-weight selection from pool
-	var scene: PackedScene = _powerup_pool[randi() % _powerup_pool.size()]
+	var scene: PackedScene = _powerup_pool[_rng.randi() % _powerup_pool.size()]
 	var powerup: Area2D = scene.instantiate()
 	var offset: Vector2 = Vector2(
-		randf_range(-GameConfig.POWERUP_SCATTER, GameConfig.POWERUP_SCATTER),
-		randf_range(-GameConfig.POWERUP_SCATTER, GameConfig.POWERUP_SCATTER)
+		_rng.randf_range(-GameConfig.POWERUP_SCATTER, GameConfig.POWERUP_SCATTER),
+		_rng.randf_range(-GameConfig.POWERUP_SCATTER, GameConfig.POWERUP_SCATTER)
 	)
 	powerup.global_position = pos + offset
 	get_tree().current_scene.call_deferred("add_child", powerup)
@@ -478,7 +481,7 @@ func _start_swarm_warning() -> void:
 ## Begin the swarm — accelerated spawn rate for a random duration.
 func _start_swarm() -> void:
 	_swarm_active = true
-	_swarm_timer = randf_range(GameConfig.SWARM_DURATION_MIN, GameConfig.SWARM_DURATION_MAX)
+	_swarm_timer = _rng.randf_range(GameConfig.SWARM_DURATION_MIN, GameConfig.SWARM_DURATION_MAX)
 	FileLogger.log_info("EnemySpawner", "[SWARM] Started — duration=%.1fs" % _swarm_timer)
 	swarm_started.emit()
 
@@ -501,7 +504,7 @@ func _roll_for_elite() -> bool:
 	var base_chance: float = GameConfig.ELITE_BASE_CHANCE
 	var elite_mult: float = _get_player_elite_spawn_rate()
 	var final_chance: float = base_chance * elite_mult
-	return randf() < final_chance
+	return _rng.randf() < final_chance
 
 
 ## Apply elite visual effects: color tint and size scale.

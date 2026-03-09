@@ -20,9 +20,11 @@ func setup(amount: float, damage_info: Dictionary, world_pos: Vector2) -> void:
 	var is_heal: bool = damage_info.get("is_heal", false)
 
 	# Random offset to prevent stacking
+	var game_seed: Node = get_node_or_null("/root/GameSeed")
+	var rng: RandomNumberGenerator = game_seed.rng("damage_numbers") if game_seed else RandomNumberGenerator.new()
 	var offset: Vector2 = Vector2(
-		randf_range(-GameConfig.DAMAGE_NUMBER_OFFSET_RANGE, GameConfig.DAMAGE_NUMBER_OFFSET_RANGE),
-		randf_range(-GameConfig.DAMAGE_NUMBER_OFFSET_RANGE, GameConfig.DAMAGE_NUMBER_OFFSET_RANGE)
+		rng.randf_range(-GameConfig.DAMAGE_NUMBER_OFFSET_RANGE, GameConfig.DAMAGE_NUMBER_OFFSET_RANGE),
+		rng.randf_range(-GameConfig.DAMAGE_NUMBER_OFFSET_RANGE, GameConfig.DAMAGE_NUMBER_OFFSET_RANGE)
 	)
 	global_position = world_pos + offset
 

@@ -379,7 +379,7 @@ const WEAPON_UPGRADE_STAT_KIND: Dictionary = {
 # =============================================================================
 # ARENA / BOUNDARY
 # =============================================================================
-const ARENA_RADIUS: float = 4000.0            # Circular play area radius (pixels)
+const ARENA_RADIUS: float = 5000.0            # Circular play area radius (pixels)
 const RADIATION_BELT_WIDTH: float = 800.0      # Width of the radiation danger zone at edge
 const RADIATION_DAMAGE_PER_SEC: float = 10.0   # DOT when inside radiation belt
 const RADIATION_PUSH_FORCE: float = 150.0      # Force pushing player back toward center

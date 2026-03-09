@@ -122,6 +122,7 @@ var _elapsed: float = 0.0
 var _is_active: bool = true
 var _mesh_instance: MeshInstance2D = null
 var _shader_material: ShaderMaterial = null
+var _rng: RandomNumberGenerator = null
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -175,6 +176,8 @@ func _on_sweep_completed_particles(_alpha: float) -> bool:
 # ══════════════════════════════════════════════════════════════════════════
 
 func _ready() -> void:
+	var game_seed: Node = get_node_or_null("/root/GameSeed")
+	_rng = game_seed.rng("arc_effect_base") if game_seed else RandomNumberGenerator.new()
 	# Find or create MeshInstance2D
 	_mesh_instance = null
 	for child in get_children():
@@ -514,7 +517,7 @@ func _update_particles(sweep_progress: float, alpha: float) -> void:
 	var num_points: int = maxi(8, particles_amount / 2)
 
 	for i in range(num_points):
-		var t: float = randf()
+		var t: float = _rng.randf()
 		var dist_from_edge: float = sweep_edge - t
 		var point_visible: bool = dist_from_edge >= 0.0 and dist_from_edge <= tail_length
 
@@ -523,7 +526,7 @@ func _update_particles(sweep_progress: float, alpha: float) -> void:
 
 		var angle: float = -arc_rad * 0.5 + arc_rad * t
 		var base_r: float = radius + thickness * clamp(particles_radius, 0.0, 1.0)
-		var r_variation: float = thickness * 0.3 * (randf() * 2.0 - 1.0)
+		var r_variation: float = thickness * 0.3 * (_rng.randf() * 2.0 - 1.0)
 		var spawn_r: float = (base_r + r_variation) * length_scale
 		spawn_r = clamp(spawn_r, radius * length_scale, (radius + thickness) * length_scale)
 
@@ -643,11 +646,11 @@ func _emit_particles_full_arc(alpha: float) -> void:
 	var full_count: int = maxi(8, particles_amount / 2)
 
 	for i in range(full_count):
-		var t: float = randf()
+		var t: float = _rng.randf()
 		var angle: float = -arc_rad * 0.5 + arc_rad * t
 
 		var base_r: float = radius + thickness * clamp(particles_radius, 0.0, 1.0)
-		var r_variation: float = thickness * 0.3 * (randf() * 2.0 - 1.0)
+		var r_variation: float = thickness * 0.3 * (_rng.randf() * 2.0 - 1.0)
 		var spawn_r: float = (base_r + r_variation) * length_scale
 		spawn_r = clamp(spawn_r, radius * length_scale, (radius + thickness) * length_scale)
 

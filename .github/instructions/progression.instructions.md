@@ -33,7 +33,7 @@ XP drops are **not scaled** by time or difficulty:
 enemy.xp_value = GameConfig.ENEMY_XP_ELITE if is_elite else GameConfig.ENEMY_XP_NORMAL
 ```
 
-**Constants:** `ENEMY_XP_NORMAL = 1.0`, `ENEMY_XP_ELITE = 3.0`
+**Constants:** `ENEMY_XP_NORMAL`, `ENEMY_XP_ELITE`
 
 ## Difficulty Stat
 

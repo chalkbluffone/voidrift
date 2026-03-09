@@ -8,8 +8,8 @@ applyTo: "scripts/systems/**,scenes/gameplay/**"
 
 The play area is a circular arena with a radiation danger zone at the edge:
 
-- `ARENA_RADIUS` — 4000px circular play area radius
-- `RADIATION_BELT_WIDTH` — 800px radiation zone at edge
+- `ARENA_RADIUS` — circular play area radius
+- `RADIATION_BELT_WIDTH` — radiation zone width at the arena edge
 - `RADIATION_DAMAGE_PER_SEC` — DOT applied while in radiation belt
 - `RADIATION_PUSH_FORCE` — Pushes player back toward center
 
@@ -21,10 +21,10 @@ Key files:
 
 ## Asteroids
 
-50 static, indestructible obstacles placed via seeded RNG:
+Static, indestructible obstacles placed via seeded RNG:
 
 - `StaticBody2D` on collision layer 2, mask 0 (blocks movement but detects nothing)
-- Procedural polygon shapes (6–16 vertices, 30–256px radius, dark gray/brown)
+- Procedural polygon shapes with configurable vertex/radius bounds
 - `Polygon2D` + `CollisionPolygon2D` for visual and physics shape
 - `effective_radius` property on each asteroid for spawn avoidance calculations
 - `AsteroidSpawner` (RefCounted) uses rejection sampling with minimum separation distance
@@ -33,9 +33,9 @@ Key files:
 
 ## Space Stations
 
-15 stations spawn randomly around the arena at run start:
+Stations spawn randomly around the arena at run start:
 
-- Player stands in 200px zone (`STATION_ZONE_RADIUS`) to charge for 5s (`STATION_CHARGE_TIME`)
+- Player stands in station zone (`STATION_ZONE_RADIUS`) to charge (`STATION_CHARGE_TIME`)
 - Charge decays slowly when leaving zone (`STATION_DECAY_TIME`)
 - On completion, choose 1 of 3 stat buffs (Uncommon–Legendary rarity, luck-influenced)
 - One-time use per station
@@ -51,8 +51,8 @@ Flat stats (shield, max_hp) use amounts scaled ×100 at generation time in `Stat
 
 BFS-based grid covering the arena for enemy movement:
 
-- `FLOW_FIELD_CELL_SIZE` — 64px grid cells
-- `FLOW_FIELD_UPDATE_INTERVAL` — Recomputes every 0.15s from player position
+- `FLOW_FIELD_CELL_SIZE` — flow-field grid cell size
+- `FLOW_FIELD_UPDATE_INTERVAL` — recompute cadence from player position
 - `FLOW_FIELD_OBSTACLE_BUFFER` — Buffer around asteroids for blocked cells
 - 8-directional BFS routing around blocked cells (asteroids + buffer)
 - Enemies sample O(1) direction lookups with bilinear interpolation for smooth paths
@@ -64,8 +64,8 @@ Key file: `scripts/systems/flow_field.gd` (`FlowField` node)
 
 Gradient-based fog with smooth dissipating edges around explored areas:
 
-- `FOG_GRID_SIZE` — Resolution of fog grid (128)
-- `FOG_REVEAL_RADIUS` — Radius revealed around player (800px)
+- `FOG_GRID_SIZE` — resolution of the fog grid
+- `FOG_REVEAL_RADIUS` — reveal radius around player
 - `FOG_GLOW_INTENSITY` — Neon glow brightness
 - `FOG_OPACITY` — Overall fog transparency
 

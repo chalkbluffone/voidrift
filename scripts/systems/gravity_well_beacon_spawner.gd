@@ -17,7 +17,7 @@ func spawn_beacons(parent: Node, obstacle_positions: Array[Vector2] = []) -> voi
 		rng = game_seed.rng("gravity_well_beacons")
 	else:
 		rng = RandomNumberGenerator.new()
-		rng.randomize()
+		rng.seed = 1
 
 	var positions: Array[Vector2] = _generate_positions(rng, obstacle_positions)
 

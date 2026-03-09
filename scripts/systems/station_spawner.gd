@@ -23,7 +23,7 @@ func spawn_stations(parent: Node, obstacle_positions: Array[Vector2] = []) -> vo
 	else:
 		# Fallback to unseeded RNG
 		_rng = RandomNumberGenerator.new()
-		_rng.randomize()
+		_rng.seed = 1
 	
 	var positions: Array[Vector2] = _generate_spawn_positions()
 	

@@ -12,6 +12,7 @@ signal station_buff_triggered(options: Array)
 signal station_buff_completed(buff: Dictionary)
 
 @onready var RunManager: Node = get_node("/root/RunManager")
+@onready var GameSeed: Node = get_node("/root/GameSeed")
 
 
 ## Generate buff options for a completed station.
@@ -43,13 +44,14 @@ func _generate_single_buff(luck: float, exclude_stats: Array[String]) -> Diction
 	if available_stats.is_empty():
 		return {}
 	
-	var stat: String = available_stats[randi() % available_stats.size()]
+	var rng: RandomNumberGenerator = GameSeed.rng("station_buffs")
+	var stat: String = available_stats[rng.randi() % available_stats.size()]
 	
 	# Calculate bonus amount based on rarity
 	var range_data: Dictionary = GameConfig.STATION_BUFF_RANGES.get(rarity, {"min": 0.02, "max": 0.04})
 	var min_val: float = float(range_data.get("min", 0.02))
 	var max_val: float = float(range_data.get("max", 0.04))
-	var amount: float = randf_range(min_val, max_val)
+	var amount: float = rng.randf_range(min_val, max_val)
 	
 	# Determine if this is a flat or multiplier stat
 	var is_flat: bool = stat in GameConfig.STATION_FLAT_STATS
@@ -105,7 +107,8 @@ func _roll_station_rarity(luck: float) -> String:
 	if total <= 0.0:
 		return "uncommon"
 	
-	var roll: float = randf() * total
+	var rng: RandomNumberGenerator = GameSeed.rng("station_buffs")
+	var roll: float = rng.randf() * total
 	var acc: float = 0.0
 	
 	# Order from lowest to highest rarity

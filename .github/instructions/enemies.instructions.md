@@ -48,15 +48,15 @@ Rolled per spawn with the player's `elite_spawn_rate` modifier:
 
 ```gdscript
 func _roll_for_elite() -> bool:
-    var base_chance: float = GameConfig.ELITE_BASE_CHANCE  # 0.05 = 5%
+    var base_chance: float = GameConfig.ELITE_BASE_CHANCE
     var elite_mult: float = _get_player_elite_spawn_rate()
     return randf() < (base_chance * elite_mult)
 ```
 
 Elites get:
 
-- `ELITE_HP_MULT` (3×), `ELITE_DAMAGE_MULT` (2×)
-- Visual: `ELITE_COLOR` (orange tint), `ELITE_SIZE_SCALE` (1.3×)
+- `ELITE_HP_MULT`, `ELITE_DAMAGE_MULT`
+- Visual: `ELITE_COLOR`, `ELITE_SIZE_SCALE`
 - `enemy_type = "elite"` for tracking
 - Drop 3 XP (vs 1 XP for normal enemies)
 
@@ -67,10 +67,10 @@ Elites get:
 Temporary spawn rate boost at fixed times during a run:
 
 ```gdscript
-const SWARM_TIMES: Array[float] = [240.0, 420.0]  # 4 min, 7 min
-const SWARM_DURATION_MIN: float = 45.0
-const SWARM_DURATION_MAX: float = 60.0
-const SWARM_SPAWN_MULTIPLIER: float = 3.0
+const SWARM_TIMES: Array[float] = GameConfig.SWARM_TIMES
+const SWARM_DURATION_MIN: float = GameConfig.SWARM_DURATION_MIN
+const SWARM_DURATION_MAX: float = GameConfig.SWARM_DURATION_MAX
+const SWARM_SPAWN_MULTIPLIER: float = GameConfig.SWARM_SPAWN_MULTIPLIER
 ```
 
 Signals: `swarm_warning_started`, `swarm_started`, `swarm_ended`

@@ -449,17 +449,22 @@ const SYNTHWAVE_COLORS: Array[Color] = [
 	Color(0.3, 0.0, 0.8, 1.0),      # Deep violet
 ]
 
+var _rng: RandomNumberGenerator = null
+
 
 ## Spawn a directional burst of particles when a layer is hit (not broken)
 func _spawn_hit_particles(source: Node2D) -> void:
+	if _rng == null:
+		var game_seed: Node = get_node_or_null("/root/GameSeed")
+		_rng = game_seed.rng("nope_bubble") if game_seed else RandomNumberGenerator.new()
 	var hit_dir: Vector2 = Vector2.ZERO
 	if source:
 		hit_dir = (source.global_position - global_position).normalized()
 	if hit_dir == Vector2.ZERO:
 		hit_dir = Vector2.RIGHT
 
-	var c1: Color = SYNTHWAVE_COLORS[randi() % SYNTHWAVE_COLORS.size()]
-	var c2: Color = SYNTHWAVE_COLORS[randi() % SYNTHWAVE_COLORS.size()]
+	var c1: Color = SYNTHWAVE_COLORS[_rng.randi() % SYNTHWAVE_COLORS.size()]
+	var c2: Color = SYNTHWAVE_COLORS[_rng.randi() % SYNTHWAVE_COLORS.size()]
 
 	var particles: Node2D = EffectUtils.create_particles(self, {
 		"emitting": true,
@@ -484,8 +489,8 @@ func _spawn_hit_particles(source: Node2D) -> void:
 			[1.0, Color(c2.r, c2.g, c2.b, 0.0)],
 		]),
 		"color_initial_ramp": EffectUtils.make_gradient([
-			[0.0, SYNTHWAVE_COLORS[randi() % SYNTHWAVE_COLORS.size()]],
-			[1.0, SYNTHWAVE_COLORS[randi() % SYNTHWAVE_COLORS.size()]],
+			[0.0, SYNTHWAVE_COLORS[_rng.randi() % SYNTHWAVE_COLORS.size()]],
+			[1.0, SYNTHWAVE_COLORS[_rng.randi() % SYNTHWAVE_COLORS.size()]],
 		]),
 		"z_index": 1,
 	})

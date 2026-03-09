@@ -1,5 +1,11 @@
 class_name ArenaUtils
 extends RefCounted
+static func _get_game_seed() -> Node:
+	var loop: MainLoop = Engine.get_main_loop()
+	if loop and loop is SceneTree:
+		return (loop as SceneTree).root.get_node_or_null("/root/GameSeed")
+	return null
+
 
 ## ArenaUtils - Shared utility functions for arena boundary calculations.
 ## Used by: ArenaBoundary, EnemySpawner, Minimap, World (player spawn).
@@ -51,8 +57,10 @@ static func get_radiation_intensity(pos: Vector2) -> float:
 ## Returns a random spawn position within the safe zone.
 static func get_random_spawn_position() -> Vector2:
 	var max_spawn_radius: float = GameConfig.ARENA_RADIUS - GameConfig.PLAYER_SPAWN_SAFE_MARGIN
-	var angle: float = randf() * TAU
-	var distance: float = randf() * max_spawn_radius
+	var game_seed: Node = _get_game_seed()
+	var rng: RandomNumberGenerator = game_seed.rng("arena_utils") if game_seed else RandomNumberGenerator.new()
+	var angle: float = rng.randf() * TAU
+	var distance: float = rng.randf() * max_spawn_radius
 	return Vector2.from_angle(angle) * distance
 
 

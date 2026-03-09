@@ -32,6 +32,7 @@ var _flee_timer: float = 0.0
 
 func _ready() -> void:
 	super._ready()
+	_rng = GameSeed.rng("loot_freighter")
 	enemy_type = "loot"
 	_state = FreighterState.CHASE
 
@@ -60,7 +61,7 @@ func _enter_flee_state() -> void:
 	if _target:
 		_flee_direction = (global_position - _target.global_position).normalized()
 	else:
-		_flee_direction = Vector2.RIGHT.rotated(randf() * TAU)
+		_flee_direction = Vector2.RIGHT.rotated(_rng.randf() * TAU)
 
 
 func _process_movement(delta: float) -> void:
@@ -114,7 +115,7 @@ func _flee_movement(delta: float) -> void:
 	# Add slight drift every interval to make movement less predictable
 	if _flee_timer >= GameConfig.FREIGHTER_FLEE_DRIFT_INTERVAL:
 		_flee_timer = 0.0
-		var drift_angle: float = randf_range(-GameConfig.FREIGHTER_FLEE_DRIFT_ANGLE, GameConfig.FREIGHTER_FLEE_DRIFT_ANGLE)
+		var drift_angle: float = _rng.randf_range(-GameConfig.FREIGHTER_FLEE_DRIFT_ANGLE, GameConfig.FREIGHTER_FLEE_DRIFT_ANGLE)
 		_flee_direction = _flee_direction.rotated(drift_angle).normalized()
 
 	# Direct flee — move_and_slide() handles asteroid collision naturally

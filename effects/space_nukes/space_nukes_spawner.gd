@@ -6,6 +6,7 @@ class_name SpaceNukesSpawner
 
 var _parent_node: Node
 var _active_instances: Array = []
+var _rng: RandomNumberGenerator = null
 
 const LAUNCH_ARC_MIN_DEG: float = 18.0
 const LAUNCH_ARC_MAX_DEG: float = 52.0
@@ -14,6 +15,11 @@ const BASE_TARGETING_RADIUS: float = 500.0
 
 func _init(parent: Node) -> void:
 	_parent_node = parent
+	var game_seed: Node = _parent_node.get_node_or_null("/root/GameSeed")
+	if game_seed and game_seed.has_method("rng"):
+		_rng = game_seed.rng("space_nukes_spawner")
+	else:
+		_rng = RandomNumberGenerator.new()
 
 
 func spawn(
@@ -61,8 +67,8 @@ func spawn(
 				travel_dir = Vector2.RIGHT
 
 		# Randomized exit arc so missiles leave the ship with a natural rocket curve.
-		var arc_sign: float = -1.0 if randf() < 0.5 else 1.0
-		var arc_radians: float = deg_to_rad(randf_range(launch_arc_min_deg, launch_arc_max_deg)) * arc_sign
+		var arc_sign: float = -1.0 if _rng.randf() < 0.5 else 1.0
+		var arc_radians: float = deg_to_rad(_rng.randf_range(launch_arc_min_deg, launch_arc_max_deg)) * arc_sign
 		var launch_dir: Vector2 = travel_dir.rotated(arc_radians).normalized()
 
 		var instance: Node2D = effect_script.new()

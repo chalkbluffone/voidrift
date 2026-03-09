@@ -4,28 +4,28 @@
 
 ### Phase 1: Foundation & Verification 🔴 HIGH PRIORITY
 
-- [ ] Make sure all randomness is based off the run seed
-- [ ] Verify XP gain is working correctly (document how it works)
-- [ ] Verify the armor stat works (currently suspected broken)
-- [ ] Verify the credit_gain stat increases credits gained (currently suspected broken)
+- [x] Make sure all randomness is based off the run seed
+- [x] Verify XP gain is working correctly (document how it works)
+- [x] Verify the armor stat works (currently suspected broken)
+- [x] Verify the credit_gain stat increases credits gained (currently suspected broken)
 
 ### Phase 2: Data & Configuration 🟡 HIGH PRIORITY
 
-- [ ] Update the arena_radius to 5000 (currently 4000)
-- [ ] Clean up instruction files — if a value exists in game_config.gd, don't document it in instruction files
-- [ ] Review existing todo.md file — determine if still needed
+- [x] Update the arena_radius to 5000 (currently 4000)
+- [x] Clean up instruction files — if a value exists in game_config.gd, don't document it in instruction files
+- [x] Review existing todo.md file — keep as active planning + execution tracker
 
 ### Phase 3: Blocking UI Bugs 🔴 HIGH PRIORITY
 
-- [ ] Weapons showing on screen as weapon ID instead of display name
-- [ ] Ship modules showing as IDs instead of display names
+- [x] Weapons showing on screen as weapon ID instead of display name
+- [x] Ship modules showing as IDs instead of display names
 
 ### Phase 4: Weapon System & Stat Bugs 🔴 HIGH PRIORITY
 
-- [ ] Attack speed stat does not speed up Radiant Arc
-- [ ] Straight Line Negotiator causing two damage numbers on each hit — check if weapon or damage number system issue, verify all weapons
-- [ ] PSP-9000 does not collide with freighters
-- [ ] When Timmy Gun and Space Lasers are both selected, Space Lasers never fires — weapon dispatch priority issue (also happens with Nikola's Coil)
+- [x] Attack speed stat does not speed up Radiant Arc
+- [x] Straight Line Negotiator causing two damage numbers on each hit — check if weapon or damage number system issue, verify all weapons
+- [x] PSP-9000 does not collide with freighters
+- [x] When Timmy Gun and Space Lasers are both selected, Space Lasers never fires — weapon dispatch priority issue (also happens with Nikola's Coil)
 
 ### Phase 5: Survivability 🟡 MEDIUM PRIORITY
 
@@ -77,17 +77,5 @@
 ## Known Issues
 
 - Godot shows "invalid UID" warnings on load (cosmetic)
-
-## Completed
-
-- Ability ring indicator HUD (phase shift charges + captain ability cooldown)
-- Captain ability charge-up system (starts uncharged, GPUParticles2D spiral, ready glow shader, flash burst)
-- Controller rebinding (RT for captain ability, LT for full map)
-- GPU particle migration Phase 1+2 (Ion Wake, Space Napalm, Nikola's Coil, Nope Bubble, Level-up reject)
-- EffectUtils.create_particles() dispatcher + set_particle_prop() runtime routing
-- SettingsManager.use_gpu_particles toggle with persistence
-- Fixed Ion Wake and Radiant Arc never appearing in level-up offers (unlock_condition was "none")
-- Overtime difficulty multiplier system (1.0x → 10.0x over 9 min overtime, scales enemy HP/damage/speed, HUD label with color feedback)
-- Overheal HP bar color changed to synthwave yellow (opaque, matching level label)
 
 _Last updated: March 8, 2026_

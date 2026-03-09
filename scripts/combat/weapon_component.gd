@@ -28,6 +28,10 @@ var _spawners: WeaponSpawnerCache = WeaponSpawnerCache.new()
 @onready var DataLoader: Node = get_node_or_null("/root/DataLoader")
 @onready var RunManager: Node = get_node_or_null("/root/RunManager")
 @onready var FrameCache: Node = get_node_or_null("/root/FrameCache")
+@onready var GameSeed: Node = get_node_or_null("/root/GameSeed")
+
+var _rng: RandomNumberGenerator = null
+var _dispatch_rotation_index: int = 0
 
 
 # ---------------------------------------------------------------------------
@@ -35,6 +39,10 @@ var _spawners: WeaponSpawnerCache = WeaponSpawnerCache.new()
 # ---------------------------------------------------------------------------
 
 func _ready() -> void:
+	if GameSeed:
+		_rng = GameSeed.rng("weapon_component")
+	else:
+		_rng = RandomNumberGenerator.new()
 	var parent: Node = get_parent()
 	if parent.has_node("StatsComponent"):
 		stats_component = parent.get_node("StatsComponent")
@@ -52,35 +60,57 @@ func _update_timers(delta: float) -> void:
 
 
 func _process_weapons() -> void:
-	for weapon_id in _inventory.weapons:
-		var weapon_state: Dictionary = _inventory.weapons[weapon_id]
+	var weapon_ids_untyped: Array = _inventory.weapons.keys()
+	var weapon_count: int = weapon_ids_untyped.size()
+	if weapon_count == 0:
+		return
 
-		if weapon_state.timer <= 0:
-			_fire_weapon(weapon_id, weapon_state)
+	var start_index: int = _dispatch_rotation_index % weapon_count
+	_dispatch_rotation_index = (_dispatch_rotation_index + 1) % weapon_count
 
-			var stats_dict: Dictionary = weapon_state.data.get("stats", {})
-			var cooldown: float = float(weapon_state.data.get("cooldown", stats_dict.get("cooldown", 0.0)))
-			if cooldown <= 0.0:
-				var base_stats: Dictionary = weapon_state.data.get("base_stats", {})
-				var atk_speed: float = float(base_stats.get("attack_speed", 1.0))
-				atk_speed = _inventory.apply_weapon_stat_mod(weapon_id, StatsComponentScript.STAT_ATTACK_SPEED, atk_speed)
-				cooldown = 1.0 / max(0.05, atk_speed)
+	for offset: int in range(weapon_count):
+		var idx: int = (start_index + offset) % weapon_count
+		var weapon_id: String = String(weapon_ids_untyped[idx])
+		var weapon_state: Dictionary = _inventory.weapons.get(weapon_id, {})
+		if weapon_state.is_empty():
+			continue
 
-			var projectile_count: float = float(stats_dict.get("projectile_count", 1.0))
-			if weapon_id == "tothian_mines":
-				var weapon_bonus_projectiles: float = _inventory.get_weapon_flat(weapon_id, StatsComponentScript.STAT_PROJECTILE_COUNT)
-				projectile_count += weapon_bonus_projectiles
-				if stats_component:
-					projectile_count += float(stats_component.get_stat_int(StatsComponentScript.STAT_PROJECTILE_COUNT))
-				projectile_count = maxf(1.0, projectile_count)
-			if projectile_count > 1.0:
-				cooldown /= projectile_count
+		if float(weapon_state.get("timer", 0.0)) > 0.0:
+			continue
 
-			var attack_speed: float = 1.0
-			if stats_component:
-				attack_speed = stats_component.get_stat(StatsComponentScript.STAT_ATTACK_SPEED)
+		_fire_weapon(weapon_id, weapon_state)
+		weapon_state.timer = _compute_next_shot_cooldown(weapon_id, weapon_state)
 
-			weapon_state.timer = cooldown / attack_speed
+
+func _compute_next_shot_cooldown(weapon_id: String, weapon_state: Dictionary) -> float:
+	var data: Dictionary = weapon_state.get("data", {})
+	var stats_dict: Dictionary = data.get("stats", {})
+
+	var cooldown: float = float(data.get("cooldown", stats_dict.get("cooldown", 0.0)))
+	if cooldown <= 0.0:
+		var base_attack_speed: float = float(stats_dict.get("attack_speed", data.get("attack_speed", 1.0)))
+		cooldown = 1.0 / maxf(0.05, base_attack_speed)
+
+	# Apply weapon-specific attack speed bonuses even when a base cooldown exists.
+	var weapon_attack_speed: float = _inventory.apply_weapon_stat_mod(weapon_id, StatsComponentScript.STAT_ATTACK_SPEED, 1.0)
+	weapon_attack_speed = maxf(0.05, weapon_attack_speed)
+	cooldown /= weapon_attack_speed
+
+	var projectile_count: float = float(stats_dict.get("projectile_count", 1.0))
+	if weapon_id == "tothian_mines":
+		var weapon_bonus_projectiles: float = _inventory.get_weapon_flat(weapon_id, StatsComponentScript.STAT_PROJECTILE_COUNT)
+		projectile_count += weapon_bonus_projectiles
+		if stats_component:
+			projectile_count += float(stats_component.get_stat_int(StatsComponentScript.STAT_PROJECTILE_COUNT))
+		projectile_count = maxf(1.0, projectile_count)
+	if projectile_count > 1.0:
+		cooldown /= projectile_count
+
+	var global_attack_speed: float = 1.0
+	if stats_component:
+		global_attack_speed = maxf(0.05, stats_component.get_stat(StatsComponentScript.STAT_ATTACK_SPEED))
+
+	return cooldown / global_attack_speed
 
 
 # ---------------------------------------------------------------------------
@@ -455,7 +485,7 @@ func _get_fire_direction(weapon_data: Dictionary) -> Vector2:
 			return Vector2.from_angle(get_parent().rotation)
 
 		"random":
-			return Vector2.from_angle(randf() * TAU)
+			return Vector2.from_angle(_rng.randf() * TAU)
 
 		"forward":
 			return Vector2.from_angle(get_parent().rotation)

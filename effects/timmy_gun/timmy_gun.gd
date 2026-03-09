@@ -27,6 +27,7 @@ const PROJECTILE_SCENE: PackedScene = preload("res://scenes/gameplay/projectile.
 @export var bullet_radius: float = 2.5
 
 @onready var FrameCache: Node = get_node("/root/FrameCache")
+@onready var GameSeed: Node = get_node("/root/GameSeed")
 
 # --- Internal ---
 var _stats_component: Node = null
@@ -35,6 +36,7 @@ var _burst_queue: int = 0
 var _burst_timer: float = 0.0
 var _fire_origin: Vector2 = Vector2.ZERO
 var _fire_direction: Vector2 = Vector2.RIGHT
+var _rng: RandomNumberGenerator = null
 
 
 func setup(params: Dictionary) -> TimmyGun:
@@ -50,6 +52,8 @@ func setup(params: Dictionary) -> TimmyGun:
 
 
 func fire_from(spawn_pos: Vector2, direction: Vector2, stats_component: Node = null) -> void:
+	if _rng == null:
+		_rng = GameSeed.rng("timmy_gun")
 	_stats_component = stats_component
 	_fire_origin = spawn_pos
 	_fire_direction = direction.normalized()
@@ -69,7 +73,7 @@ func _process(delta: float) -> void:
 		_burst_timer -= delta
 		if _burst_timer <= 0.0:
 			# Add slight random spread to each burst bullet for machine-gun feel
-			var spread_angle: float = randf_range(deg_to_rad(-4.0), deg_to_rad(4.0))
+			var spread_angle: float = _rng.randf_range(deg_to_rad(-4.0), deg_to_rad(4.0))
 			var bullet_dir: Vector2 = _fire_direction.rotated(spread_angle)
 			_spawn_bullet(_fire_origin, bullet_dir, bounce_count)
 			_burst_queue -= 1

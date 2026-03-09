@@ -110,7 +110,9 @@ func spawn_from(spawn_pos: Vector2, direction: Vector2) -> void:
 # ══════════════════════════════════════════════════════════════════════════
 
 func _ready() -> void:
-	seed_offset = randf() * 100.0
+	var game_seed: Node = get_node_or_null("/root/GameSeed")
+	var rng: RandomNumberGenerator = game_seed.rng("space_napalm") if game_seed else RandomNumberGenerator.new()
+	seed_offset = rng.randf() * 100.0
 
 	# Create projectile visuals
 	_create_projectile_mesh()

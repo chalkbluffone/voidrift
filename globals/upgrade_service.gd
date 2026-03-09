@@ -33,9 +33,12 @@ const FLAT_STATS: Dictionary = {
 @onready var GameConfig: Node = get_node("/root/GameConfig")
 @onready var GameSeed: Node = get_node("/root/GameSeed")
 
+var _rng: RandomNumberGenerator = null
+
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	_rng = GameSeed.rng("upgrade_service")
 
 
 func generate_level_up_options() -> Array[Dictionary]:
@@ -198,7 +201,8 @@ func _pick_weighted_index(items: Array[Dictionary], rng: RandomNumberGenerator =
 		total += float(it.get("weight", 1.0))
 	if total <= 0.0:
 		return -1
-	var roll: float = rng.randf() * total if rng else randf() * total
+	var rng_to_use: RandomNumberGenerator = rng if rng else _rng
+	var roll: float = rng_to_use.randf() * total
 	var acc: float = 0.0
 	for i in range(items.size()):
 		acc += float(items[i].get("weight", 1.0))
@@ -244,7 +248,7 @@ func _roll_rarity(weights: Dictionary, luck: float) -> String:
 	if total <= 0.0:
 		return "common"
 
-	var roll: float = randf() * total
+	var roll: float = _rng.randf() * total
 	var acc: float = 0.0
 	for key in GameConfig.RARITY_ORDER:
 		acc += w.get(key, 0.0)

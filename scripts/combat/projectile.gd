@@ -20,6 +20,7 @@ var _weapon_crit_damage: float = 0.0
 
 var _hits_remaining: int = 1
 var _lifetime: float = GameConfig.PROJECTILE_DEFAULT_LIFETIME
+var _hit_enemy_ids: Dictionary = {}
 
 
 func _ready() -> void:
@@ -97,6 +98,14 @@ func _on_area_entered(area: Area2D) -> void:
 
 
 func _hit_enemy(enemy: Node2D) -> void:
+	if not is_instance_valid(enemy):
+		return
+
+	var enemy_id: int = enemy.get_instance_id()
+	if _hit_enemy_ids.has(enemy_id):
+		return
+	_hit_enemy_ids[enemy_id] = true
+
 	# Calculate damage with crits
 	var damage_info: Dictionary = {"damage": damage, "is_crit": false, "is_overcrit": false}
 	

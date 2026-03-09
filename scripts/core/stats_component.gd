@@ -12,6 +12,7 @@ signal lifesteal_healed(amount: float, position: Vector2)
 
 # Autoload references
 var DataLoader: Node
+var GameSeed: Node
 
 # --- Stat Names (constants for type safety) ---
 const STAT_MAX_HP: String = "max_hp"
@@ -116,12 +117,18 @@ var shield_recharge_timer: float = 0.0
 
 # HP Regen accumulator
 var _regen_accumulator: float = 0.0
+var _rng: RandomNumberGenerator = null
 
 
 func _ready() -> void:
 	# Get autoload references
 	DataLoader = get_node_or_null("/root/DataLoader")
 	GameConfig = get_node_or_null("/root/GameConfig")
+	GameSeed = get_node_or_null("/root/GameSeed")
+	if GameSeed:
+		_rng = GameSeed.rng("stats_component")
+	else:
+		_rng = RandomNumberGenerator.new()
 	
 	# Load stat caps from GameConfig
 	if GameConfig:
@@ -361,7 +368,7 @@ func _mark_dirty() -> void:
 func take_damage(amount: float, source: Node = null) -> float:
 	# Check evasion
 	var evasion: float = get_stat(STAT_EVASION)
-	if randf() * 100.0 < evasion:
+	if _rng.randf() * 100.0 < evasion:
 		# Dodged!
 		return 0.0
 	
@@ -456,7 +463,7 @@ func calculate_damage(base_damage: float, weapon_crit_chance: float = 0.0, weapo
 	var is_overcrit: bool = false
 	
 	# Check for crit
-	var roll: float = randf() * 100.0
+	var roll: float = _rng.randf() * 100.0
 	if roll < crit_chance:
 		is_crit = true
 		final_damage *= crit_damage
@@ -479,7 +486,7 @@ func roll_lifesteal() -> bool:
 	if lifesteal <= 0:
 		return false
 
-	var roll: float = randf() * 100.0
+	var roll: float = _rng.randf() * 100.0
 	if roll < lifesteal:
 		var heal_amount: float = 1.0
 		# Check for double heal (lifesteal > 100%)
@@ -496,7 +503,7 @@ func roll_lifesteal() -> bool:
 ## Roll for evasion. Returns true if attack should be dodged.
 func roll_evasion() -> bool:
 	var evasion: float = get_stat(STAT_EVASION)
-	return randf() * 100.0 < evasion
+	return _rng.randf() * 100.0 < evasion
 
 
 # --- Debug ---

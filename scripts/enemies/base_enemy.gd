@@ -26,6 +26,7 @@ var _hitbox: Area2D = null
 @onready var RunManager: Node = get_node("/root/RunManager")
 @onready var GameConfig: Node = get_node("/root/GameConfig")
 @onready var FrameCache: Node = get_node("/root/FrameCache")
+@onready var GameSeed: Node = get_node("/root/GameSeed")
 
 # --- Knockback ---
 var _knockback_velocity: Vector2 = Vector2.ZERO
@@ -41,10 +42,12 @@ var _enemy_grid: SpatialHashGrid = null
 
 # --- Smoothed Direction ---
 var _current_dir: Vector2 = Vector2.ZERO
+var _rng: RandomNumberGenerator = null
 
 
 func _ready() -> void:
 	add_to_group("enemies")
+	_rng = GameSeed.rng("base_enemy")
 	current_hp = max_hp
 	_find_player()
 	_find_flow_field()
@@ -222,8 +225,8 @@ func _teleport_near_player() -> void:
 		return
 	var attempts: int = 10
 	for i: int in range(attempts):
-		var angle: float = randf() * TAU
-		var dist: float = randf_range(GameConfig.SPAWN_RADIUS_MIN, GameConfig.SPAWN_RADIUS_MAX)
+		var angle: float = _rng.randf() * TAU
+		var dist: float = _rng.randf_range(GameConfig.SPAWN_RADIUS_MIN, GameConfig.SPAWN_RADIUS_MAX)
 		var candidate: Vector2 = _target.global_position + Vector2.from_angle(angle) * dist
 		# Quick arena bounds check
 		if candidate.length() < GameConfig.ARENA_RADIUS:

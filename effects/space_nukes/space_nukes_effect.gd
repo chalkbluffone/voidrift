@@ -32,6 +32,7 @@ var _cleanup_timer: float = 0.0
 var _exploded: bool = false
 var _weave_seed: float = 0.0
 var _weave_sign: float = 1.0
+var _rng: RandomNumberGenerator = null
 
 
 func setup(params: Dictionary) -> SpaceNukesEffect:
@@ -55,8 +56,11 @@ func launch(spawn_pos: Vector2, direction: Vector2, target: Node2D, target_pos: 
 	if _missile_dir.is_zero_approx():
 		_missile_dir = Vector2.RIGHT
 	_missile_speed = projectile_speed * 0.45
-	_weave_seed = randf() * TAU
-	_weave_sign = -1.0 if randf() < 0.5 else 1.0
+	if _rng == null:
+		var game_seed: Node = get_node_or_null("/root/GameSeed")
+		_rng = game_seed.rng("space_nukes_effect") if game_seed else RandomNumberGenerator.new()
+	_weave_seed = _rng.randf() * TAU
+	_weave_sign = -1.0 if _rng.randf() < 0.5 else 1.0
 
 	if _missile_visual == null:
 		_missile_visual = _MissileVisual.new()

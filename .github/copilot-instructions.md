@@ -107,7 +107,7 @@ Detailed mechanics live in the domain instruction files. This is the high-level 
 - **Enemy Scaling**: Polynomial HP + linear damage over time, difficulty stat multiplier, elites, swarms. → `enemies.instructions.md`
 - **Rarity System**: Common → Uncommon → Rare → Epic → Legendary. → `progression.instructions.md`
 - **Ship + Captain**: Independent selection per run, hidden synergy combos. → `player.instructions.md`
-- **Arena**: Circular 4000px radius, radiation belt, 50 asteroids, 15 stations, flow field pathing. → `world.instructions.md`
+- **Arena**: Circular arena driven by `GameConfig.ARENA_RADIUS`, with radiation belt, asteroid field, stations, and flow field pathing. → `world.instructions.md`
 - **HUD**: Shield/HP bars, minimap, full map overlay, swarm warnings, level-up UI. → `ui.instructions.md`
 - **Run structure**: Timed survival (default 10 min), swarms at intervals, final boss via beacon. → `progression.instructions.md`
 

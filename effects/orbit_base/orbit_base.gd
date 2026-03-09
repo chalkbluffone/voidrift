@@ -126,13 +126,14 @@ func _check_contacts() -> void:
 		var enemy_id: int = enemy_2d.get_instance_id()
 		if _enemy_hit_cooldowns.has(enemy_id):
 			continue
+		var enemy_contact_radius: float = _estimate_enemy_contact_radius(enemy_2d)
 
 		var hit: bool = false
 		for drone in _drones:
 			if not is_instance_valid(drone):
 				continue
 			var drone_world_pos: Vector2 = global_position + drone.position
-			if drone_world_pos.distance_to(enemy_2d.global_position) <= contact_radius + 20.0:
+			if drone_world_pos.distance_to(enemy_2d.global_position) <= contact_radius + enemy_contact_radius:
 				hit = true
 				var push_dir: Vector2 = (enemy_2d.global_position - global_position).normalized()
 				if push_dir == Vector2.ZERO:
@@ -152,3 +153,25 @@ func _apply_hit(enemy: Node2D, push_dir: Vector2) -> void:
 
 	if enemy.has_method("apply_knockback"):
 		enemy.apply_knockback(push_dir * knockback)
+
+
+func _estimate_enemy_contact_radius(enemy: Node2D) -> float:
+	var fallback_radius: float = 20.0
+	var hitbox_area: Area2D = enemy.get_node_or_null("HitboxArea") as Area2D
+	if hitbox_area == null:
+		return fallback_radius
+
+	var hitbox_shape: CollisionShape2D = hitbox_area.get_node_or_null("HitboxShape") as CollisionShape2D
+	if hitbox_shape == null or hitbox_shape.shape == null:
+		return fallback_radius
+
+	if hitbox_shape.shape is CircleShape2D:
+		return maxf(fallback_radius, (hitbox_shape.shape as CircleShape2D).radius)
+	if hitbox_shape.shape is RectangleShape2D:
+		var rect: RectangleShape2D = hitbox_shape.shape as RectangleShape2D
+		return maxf(fallback_radius, maxf(rect.size.x, rect.size.y) * 0.5)
+	if hitbox_shape.shape is CapsuleShape2D:
+		var capsule: CapsuleShape2D = hitbox_shape.shape as CapsuleShape2D
+		return maxf(fallback_radius, maxf(capsule.radius, capsule.height * 0.5 + capsule.radius))
+
+	return fallback_radius

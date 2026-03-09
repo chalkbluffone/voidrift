@@ -35,6 +35,7 @@ const PROJECTILE_SCENE: PackedScene = preload("res://scenes/gameplay/projectile.
 # --- Internal ---
 var _pellets: Array = []  # Array of projectile node refs
 var _spawn_origin: Vector2 = Vector2.ZERO
+var _rng: RandomNumberGenerator = null
 
 
 func setup(params: Dictionary) -> PersonalSpaceViolator:
@@ -51,6 +52,9 @@ func setup(params: Dictionary) -> PersonalSpaceViolator:
 
 
 func fire_burst(origin: Vector2, direction: Vector2) -> void:
+	if _rng == null:
+		var game_seed: Node = get_node_or_null("/root/GameSeed")
+		_rng = game_seed.rng("personal_space_violator") if game_seed else RandomNumberGenerator.new()
 	_spawn_origin = origin
 	global_position = origin
 
@@ -63,8 +67,8 @@ func fire_burst(origin: Vector2, direction: Vector2) -> void:
 			t = float(i) / float(pellet_count - 1)
 		var angle: float = base_angle - half_spread + (half_spread * 2.0 * t)
 		# Random jitter for organic shotgun feel
-		angle += randf_range(-deg_to_rad(3.0), deg_to_rad(3.0))
-		var spd: float = pellet_speed * randf_range(0.9, 1.1)
+		angle += _rng.randf_range(-deg_to_rad(3.0), deg_to_rad(3.0))
+		var spd: float = pellet_speed * _rng.randf_range(0.9, 1.1)
 		_spawn_pellet(angle, spd)
 
 

@@ -28,6 +28,7 @@ const PROJECTILE_SCENE: PackedScene = preload("res://scenes/gameplay/projectile.
 @export var bolt_width: float = 2.0
 
 @onready var FrameCache: Node = get_node("/root/FrameCache")
+@onready var GameSeed: Node = get_node("/root/GameSeed")
 
 # --- Internal ---
 var _stats_component: Node = null
@@ -36,6 +37,7 @@ var _burst_queue: int = 0
 var _burst_timer: float = 0.0
 var _fire_origin: Vector2 = Vector2.ZERO
 var _fire_direction: Vector2 = Vector2.RIGHT
+var _rng: RandomNumberGenerator = null
 
 
 func setup(params: Dictionary) -> SpaceLasers:
@@ -50,6 +52,8 @@ func setup(params: Dictionary) -> SpaceLasers:
 
 
 func fire_from(spawn_pos: Vector2, direction: Vector2, stats_component: Node = null) -> void:
+	if _rng == null:
+		_rng = GameSeed.rng("space_lasers")
 	_stats_component = stats_component
 	_fire_origin = spawn_pos
 	_fire_direction = direction.normalized()
@@ -68,7 +72,7 @@ func _process(delta: float) -> void:
 	if _burst_queue > 0:
 		_burst_timer -= delta
 		if _burst_timer <= 0.0:
-			var spread_angle: float = randf_range(deg_to_rad(-3.0), deg_to_rad(3.0))
+			var spread_angle: float = _rng.randf_range(deg_to_rad(-3.0), deg_to_rad(3.0))
 			var bolt_dir: Vector2 = _fire_direction.rotated(spread_angle)
 			_spawn_bolt(_fire_origin, bolt_dir, bounce_count)
 			_burst_queue -= 1
