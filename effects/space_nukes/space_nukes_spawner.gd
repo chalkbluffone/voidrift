@@ -7,14 +7,17 @@ class_name SpaceNukesSpawner
 var _parent_node: Node
 var _active_instances: Array = []
 var _rng: RandomNumberGenerator = null
-
-const LAUNCH_ARC_MIN_DEG: float = 18.0
-const LAUNCH_ARC_MAX_DEG: float = 52.0
-const BASE_TARGETING_RADIUS: float = 500.0
+var _launch_arc_min_deg: float
+var _launch_arc_max_deg: float
+var _base_targeting_radius: float
 
 
 func _init(parent: Node) -> void:
 	_parent_node = parent
+	var config: Node = _parent_node.get_node("/root/GameConfig")
+	_launch_arc_min_deg = config.NUKE_LAUNCH_ARC_MIN_DEG
+	_launch_arc_max_deg = config.NUKE_LAUNCH_ARC_MAX_DEG
+	_base_targeting_radius = config.NUKE_BASE_TARGETING_RADIUS
 	var game_seed: Node = _parent_node.get_node_or_null("/root/GameSeed")
 	if game_seed and game_seed.has_method("rng"):
 		_rng = game_seed.rng("space_nukes_spawner")
@@ -37,7 +40,7 @@ func spawn(
 		targeting_center = follow_source.global_position
 
 	var size_mult: float = maxf(0.2, float(params.get("size_mult", 1.0)))
-	var targeting_radius: float = BASE_TARGETING_RADIUS * size_mult
+	var targeting_radius: float = _base_targeting_radius * size_mult
 
 	var targets: Array[Node2D] = EffectUtils.find_enemies_in_range(_parent_node.get_tree(), targeting_center, targeting_radius)
 	if targets.is_empty():
@@ -45,8 +48,8 @@ func spawn(
 
 	var rockets_per_volley: int = maxi(1, int(params.get("projectile_count", 1)))
 	var rockets_to_fire: int = mini(rockets_per_volley, targets.size())
-	var launch_arc_min_deg: float = float(params.get("launch_arc_min_deg", LAUNCH_ARC_MIN_DEG))
-	var launch_arc_max_deg: float = float(params.get("launch_arc_max_deg", LAUNCH_ARC_MAX_DEG))
+	var launch_arc_min_deg: float = float(params.get("launch_arc_min_deg", _launch_arc_min_deg))
+	var launch_arc_max_deg: float = float(params.get("launch_arc_max_deg", _launch_arc_max_deg))
 	if launch_arc_max_deg < launch_arc_min_deg:
 		var swap: float = launch_arc_min_deg
 		launch_arc_min_deg = launch_arc_max_deg

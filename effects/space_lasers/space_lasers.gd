@@ -26,6 +26,7 @@ const PROJECTILE_SCENE: PackedScene = preload("res://scenes/gameplay/projectile.
 @export var glow_strength: float = 1.5
 @export var bolt_length: float = 12.0
 @export var bolt_width: float = 2.0
+@export var spread_angle_deg: float = 3.0
 
 @onready var FrameCache: Node = get_node("/root/FrameCache")
 @onready var GameSeed: Node = get_node("/root/GameSeed")
@@ -72,7 +73,7 @@ func _process(delta: float) -> void:
 	if _burst_queue > 0:
 		_burst_timer -= delta
 		if _burst_timer <= 0.0:
-			var spread_angle: float = _rng.randf_range(deg_to_rad(-3.0), deg_to_rad(3.0))
+			var spread_angle: float = _rng.randf_range(deg_to_rad(-spread_angle_deg), deg_to_rad(spread_angle_deg))
 			var bolt_dir: Vector2 = _fire_direction.rotated(spread_angle)
 			_spawn_bolt(_fire_origin, bolt_dir, bounce_count)
 			_burst_queue -= 1
@@ -168,12 +169,9 @@ func _on_bolt_hit(enemy: Node2D, _damage_info: Dictionary, source_projectile: No
 
 ## Elongated neon-red laser bolt visual. Drawn procedurally as a stretched
 ## glowing capsule shape oriented along the projectile's travel direction.
-class _NeonLaserVisual extends Node2D:
+class _NeonLaserVisual extends NeonProjectileVisual:
 	var bolt_length: float = 12.0
 	var bolt_width: float = 2.0
-	var color_core: Color = Color(1.0, 0.13, 0.13, 1.0)
-	var color_glow: Color = Color(1.0, 0.0, 0.0, 1.0)
-	var glow_strength: float = 1.5
 
 	func _ready() -> void:
 		queue_redraw()
@@ -194,9 +192,7 @@ class _NeonLaserVisual extends Node2D:
 			var t: float = float(i) / 3.0
 			var glow_w: float = half_w * (1.0 + t * 3.0)
 			var glow_l: float = l * (1.0 + t * 0.5)
-			var alpha: float = 0.10 * t * glow_strength
-			var col: Color = Color(color_glow.r, color_glow.g, color_glow.b, alpha)
-			_draw_capsule(Vector2(-glow_l * 0.5, 0.0), glow_l, glow_w, col)
+			_draw_capsule(Vector2(-glow_l * 0.5, 0.0), glow_l, glow_w, _glow_color(t, 0.10))
 
 		# Bright glow body
 		var bright_col: Color = Color(color_glow.r, color_glow.g, color_glow.b, 0.55)

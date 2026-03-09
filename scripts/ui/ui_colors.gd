@@ -109,3 +109,16 @@ const DEFEAT_OUTLINE: Color = Color(0.4, 0.0, 0.1, 1.0)
 const PARTICLE_PINK: Color = Color(1.0, 0.08, 0.58, 1.0)
 const PARTICLE_PURPLE: Color = Color(0.58, 0.0, 1.0, 1.0)
 const PARTICLE_CYAN: Color = Color(0.0, 1.0, 1.0, 1.0)
+
+# --- Map Element Colors (minimap + full map) ---
+
+const MAP_PLAYER: Color = Color(0.0, 1.0, 0.9, 1.0)        # Cyan
+const MAP_ENEMY: Color = Color(1.0, 0.2, 0.2, 1.0)         # Red
+const MAP_PICKUP: Color = Color(0.5, 1.0, 0.3, 1.0)        # Green
+const MAP_STATION: Color = Color(1.0, 0.8, 0.2, 1.0)       # Yellow/Gold
+const MAP_ASTEROID: Color = Color(0.45, 0.45, 0.5, 0.7)    # Gray
+const MAP_POWERUP_HEALTH: Color = Color(1.0, 0.25, 0.25, 1.0)
+const MAP_POWERUP_SPEED: Color = Color(0.3, 0.7, 1.0, 1.0)
+const MAP_POWERUP_STOPWATCH: Color = Color(1.0, 0.85, 0.25, 1.0)
+const MAP_POWERUP_GRAVITY: Color = Color(0.75, 0.45, 1.0, 1.0)
+const MAP_BOUNDARY: Color = Color(1.0, 0.0, 1.0, 0.8)      # Pink

@@ -74,7 +74,6 @@ func load_game() -> void:
 				for key in persistent_data:
 					if data.has(key):
 						persistent_data[key] = data[key]
-				_ensure_default_unlocks()
 			file.close()
 			game_loaded.emit()
 

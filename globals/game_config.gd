@@ -502,3 +502,20 @@ const STATION_RARITY_COLORS: Dictionary = {
 	"epic": Color(0.8, 0.3, 1.0, 1.0),        # Purple
 	"legendary": Color(1.0, 0.8, 0.2, 1.0),   # Gold
 }
+
+# =============================================================================
+# SPACE NUKES (missile weapon)
+# =============================================================================
+const NUKE_LAUNCH_ARC_MIN_DEG: float = 18.0     # Minimum launch angle offset from target direction
+const NUKE_LAUNCH_ARC_MAX_DEG: float = 52.0     # Maximum launch angle offset from target direction
+const NUKE_BASE_TARGETING_RADIUS: float = 500.0  # Base radius for finding nuke targets
+const NUKE_MISSILE_SPEED_FACTOR: float = 0.45    # Initial speed as fraction of projectile_speed
+
+# =============================================================================
+# GRAVITY WELL BEACON (visual)
+# =============================================================================
+const BEACON_CIRCLE_RADIUS: float = 50.0
+const BEACON_CIRCLE_COLOR: Color = Color(0.5, 0.15, 0.9, 0.7)
+const BEACON_CIRCLE_COLOR_DEPLETED: Color = Color(0.2, 0.2, 0.2, 0.3)
+const BEACON_TITLE_COLOR: Color = Color(0.85, 0.75, 1.0, 1.0)
+const BEACON_PROMPT_COLOR: Color = Color(1.0, 1.0, 0.5, 1.0)

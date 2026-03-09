@@ -7,18 +7,18 @@ extends Control
 const FogOfWarScript: GDScript = preload("res://scripts/systems/fog_of_war.gd")
 const FogShader: Shader = preload("res://shaders/fog_of_war.gdshader")
 
-# Colors for map elements (same as minimap for consistency)
+# Colors for map elements (shared palette from UiColors)
 const COLOR_BACKGROUND: Color = Color(0.02, 0.02, 0.05, 0.95)
-const COLOR_PLAYER: Color = Color(0.0, 1.0, 0.9, 1.0)  # Cyan
-const COLOR_ENEMY: Color = Color(1.0, 0.2, 0.2, 1.0)   # Red
-const COLOR_PICKUP: Color = Color(0.5, 1.0, 0.3, 1.0)  # Green
-const COLOR_STATION: Color = Color(1.0, 0.8, 0.2, 1.0) # Yellow/Gold
-const COLOR_ASTEROID: Color = Color(0.45, 0.45, 0.5, 0.7) # Gray
-const COLOR_POWERUP_HEALTH: Color = Color(1.0, 0.25, 0.25, 1.0)
-const COLOR_POWERUP_SPEED: Color = Color(0.3, 0.7, 1.0, 1.0)
-const COLOR_POWERUP_STOPWATCH: Color = Color(1.0, 0.85, 0.25, 1.0)
-const COLOR_POWERUP_GRAVITY: Color = Color(0.75, 0.45, 1.0, 1.0)
-const COLOR_BOUNDARY: Color = Color(1.0, 0.0, 1.0, 0.8)  # Pink
+const COLOR_PLAYER: Color = UiColors.MAP_PLAYER
+const COLOR_ENEMY: Color = UiColors.MAP_ENEMY
+const COLOR_PICKUP: Color = UiColors.MAP_PICKUP
+const COLOR_STATION: Color = UiColors.MAP_STATION
+const COLOR_ASTEROID: Color = UiColors.MAP_ASTEROID
+const COLOR_POWERUP_HEALTH: Color = UiColors.MAP_POWERUP_HEALTH
+const COLOR_POWERUP_SPEED: Color = UiColors.MAP_POWERUP_SPEED
+const COLOR_POWERUP_STOPWATCH: Color = UiColors.MAP_POWERUP_STOPWATCH
+const COLOR_POWERUP_GRAVITY: Color = UiColors.MAP_POWERUP_GRAVITY
+const COLOR_BOUNDARY: Color = UiColors.MAP_BOUNDARY
 const COLOR_GRID: Color = Color(0.1, 0.1, 0.15, 0.5)
 
 var _player: Node2D = null

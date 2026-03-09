@@ -136,11 +136,8 @@ func _calculate_falloff(distance: float) -> float:
 
 # --- Neon glow visual (replaces bullet sprite) ---
 
-class _NeonGlow extends Node2D:
+class _NeonGlow extends NeonProjectileVisual:
 	var pellet_radius: float = 0.5
-	var color_core: Color = Color.WHITE
-	var color_glow: Color = Color(0.224, 1.0, 0.078, 1.0)
-	var glow_strength: float = 2.5
 	var bloom_intensity: float = 3.0
 
 	func _draw() -> void:
@@ -149,8 +146,7 @@ class _NeonGlow extends Node2D:
 		for i in range(bloom_layers, 0, -1):
 			var t: float = float(i) / float(bloom_layers)
 			var r: float = pellet_radius * (1.0 + t * bloom_intensity)
-			var alpha: float = 0.15 * t * glow_strength
-			draw_circle(Vector2.ZERO, r, Color(color_glow.r, color_glow.g, color_glow.b, alpha))
+			draw_circle(Vector2.ZERO, r, _glow_color(t, 0.15))
 		# Core glow ring
 		draw_circle(Vector2.ZERO, pellet_radius * 1.2, Color(color_glow.r, color_glow.g, color_glow.b, 0.6))
 		# Bright core

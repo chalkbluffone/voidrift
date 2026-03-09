@@ -16,12 +16,6 @@ var _using_controller: bool = false
 
 @onready var GameConfig: Node = get_node("/root/GameConfig")
 
-const CIRCLE_RADIUS: float = 50.0
-const CIRCLE_COLOR: Color = Color(0.5, 0.15, 0.9, 0.7)
-const CIRCLE_COLOR_DEPLETED: Color = Color(0.2, 0.2, 0.2, 0.3)
-const TITLE_COLOR: Color = Color(0.85, 0.75, 1.0, 1.0)
-const PROMPT_COLOR: Color = Color(1.0, 1.0, 0.5, 1.0)
-
 
 func _ready() -> void:
 	add_to_group("gravity_well_beacons")
@@ -65,9 +59,10 @@ func _create_visual() -> void:
 	_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_title_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_title_label.add_theme_font_size_override("font_size", 12)
-	_title_label.add_theme_color_override("font_color", TITLE_COLOR)
-	_title_label.size = Vector2(CIRCLE_RADIUS * 2.0, CIRCLE_RADIUS * 2.0)
-	_title_label.position = Vector2(-CIRCLE_RADIUS, -CIRCLE_RADIUS)
+	_title_label.add_theme_color_override("font_color", GameConfig.BEACON_TITLE_COLOR)
+	var r: float = GameConfig.BEACON_CIRCLE_RADIUS
+	_title_label.size = Vector2(r * 2.0, r * 2.0)
+	_title_label.position = Vector2(-r, -r)
 	add_child(_title_label)
 
 
@@ -76,9 +71,9 @@ func _create_prompt() -> void:
 	_prompt_label.name = "PromptLabel"
 	_prompt_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_prompt_label.add_theme_font_size_override("font_size", 14)
-	_prompt_label.add_theme_color_override("font_color", PROMPT_COLOR)
+	_prompt_label.add_theme_color_override("font_color", GameConfig.BEACON_PROMPT_COLOR)
 	_prompt_label.size = Vector2(200.0, 30.0)
-	_prompt_label.position = Vector2(-100.0, CIRCLE_RADIUS + 8.0)
+	_prompt_label.position = Vector2(-100.0, GameConfig.BEACON_CIRCLE_RADIUS + 8.0)
 	_prompt_label.visible = false
 	add_child(_prompt_label)
 	_update_prompt_text()
@@ -137,17 +132,18 @@ func _process(delta: float) -> void:
 
 
 func _on_draw_circle() -> void:
-	var color: Color = CIRCLE_COLOR_DEPLETED if _is_depleted else CIRCLE_COLOR
+	var color: Color = GameConfig.BEACON_CIRCLE_COLOR_DEPLETED if _is_depleted else GameConfig.BEACON_CIRCLE_COLOR
 	# Subtle pulse when active
 	if not _is_depleted:
 		var pulse: float = 0.15 * sin(_pulse_time * 2.0)
 		color.a = clampf(color.a + pulse, 0.3, 0.9)
 
 	# Filled circle
-	_circle_visual.draw_circle(Vector2.ZERO, CIRCLE_RADIUS, color)
+	var cr: float = GameConfig.BEACON_CIRCLE_RADIUS
+	_circle_visual.draw_circle(Vector2.ZERO, cr, color)
 	# Border ring
 	var border_color: Color = Color(0.7, 0.4, 1.0, 0.9) if not _is_depleted else Color(0.3, 0.3, 0.3, 0.3)
-	_circle_visual.draw_arc(Vector2.ZERO, CIRCLE_RADIUS, 0.0, TAU, 48, border_color, 2.0)
+	_circle_visual.draw_arc(Vector2.ZERO, cr, 0.0, TAU, 48, border_color, 2.0)
 
 
 func _on_body_entered(body: Node2D) -> void:

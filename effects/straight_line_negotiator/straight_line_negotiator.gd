@@ -75,10 +75,7 @@ func _process(_delta: float) -> void:
 		_projectile.queue_free()
 
 
-class _NeedleTracer extends Node2D:
-	var color_core: Color = Color(1.0, 0.96, 0.9, 1.0)
-	var color_glow: Color = Color(0.35, 0.95, 1.0, 1.0)
-	var glow_strength: float = 1.4
+class _NeedleTracer extends NeonProjectileVisual:
 	var needle_length_px: float = 28.0
 	var needle_width_px: float = 2.0
 	var trail_alpha: float = 0.35
@@ -93,8 +90,7 @@ class _NeedleTracer extends Node2D:
 		for i in range(3, 0, -1):
 			var t: float = float(i) / 3.0
 			var glow_w: float = width * (1.0 + t * 2.0)
-			var glow_color: Color = Color(color_glow.r, color_glow.g, color_glow.b, 0.13 * t * glow_strength)
-			draw_line(Vector2.ZERO, Vector2.RIGHT * length, glow_color, glow_w, true)
+			draw_line(Vector2.ZERO, Vector2.RIGHT * length, _glow_color(t, 0.13), glow_w, true)
 
 		draw_line(
 			Vector2.ZERO,

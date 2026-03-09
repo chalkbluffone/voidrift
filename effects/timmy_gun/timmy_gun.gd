@@ -25,6 +25,7 @@ const PROJECTILE_SCENE: PackedScene = preload("res://scenes/gameplay/projectile.
 @export var color_glow: Color = Color(0.0, 0.73, 1.0, 1.0)
 @export var glow_strength: float = 2.0
 @export var bullet_radius: float = 2.5
+@export var spread_angle_deg: float = 4.0
 
 @onready var FrameCache: Node = get_node("/root/FrameCache")
 @onready var GameSeed: Node = get_node("/root/GameSeed")
@@ -73,7 +74,7 @@ func _process(delta: float) -> void:
 		_burst_timer -= delta
 		if _burst_timer <= 0.0:
 			# Add slight random spread to each burst bullet for machine-gun feel
-			var spread_angle: float = _rng.randf_range(deg_to_rad(-4.0), deg_to_rad(4.0))
+			var spread_angle: float = _rng.randf_range(deg_to_rad(-spread_angle_deg), deg_to_rad(spread_angle_deg))
 			var bullet_dir: Vector2 = _fire_direction.rotated(spread_angle)
 			_spawn_bullet(_fire_origin, bullet_dir, bounce_count)
 			_burst_queue -= 1
@@ -164,12 +165,9 @@ func _on_bullet_hit(enemy: Node2D, _damage_info: Dictionary, source_projectile: 
 	call_deferred("_spawn_bullet", hit_pos, bounce_dir, bounces_remaining - 1)
 
 
-class _NeonBullet extends Node2D:
+class _NeonBullet extends NeonProjectileVisual:
 	## Tiny glowing neon-blue bullet visual. Drawn procedurally.
 	var bullet_radius: float = 2.5
-	var color_core: Color = Color(0.8, 0.87, 1.0, 1.0)
-	var color_glow: Color = Color(0.0, 0.73, 1.0, 1.0)
-	var glow_strength: float = 2.0
 
 	func _ready() -> void:
 		queue_redraw()
@@ -181,8 +179,7 @@ class _NeonBullet extends Node2D:
 		for i in range(3, 0, -1):
 			var t: float = float(i) / 3.0
 			var glow_r: float = r * (1.0 + t * 3.0)
-			var alpha: float = 0.12 * t * glow_strength
-			draw_circle(Vector2.ZERO, glow_r, Color(color_glow.r, color_glow.g, color_glow.b, alpha))
+			draw_circle(Vector2.ZERO, glow_r, _glow_color(t))
 
 		# Bright glow ring
 		draw_circle(Vector2.ZERO, r * 1.4, Color(color_glow.r, color_glow.g, color_glow.b, 0.55))

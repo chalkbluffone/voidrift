@@ -55,7 +55,7 @@ func launch(spawn_pos: Vector2, direction: Vector2, target: Node2D, target_pos: 
 	_missile_dir = direction.normalized()
 	if _missile_dir.is_zero_approx():
 		_missile_dir = Vector2.RIGHT
-	_missile_speed = projectile_speed * 0.45
+	_missile_speed = projectile_speed * GameConfig.NUKE_MISSILE_SPEED_FACTOR
 	if _rng == null:
 		var game_seed: Node = get_node_or_null("/root/GameSeed")
 		_rng = game_seed.rng("space_nukes_effect") if game_seed else RandomNumberGenerator.new()

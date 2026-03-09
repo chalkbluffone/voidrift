@@ -11,6 +11,7 @@ signal station_buff_triggered(options: Array)
 ## @param buff: The selected buff (Dictionary, empty if ignored)
 signal station_buff_completed(buff: Dictionary)
 
+@onready var GameConfig: Node = get_node("/root/GameConfig")
 @onready var RunManager: Node = get_node("/root/RunManager")
 @onready var GameSeed: Node = get_node("/root/GameSeed")
 

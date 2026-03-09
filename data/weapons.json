@@ -479,7 +479,8 @@
 		"display_name": "Timmy Gun",
 		"enabled": true,
 		"motion": {
-			"burst_interval": 0.06
+			"burst_interval": 0.06,
+			"spread_angle_deg": 4.0
 		},
 		"scene": "res://effects/timmy_gun/TimmyGun.tscn",
 		"shape": {
@@ -535,7 +536,8 @@
 		"display_name": "Space Lasers",
 		"enabled": true,
 		"motion": {
-			"burst_interval": 0.04
+			"burst_interval": 0.04,
+			"spread_angle_deg": 3.0
 		},
 		"scene": "res://effects/space_lasers/SpaceLasers.tscn",
 		"shape": {
