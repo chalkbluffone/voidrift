@@ -115,9 +115,10 @@ func _setup_stations(obstacle_positions: Array[Vector2]) -> void:
 
 ## Spawn Gravity Well beacons around the arena, avoiding asteroids and stations.
 func _setup_gravity_well_beacons(obstacle_positions: Array[Vector2]) -> void:
-	# Collect station positions to avoid overlap
+	# Collect station positions to avoid overlap — use group query directly
+	# because FrameCache may hold stale refs from the previous run during _ready().
 	var avoid_positions: Array[Vector2] = obstacle_positions.duplicate()
-	var stations: Array[Node] = FrameCache.stations
+	var stations: Array[Node] = get_tree().get_nodes_in_group("stations")
 	for station: Node in stations:
 		if station is Node2D:
 			avoid_positions.append((station as Node2D).global_position)

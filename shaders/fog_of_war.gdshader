@@ -48,22 +48,16 @@ float fbm(vec2 p) {
 	return value;
 }
 
-// Sample fog texture with blur for soft edges
+// Sample fog texture with lightweight blur for soft edges
 float sample_fog_blurred(vec2 uv, float blur_radius) {
-	float total = 0.0;
-	float weight_sum = 0.0;
-	
-	// 5x5 gaussian-weighted blur for smoother edges
-	for (int x = -2; x <= 2; x++) {
-		for (int y = -2; y <= 2; y++) {
-			vec2 offset = vec2(float(x), float(y)) * blur_radius * 0.5;
-			float weight = 1.0 / (1.0 + length(vec2(float(x), float(y))));
-			total += texture(fog_texture, uv + offset).r * weight;
-			weight_sum += weight;
-		}
-	}
-	
-	return total / weight_sum;
+	// 5-sample weighted cross — 80% fewer lookups than the old 5x5 kernel.
+	// Linear filtering on the texture provides additional smoothing.
+	float center = texture(fog_texture, uv).r;
+	float right  = texture(fog_texture, uv + vec2(blur_radius, 0.0)).r;
+	float left   = texture(fog_texture, uv - vec2(blur_radius, 0.0)).r;
+	float up     = texture(fog_texture, uv + vec2(0.0, blur_radius)).r;
+	float down   = texture(fog_texture, uv - vec2(0.0, blur_radius)).r;
+	return (center * 2.0 + right + left + up + down) / 6.0;
 }
 
 void fragment() {

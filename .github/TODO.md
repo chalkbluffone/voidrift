@@ -40,9 +40,9 @@ Prioritized by impact. Items marked ✅ when resolved.
 
 ### P3 — Performance Improvements
 
-- [ ] **fog_of_war.gdshader** — 5×5 Gaussian blur kernel = 25 texture lookups per pixel. Consider pre-blurring the fog texture at load time or using a separable two-pass blur.
-- [ ] **nope_bubble.gd** — Calls `FrameCache.enemy_grid.query_radius()` every frame even when shield layers are depleted (`_current_layers <= 0`). Add early-return guard.
-- [ ] **spin_cycle.gd** — Creates a new `PackedVector2Array` in `_draw()` every frame for the wedge polygon. Cache the array and rebuild only when `slice_fraction` changes.
+- [x] **fog_of_war.gdshader** — ✅ Replaced 5×5 kernel (25 lookups) with weighted 5-sample cross pattern (80% reduction). Linear filtering provides additional smoothing.
+- [x] **nope_bubble.gd** — ✅ Already guarded: `query_radius()` is inside `if _current_layers > 0:` block.
+- [x] **spin_cycle.gd** — ✅ Cached `PackedVector2Array`/`PackedColorArray` as member vars; pre-computed unit wedge directions, rebuilt only when `slice_fraction` changes; rotation applied via manual cos/sin (2 trig calls/frame instead of 50).
 
 ### P4 — Hardcoded Values → GameConfig
 

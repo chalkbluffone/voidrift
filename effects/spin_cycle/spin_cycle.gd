@@ -22,6 +22,12 @@ var _sweep_angle: float = 0.0  # current leading edge of the slice in radians
 var _enemy_hit_cooldowns: Dictionary = {}  # enemy_instance_id -> remaining cooldown
 var _slice_angle: float = 0.0  # cached: slice_fraction * TAU
 
+# Cached draw arrays — rebuilt only when slice_fraction changes
+var _cached_points: PackedVector2Array = PackedVector2Array()
+var _cached_colors: PackedColorArray = PackedColorArray()
+var _unit_wedge_dirs: PackedVector2Array = PackedVector2Array()
+var _cached_slice_fraction: float = -1.0
+
 const ARC_POINT_COUNT: int = 24  # points used to draw the wedge arc
 
 
@@ -98,24 +104,33 @@ func _draw() -> void:
 	# --- Faint ring outline (full circle) ---
 	draw_arc(Vector2.ZERO, radius, 0.0, TAU, 64, ring_color, 1.5, true)
 
-	# --- Bright filled wedge for the active slice ---
-	var wedge_start: float = _sweep_angle
-	var wedge_end: float = _sweep_angle + _slice_angle
-	var points: PackedVector2Array = PackedVector2Array()
-	points.append(Vector2.ZERO)  # center of the pie
+	# --- Rebuild cached arrays only when slice_fraction changes ---
+	if _cached_slice_fraction != slice_fraction:
+		_cached_slice_fraction = slice_fraction
+		var point_count: int = ARC_POINT_COUNT + 2  # center + arc points
+		_cached_points.resize(point_count)
+		_cached_colors.resize(point_count)
+		for i: int in range(point_count):
+			_cached_colors[i] = wedge_color
+		_unit_wedge_dirs.resize(ARC_POINT_COUNT + 1)
+		for i: int in range(ARC_POINT_COUNT + 1):
+			var t: float = float(i) / float(ARC_POINT_COUNT)
+			var angle: float = t * _slice_angle
+			_unit_wedge_dirs[i] = Vector2(cos(angle), sin(angle))
 
-	for i in range(ARC_POINT_COUNT + 1):
-		var t: float = float(i) / float(ARC_POINT_COUNT)
-		var angle: float = wedge_start + t * _slice_angle
-		points.append(Vector2(cos(angle), sin(angle)) * radius)
+	# --- Update point positions (rotate + scale cached unit directions) ---
+	var cos_a: float = cos(_sweep_angle)
+	var sin_a: float = sin(_sweep_angle)
+	_cached_points[0] = Vector2.ZERO
+	for i: int in range(ARC_POINT_COUNT + 1):
+		var u: Vector2 = _unit_wedge_dirs[i]
+		_cached_points[i + 1] = Vector2(u.x * cos_a - u.y * sin_a, u.x * sin_a + u.y * cos_a) * radius
 
-	var colors: PackedColorArray = PackedColorArray()
-	for i in range(points.size()):
-		colors.append(wedge_color)
-
-	draw_polygon(points, colors)
+	draw_polygon(_cached_points, _cached_colors)
 
 	# --- Bright arc edge on the wedge ---
+	var wedge_start: float = _sweep_angle
+	var wedge_end: float = _sweep_angle + _slice_angle
 	var edge_color: Color = Color(wedge_color.r, wedge_color.g, wedge_color.b, minf(wedge_color.a * 2.0, 1.0))
 	draw_arc(Vector2.ZERO, radius, wedge_start, wedge_end, ARC_POINT_COUNT, edge_color, 2.0, true)
 
