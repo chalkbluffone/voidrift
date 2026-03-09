@@ -142,6 +142,18 @@ The following gotchas remain here because they are GDScript-engine-level issues,
 
 Both Area2Ds need `monitoring = true`, `monitorable = true`, and correct collision layers/masks (one's layer must match other's mask).
 
+### Duplicate Hits from `body_entered` + `area_entered`
+
+When an `Area2D` listens to both `body_entered` and `area_entered`, one gameplay collision can fire both callbacks (for example enemy body + enemy HitboxArea). If both call the same damage routine, damage and UI can double-trigger.
+
+Use a per-projectile or per-frame guard keyed by target instance ID:
+
+```gdscript
+if _hit_enemy_ids.has(enemy.get_instance_id()):
+    return
+_hit_enemy_ids[enemy.get_instance_id()] = true
+```
+
 ### DataLoader Returns Array, Not Dictionary
 
 `DataLoader.get_all_weapons()` returns Array, not Dictionary. Iterate directly:

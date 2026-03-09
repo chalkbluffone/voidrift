@@ -8,6 +8,22 @@ applyTo: "scripts/combat/**,effects/**"
 
 All weapons fire automatically — no manual aiming. The `WeaponComponent` handles targeting and spawn timing. Weapons select the nearest enemy within `GameConfig.WEAPON_TARGETING_RANGE` and fire at the configured rate.
 
+### Cooldown + Attack Speed Rule
+
+- Weapon cooldown calculation must apply both:
+- Per-weapon `attack_speed` bonuses from weapon level-ups (`WeaponInventory.apply_weapon_stat_mod`)
+- Global `attack_speed` from `StatsComponent`
+- Apply per-weapon attack speed even when the weapon has an explicit `stats.cooldown` value.
+
+This prevents melee/projectile weapons (including Radiant Arc) from ignoring attack-speed upgrades.
+
+### Multi-Weapon Dispatch Fairness
+
+- Do not iterate weapons in a fixed dictionary order each frame.
+- Rotate the starting index each tick (round-robin) when processing ready weapons.
+
+This avoids persistent priority bias where one burst weapon can repeatedly starve another (observed with Timmy Gun vs Space Lasers/Nikola's Coil combinations).
+
 ## Weapon Architecture
 
 - 17 weapon effect directories under `effects/`, each containing `.gd` + `.tscn` + optional `.gdshader`
@@ -186,3 +202,15 @@ No exclamation mark suffixes on any tier. Z-index layering ensures crits render 
 ### Gotcha: Color via self_modulate
 
 Do **not** use `add_theme_color_override("default_color", color)` or BBCode `[color]` tags — the global Exo2 theme overrides them. Use `self_modulate` on the RichTextLabel node to tint reliably.
+
+### Gotcha: Duplicate Hit Events from Shared Projectile Signals
+
+Projectiles listen to both `body_entered` and `area_entered` to support enemy body collisions and `HitboxArea` collisions. The same enemy can trigger both during one contact.
+
+Guard `_hit_enemy()` by enemy instance ID so each projectile can only apply damage to a given enemy once. Without this, single hits can produce duplicate damage numbers and duplicate damage application (seen with Straight Line Negotiator).
+
+### Gotcha: Orbit Contact Radius vs Large Enemies
+
+Orbit weapons should not use a fixed extra radius for all enemies. Use enemy hitbox shape dimensions (`HitboxArea/HitboxShape`) when computing contact threshold.
+
+This keeps PSP-9000 collisions reliable against large freighters and other non-circular enemies.
