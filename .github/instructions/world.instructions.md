@@ -47,18 +47,13 @@ Stations spawn randomly around the arena at run start:
 
 Flat stats (shield, max_hp) use amounts scaled ×100 at generation time in `StationService._generate_single_buff`, so the stored buff amount matches the applied flat value. Percentage-scale stats (damage, speed) use raw decimal values (0.02–0.15).
 
-## Flow Field Pathfinding
+## Asteroid Interaction
 
-BFS-based grid covering the arena for enemy movement:
+Enemies phase through asteroids at reduced speed (see `enemies.instructions.md` for movement details). Key asteroid properties:
 
-- `FLOW_FIELD_CELL_SIZE` — flow-field grid cell size
-- `FLOW_FIELD_UPDATE_INTERVAL` — recompute cadence from player position
-- `FLOW_FIELD_OBSTACLE_BUFFER` — Buffer around asteroids for blocked cells
-- 8-directional BFS routing around blocked cells (asteroids + buffer)
-- Enemies sample O(1) direction lookups with bilinear interpolation for smooth paths
-- Direction changes are lerped via `ENEMY_TURN_SPEED` to prevent jerky turns
-
-Key file: `scripts/systems/flow_field.gd` (`FlowField` node)
+- Each asteroid has an `effective_radius` property (max vertex distance from center)
+- Used by enemy movement for overlap detection (`distance_squared` vs `effective_radius²`)
+- Asteroid data cached in `FrameCache.asteroids` (static cache, refreshed via `cache_statics()`)
 
 ## Fog of War
 
@@ -82,7 +77,7 @@ Fog texture is rebuilt only when a dirty flag is set (player moves into a new gr
 
 One-time-use world interactables that vacuum all drops (not power-ups) to the player:
 
-- Beacon count is rolled per run in range `GRAVITY_WELL_BEACON_COUNT_MIN`..`GRAVITY_WELL_BEACON_COUNT_MAX` (currently 2-5), spawned by `GravityWellBeaconSpawner`
+- Beacon count is derived from `GRAVITY_WELL_BEACON_DENSITY` × safe area, spawned by `GravityWellBeaconSpawner`
 - Spawn positions avoid asteroids and stations using rejection sampling
 - Vacuum skips nodes in `"powerups"` group — power-ups require physical touch
 - Vacuum speed uses `GameConfig.GRAVITY_WELL_VACUUM_SPEED` directly (no half-speed multiplier)
@@ -120,7 +115,7 @@ Key files:
 
 ## Resolved Issues
 
-- **Enemy obstacle avoidance**: Raycast approach caused spinning/clustering. Potential field repulsion caused jitter. Replaced with BFS flow field — globally consistent, deterministic, no per-enemy physics queries.
+- **Enemy obstacle avoidance**: Raycast approach caused spinning/clustering. Potential field repulsion caused jitter. BFS flow field was tried but made movement feel unnatural. All replaced with asteroid phasing — enemies pass through asteroids at 50% speed with visual dim.
 - **Station buff flat stats** used percentage-scale amounts (0.02–0.15) applied raw as flat bonuses, making +9 Shield actually +0.09. Fixed by scaling flat amounts ×100 at generation in `StationService._generate_single_buff`.
 - **Gravity Well placeholder visual**: Replaced ColorRect with custom `_draw()` circle (pulsing glow, border ring, centered text) and manual activation via `interact` input with proximity prompt.
 - **Gravity Well vacuum exemption**: Beacons and Gravity Well power-ups now skip nodes in the `"powerups"` group when vacuuming, so power-ups always require physical touch.

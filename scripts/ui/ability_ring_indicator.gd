@@ -6,7 +6,7 @@ extends Control
 ## Features a charge-up visual system: spiraling particles during charging,
 ## pulsing glow shader when ready, flash burst on charge completion.
 
-const EffectUtils: GDScript = preload("res://scripts/core/effect_utils.gd")
+const _EffectUtilsScript: GDScript = preload("res://scripts/core/effect_utils.gd")
 
 # =============================================================================
 # CONSTANTS
@@ -541,7 +541,7 @@ func _setup_charge_particles() -> void:
 	_charge_particles.explosiveness = 0.0
 
 	# Use a small white texture
-	_charge_particles.texture = EffectUtils.get_white_pixel_texture(4)
+	_charge_particles.texture = _EffectUtilsScript.get_white_pixel_texture(4)
 
 	# Configure via ParticleProcessMaterial
 	_charge_material = ParticleProcessMaterial.new()

@@ -29,12 +29,11 @@ build/          Export output (windows/, linux/, macos/) — gitignored
 | 5   | `RunManager`         | Run lifecycle, scene transitions                                    |
 | 6   | `ProgressionManager` | XP tracking + level-up flow                                         |
 | 7   | `UpgradeService`     | Level-up option generation                                          |
-| 8   | `StationService`     | Space station buff generation + application                         |
-| 9   | `GameManager`        | Legacy compatibility facade                                         |
-| 10  | `FileLogger`         | Debug logging to `debug_log.txt`                                    |
-| 11  | `SettingsManager`    | Audio/display/monitor selection                                     |
-| 12  | `SteamManager`       | GodotSteam init, callbacks, graceful fallback                       |
-| 13  | `FrameCache`         | Per-frame group query cache (enemies, damage numbers, spatial grid) |
+| 8   | `FileLogger`         | Debug logging to `debug_log.txt`                                    |
+| 9   | `SettingsManager`    | Audio/display/monitor selection                                     |
+| 10  | `StationService`     | Space station buff generation + application                         |
+| 11  | `SteamManager`       | GodotSteam init, callbacks, graceful fallback                       |
+| 12  | `FrameCache`         | Per-frame group query cache (enemies, damage numbers, spatial grid) |
 
 ## Data Files (`data/`)
 

@@ -37,9 +37,10 @@ func spawn_stations(parent: Node, obstacle_positions: Array[Vector2] = []) -> vo
 ## Generate random spawn positions with minimum separation.
 func _generate_spawn_positions() -> Array[Vector2]:
 	var positions: Array[Vector2] = []
-	var count: int = GameConfig.STATION_COUNT
-	var min_radius: float = GameConfig.STATION_SPAWN_MIN_RADIUS
-	var max_radius: float = GameConfig.STATION_SPAWN_MAX_RADIUS
+	var safe_radius: float = GameConfig.ARENA_RADIUS - GameConfig.RADIATION_BELT_WIDTH
+	var safe_area: float = PI * safe_radius * safe_radius
+	var count: int = maxi(1, roundi(GameConfig.STATION_DENSITY * safe_area / 1_000_000.0))
+	var max_radius: float = safe_radius
 	var min_separation: float = GameConfig.STATION_MIN_SEPARATION
 	var max_attempts: int = 100  # Prevent infinite loops
 	
@@ -51,9 +52,9 @@ func _generate_spawn_positions() -> Array[Vector2]:
 		while not valid_position and attempts < max_attempts:
 			attempts += 1
 			
-			# Generate random position within arena bounds
+			# Generate random position within arena bounds (sqrt for uniform area distribution)
 			var angle: float = _rng.randf() * TAU
-			var distance: float = _rng.randf_range(min_radius, max_radius)
+			var distance: float = sqrt(_rng.randf()) * max_radius
 			pos = Vector2.from_angle(angle) * distance
 			
 			# Check separation from existing stations
@@ -76,7 +77,7 @@ func _generate_spawn_positions() -> Array[Vector2]:
 			# Fallback: place anyway if we couldn't find a valid spot
 			push_warning("StationSpawner: Could not find valid position for station %d after %d attempts" % [i, max_attempts])
 			var angle: float = _rng.randf() * TAU
-			var distance: float = _rng.randf_range(min_radius, max_radius)
+			var distance: float = sqrt(_rng.randf()) * max_radius
 			positions.append(Vector2.from_angle(angle) * distance)
 	
 	return positions

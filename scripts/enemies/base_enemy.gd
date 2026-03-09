@@ -34,18 +34,10 @@ var _knockback_velocity: Vector2 = Vector2.ZERO
 # --- Contact Damage ---
 var _damage_cooldown: float = 0.0
 
-# --- Flow Field ---
-var _flow_field: FlowField = null
+# --- Asteroid Overlap ---
+var _in_asteroid: bool = false
 
-# --- Spatial Hash Grid (from FrameCache autoload) ---
-var _enemy_grid: SpatialHashGrid = null
-
-# --- Smoothed Direction ---
-var _current_dir: Vector2 = Vector2.ZERO
 var _rng: RandomNumberGenerator = null
-var _last_position: Vector2 = Vector2.ZERO
-var _stuck_timer: float = 0.0
-var _unstuck_cooldown: float = 0.0
 
 
 func _ready() -> void:
@@ -53,8 +45,6 @@ func _ready() -> void:
 	_rng = GameSeed.rng("base_enemy")
 	current_hp = max_hp
 	_find_player()
-	_find_flow_field()
-	_find_enemy_grid()
 	
 	# Ensure HitboxArea is connected and monitoring
 	_hitbox = get_node_or_null("HitboxArea") as Area2D
@@ -65,7 +55,6 @@ func _ready() -> void:
 	# Spawn frozen if a stopwatch freeze is currently active
 	if get_tree().has_meta("stopwatch_freeze_active"):
 		is_frozen = true
-	_last_position = global_position
 
 
 
@@ -73,7 +62,6 @@ func _physics_process(delta: float) -> void:
 	_process_knockback(delta)
 	_process_movement(delta)
 	move_and_slide()
-	_process_stuck_recovery(delta)
 	_process_contact_damage(delta)
 	_check_arena_bounds()
 
@@ -114,145 +102,50 @@ func _find_player() -> void:
 		_target = players[0]
 
 
-func _find_flow_field() -> void:
-	var fields: Array[Node] = get_tree().get_nodes_in_group("flow_field")
-	if fields.size() > 0:
-		_flow_field = fields[0] as FlowField
-
-
-func _find_enemy_grid() -> void:
-	_enemy_grid = FrameCache.enemy_grid
-
-
-func _process_movement(delta: float) -> void:
+func _process_movement(_delta: float) -> void:
 	if is_frozen:
-		velocity = _knockback_velocity  # Still allow knockback but no chase
+		velocity = _knockback_velocity
+		_update_asteroid_visual(false)
 		return
 	if not _target:
 		_find_player()
 		return
-	if not _flow_field:
-		_find_flow_field()
 
-	# Flow field direction (routes around obstacles via precomputed BFS)
-	var desired_dir: Vector2 = Vector2.ZERO
-	if _flow_field:
-		desired_dir = _flow_field.get_direction(global_position)
-
-	# Fallback to direct chase when field has no data for this cell
-	if desired_dir.length_squared() < 0.001:
-		desired_dir = (_target.global_position - global_position).normalized()
-
-	# Smoothly interpolate toward desired direction to avoid jerky turns
-	if _current_dir.length_squared() < 0.001:
-		_current_dir = desired_dir
-	else:
-		_current_dir = _current_dir.lerp(desired_dir, minf(1.0, GameConfig.ENEMY_TURN_SPEED * delta)).normalized()
-
-	var chase_velocity: Vector2 = _current_dir * move_speed
-
-	# Separation force prevents enemy stacking
-	var separation: Vector2 = _get_separation_force()
-
-	velocity = chase_velocity + _knockback_velocity + separation
+	var speed: float = _get_asteroid_adjusted_speed(move_speed)
+	var desired_dir: Vector2 = (_target.global_position - global_position).normalized()
+	velocity = desired_dir * speed + _knockback_velocity
 
 	# Face movement direction
 	if velocity.length() > 10:
 		rotation = velocity.angle()
 
 
-func _process_stuck_recovery(delta: float) -> void:
-	if _unstuck_cooldown > 0.0:
-		_unstuck_cooldown = maxf(0.0, _unstuck_cooldown - delta)
-
-	var moved_distance: float = global_position.distance_to(_last_position)
-	_last_position = global_position
-
-	if is_frozen:
-		_stuck_timer = 0.0
-		return
-
-	var intended_velocity: Vector2 = velocity - _knockback_velocity
-	if intended_velocity.length() < GameConfig.ENEMY_STUCK_MIN_INTENT_SPEED:
-		_stuck_timer = 0.0
-		return
-
-	if moved_distance <= GameConfig.ENEMY_STUCK_DISTANCE_THRESHOLD:
-		_stuck_timer += delta
-	else:
-		_stuck_timer = maxf(0.0, _stuck_timer - delta * 0.5)
-
-	if _stuck_timer < GameConfig.ENEMY_STUCK_TIME:
-		return
-	if _unstuck_cooldown > 0.0:
-		return
-
-	_apply_unstuck_impulse()
-	_stuck_timer = 0.0
-	_unstuck_cooldown = GameConfig.ENEMY_UNSTUCK_COOLDOWN
-
-
-func _apply_unstuck_impulse() -> void:
-	var escape_dir: Vector2 = _current_dir
-
-	if get_slide_collision_count() > 0:
-		var collision: KinematicCollision2D = get_slide_collision(0)
-		if collision:
-			var normal: Vector2 = collision.get_normal()
-			var tangent: Vector2 = Vector2(-normal.y, normal.x)
-			if tangent.dot(_current_dir) < 0.0:
-				tangent = -tangent
-			escape_dir = tangent.normalized()
-
-	if escape_dir.length_squared() < 0.001 and _target and is_instance_valid(_target):
-		escape_dir = (global_position - _target.global_position).normalized()
-	if escape_dir.length_squared() < 0.001:
-		escape_dir = Vector2.RIGHT.rotated(_rng.randf() * TAU)
-
-	_knockback_velocity += escape_dir * GameConfig.ENEMY_UNSTUCK_PUSH
-	_current_dir = escape_dir
-
-
-## Compute a repulsion force away from nearby enemies to prevent stacking.
-## Uses spatial hash grid for O(k) neighbor lookup instead of O(n) group scan.
-func _get_separation_force() -> Vector2:
-	var sep_radius: float = GameConfig.ENEMY_SEPARATION_RADIUS
-	var sep_radius_sq: float = sep_radius * sep_radius
-	var sep_strength: float = GameConfig.ENEMY_SEPARATION_STRENGTH
-	var force: Vector2 = Vector2.ZERO
+## Check if this enemy overlaps any asteroid and return the adjusted speed.
+## Also updates visual feedback (dim sprite when inside asteroid).
+func _get_asteroid_adjusted_speed(base_speed: float) -> float:
 	var my_pos: Vector2 = global_position
+	var asteroids: Array[Node] = FrameCache.asteroids
+	for asteroid: Node in asteroids:
+		if not asteroid is Node2D:
+			continue
+		var ast: Node2D = asteroid as Node2D
+		@warning_ignore("unsafe_property_access")
+		var radius: float = ast.effective_radius
+		if my_pos.distance_squared_to(ast.global_position) < radius * radius:
+			_update_asteroid_visual(true)
+			return base_speed * GameConfig.ENEMY_ASTEROID_SLOW_MULTIPLIER
+	_update_asteroid_visual(false)
+	return base_speed
 
-	if not _enemy_grid:
-		_find_enemy_grid()
 
-	if _enemy_grid:
-		var nearby: Array[Node2D] = _enemy_grid.query_radius(my_pos, sep_radius)
-		for other: Node2D in nearby:
-			if other == self:
-				continue
-			var diff: Vector2 = my_pos - other.global_position
-			var dist_sq: float = diff.length_squared()
-			if dist_sq < sep_radius_sq and dist_sq > 0.01:
-				var dist: float = sqrt(dist_sq)
-				var proximity: float = 1.0 - (dist / sep_radius)
-				force += diff.normalized() * proximity * sep_strength
-	else:
-		# Fallback: brute-force group scan (only if grid unavailable)
-		var enemies: Array[Node] = FrameCache.enemies
-		for enemy: Node in enemies:
-			if enemy == self:
-				continue
-			if not enemy is Node2D:
-				continue
-			var other_pos: Vector2 = (enemy as Node2D).global_position
-			var diff: Vector2 = my_pos - other_pos
-			var dist_sq: float = diff.length_squared()
-			if dist_sq < sep_radius_sq and dist_sq > 0.01:
-				var dist: float = sqrt(dist_sq)
-				var proximity: float = 1.0 - (dist / sep_radius)
-				force += diff.normalized() * proximity * sep_strength
-
-	return force
+## Update sprite visual when entering/leaving an asteroid.
+func _update_asteroid_visual(inside: bool) -> void:
+	if inside == _in_asteroid:
+		return
+	_in_asteroid = inside
+	var sprite: Node = get_node_or_null("Sprite2D")
+	if sprite:
+		(sprite as CanvasItem).modulate.a = 0.4 if inside else 1.0
 
 
 func _process_knockback(delta: float) -> void:
@@ -288,13 +181,14 @@ func _teleport_near_player() -> void:
 		# Quick arena bounds check
 		if candidate.length() < GameConfig.ARENA_RADIUS:
 			global_position = candidate
-			_current_dir = (_target.global_position - global_position).normalized()
+			reset_physics_interpolation()
 			return
 	# Fallback: place behind player relative to center
 	var behind_dir: Vector2 = -_target.global_position.normalized()
 	if behind_dir.length_squared() < 0.01:
 		behind_dir = Vector2.RIGHT
 	global_position = _target.global_position + behind_dir * GameConfig.SPAWN_RADIUS_MIN
+	reset_physics_interpolation()
 
 
 func take_damage(amount: float, _source: Node = null, damage_info: Dictionary = {}) -> void:

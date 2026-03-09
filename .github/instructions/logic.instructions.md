@@ -91,7 +91,7 @@ signal damage_taken(amount: int, source: Node)
 @onready var collision: CollisionShape2D = $CollisionShape2D
 
 # Autoload references via get_node_or_null
-@onready var GameManager: Node = get_node_or_null("/root/GameManager")
+@onready var RunManager: Node = get_node_or_null("/root/RunManager")
 
 # Signals for decoupled communication
 signal died
@@ -126,11 +126,16 @@ return tree.get_nodes_in_group("enemies")  # fallback
 
 ### What FrameCache Provides
 
-| Property         | Type              | Contents                                       |
-| ---------------- | ----------------- | ---------------------------------------------- |
-| `enemies`        | `Array[Node]`     | All nodes in `"enemies"` group                 |
-| `damage_numbers` | `Array[Node]`     | All nodes in `"damage_numbers"` group          |
-| `enemy_grid`     | `SpatialHashGrid` | Spatial hash grid rebuilt from enemy positions |
+| Property         | Type              | Contents                                                |
+| ---------------- | ----------------- | ------------------------------------------------------- |
+| `enemies`        | `Array[Node]`     | All nodes in `"enemies"` group                          |
+| `damage_numbers` | `Array[Node]`     | All nodes in `"damage_numbers"` group                   |
+| `enemy_grid`     | `SpatialHashGrid` | Spatial hash grid rebuilt from enemy positions          |
+| `pickups`        | `Array[Node]`     | All nodes in `"pickups"` group                          |
+| `powerups`       | `Array[Node]`     | All nodes in `"powerups"` group                         |
+| `stations`       | `Array[Node]`     | All nodes in `"stations"` group                         |
+| `asteroids`      | `Array[Node]`     | Static asteroid cache (refreshed via `cache_statics()`) |
+| `player`         | `Node2D`          | Cached player reference                                 |
 
 ---
 

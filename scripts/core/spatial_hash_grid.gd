@@ -15,9 +15,10 @@ func _init(cell_size: float = 100.0) -> void:
 	_inv_cell_size = 1.0 / _cell_size
 
 
-## Remove all entities from the grid.
+## Remove all entities from the grid (reuses bucket arrays to avoid GC churn).
 func clear() -> void:
-	_cells.clear()
+	for key: Vector2i in _cells:
+		(_cells[key] as Array).clear()
 
 
 ## Insert an entity into the grid based on its global_position.

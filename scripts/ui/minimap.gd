@@ -35,7 +35,8 @@ var _fog_material: ShaderMaterial = null
 
 func _ready() -> void:
 	_minimap_size = GameConfig.MINIMAP_SIZE
-	_world_radius = GameConfig.MINIMAP_WORLD_RADIUS
+	_world_radius = GameConfig.ARENA_RADIUS * GameConfig.MINIMAP_WORLD_RADIUS_COVERAGE
+	_world_radius = maxf(_world_radius, 1.0)
 	
 	# Calculate scale: world units to minimap pixels
 	# world_radius controls zoom - smaller value = more zoomed in
@@ -78,18 +79,24 @@ func _setup_fog_overlay() -> void:
 	add_child(_fog_overlay)
 
 
+var _fog_frame_counter: int = 0
+const _FOG_UPDATE_INTERVAL: int = 3  ## Update fog every N frames
+
+
 func _process(_delta: float) -> void:
 	if _player == null:
-		_find_player()
+		_player = FrameCache.player
 	
 	if _player and _fog_of_war:
-		# Reveal fog around player
-		_fog_of_war.reveal_radius(_player.global_position, GameConfig.FOG_REVEAL_RADIUS)
-		
-		# Update fog texture for shader
-		if _fog_material:
-			var fog_tex: ImageTexture = _fog_of_war.get_texture(_player.global_position, _world_radius)
-			_fog_material.set_shader_parameter("fog_texture", fog_tex)
+		_fog_frame_counter += 1
+		if _fog_frame_counter >= _FOG_UPDATE_INTERVAL:
+			_fog_frame_counter = 0
+			# Reveal fog around player
+			_fog_of_war.reveal_radius(_player.global_position, GameConfig.FOG_REVEAL_RADIUS)
+			# Update fog texture for shader
+			if _fog_material:
+				var fog_tex: ImageTexture = _fog_of_war.get_texture(_player.global_position, _world_radius)
+				_fog_material.set_shader_parameter("fog_texture", fog_tex)
 	
 	# Redraw every frame
 	queue_redraw()
@@ -118,9 +125,6 @@ func _draw() -> void:
 	
 	# Draw enemies
 	_draw_enemies(center, radius, player_pos)
-	
-	# Draw pickups
-	_draw_pickups(center, radius, player_pos)
 
 	# Draw power-ups with unique icon/color markers
 	_draw_powerups(center, radius, player_pos)
@@ -177,7 +181,7 @@ func _draw_enemies(center: Vector2, radius: float, player_pos: Vector2) -> void:
 
 ## Draw pickup dots on the minimap.
 func _draw_pickups(center: Vector2, radius: float, player_pos: Vector2) -> void:
-	var pickups: Array[Node] = get_tree().get_nodes_in_group("pickups")
+	var pickups: Array[Node] = FrameCache.pickups
 	
 	for pickup: Node in pickups:
 		if not pickup is Node2D:
@@ -200,7 +204,7 @@ func _draw_pickups(center: Vector2, radius: float, player_pos: Vector2) -> void:
 
 ## Draw power-up markers with type-specific icon and color.
 func _draw_powerups(center: Vector2, radius: float, player_pos: Vector2) -> void:
-	var powerups: Array[Node] = get_tree().get_nodes_in_group("powerups")
+	var powerups: Array[Node] = FrameCache.powerups
 
 	for powerup: Node in powerups:
 		if not powerup is Node2D:
@@ -240,7 +244,7 @@ func _draw_powerup_icon(marker_pos: Vector2, marker_type: String, marker_color: 
 			marker_pos + Vector2(-0.3, 1.8) * icon_scale,
 			marker_pos + Vector2(0.1, 0.5) * icon_scale
 		])
-		draw_colored_polygon(bolt_points, Color.WHITE)
+		draw_polyline(bolt_points, Color.WHITE, 1.2)
 	elif marker_type == "stopwatch":
 		draw_circle(marker_pos, 1.7 * icon_scale, Color.WHITE)
 		draw_line(marker_pos + Vector2(0.0, -2.4) * icon_scale, marker_pos + Vector2(0.0, -1.6) * icon_scale, marker_color, 1.0)
@@ -273,7 +277,7 @@ func _get_powerup_marker_info(powerup: Node2D) -> Dictionary:
 
 ## Draw space station icons on the minimap (active stations only).
 func _draw_stations(center: Vector2, radius: float, player_pos: Vector2) -> void:
-	var stations: Array[Node] = get_tree().get_nodes_in_group("stations")
+	var stations: Array[Node] = FrameCache.stations
 	
 	for station: Node in stations:
 		if not station is Node2D:
@@ -296,7 +300,7 @@ func _draw_stations(center: Vector2, radius: float, player_pos: Vector2) -> void
 
 ## Draw asteroid shapes on the minimap (scaled polygons, not dots).
 func _draw_asteroids(center: Vector2, radius: float, player_pos: Vector2) -> void:
-	var asteroids: Array[Node] = get_tree().get_nodes_in_group("asteroids")
+	var asteroids: Array[Node] = FrameCache.asteroids
 
 	for asteroid: Node in asteroids:
 		if not asteroid is Node2D:
@@ -348,9 +352,7 @@ func _draw_asteroids(center: Vector2, radius: float, player_pos: Vector2) -> voi
 
 
 func _find_player() -> void:
-	var players: Array[Node] = get_tree().get_nodes_in_group("player")
-	if players.size() > 0:
-		_player = players[0] as Node2D
+	_player = FrameCache.player
 
 
 ## Returns the fog of war instance (for sharing with full map overlay).

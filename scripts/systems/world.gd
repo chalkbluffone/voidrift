@@ -10,7 +10,6 @@ var _stars_near_layer: Node = null
 var _arena_boundary: Node2D = null
 var _asteroid_spawner: AsteroidSpawner = null
 var _station_spawner: StationSpawner = null
-var _flow_field: FlowField = null
 var _beacon_spawner: GravityWellBeaconSpawner = null
 
 func _enter_tree() -> void:
@@ -35,9 +34,6 @@ func _ready() -> void:
 	# Spawn asteroids (terrain placed first)
 	var asteroid_positions: Array[Vector2] = _setup_asteroids()
 	
-	# Build flow field for enemy pathfinding around asteroids
-	_setup_flow_field()
-	
 	# Spawn space stations (avoids asteroid positions)
 	_setup_stations(asteroid_positions)
 	
@@ -46,6 +42,10 @@ func _ready() -> void:
 	
 	# Spawn player at random safe position (avoids asteroids)
 	_setup_player_spawn(asteroid_positions)
+
+	# Cache static groups in FrameCache now that all world objects are spawned
+	var _frame_cache: Node = get_node("/root/FrameCache")
+	_frame_cache.cache_statics()
 
 	# Start the run if no main menu launched it
 	if RunManager.current_state != RunManager.GameState.PLAYING:
@@ -99,26 +99,6 @@ func _setup_asteroids() -> Array[Vector2]:
 
 	_asteroid_spawner = AsteroidSpawner.new()
 	return _asteroid_spawner.spawn_asteroids(asteroids_container)
-
-
-## Build the flow field navigation grid for enemy pathfinding.
-func _setup_flow_field() -> void:
-	_flow_field = FlowField.new()
-	_flow_field.name = "FlowField"
-	add_child(_flow_field)
-
-	var asteroids: Array[Node] = get_tree().get_nodes_in_group("asteroids")
-	_flow_field.setup(
-		GameConfig.ARENA_RADIUS,
-		GameConfig.FLOW_FIELD_CELL_SIZE,
-		asteroids,
-		GameConfig.FLOW_FIELD_OBSTACLE_BUFFER,
-	)
-
-	# First update so enemies spawned immediately have a valid field
-	var ship: Node2D = get_node_or_null("Ship") as Node2D
-	if ship:
-		_flow_field.update_field(ship.global_position)
 
 
 ## Spawn space stations around the arena, avoiding asteroid positions.

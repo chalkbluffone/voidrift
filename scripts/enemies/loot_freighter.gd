@@ -79,23 +79,11 @@ func _process_movement(delta: float) -> void:
 			_flee_movement(delta)
 
 
-func _chase_movement(delta: float) -> void:
-	## Move toward the player at normal chase speed using flow field.
-	var desired_dir: Vector2 = Vector2.ZERO
-	if _flow_field:
-		desired_dir = _flow_field.get_direction(global_position)
-	if desired_dir.length_squared() < 0.001:
-		desired_dir = (_target.global_position - global_position).normalized()
-
-	# Smooth direction changes
-	if _current_dir.length_squared() < 0.001:
-		_current_dir = desired_dir
-	else:
-		_current_dir = _current_dir.lerp(desired_dir, minf(1.0, GameConfig.ENEMY_TURN_SPEED * delta)).normalized()
-
-	var chase_velocity: Vector2 = _current_dir * move_speed
-	var separation: Vector2 = _get_separation_force()
-	velocity = chase_velocity + _knockback_velocity + separation
+func _chase_movement(_delta: float) -> void:
+	## Move toward the player at normal chase speed.
+	var speed: float = _get_asteroid_adjusted_speed(move_speed)
+	var desired_dir: Vector2 = (_target.global_position - global_position).normalized()
+	velocity = desired_dir * speed + _knockback_velocity
 
 	if velocity.length() > 10:
 		rotation = velocity.angle()
@@ -118,10 +106,8 @@ func _flee_movement(delta: float) -> void:
 		var drift_angle: float = _rng.randf_range(-GameConfig.FREIGHTER_FLEE_DRIFT_ANGLE, GameConfig.FREIGHTER_FLEE_DRIFT_ANGLE)
 		_flee_direction = _flee_direction.rotated(drift_angle).normalized()
 
-	# Direct flee — move_and_slide() handles asteroid collision naturally
-	var flee_velocity: Vector2 = _flee_direction * flee_speed
-	var separation: Vector2 = _get_separation_force()
-	velocity = flee_velocity + _knockback_velocity + separation
+	var speed: float = _get_asteroid_adjusted_speed(flee_speed)
+	velocity = _flee_direction * speed + _knockback_velocity
 
 	if velocity.length() > 10:
 		rotation = velocity.angle()

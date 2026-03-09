@@ -88,34 +88,20 @@ The Stopwatch power-up freezes all enemies in place:
 - **New enemy spawns** check `get_tree().has_meta("stopwatch_freeze_active")` in `_ready()` and spawn frozen
 - Unfreeze timer uses generation-counter pattern — collecting another stopwatch refreshes the duration
 
-## Enemy Movement & Flow Field
+## Enemy Movement & Asteroid Phasing
 
-Enemies use the `FlowField` system for pathfinding (see `world.instructions.md` for flow field details). Key behavior:
+Enemies use simple direct chase movement — they move straight toward the player at `move_speed`. Enemies do **not** collide with asteroids (collision mask excludes layer 2). Instead, they phase through asteroids at reduced speed:
 
-- Direction from flow field is sampled via O(1) bilinear interpolation lookup
-- Direction changes are lerped via `ENEMY_TURN_SPEED` (default 6.0) to prevent jerky turns
-- Soft `_get_separation_force()` provides gentle visual spread without hard blocking
-- Enemies do **not** collide with each other (collision mask excludes layer 8) — standard for the survivors genre
+- `ENEMY_ASTEROID_SLOW_MULTIPLIER` (0.5) — speed multiplier when overlapping an asteroid
+- Visual feedback: enemy sprite dims to 40% alpha while inside an asteroid
+- Asteroids act as soft tactical cover — players can kite through asteroid fields for breathing room
+- The slow check uses `FrameCache.asteroids` (static cache) with `distance_squared` vs `effective_radius²`
 
-### Separation via SpatialHashGrid
+Enemies do **not** collide with each other (collision mask excludes layer 8) — standard for the survivors genre.
 
-Separation force uses `SpatialHashGrid` for O(k) neighbor queries instead of O(n²) brute force:
+### Loot Freighter Movement
 
-- `SpatialHashGrid` (`scripts/core/spatial_hash_grid.gd`) uses fixed-size cells for fast radius queries
-- Entities register/unregister on spawn/despawn
-- `query_radius()` returns nearby entities within a given radius
-- **Critical**: `is_instance_valid(entity)` must be checked BEFORE `entity as Node2D` cast — casting a freed object crashes immediately
-
-### Anti-Stuck Recovery (Asteroids)
-
-Enemies and Loot Freighters keep flow-field/flee logic, but now apply a lightweight unstuck recovery when movement intent is high and real movement stays near-zero while colliding with obstacles:
-
-- `ENEMY_STUCK_MIN_INTENT_SPEED` gates checks so idle/slow movement does not trigger recovery
-- `ENEMY_STUCK_DISTANCE_THRESHOLD` + `ENEMY_STUCK_TIME` detect persistent blocking
-- Recovery applies a tangential push using collision normal (`ENEMY_UNSTUCK_PUSH`) and updates direction
-- `ENEMY_UNSTUCK_COOLDOWN` prevents repeated rapid-fire corrections
-
-This avoids full pathing rewrites while reducing asteroid pinning for both standard enemies and fleeing freighters.
+`LootFreighter` overrides `_process_movement()` with a chase→flee state machine. Both states call `_get_asteroid_adjusted_speed()` from BaseEnemy for consistent asteroid slow behavior.
 
 ### Enemy Leash System
 
@@ -157,5 +143,5 @@ When overriding `take_damage()` in an enemy subclass (e.g., `LootFreighter`), ca
 
 ## Resolved Issues
 
-- **Raycast obstacle avoidance** caused spinning/clustering (surface normals inconsistent between frames/enemies). Potential field repulsion also caused jitter. Both replaced with BFS flow field — globally consistent, deterministic, no per-enemy physics queries.
+- **Raycast obstacle avoidance** caused spinning/clustering (surface normals inconsistent between frames/enemies). Potential field repulsion also caused jitter. BFS flow field was tried but made movement feel unnatural. All replaced with simple direct chase + asteroid phasing (enemies pass through asteroids at 50% speed with visual dim).
 - **SpatialHashGrid freed-object crash**: `entity as Node2D` cast on a freed object crashes before `is_instance_valid()` can protect. Fixed by checking validity before the cast in `query_radius()`.

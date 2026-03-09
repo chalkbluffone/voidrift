@@ -146,7 +146,7 @@ func _on_bullet_hit(enemy: Node2D, _damage_info: Dictionary, source_projectile: 
 		if not enemy_any is Node2D or not is_instance_valid(enemy_any):
 			continue
 		var e: Node2D = enemy_any as Node2D
-		if e == enemy:
+		if is_instance_valid(enemy) and e == enemy:
 			continue
 		var dist: float = hit_pos.distance_to(e.global_position)
 		if dist < nearest_dist:

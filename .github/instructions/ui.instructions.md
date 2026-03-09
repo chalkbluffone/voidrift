@@ -46,7 +46,7 @@ The HUD uses Orbitron-Bold font throughout with synthwave neon styling.
 - Station markers: gold (active), gray (depleted) — always visible (not fog-restricted)
 - Asteroid polygons: actual shapes scaled to minimap coordinates, fog-restricted, clamped to circular boundary
 - **Polygon clamping rule**: If ANY vertex is clamped to the circular boundary, draw a simple `draw_circle()` dot instead of `draw_colored_polygon()`. Only fully-inside asteroids get polygon treatment (avoids degenerate triangulation).
-- World radius visible controlled by `MINIMAP_WORLD_RADIUS` (zoom level)
+- World radius visible controlled by `MINIMAP_WORLD_RADIUS_COVERAGE` (fraction of `ARENA_RADIUS`, zoom level)
 - Key file: `scripts/ui/minimap.gd`
 
 ## Full Map Overlay

@@ -56,7 +56,8 @@ static func get_radiation_intensity(pos: Vector2) -> float:
 
 ## Returns a random spawn position within the safe zone.
 static func get_random_spawn_position() -> Vector2:
-	var max_spawn_radius: float = GameConfig.ARENA_RADIUS - GameConfig.PLAYER_SPAWN_SAFE_MARGIN
+	var max_spawn_radius: float = GameConfig.ARENA_RADIUS * GameConfig.PLAYER_SPAWN_MAX_RADIUS_COVERAGE
+	max_spawn_radius = clampf(max_spawn_radius, 1.0, GameConfig.ARENA_RADIUS)
 	var game_seed: Node = _get_game_seed()
 	var rng: RandomNumberGenerator = game_seed.rng("arena_utils") if game_seed else RandomNumberGenerator.new()
 	var angle: float = rng.randf() * TAU

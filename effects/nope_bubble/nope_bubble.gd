@@ -177,17 +177,16 @@ func _process(delta: float) -> void:
 	# Also do direct distance check against all enemies as a reliable fallback
 	if _current_layers > 0:
 		var bubble_radius: float = size * 1.3
-		for enemy in FrameCache.enemies:
-			if enemy is Node2D and is_instance_valid(enemy):
-				var dist: float = global_position.distance_to(enemy.global_position)
-				if dist < bubble_radius + 22.0:  # 22 = enemy collision radius
-					_handle_bubble_collision(enemy)
-					# Continuously push enemies away (not just on first contact)
-					if enemy.has_method("apply_knockback"):
-						var push_dir: Vector2 = (enemy.global_position - global_position).normalized()
-						if push_dir == Vector2.ZERO:
-							push_dir = Vector2.RIGHT
-						enemy.apply_knockback(push_dir * knockback * delta * 10.0)
+		var check_radius: float = bubble_radius + 22.0  # 22 = enemy collision radius
+		var nearby: Array[Node2D] = FrameCache.enemy_grid.query_radius(global_position, check_radius)
+		for enemy: Node2D in nearby:
+			_handle_bubble_collision(enemy)
+			# Continuously push enemies away (not just on first contact)
+			if enemy.has_method("apply_knockback"):
+				var push_dir: Vector2 = (enemy.global_position - global_position).normalized()
+				if push_dir == Vector2.ZERO:
+					push_dir = Vector2.RIGHT
+				enemy.apply_knockback(push_dir * knockback * delta * 10.0)
 
 
 func _create_visuals() -> void:

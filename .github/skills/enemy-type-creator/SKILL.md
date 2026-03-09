@@ -74,26 +74,11 @@ func _process_movement(delta: float) -> void:
 			_chase_movement(delta)
 
 
-func _chase_movement(delta: float) -> void:
-	## Standard chase using flow field. Copy from BaseEnemy._process_movement().
-	if not _flow_field:
-		_find_flow_field()
-
-	var desired_dir: Vector2 = Vector2.ZERO
-	if _flow_field:
-		desired_dir = _flow_field.get_direction(global_position)
-
-	if desired_dir.length_squared() < 0.001:
-		desired_dir = (_target.global_position - global_position).normalized()
-
-	if _current_dir.length_squared() < 0.001:
-		_current_dir = desired_dir
-	else:
-		_current_dir = _current_dir.lerp(desired_dir, minf(1.0, GameConfig.ENEMY_TURN_SPEED * delta)).normalized()
-
-	var chase_velocity: Vector2 = _current_dir * move_speed
-	var separation: Vector2 = _get_separation_force()
-	velocity = chase_velocity + _knockback_velocity + separation
+func _chase_movement(_delta: float) -> void:
+	## Standard chase — direct toward player with asteroid slow.
+	var speed: float = _get_asteroid_adjusted_speed(move_speed)
+	var desired_dir: Vector2 = (_target.global_position - global_position).normalized()
+	velocity = desired_dir * speed + _knockback_velocity
 
 	if velocity.length() > 10:
 		rotation = velocity.angle()
@@ -101,12 +86,11 @@ func _chase_movement(delta: float) -> void:
 
 **Key rules for enemy scripts:**
 
-- Always call `super._ready()` to inherit base setup (group, HP, player/flow field finding)
+- Always call `super._ready()` to inherit base setup (group, HP, player finding)
 - Override `_process_movement(delta)` for custom movement — BaseEnemy calls this from `_physics_process`
 - Override `take_damage()` if the enemy has special damage reactions (like LootFreighter's flee trigger)
 - Set `enemy_type` in `_ready()`: `"normal"`, `"elite"`, `"boss"`, or `"loot"`
-- Use flow field for pathfinding: `_flow_field.get_direction(global_position)`
-- Always include separation force: `_get_separation_force()` (prevents enemy stacking)
+- Use `_get_asteroid_adjusted_speed(base_speed)` for movement speed (handles asteroid slow + visual dim)
 - Include knockback velocity in final velocity calculation
 
 ### Step 3: Create Enemy Scene
@@ -250,8 +234,7 @@ func _process_movement(delta: float) -> void:
 - [ ] HitboxArea: Layer 8, Mask 1 (Player), monitoring + monitorable enabled
 - [ ] JSON entry in `data/enemies.json` with all required keys
 - [ ] `super._ready()` called in custom scripts
-- [ ] Flow field movement used (not direct chase)
-- [ ] Separation force included in velocity
+- [ ] Asteroid slow used via `_get_asteroid_adjusted_speed()` in movement
 - [ ] `enemy_type` set correctly ("normal", "elite", "boss", "loot")
 - [ ] Loot values configured (xp_value, credit_value, stardust_value)
 - [ ] `died` signal emits correctly (inherited from BaseEnemy)

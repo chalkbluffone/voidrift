@@ -128,6 +128,8 @@ func _find_spawn_position() -> Vector2:
 		var angle: float = _rng.randf() * TAU
 		var distance: float = _rng.randf_range(GameConfig.SPAWN_RADIUS_MIN, GameConfig.SPAWN_RADIUS_MAX)
 		var candidate: Vector2 = _player.global_position + Vector2.from_angle(angle) * distance
+		if candidate.length() >= GameConfig.ARENA_RADIUS:
+			continue
 
 		var overlaps: bool = false
 		for asteroid_data: Dictionary in _cached_asteroids:
@@ -145,6 +147,8 @@ func _find_spawn_position() -> Vector2:
 		var angle: float = _rng.randf() * TAU
 		var distance: float = _rng.randf_range(GameConfig.SPAWN_RADIUS_MAX, GameConfig.SPAWN_RADIUS_MAX * 1.5)
 		var candidate: Vector2 = _player.global_position + Vector2.from_angle(angle) * distance
+		if candidate.length() >= GameConfig.ARENA_RADIUS:
+			continue
 
 		var overlaps: bool = false
 		for asteroid_data: Dictionary in _cached_asteroids:
@@ -161,7 +165,8 @@ func _find_spawn_position() -> Vector2:
 	var behind_dir: Vector2 = -_player.global_position.normalized()
 	if behind_dir.length_squared() < 0.01:
 		behind_dir = Vector2.RIGHT
-	return _player.global_position + behind_dir * GameConfig.SPAWN_RADIUS_MIN
+	var fallback: Vector2 = _player.global_position + behind_dir * GameConfig.SPAWN_RADIUS_MIN
+	return ArenaUtils.clamp_to_arena(fallback * 0.95)
 
 
 func _spawn_enemy() -> void:
@@ -388,7 +393,7 @@ func _spawn_xp(pos: Vector2, amount: float) -> void:
 	get_tree().current_scene.call_deferred("add_child", xp)
 
 
-func _spawn_credits(pos: Vector2, amount: int) -> void:
+func _spawn_credits(_pos: Vector2, amount: int) -> void:
 	if amount <= 0:
 		return
 	# Performance optimization: grant credits instantly instead of spawning pickup nodes.

@@ -21,16 +21,17 @@ func spawn_asteroids(parent: Node) -> Array[Vector2]:
 		rng = RandomNumberGenerator.new()
 		rng.seed = 1
 
-	var count: int = GameConfig.ASTEROID_COUNT
-	var min_radius: float = GameConfig.ASTEROID_SPAWN_MIN_RADIUS
-	var max_radius: float = GameConfig.ASTEROID_SPAWN_MAX_RADIUS
+	var safe_radius: float = GameConfig.ARENA_RADIUS - GameConfig.RADIATION_BELT_WIDTH
+	var safe_area: float = PI * safe_radius * safe_radius
+	var count: int = maxi(1, roundi(GameConfig.ASTEROID_DENSITY * safe_area / 1_000_000.0))
+	var max_radius: float = safe_radius
 	var min_sep: float = GameConfig.ASTEROID_MIN_SEPARATION
 	var max_attempts: int = 100
 
 	_spawned_positions.clear()
 
 	for i: int in range(count):
-		var pos: Vector2 = _find_valid_position(rng, min_radius, max_radius, min_sep, max_attempts)
+		var pos: Vector2 = _find_valid_position(rng, max_radius, min_sep, max_attempts)
 		_spawned_positions.append(pos)
 
 		var asteroid_size: float = rng.randf_range(
@@ -49,14 +50,13 @@ func spawn_asteroids(parent: Node) -> Array[Vector2]:
 ## Find a position that satisfies minimum separation from existing asteroids.
 func _find_valid_position(
 	rng: RandomNumberGenerator,
-	min_radius: float,
 	max_radius: float,
 	min_sep: float,
 	max_attempts: int
 ) -> Vector2:
 	for attempt: int in range(max_attempts):
 		var angle: float = rng.randf() * TAU
-		var distance: float = rng.randf_range(min_radius, max_radius)
+		var distance: float = sqrt(rng.randf()) * max_radius
 		var candidate: Vector2 = Vector2.from_angle(angle) * distance
 
 		var valid: bool = true
@@ -70,7 +70,7 @@ func _find_valid_position(
 
 	# Fallback: return last generated position even if separation violated
 	var fallback_angle: float = rng.randf() * TAU
-	var fallback_distance: float = rng.randf_range(min_radius, max_radius)
+	var fallback_distance: float = sqrt(rng.randf()) * max_radius
 	return Vector2.from_angle(fallback_angle) * fallback_distance
 
 

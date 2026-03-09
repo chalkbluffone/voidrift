@@ -124,6 +124,10 @@ interact={
 
 limits/debugger/max_queued_messages=4096
 
+[physics]
+
+common/physics_interpolation=true
+
 [rendering]
 
 textures/vram_compression/import_etc2_astc=true

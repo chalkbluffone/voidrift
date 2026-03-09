@@ -125,9 +125,6 @@ func _draw() -> void:
 	
 	# Draw stations (only if revealed by fog of war)
 	_draw_stations(center)
-	
-	# Draw pickups
-	_draw_pickups(center)
 
 	# Draw power-ups with unique icon/color markers
 	_draw_powerups(center)
@@ -150,7 +147,8 @@ func _draw() -> void:
 
 func _draw_grid(center: Vector2, radius: float) -> void:
 	# Draw concentric rings at intervals
-	var ring_interval: float = 4000.0  # World units between rings
+	var ring_interval: float = GameConfig.ARENA_RADIUS * GameConfig.FULLMAP_GRID_RING_INTERVAL_COVERAGE
+	ring_interval = maxf(ring_interval, 1.0)
 	var ring_count: int = ceili(GameConfig.ARENA_RADIUS / ring_interval)
 	
 	for i: int in range(1, ring_count):
@@ -185,7 +183,7 @@ func _draw_enemies(center: Vector2) -> void:
 
 
 func _draw_pickups(center: Vector2) -> void:
-	var pickups: Array[Node] = get_tree().get_nodes_in_group("pickups")
+	var pickups: Array[Node] = FrameCache.pickups
 	var radius: float = _map_size * 0.5
 	
 	for pickup: Node in pickups:
@@ -208,7 +206,7 @@ func _draw_pickups(center: Vector2) -> void:
 
 
 func _draw_powerups(center: Vector2) -> void:
-	var powerups: Array[Node] = get_tree().get_nodes_in_group("powerups")
+	var powerups: Array[Node] = FrameCache.powerups
 	var radius: float = _map_size * 0.5
 
 	for powerup: Node in powerups:
@@ -281,7 +279,7 @@ func _get_powerup_marker_info(powerup: Node2D) -> Dictionary:
 
 ## Draw space station icons (only if revealed by fog of war).
 func _draw_stations(center: Vector2) -> void:
-	var stations: Array[Node] = get_tree().get_nodes_in_group("stations")
+	var stations: Array[Node] = FrameCache.stations
 	var radius: float = _map_size * 0.5
 	
 	for station: Node in stations:
@@ -308,7 +306,7 @@ func _draw_stations(center: Vector2) -> void:
 
 ## Draw asteroid shapes on the full map (scaled polygons, not dots).
 func _draw_asteroids(center: Vector2) -> void:
-	var asteroids: Array[Node] = get_tree().get_nodes_in_group("asteroids")
+	var asteroids: Array[Node] = FrameCache.asteroids
 	var radius: float = _map_size * 0.5
 
 	for asteroid: Node in asteroids:
@@ -378,6 +376,4 @@ func set_fog_of_war(fog: FogOfWar) -> void:
 
 
 func _find_player() -> void:
-	var players: Array[Node] = get_tree().get_nodes_in_group("player")
-	if players.size() > 0:
-		_player = players[0] as Node2D
+	_player = FrameCache.player

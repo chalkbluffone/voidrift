@@ -135,19 +135,10 @@ const ENEMY_KNOCKBACK_FRICTION: float = 8.0   # Knockback decay rate (enemies)
 const ENEMY_CONTACT_DAMAGE_INTERVAL: float = 0.5  # Contact damage tick rate (seconds)
 
 # =============================================================================
-# ENEMY OBSTACLE AVOIDANCE (Flow Field)
+# ENEMY ASTEROID INTERACTION
 # =============================================================================
-const FLOW_FIELD_CELL_SIZE: float = 64.0           # Grid resolution in pixels
-const FLOW_FIELD_UPDATE_INTERVAL: float = 0.15     # Seconds between BFS recomputes
-const FLOW_FIELD_OBSTACLE_BUFFER: float = 24.0     # Extra clearance around asteroids (pixels)
-const ENEMY_TURN_SPEED: float = 6.0                # Direction smoothing rate (higher = snappier turns)
-const ENEMY_SEPARATION_RADIUS: float = 50.0        # Repulsion radius between enemies (pixels)
-const ENEMY_SEPARATION_STRENGTH: float = 80.0      # Separation push force (pixels/sec)
-const ENEMY_STUCK_MIN_INTENT_SPEED: float = 30.0   # Minimum intended speed before anti-stuck checks run
-const ENEMY_STUCK_DISTANCE_THRESHOLD: float = 2.0  # Moved distance threshold per physics frame to count as stuck
-const ENEMY_STUCK_TIME: float = 0.6                # Seconds blocked before anti-stuck recovery triggers
-const ENEMY_UNSTUCK_PUSH: float = 180.0            # Tangential push strength used for anti-stuck recovery
-const ENEMY_UNSTUCK_COOLDOWN: float = 0.4          # Minimum time between anti-stuck recoveries
+const ENEMY_ASTEROID_SLOW_MULTIPLIER: float = 0.5  # Speed multiplier when enemy overlaps an asteroid
+const ENEMY_GRID_CELL_SIZE: float = 100.0           # SpatialHashGrid cell size for enemy proximity queries
 
 # =============================================================================
 # COMBAT / STATS
@@ -389,7 +380,7 @@ const ARENA_RADIUS: float = 5000.0            # Circular play area radius (pixel
 const RADIATION_BELT_WIDTH: float = 800.0      # Width of the radiation danger zone at edge
 const RADIATION_DAMAGE_PER_SEC: float = 10.0   # DOT when inside radiation belt
 const RADIATION_PUSH_FORCE: float = 150.0      # Force pushing player back toward center
-const PLAYER_SPAWN_SAFE_MARGIN: float = 2000.0 # Spawn within ARENA_RADIUS - this margin
+const PLAYER_SPAWN_MAX_RADIUS_COVERAGE: float = 0.6 # Player spawn radius as % of ARENA_RADIUS
 const ENEMY_DESPAWN_BUFFER: float = 500.0      # Despawn enemies beyond ARENA_RADIUS + buffer
 const ENEMY_LEASH_RADIUS: float = 1200.0       # Max distance from player before teleport-respawn
 const BOSS_LEASH_RADIUS: float = 2000.0        # Leash radius for boss enemies (wider)
@@ -397,22 +388,21 @@ const BOSS_LEASH_RADIUS: float = 2000.0        # Leash radius for boss enemies (
 # =============================================================================
 # ASTEROIDS
 # =============================================================================
-const ASTEROID_COUNT: int = 50                     # Number of asteroids per run
+const ASTEROID_DENSITY: float = 0.9                # Asteroids per million sq px of safe area (~50 at R=5000)
 const ASTEROID_SIZE_MIN: float = 30.0              # Smallest asteroid radius (pixels)
 const ASTEROID_SIZE_MAX: float = 256.0             # Largest asteroid radius (pixels)
 const ASTEROID_VERTEX_COUNT_MIN: int = 6           # Minimum polygon vertices
 const ASTEROID_VERTEX_COUNT_MAX: int = 16          # Maximum polygon vertices
 const ASTEROID_MIN_SEPARATION: float = 150.0       # Minimum distance between asteroids
-const ASTEROID_SPAWN_MIN_RADIUS: float = 300.0     # Keeps center area clear
-const ASTEROID_SPAWN_MAX_RADIUS: float = 3000.0    # Stay inside radiation belt
 const ASTEROID_RADIUS_JITTER: float = 0.35         # Per-vertex radius variation (0-1)
 
 # =============================================================================
 # MINIMAP / FOG OF WAR / FULL MAP
 # =============================================================================
 const MINIMAP_SIZE: float = 180.0              # Minimap diameter (pixels)
-const MINIMAP_WORLD_RADIUS: float = 600.0     # World radius visible in minimap (smaller = zoomed in)
+const MINIMAP_WORLD_RADIUS_COVERAGE: float = 0.12 # World radius visible in minimap as % of ARENA_RADIUS
 const FULLMAP_SIZE: float = 800.0              # Full map overlay diameter (pixels)
+const FULLMAP_GRID_RING_INTERVAL_COVERAGE: float = 0.8 # Ring spacing as % of ARENA_RADIUS
 const FOG_GRID_SIZE: int = 128                 # Fog of war grid resolution
 const FOG_REVEAL_RADIUS: float = 800.0         # Radius revealed around player (world units)
 const FOG_GLOW_INTENSITY: float = 0.6          # Brightness of fog neon glow (0.5 = dim, 3.0 = bright)
@@ -421,13 +411,11 @@ const FOG_OPACITY: float = 0.5                 # Fog transparency (0.0 = invisib
 # =============================================================================
 # SPACE STATIONS (Buff Shrines)
 # =============================================================================
-const STATION_COUNT: int = 15                  # Number of stations spawned per run
+const STATION_DENSITY: float = 0.27            # Stations per million sq px of safe area (~15 at R=5000)
 const STATION_ZONE_RADIUS: float = 200.0       # Activation bubble radius (pixels)
 const STATION_COLLISION_RADIUS: float = 50.0   # Solid collision radius for station center
 const STATION_CHARGE_TIME: float = 5.0         # Seconds to fully charge when inside zone
 const STATION_DECAY_TIME: float = 5.0          # Seconds for charge to drain to 0 when outside
-const STATION_SPAWN_MIN_RADIUS: float = 500.0  # Minimum distance from arena center
-const STATION_SPAWN_MAX_RADIUS: float = 3200.0 # Maximum distance (inside radiation belt)
 const STATION_MIN_SEPARATION: float = 400.0    # Minimum distance between stations
 const STATION_BUFF_OPTION_COUNT: int = 3       # Number of buff choices shown on completion
 
@@ -468,12 +456,9 @@ const STATION_FLAT_STATS: Array[String] = [
 # GRAVITY WELL (pickup vacuum system)
 # =============================================================================
 const GRAVITY_WELL_VACUUM_SPEED: float = 1200.0            # Speed pickups fly to player during vacuum
-const GRAVITY_WELL_BEACON_COUNT_MIN: int = 2                # Minimum beacons placed per run
-const GRAVITY_WELL_BEACON_COUNT_MAX: int = 5                # Maximum beacons placed per run
+const GRAVITY_WELL_BEACON_DENSITY: float = 0.063            # Beacons per million sq px of safe area (~3-4 at R=5000)
 const GRAVITY_WELL_BEACON_ACTIVATION_RADIUS: float = 80.0   # Proximity to activate beacon
 const GRAVITY_WELL_BEACON_MIN_SEPARATION: float = 500.0     # Minimum distance between beacons
-const GRAVITY_WELL_BEACON_SPAWN_MIN_RADIUS: float = 600.0   # Min distance from arena center
-const GRAVITY_WELL_BEACON_SPAWN_MAX_RADIUS: float = 3000.0  # Max distance from arena center
 
 # Display-friendly stat names for UI
 const STATION_STAT_DISPLAY_NAMES: Dictionary = {
