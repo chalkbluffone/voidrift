@@ -101,12 +101,14 @@ func unlock_captain(captain_id: String) -> void:
 		save_game()
 
 
+## TODO: implement — wire into synergy discovery UI when built
 func discover_synergy(synergy_key: String) -> void:
 	if synergy_key not in persistent_data.discovered_synergies:
 		persistent_data.discovered_synergies.append(synergy_key)
 		save_game()
 
 
+## TODO: implement — wire into synergy discovery UI when built
 func is_synergy_discovered(synergy_key: String) -> bool:
 	return synergy_key in persistent_data.discovered_synergies
 
@@ -183,28 +185,34 @@ func spend_stardust(amount: int) -> bool:
 	return false
 
 
+## TODO: implement — wire into run-end stats screen
 func get_total_runs() -> int:
 	return int(persistent_data.get("total_runs", 0))
 
 
+## TODO: implement — call from RunManager on run end
 func increment_total_runs() -> void:
 	persistent_data["total_runs"] = get_total_runs() + 1
 	save_game()
 
 
+## TODO: implement — wire into run-end stats screen
 func get_total_wins() -> int:
 	return int(persistent_data.get("total_wins", 0))
 
 
+## TODO: implement — call from RunManager on victory
 func increment_total_wins() -> void:
 	persistent_data["total_wins"] = get_total_wins() + 1
 	save_game()
 
 
+## TODO: implement — wire into run-end stats screen
 func get_high_score() -> int:
 	return int(persistent_data.get("high_score", 0))
 
 
+## TODO: implement — call from RunManager on run end
 func update_high_score(score: int) -> bool:
 	if score > get_high_score():
 		persistent_data["high_score"] = score
@@ -213,10 +221,12 @@ func update_high_score(score: int) -> bool:
 	return false
 
 
+## TODO: implement — wire into run-end stats screen
 func get_best_time() -> float:
 	return float(persistent_data.get("best_time", 0.0))
 
 
+## TODO: implement — call from RunManager on run end
 func update_best_time(time: float) -> bool:
 	var current_best: float = get_best_time()
 	if current_best == 0.0 or time < current_best:
@@ -226,6 +236,6 @@ func update_best_time(time: float) -> bool:
 	return false
 
 
+## TODO: implement — call periodically or on run end, needs save trigger
 func add_time_played(seconds: float) -> void:
 	persistent_data["total_time_played"] = float(persistent_data.get("total_time_played", 0.0)) + seconds
-	# Don't save immediately, batch with other saves

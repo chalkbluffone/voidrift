@@ -8,6 +8,7 @@ const LOG_FILE_PATH_EXPORT: String = "user://debug_log.txt"
 const MAX_LOG_SIZE: int = 1024 * 1024  # 1MB max before truncating
 
 var _file: FileAccess = null
+var _bytes_written: int = 0
 var _log_path: String = ""
 
 func _ready() -> void:
@@ -47,7 +48,15 @@ func _exit_tree() -> void:
 func _write(text: String) -> void:
 	if _file:
 		var timestamp: String = Time.get_time_string_from_system()
-		_file.store_string("[%s] %s\n" % [timestamp, text])
+		var line: String = "[%s] %s\n" % [timestamp, text]
+		_bytes_written += line.length()
+		if _bytes_written > MAX_LOG_SIZE:
+			_file.store_string("[%s] [WARN][FileLogger] Log truncated at %d bytes\n" % [timestamp, MAX_LOG_SIZE])
+			_file.flush()
+			_file.close()
+			_file = null
+			return
+		_file.store_string(line)
 		_file.flush()  # Flush immediately so we don't lose data on crash
 
 

@@ -8,7 +8,7 @@ applyTo: "**"
 
 ```
 data/           9 JSON files — all game content (weapons, ships, captains, enemies, etc.)
-globals/        13 autoloads (GameConfig → FrameCache)
+globals/        12 autoloads (GameConfig → FrameCache)
 scripts/        GDScript organized by domain (core/, combat/, player/, systems/, ui/, pickups/, enemies/)
               core/ includes SpatialHashGrid utility for fast neighbor queries
 scenes/         .tscn files (gameplay/, ui/, pickups/, enemies/)

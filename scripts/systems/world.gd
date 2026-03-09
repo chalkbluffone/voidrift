@@ -117,7 +117,7 @@ func _setup_stations(obstacle_positions: Array[Vector2]) -> void:
 func _setup_gravity_well_beacons(obstacle_positions: Array[Vector2]) -> void:
 	# Collect station positions to avoid overlap
 	var avoid_positions: Array[Vector2] = obstacle_positions.duplicate()
-	var stations: Array[Node] = get_tree().get_nodes_in_group("stations")
+	var stations: Array[Node] = FrameCache.stations
 	for station: Node in stations:
 		if station is Node2D:
 			avoid_positions.append((station as Node2D).global_position)

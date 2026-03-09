@@ -131,11 +131,13 @@ func get_weapon(id: String) -> Dictionary:
 func get_weapon_upgrade(id: String) -> Dictionary:
 	return weapon_upgrades.get(id, {})
 
+## TODO: implement — wire into weapon upgrade browsing UI
 func get_all_weapon_upgrades() -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	result.assign(weapon_upgrades.values())
 	return result
 
+## TODO: implement — wire into weapon upgrade browsing UI
 func get_weapon_upgrade_ids() -> Array[String]:
 	var result: Array[String] = []
 	result.assign(weapon_upgrades.keys())
@@ -159,6 +161,7 @@ func get_enemy(id: String) -> Dictionary:
 func get_base_player_stats() -> Dictionary:
 	return base_player_stats.duplicate()
 
+## TODO: implement — wire into weapon collection/browse UI
 func get_all_weapons() -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	result.assign(weapons.values())
@@ -179,6 +182,7 @@ func get_all_ship_upgrades() -> Array[Dictionary]:
 	result.assign(ship_upgrades.values())
 	return result
 
+## TODO: implement — wire into item collection/browse UI
 func get_all_items() -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	result.assign(items.values())
@@ -200,20 +204,20 @@ func get_enabled_weapon_ids() -> Array[String]:
 	result.assign(weapons.keys().filter(func(id: Variant) -> bool: return weapons[id].get("enabled", true)))
 	return result
 
+## TODO: implement — integrate with PersistenceManager unlock tracking
 func get_unlocked_weapons() -> Array[Dictionary]:
-	# TODO: Filter by player's unlock progress
 	var result: Array[Dictionary] = []
 	result.assign(weapons.values().filter(func(w: Variant) -> bool: return w.get("enabled", true) and w.get("unlock_condition") == "default"))
 	return result
 
+## TODO: implement — integrate with PersistenceManager unlock tracking
 func get_unlocked_ships() -> Array[Dictionary]:
-	# TODO: Filter by player's unlock progress
 	var result: Array[Dictionary] = []
 	result.assign(ships.values().filter(func(s: Variant) -> bool: return s.get("unlock_condition") == "default"))
 	return result
 
+## TODO: implement — integrate with PersistenceManager unlock tracking
 func get_unlocked_captains() -> Array[Dictionary]:
-	# TODO: Filter by player's unlock progress
 	var result: Array[Dictionary] = []
 	result.assign(captains.values().filter(func(c: Variant) -> bool: return c.get("unlock_condition") == "default"))
 	return result

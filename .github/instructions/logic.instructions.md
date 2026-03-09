@@ -214,7 +214,7 @@ for entity: Variant in bucket:
 Ensure autoload is registered in Project Settings. Use `@onready` to defer until tree is ready:
 
 ```gdscript
-@onready var GameManager: Node = get_node("/root/GameManager")
+@onready var RunManager: Node = get_node("/root/RunManager")
 ```
 
 ### `grab_focus()` Triggers Hover/Scale Tweens on Load

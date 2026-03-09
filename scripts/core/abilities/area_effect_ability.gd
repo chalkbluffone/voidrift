@@ -19,17 +19,15 @@ func _activate() -> void:
 	var enemies: Array[Node] = []
 
 	if radius_value <= 0.0:
-		# Screen-wide: grab all enemies in group
-		enemies.assign(get_tree().get_nodes_in_group("enemies"))
+		# Screen-wide: grab all enemies via FrameCache
+		enemies.assign(FrameCache.enemies)
 	else:
-		# Distance-based from player
+		# Distance-based from player via spatial grid
 		if _owner_ship and _owner_ship is Node2D:
 			var owner_pos: Vector2 = (_owner_ship as Node2D).global_position
-			for enemy in get_tree().get_nodes_in_group("enemies"):
-				if enemy is Node2D:
-					var enemy_2d: Node2D = enemy as Node2D
-					if owner_pos.distance_to(enemy_2d.global_position) <= radius_value:
-						enemies.append(enemy)
+			var nearby: Array[Node2D] = FrameCache.enemy_grid.query_radius(owner_pos, radius_value)
+			for enemy: Node2D in nearby:
+				enemies.append(enemy)
 
 	# Apply slow to each enemy
 	for enemy in enemies:

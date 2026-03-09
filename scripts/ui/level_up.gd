@@ -218,27 +218,6 @@ func _style_card(card: PanelContainer) -> void:
 		)
 
 
-func _style_button(_button: Button, _base_color: Color) -> void:
-	# DEPRECATED: Use CARD_HOVER_FX_SCRIPT.style_synthwave_button() instead.
-	# Kept as no-op stub in case any external callers remain.
-	pass
-
-
-func _on_button_mouse_entered(_button: Button) -> void:
-	# Now handled by CARD_HOVER_FX_SCRIPT.style_synthwave_button() focus/hover connections.
-	pass
-
-
-func _on_button_mouse_exited(_button: Button) -> void:
-	# Now handled by CARD_HOVER_FX_SCRIPT.style_synthwave_button() focus/hover connections.
-	pass
-
-
-func _set_button_hover_state(_button: Button, _hovered: bool) -> void:
-	# Now handled by CARD_HOVER_FX_SCRIPT.tween_button_scale().
-	pass
-
-
 func _on_level_up_triggered(current_level: int, available_upgrades: Array) -> void:
 	# Kill any in-flight hide tween so its stale hide() callback never fires
 	if _hide_tween and _hide_tween.is_valid():
