@@ -43,7 +43,7 @@ func _apply_radiation_effects(delta: float) -> void:
 	# Apply damage scaled by intensity (more damage deeper in belt)
 	var damage: float = GameConfig.RADIATION_DAMAGE_PER_SEC * intensity * delta
 	if damage > 0 and _player.has_method("take_damage"):
-		_player.take_damage(damage, self)
+		_player.take_damage(damage, self, true)
 	
 	# Apply push force toward center
 	var push_direction: Vector2 = ArenaUtils.get_direction_to_center(_player.global_position)

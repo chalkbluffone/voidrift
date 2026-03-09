@@ -18,6 +18,7 @@ func setup(amount: float, damage_info: Dictionary, world_pos: Vector2) -> void:
 	var is_crit: bool = damage_info.get("is_crit", false)
 	var is_overcrit: bool = damage_info.get("is_overcrit", false)
 	var is_heal: bool = damage_info.get("is_heal", false)
+	var is_evade: bool = damage_info.get("is_evade", false)
 
 	# Random offset to prevent stacking
 	var game_seed: Node = get_node_or_null("/root/GameSeed")
@@ -33,7 +34,11 @@ func setup(amount: float, damage_info: Dictionary, world_pos: Vector2) -> void:
 	var color: Color = Color.WHITE
 	var prefix: String = ""
 
-	if is_heal:
+	if is_evade:
+		font_size = GameConfig.DAMAGE_NUMBER_FONT_SIZE_CRIT
+		color = UiColors.CYAN
+		z_index = 103
+	elif is_heal:
 		color = Color(0.2, 1.0, 0.4, 1.0)  # Green
 		prefix = "+"
 		z_index = 99  # Below damage numbers
@@ -48,8 +53,8 @@ func setup(amount: float, damage_info: Dictionary, world_pos: Vector2) -> void:
 	else:
 		z_index = 100  # Normal damage
 
-	# Format display text — round to int for clean appearance
-	var display_text: String = prefix + str(int(round(amount)))
+	# Format display text.
+	var display_text: String = "Evaded!" if is_evade else prefix + _format_compact_amount(amount)
 
 	# Apply font settings via theme overrides
 	add_theme_font_override("bold_font", DAMAGE_NUMBER_FONT)
@@ -65,7 +70,9 @@ func setup(amount: float, damage_info: Dictionary, world_pos: Vector2) -> void:
 	self_modulate = color
 
 	# Build BBCode
-	if is_overcrit:
+	if is_evade:
+		text = "[b]" + display_text + "[/b]"
+	elif is_overcrit:
 		text = "[shake rate=20.0 level=5 connected=1][b]" + display_text + "[/b][/shake]"
 	elif is_crit or is_heal:
 		text = "[b]" + display_text + "[/b]"
@@ -109,3 +116,19 @@ func _animate(is_crit: bool, is_overcrit: bool) -> void:
 		.set_delay(duration * 0.4)
 	tween.set_parallel(false)
 	tween.tween_callback(queue_free)
+
+
+func _format_compact_amount(amount: float) -> String:
+	var rounded: int = int(round(amount))
+	var abs_amount: float = absf(float(rounded))
+	if abs_amount < 1000.0:
+		return str(rounded)
+
+	var compact: float = abs_amount / 1000.0
+	var compact_str: String = "%.1f" % compact
+	if compact_str.ends_with(".0"):
+		compact_str = compact_str.substr(0, compact_str.length() - 2)
+
+	if rounded < 0:
+		return "-" + compact_str + "k"
+	return compact_str + "k"

@@ -222,6 +222,7 @@ const STARDUST_BASE_DROP_CHANCE: float = 0.03  # 3% base chance per non-freighte
 const GAME_OVER_DELAY: float = 0.6         # Death animation delay before game over screen (seconds)
 const HUD_AVATAR_SIZE: float = 72.0        # Captain portrait diameter (pixels)
 const HUD_AVATAR_CROP_FRACTION: float = 0.65  # How much of captain sprite to show (0-1)
+const EVADE_POPUP_COOLDOWN: float = 0.2     # Minimum time between "Evaded!" popups while phasing
 
 # =============================================================================
 # DAMAGE NUMBERS

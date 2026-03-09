@@ -156,7 +156,7 @@ func _activate() -> void:
 			if pickup is BasePickup:
 				var bp: BasePickup = pickup as BasePickup
 				bp.attract_to(_player_ref)
-				bp._current_speed = GameConfig.GRAVITY_WELL_VACUUM_SPEED * 0.5
+				bp._current_speed = GameConfig.GRAVITY_WELL_VACUUM_SPEED
 
 	# Disable zone and dim visual
 	_buff_zone.monitoring = false

@@ -365,7 +365,8 @@ func _mark_dirty() -> void:
 # --- HP & Damage ---
 
 ## Apply damage after armor/evasion. Returns actual damage taken.
-func take_damage(amount: float, source: Node = null) -> float:
+## When bypass_shield is true, damage is applied directly to HP.
+func take_damage(amount: float, source: Node = null, bypass_shield: bool = false) -> float:
 	# Check evasion
 	var evasion: float = get_stat(STAT_EVASION)
 	if _rng.randf() * 100.0 < evasion:
@@ -377,8 +378,8 @@ func take_damage(amount: float, source: Node = null) -> float:
 	var damage_mult: float = 1.0 - (armor / 100.0)
 	var actual_damage: float = amount * damage_mult
 	
-	# Shield absorbs first
-	if current_shield > 0:
+	# Shield absorbs first unless this damage source bypasses shields.
+	if not bypass_shield and current_shield > 0:
 		if current_shield >= actual_damage:
 			current_shield -= actual_damage
 			shield_recharge_timer = GameConfig.SHIELD_RECHARGE_DELAY

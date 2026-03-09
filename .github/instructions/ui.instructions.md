@@ -153,7 +153,9 @@ Floating `RichTextLabel` nodes spawned in world space at enemy hit positions or 
 - Font: Orbitron-Bold with 3px black outline for readability
 - Animation: rise upward (`DAMAGE_NUMBER_RISE_DISTANCE`) + fade out over `DAMAGE_NUMBER_DURATION`
 - Crit/overcrit: bounce scale via `create_tween()`, BBCode bold/shake. No exclamation mark suffixes.
+- **Compact formatting**: values >= 1000 render as `k` shorthand with one decimal (`16500` -> `16.5k`, `12000` -> `12k`)
 - **Heal numbers**: Green `+N` text for lifesteal procs via `is_heal` flag in `damage_info`
+- **Evade popup**: During phase shift, blocked hits spawn cyan `Evaded!` popup text near the ship via `is_evade` flag in `DamageNumber.setup()`
 - **Z-index layering**: heal=99, normal=100, crit=101, overcrit=102 — ensures crits render above normal hits
 - Soft cap: 30 simultaneous labels (`"damage_numbers"` group), oldest removed when exceeded
 - Setting: `PersistenceManager.persistent_data.settings.show_damage_numbers` (default `true`)
@@ -164,3 +166,4 @@ Floating `RichTextLabel` nodes spawned in world space at enemy hit positions or 
 - **Ship select hover on load**: First card appeared hovered because `grab_focus()` triggers `focus_entered` → hover tween. Fixed by calling `reset_hover()` immediately after `grab_focus()`.
 - **HUD shield bar invisible**: `get_stat("max_shield")` doesn't exist — the stat is `"shield"`. Fixed to `get_stat("shield")`.
 - **Minimap polygon triangulation spam (60K errors)**: Clamping asteroid vertices to circle edge creates degenerate shapes. Fixed by drawing `draw_circle()` dot when any vertex is clamped instead of attempting `draw_colored_polygon()`.
+- **Missing phase-shift feedback**: Added `Evaded!` popup text when incoming hits are ignored during active phase shift, with cooldown via `GameConfig.EVADE_POPUP_COOLDOWN` to prevent spam.

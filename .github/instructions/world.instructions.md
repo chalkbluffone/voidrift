@@ -10,7 +10,7 @@ The play area is a circular arena with a radiation danger zone at the edge:
 
 - `ARENA_RADIUS` — circular play area radius
 - `RADIATION_BELT_WIDTH` — radiation zone width at the arena edge
-- `RADIATION_DAMAGE_PER_SEC` — DOT applied while in radiation belt
+- `RADIATION_DAMAGE_PER_SEC` — DOT applied while in radiation belt (bypasses shields; damages HP directly)
 - `RADIATION_PUSH_FORCE` — Pushes player back toward center
 
 Key files:
@@ -85,6 +85,7 @@ One-time-use world interactables that vacuum all drops (not power-ups) to the pl
 - `GRAVITY_WELL_BEACON_COUNT` beacons per run, spawned by `GravityWellBeaconSpawner`
 - Spawn positions avoid asteroids and stations using rejection sampling
 - Vacuum skips nodes in `"powerups"` group — power-ups require physical touch
+- Vacuum speed uses `GameConfig.GRAVITY_WELL_VACUUM_SPEED` directly (no half-speed multiplier)
 
 ### Beacon Visual
 
@@ -124,3 +125,5 @@ Key files:
 - **Gravity Well placeholder visual**: Replaced ColorRect with custom `_draw()` circle (pulsing glow, border ring, centered text) and manual activation via `interact` input with proximity prompt.
 - **Gravity Well vacuum exemption**: Beacons and Gravity Well power-ups now skip nodes in the `"powerups"` group when vacuuming, so power-ups always require physical touch.
 - **Gravity Well refactored to power-up**: `GravityWellPickup` now extends `BasePowerUp` (was `BasePickup`). Dropped from shared power-up pool instead of independent RNG. Scene updated to 48×48 with shader glow.
+- **Gravity Well vacuum felt too weak**: Removed legacy `* 0.5` speed multiplier and preserved boosted pickup speed in `BasePickup` so gravity-well pull is meaningfully faster.
+- **Radiation survivability mismatch**: Radiation belt damage now bypasses shields and applies directly to HP via `take_damage(..., bypass_shield=true)` to keep boundary pressure meaningful.

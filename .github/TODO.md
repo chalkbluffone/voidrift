@@ -29,13 +29,13 @@
 
 ### Phase 5: Survivability 🟡 MEDIUM PRIORITY
 
-- [ ] Radiation belt damage should affect health regardless of shield
+- [x] Radiation belt damage should affect health regardless of shield
 
 ### Phase 6: UX Feedback & Polish 🟡 MEDIUM PRIORITY
 
-- [ ] When damage numbers get large, display as "16.5k" instead of "16500"
-- [ ] When player evades (phase shift), text should pop up near player saying "Evaded!"
-- [ ] Gravity well vacuum needs to pull XP in faster (2x current speed)
+- [x] When damage numbers get large, display as "16.5k" instead of "16500"
+- [x] When player evades (phase shift), text should pop up near player saying "Evaded!"
+- [x] Gravity well vacuum needs to pull XP in faster (2x current speed)
 
 ### Phase 7: Level-Up System 🟡 MEDIUM PRIORITY
 

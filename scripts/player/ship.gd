@@ -24,6 +24,9 @@ const StatsComponentScript: GDScript = preload("res://scripts/core/stats_compone
 @onready var sprite: AnimatedSprite2D = $Sprite2D
 @onready var RunManager: Node = get_node_or_null("/root/RunManager")
 @onready var ProgressionManager: Node = get_node_or_null("/root/ProgressionManager")
+@onready var FrameCache: Node = get_node_or_null("/root/FrameCache")
+
+const _DAMAGE_NUMBER_SCENE: PackedScene = preload("res://scenes/ui/damage_number.tscn")
 
 # --- Test Mode ---
 ## When true, skips run registration and auto-weapon equip
@@ -40,6 +43,7 @@ var _phase_cooldown_timer: float = 0.0
 var _phase_direction: Vector2 = Vector2.ZERO
 var _normal_collision_layer: int = 0
 var _normal_collision_mask: int = 0
+var _evade_popup_cooldown_timer: float = 0.0
 
 # --- I-Frames ---
 var _iframes_timer: float = 0.0
@@ -252,6 +256,9 @@ func _on_stat_changed(stat_name: String, _old_value: float, _new_value: float) -
 
 
 func _physics_process(delta: float) -> void:
+	if _evade_popup_cooldown_timer > 0.0:
+		_evade_popup_cooldown_timer = maxf(0.0, _evade_popup_cooldown_timer - delta)
+
 	_process_phase_shift(delta)
 	_process_phase_recharge(delta)
 	_process_iframes(delta)
@@ -450,8 +457,11 @@ func _process_iframes(delta: float) -> void:
 
 # --- Damage ---
 
-func take_damage(amount: float, source: Node = null) -> float:
-	if _is_invincible or _is_phasing:
+func take_damage(amount: float, source: Node = null, bypass_shield: bool = false) -> float:
+	if _is_phasing:
+		_spawn_evade_popup()
+		return 0.0
+	if _is_invincible:
 		return 0.0
 	
 	# Run damage interceptors (e.g. Nope Bubble shield)
@@ -463,7 +473,7 @@ func take_damage(amount: float, source: Node = null) -> float:
 				return 0.0
 	amount = intercepted_amount
 	
-	var actual_damage: float = stats.take_damage(amount, source)
+	var actual_damage: float = stats.take_damage(amount, source, bypass_shield)
 	
 	if actual_damage > 0:
 		RunManager.record_damage_taken(actual_damage)
@@ -480,6 +490,31 @@ func take_damage(amount: float, source: Node = null) -> float:
 		_iframes_timer = GameConfig.DAMAGE_IFRAMES
 	
 	return actual_damage
+
+
+func _spawn_evade_popup() -> void:
+	if _evade_popup_cooldown_timer > 0.0:
+		return
+	_show_evade_popup()
+	_evade_popup_cooldown_timer = GameConfig.EVADE_POPUP_COOLDOWN
+
+
+func _show_evade_popup() -> void:
+	@warning_ignore("unsafe_property_access")
+	var show_numbers: bool = get_node("/root/PersistenceManager").persistent_data.settings.get("show_damage_numbers", true)
+	if not show_numbers:
+		return
+
+	if FrameCache:
+		var existing: Array[Node] = FrameCache.damage_numbers
+		if existing.size() >= GameConfig.DAMAGE_NUMBER_MAX_COUNT:
+			if is_instance_valid(existing[0]):
+				existing[0].queue_free()
+
+	var label: DamageNumber = _DAMAGE_NUMBER_SCENE.instantiate() as DamageNumber
+	get_tree().current_scene.add_child(label)
+	label.setup(0.0, {"is_evade": true}, global_position)
+
 
 
 func register_damage_interceptor(callback: Callable) -> void:

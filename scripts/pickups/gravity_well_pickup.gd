@@ -26,4 +26,4 @@ func _apply_powerup_effect(player: Node2D, _multiplier: float) -> void:
 			var bp: BasePickup = pickup as BasePickup
 			bp.attract_to(player)
 			# Boost speed for satisfying vacuum effect
-			bp._current_speed = GameConfig.GRAVITY_WELL_VACUUM_SPEED * 0.5
+			bp._current_speed = GameConfig.GRAVITY_WELL_VACUUM_SPEED

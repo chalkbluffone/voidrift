@@ -27,7 +27,9 @@ func _on_pickup_ready() -> void:
 
 func _process(delta: float) -> void:
 	if _is_attracted and _target:
-		_current_speed = minf(_current_speed + GameConfig.PICKUP_MAGNET_ACCELERATION * delta, GameConfig.PICKUP_MAGNET_SPEED)
+		# Keep externally boosted vacuum speeds instead of clamping back to normal magnet speed.
+		var speed_cap: float = maxf(GameConfig.PICKUP_MAGNET_SPEED, _current_speed)
+		_current_speed = minf(_current_speed + GameConfig.PICKUP_MAGNET_ACCELERATION * delta, speed_cap)
 		var direction: Vector2 = (_target.global_position - global_position).normalized()
 		position += direction * _current_speed * delta
 
