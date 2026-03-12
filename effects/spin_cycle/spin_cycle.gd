@@ -14,10 +14,13 @@ extends Node2D
 
 @export var ring_color: Color = Color(1.0, 1.0, 1.0, 0.15)
 @export var wedge_color: Color = Color(0.4, 0.8, 1.0, 0.5)
+@export var crit_chance: float = 0.0
+@export var crit_damage: float = 0.0
 
 @onready var FrameCache: Node = get_node("/root/FrameCache")
 
 var _follow_source: Node2D = null
+var _stats_component: Node = null
 var _sweep_angle: float = 0.0  # current leading edge of the slice in radians
 var _enemy_hit_cooldowns: Dictionary = {}  # enemy_instance_id -> remaining cooldown
 var _slice_angle: float = 0.0  # cached: slice_fraction * TAU
@@ -72,6 +75,8 @@ func spawn_at(spawn_pos: Vector2) -> void:
 
 func set_follow_source(source: Node2D) -> void:
 	_follow_source = source
+	if source and source.has_node("StatsComponent"):
+		_stats_component = source.get_node("StatsComponent")
 
 
 func _process(delta: float) -> void:
@@ -191,7 +196,15 @@ func _is_angle_in_slice(offset: Vector2) -> bool:
 
 
 func _apply_damage(enemy: Node2D) -> void:
+	var final_damage: float = damage
+	var damage_info: Dictionary = {"damage": damage, "is_crit": false, "is_overcrit": false}
+	if _stats_component and _stats_component.has_method("calculate_damage"):
+		damage_info = _stats_component.calculate_damage(damage, crit_chance, crit_damage)
+		final_damage = float(damage_info.get("damage", damage))
+		if _stats_component.has_method("roll_lifesteal"):
+			_stats_component.roll_lifesteal()
+
 	if enemy.has_method("take_damage"):
-		enemy.take_damage(damage, self)
+		enemy.take_damage(final_damage, self, damage_info)
 	elif enemy.get_parent() and enemy.get_parent().has_method("take_damage"):
-		enemy.get_parent().take_damage(damage, self)
+		enemy.get_parent().take_damage(final_damage, self, damage_info)

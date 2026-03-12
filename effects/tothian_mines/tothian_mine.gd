@@ -13,9 +13,12 @@ class_name TothianMine
 @export var pulse_speed: float = 5.0
 @export var pulse_depth: float = 0.22
 @export var detonation_sfx: AudioStream
+@export var crit_chance: float = 0.0
+@export var crit_damage: float = 0.0
 
 var _life_remaining: float = 0.0
 var _exploded: bool = false
+var _stats_component: Node = null
 var _area: Area2D = null
 var _collision: CollisionShape2D = null
 var _base_size: float = 0.0
@@ -45,6 +48,11 @@ func setup(params: Dictionary) -> void:
 
 func spawn_at(spawn_pos: Vector2) -> void:
 	global_position = spawn_pos
+
+
+func set_source(source: Node2D) -> void:
+	if source and source.has_node("StatsComponent"):
+		_stats_component = source.get_node("StatsComponent")
 
 
 func _process(delta: float) -> void:
@@ -159,9 +167,16 @@ func _apply_aoe_damage() -> void:
 		if global_position.distance_to(enemy.global_position) > hit_radius:
 			continue
 		if enemy.has_method("take_damage"):
-			enemy.take_damage(damage, self)
+			var final_damage: float = damage
+			var damage_info: Dictionary = {"damage": damage, "is_crit": false, "is_overcrit": false}
+			if _stats_component and _stats_component.has_method("calculate_damage"):
+				damage_info = _stats_component.calculate_damage(damage, crit_chance, crit_damage)
+				final_damage = float(damage_info.get("damage", damage))
+				if _stats_component.has_method("roll_lifesteal"):
+					_stats_component.roll_lifesteal()
+			enemy.take_damage(final_damage, self, damage_info)
 			if RunManager and RunManager.has_method("record_damage_dealt"):
-				RunManager.record_damage_dealt(damage)
+				RunManager.record_damage_dealt(final_damage)
 
 
 func _spawn_explosion_flash() -> void:

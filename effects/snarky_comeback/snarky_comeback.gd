@@ -177,6 +177,8 @@ func set_direction(direction: Vector2) -> void:
 
 func set_source(source: Node2D) -> void:
 	_source = source
+	if source and source.has_node("StatsComponent"):
+		_stats_component = source.get_node("StatsComponent")
 
 
 func spawn_from(spawn_pos: Vector2, direction: Vector2) -> void:

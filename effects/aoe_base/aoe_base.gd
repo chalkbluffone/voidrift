@@ -10,8 +10,11 @@ extends Node2D
 @export var ring_color: Color = Color(1.0, 0.95, 0.45, 0.75)
 @export var glow_strength: float = 0.45
 @export var glow_width_px: float = 10.0
+@export var crit_chance: float = 0.0
+@export var crit_damage: float = 0.0
 
 var _follow_source: Node2D = null
+var _stats_component: Node = null
 var _tick_timer: float = 0.0
 var _mesh: MeshInstance2D = null
 var _shader_material: ShaderMaterial = null
@@ -50,6 +53,8 @@ func spawn_at(spawn_pos: Vector2) -> void:
 
 func set_follow_source(source: Node2D) -> void:
 	_follow_source = source
+	if source and source.has_node("StatsComponent"):
+		_stats_component = source.get_node("StatsComponent")
 
 
 func _process(delta: float) -> void:
@@ -131,19 +136,32 @@ func _deal_tick_damage() -> void:
 		for area in areas:
 			if not is_instance_valid(area):
 				continue
+			var target: Node = null
 			if area.has_method("take_damage") and not damaged.has(area):
-				area.take_damage(damage, self)
-				damaged.append(area)
-				continue
-			var parent: Node = area.get_parent()
-			if parent and parent.is_in_group("enemies") and parent.has_method("take_damage") and not damaged.has(parent):
-				parent.take_damage(damage, self)
-				damaged.append(parent)
+				target = area
+			else:
+				var area_parent: Node = area.get_parent()
+				if area_parent and area_parent.is_in_group("enemies") and area_parent.has_method("take_damage") and not damaged.has(area_parent):
+					target = area_parent
+			if target:
+				var result: Dictionary = _calculate_hit_damage()
+				target.take_damage(result.damage, self, result)
+				damaged.append(target)
 
 		var bodies: Array = _hitbox.get_overlapping_bodies()
 		for body in bodies:
 			if not is_instance_valid(body):
 				continue
 			if body.is_in_group("enemies") and body.has_method("take_damage") and not damaged.has(body):
-				body.take_damage(damage, self)
+				var result: Dictionary = _calculate_hit_damage()
+				body.take_damage(result.damage, self, result)
 				damaged.append(body)
+
+
+func _calculate_hit_damage() -> Dictionary:
+	if _stats_component and _stats_component.has_method("calculate_damage"):
+		var damage_info: Dictionary = _stats_component.calculate_damage(damage, crit_chance, crit_damage)
+		if _stats_component.has_method("roll_lifesteal"):
+			_stats_component.roll_lifesteal()
+		return damage_info
+	return {"damage": damage, "is_crit": false, "is_overcrit": false}

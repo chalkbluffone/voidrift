@@ -184,14 +184,15 @@ func _apply_burst_damage(origin: Vector2) -> void:
 			continue
 
 		var final_damage: float = damage
+		var damage_info: Dictionary = {"damage": damage, "is_crit": false, "is_overcrit": false}
 		if _stats_component and _stats_component.has_method("calculate_damage"):
-			var damage_info: Dictionary = _stats_component.calculate_damage(damage, crit_chance, crit_damage)
+			damage_info = _stats_component.calculate_damage(damage, crit_chance, crit_damage)
 			final_damage = float(damage_info.get("damage", damage))
 			if _stats_component.has_method("roll_lifesteal"):
 				_stats_component.roll_lifesteal()
 
 		if enemy.has_method("take_damage"):
-			enemy.take_damage(final_damage, self)
+			enemy.take_damage(final_damage, self, damage_info)
 			if RunManager and RunManager.has_method("record_damage_dealt"):
 				RunManager.record_damage_dealt(final_damage)
 

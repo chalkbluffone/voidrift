@@ -12,7 +12,7 @@ func _init(parent: Node) -> void:
 	_parent_node = parent
 
 
-func spawn(spawn_pos: Vector2, params: Dictionary = {}, _follow_source: Node2D = null) -> Node2D:
+func spawn(spawn_pos: Vector2, params: Dictionary = {}, follow_source: Node2D = null) -> Node2D:
 	if _parent_node == null:
 		return null
 
@@ -35,6 +35,9 @@ func spawn(spawn_pos: Vector2, params: Dictionary = {}, _follow_source: Node2D =
 
 	if params and mine.has_method("setup"):
 		mine.setup(params)
+
+	if follow_source and mine.has_method("set_source"):
+		mine.set_source(follow_source)
 
 	if mine.has_method("spawn_at"):
 		mine.spawn_at(spawn_pos)

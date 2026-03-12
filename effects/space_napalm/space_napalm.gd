@@ -44,14 +44,17 @@ class_name SpaceNapalm
 @export var duration: float = 10.0      ## Safety net max lifetime
 @export var seed_offset: float = 0.0
 @export var size_mult: float = 1.0      ## From size stat — scales aoe_radius
+@export var crit_chance: float = 0.0
+@export var crit_damage: float = 0.0
 
-# ── Internal State ────────────────────────────────────────────────────────
+# ── Internal State ────────────────────────────────────────────────────────────────────
 
 enum Phase { PROJECTILE, IMPACT, BURNING, FADEOUT, DONE }
 
 var _phase: int = Phase.PROJECTILE
 var _direction: Vector2 = Vector2.RIGHT
 var _source: Node2D = null
+var _stats_component: Node = null
 var _target_pos: Vector2 = Vector2.ZERO
 var _elapsed: float = 0.0
 var _phase_time: float = 0.0  ## Time within current phase
@@ -94,6 +97,8 @@ func setup(params: Dictionary) -> SpaceNapalm:
 
 func set_source(source: Node2D) -> void:
 	_source = source
+	if source and source.has_node("StatsComponent"):
+		_stats_component = source.get_node("StatsComponent")
 
 
 func set_target(target_pos: Vector2) -> void:
@@ -339,7 +344,14 @@ func _deal_impact_damage() -> void:
 		var dist: float = global_position.distance_to(enemy.global_position)
 		if dist <= effective_radius:
 			if enemy.has_method("take_damage"):
-				enemy.take_damage(damage)
+				var final_damage: float = damage
+				var damage_info: Dictionary = {"damage": damage, "is_crit": false, "is_overcrit": false}
+				if _stats_component and _stats_component.has_method("calculate_damage"):
+					damage_info = _stats_component.calculate_damage(damage, crit_chance, crit_damage)
+					final_damage = float(damage_info.get("damage", damage))
+					if _stats_component.has_method("roll_lifesteal"):
+						_stats_component.roll_lifesteal()
+				enemy.take_damage(final_damage, self, damage_info)
 
 
 func _deal_aoe_damage() -> void:
@@ -355,7 +367,14 @@ func _deal_aoe_damage() -> void:
 	for area in areas:
 		var parent_node: Node = area.get_parent()
 		if parent_node and parent_node.is_in_group("enemies") and parent_node.has_method("take_damage") and not damaged.has(parent_node):
-			parent_node.take_damage(burn_damage)
+			var final_burn: float = burn_damage
+			var damage_info: Dictionary = {"damage": burn_damage, "is_crit": false, "is_overcrit": false}
+			if _stats_component and _stats_component.has_method("calculate_damage"):
+				damage_info = _stats_component.calculate_damage(burn_damage, crit_chance, crit_damage)
+				final_burn = float(damage_info.get("damage", burn_damage))
+				if _stats_component.has_method("roll_lifesteal"):
+					_stats_component.roll_lifesteal()
+			parent_node.take_damage(final_burn, self, damage_info)
 			damaged.append(parent_node)
 
 

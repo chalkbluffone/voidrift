@@ -31,10 +31,13 @@ const PROJECTILE_SCENE: PackedScene = preload("res://scenes/gameplay/projectile.
 @export var glow_strength: float = 2.5
 @export var bloom_intensity: float = 3.0
 @export var pellet_height_px: int = 5
+@export var crit_chance: float = 0.0
+@export var crit_damage: float = 0.0
 
 # --- Internal ---
 var _pellets: Array = []  # Array of projectile node refs
 var _spawn_origin: Vector2 = Vector2.ZERO
+var _stats_component: Node = null
 var _rng: RandomNumberGenerator = null
 
 
@@ -49,6 +52,11 @@ func setup(params: Dictionary) -> PersonalSpaceViolator:
 	if params.has("size_mult"):
 		pellet_radius *= float(params["size_mult"])
 	return self
+
+
+func set_source(source: Node2D) -> void:
+	if source and source.has_node("StatsComponent"):
+		_stats_component = source.get_node("StatsComponent")
 
 
 func fire_burst(origin: Vector2, direction: Vector2) -> void:
@@ -81,7 +89,7 @@ func _spawn_pellet(angle: float, speed: float) -> void:
 
 	# Initialize with standard projectile API
 	var style: Dictionary = {"color": color_glow}
-	pellet.initialize(damage, dir, speed, 0, 1.0, null, style)
+	pellet.initialize(damage, dir, speed, 0, 1.0, _stats_component, style, crit_chance, crit_damage)
 	pellet._lifetime = lifetime
 	pellet.global_position = _spawn_origin
 

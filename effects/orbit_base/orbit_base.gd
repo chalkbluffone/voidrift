@@ -12,10 +12,13 @@ extends Node2D
 @export var orbit_radius: float = 72.0
 @export var drone_size: float = 9.0
 @export var hit_cooldown: float = 0.35
+@export var crit_chance: float = 0.0
+@export var crit_damage: float = 0.0
 
 @onready var FrameCache: Node = get_node("/root/FrameCache")
 
 var _follow_source: Node2D = null
+var _stats_component: Node = null
 var _orbit_phase: float = 0.0
 var _drones: Array[Node2D] = []
 var _enemy_hit_cooldowns: Dictionary = {}  # enemy_id -> remaining cooldown
@@ -58,6 +61,8 @@ func spawn_at(spawn_pos: Vector2) -> OrbitBase:
 
 func set_follow_source(source: Node2D) -> void:
 	_follow_source = source
+	if source and source.has_node("StatsComponent"):
+		_stats_component = source.get_node("StatsComponent")
 
 
 func _rebuild_drones() -> void:
@@ -146,10 +151,18 @@ func _check_contacts() -> void:
 
 
 func _apply_hit(enemy: Node2D, push_dir: Vector2) -> void:
+	var final_damage: float = damage
+	var damage_info: Dictionary = {"damage": damage, "is_crit": false, "is_overcrit": false}
+	if _stats_component and _stats_component.has_method("calculate_damage"):
+		damage_info = _stats_component.calculate_damage(damage, crit_chance, crit_damage)
+		final_damage = float(damage_info.get("damage", damage))
+		if _stats_component.has_method("roll_lifesteal"):
+			_stats_component.roll_lifesteal()
+
 	if enemy.has_method("take_damage"):
-		enemy.take_damage(damage, self)
+		enemy.take_damage(final_damage, self, damage_info)
 	elif enemy.get_parent() and enemy.get_parent().has_method("take_damage"):
-		enemy.get_parent().take_damage(damage, self)
+		enemy.get_parent().take_damage(final_damage, self, damage_info)
 
 	if enemy.has_method("apply_knockback"):
 		enemy.apply_knockback(push_dir * knockback)

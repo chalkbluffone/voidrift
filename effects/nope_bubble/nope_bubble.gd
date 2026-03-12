@@ -21,6 +21,8 @@ extends Node2D
 @export var ambient_particle_count: int = 24
 @export var color: Color = Color(0.65, 0.2, 1.0, 0.75)
 @export var cooldown: float = 3.0  # Used for display only; spawner handles regen timing
+@export var crit_chance: float = 0.0
+@export var crit_damage: float = 0.0
 
 @onready var FrameCache: Node = get_node("/root/FrameCache")
 
@@ -28,6 +30,7 @@ extends Node2D
 var _current_layers: int = 2
 var _max_layers: int = 2
 var _follow_source: Node2D = null
+var _stats_component: Node = null
 var _shield_mesh: MeshInstance2D = null
 var _shield_area: Area2D = null
 var _shield_collision: CollisionShape2D = null
@@ -86,6 +89,8 @@ func spawn_at(pos: Vector2) -> void:
 
 func set_follow_source(source: Node2D) -> void:
 	_follow_source = source
+	if source and source.has_node("StatsComponent"):
+		_stats_component = source.get_node("StatsComponent")
 
 
 func add_layer() -> void:
@@ -606,7 +611,14 @@ func _on_shockwave_hit(area: Area2D, hit_targets: Dictionary) -> void:
 		var target_id: int = target.get_instance_id()
 		if not hit_targets.has(target_id):
 			hit_targets[target_id] = true
-			target.take_damage(damage)
+			var final_damage: float = damage
+			var damage_info: Dictionary = {"damage": damage, "is_crit": false, "is_overcrit": false}
+			if _stats_component and _stats_component.has_method("calculate_damage"):
+				damage_info = _stats_component.calculate_damage(damage, crit_chance, crit_damage)
+				final_damage = float(damage_info.get("damage", damage))
+				if _stats_component.has_method("roll_lifesteal"):
+					_stats_component.roll_lifesteal()
+			target.take_damage(final_damage, self, damage_info)
 			# Also apply knockback to shockwave victims
 			if target.has_method("apply_knockback") and _follow_source:
 				var kb_dir: Vector2 = (target.global_position - _follow_source.global_position).normalized()
@@ -618,7 +630,14 @@ func _on_shockwave_body_hit(body: Node2D, hit_targets: Dictionary) -> void:
 		var target_id: int = body.get_instance_id()
 		if not hit_targets.has(target_id):
 			hit_targets[target_id] = true
-			body.take_damage(damage)
+			var final_damage: float = damage
+			var damage_info: Dictionary = {"damage": damage, "is_crit": false, "is_overcrit": false}
+			if _stats_component and _stats_component.has_method("calculate_damage"):
+				damage_info = _stats_component.calculate_damage(damage, crit_chance, crit_damage)
+				final_damage = float(damage_info.get("damage", damage))
+				if _stats_component.has_method("roll_lifesteal"):
+					_stats_component.roll_lifesteal()
+			body.take_damage(final_damage, self, damage_info)
 			if body.has_method("apply_knockback") and _follow_source:
 				var kb_dir: Vector2 = (body.global_position - _follow_source.global_position).normalized()
 				body.apply_knockback(kb_dir * knockback * 0.5)

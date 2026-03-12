@@ -26,6 +26,8 @@ class_name BrokenTractorBeam
 @export var particle_speed: float = 200.0
 @export var particle_lifetime: float = 0.4
 @export var beam_width: float = 12.0
+@export var crit_chance: float = 0.0
+@export var crit_damage: float = 0.0
 
 @onready var FrameCache: Node = get_node("/root/FrameCache")
 
@@ -34,6 +36,7 @@ class_name BrokenTractorBeam
 
 # --- Internal State ---
 var _follow_source: Node2D = null
+var _stats_component: Node = null
 var _target: Node2D = null
 var _elapsed: float = 0.0
 var _dot_timer: float = 0.0
@@ -91,6 +94,8 @@ func load_from_data(data: Dictionary) -> void:
 
 func set_follow_source(source: Node2D) -> BrokenTractorBeam:
 	_follow_source = source
+	if source and source.has_node("StatsComponent"):
+		_stats_component = source.get_node("StatsComponent")
 	return self
 
 
@@ -209,13 +214,23 @@ func _apply_burst_damage(target: Node2D) -> void:
 	## Initial burst damage when locking onto a target (2x tick damage).
 	if is_instance_valid(target) and target.has_method("take_damage"):
 		var burst: float = damage * burst_multiplier
-		target.take_damage(burst)
+		var damage_info: Dictionary = {"damage": burst, "is_crit": false, "is_overcrit": false}
+		if _stats_component and _stats_component.has_method("calculate_damage"):
+			damage_info = _stats_component.calculate_damage(burst, crit_chance, crit_damage)
+			if _stats_component.has_method("roll_lifesteal"):
+				_stats_component.roll_lifesteal()
+		target.take_damage(float(damage_info.get("damage", burst)), self, damage_info)
 
 
 func _deal_tick_damage(target: Node2D) -> void:
 	## Periodic tick damage while tethered.
 	if is_instance_valid(target) and target.has_method("take_damage"):
-		target.take_damage(damage)
+		var damage_info: Dictionary = {"damage": damage, "is_crit": false, "is_overcrit": false}
+		if _stats_component and _stats_component.has_method("calculate_damage"):
+			damage_info = _stats_component.calculate_damage(damage, crit_chance, crit_damage)
+			if _stats_component.has_method("roll_lifesteal"):
+				_stats_component.roll_lifesteal()
+		target.take_damage(float(damage_info.get("damage", damage)), self, damage_info)
 
 
 func _pull_target(delta: float) -> void:

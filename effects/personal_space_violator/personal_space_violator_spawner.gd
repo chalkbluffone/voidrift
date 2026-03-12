@@ -26,7 +26,7 @@ func spawn(
 	spawn_pos: Vector2,
 	direction: Vector2,
 	params: Dictionary = {},
-	_follow_source: Node2D = null
+	follow_source: Node2D = null
 ) -> Node2D:
 	# Only fire when there's an actual enemy target
 	var nearest: Node2D = EffectUtils.find_nearest_enemy(_parent_node.get_tree(), spawn_pos)
@@ -41,6 +41,9 @@ func spawn(
 
 	if params and instance.has_method("setup"):
 		instance.setup(params)
+
+	if follow_source and instance.has_method("set_source"):
+		instance.set_source(follow_source)
 
 	if instance.has_method("fire_burst"):
 		instance.fire_burst(spawn_pos, direction.normalized())

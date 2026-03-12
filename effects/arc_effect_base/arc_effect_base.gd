@@ -89,6 +89,8 @@ class DebugCapsule extends Node2D:
 @export var rotation_offset_deg: float = 0.0
 @export var seed_offset: float = 0.0
 @export var damage: float = 25.0
+@export var crit_chance: float = 0.0
+@export var crit_damage: float = 0.0
 
 # ── Particles ─────────────────────────────────────────────────────────────
 
@@ -106,6 +108,7 @@ class DebugCapsule extends Node2D:
 # ── Internal state ────────────────────────────────────────────────────────
 
 var _hit_targets: Array = []
+var _stats_component: Node = null
 var _hitbox: Area2D = null
 var _hitbox_collisions: Array[CollisionShape2D] = []
 var _hitbox_count: int = 0
@@ -427,10 +430,17 @@ func _on_hitbox_area_entered(area: Area2D) -> void:
 	if area in _hit_targets:
 		return
 	_hit_targets.append(area)
+	var final_damage: float = damage
+	var damage_info: Dictionary = {"damage": damage, "is_crit": false, "is_overcrit": false}
+	if _stats_component and _stats_component.has_method("calculate_damage"):
+		damage_info = _stats_component.calculate_damage(damage, crit_chance, crit_damage)
+		final_damage = float(damage_info.get("damage", damage))
+		if _stats_component.has_method("roll_lifesteal"):
+			_stats_component.roll_lifesteal()
 	if area.has_method("take_damage"):
-		area.take_damage(damage, self)
+		area.take_damage(final_damage, self, damage_info)
 	elif area.get_parent() and area.get_parent().has_method("take_damage"):
-		area.get_parent().take_damage(damage, self)
+		area.get_parent().take_damage(final_damage, self, damage_info)
 
 
 # ══════════════════════════════════════════════════════════════════════════

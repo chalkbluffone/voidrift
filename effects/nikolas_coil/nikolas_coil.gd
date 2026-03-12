@@ -46,9 +46,12 @@ class_name NikolasCoil
 @export var sparks_speed: float = 120.0
 @export var sparks_lifetime: float = 0.15
 @export var sparks_size: float = 2.0
+@export var crit_chance: float = 0.0
+@export var crit_damage: float = 0.0
 
 # --- Internal State ---
 var _follow_source: Node2D = null
+var _stats_component: Node = null
 var _origin: Vector2 = Vector2.ZERO
 var _chain_targets: Array[Node2D] = []  # Ordered list of enemy targets
 var _segments: Array[Dictionary] = []   # {mesh, material, revealed}
@@ -120,6 +123,8 @@ func setup(params: Dictionary) -> NikolasCoil:
 
 func set_follow_source(source: Node2D) -> NikolasCoil:
 	_follow_source = source
+	if source and source.has_node("StatsComponent"):
+		_stats_component = source.get_node("StatsComponent")
 	return self
 
 
@@ -545,8 +550,15 @@ func _rebuild_fork_mesh(mesh_inst: MeshInstance2D, from_pos: Vector2, to_pos: Ve
 # =============================================================================
 
 func _deal_damage(target: Node2D) -> void:
+	var final_damage: float = damage
+	var damage_info: Dictionary = {"damage": damage, "is_crit": false, "is_overcrit": false}
+	if _stats_component and _stats_component.has_method("calculate_damage"):
+		damage_info = _stats_component.calculate_damage(damage, crit_chance, crit_damage)
+		final_damage = float(damage_info.get("damage", damage))
+		if _stats_component.has_method("roll_lifesteal"):
+			_stats_component.roll_lifesteal()
 	if target.has_method("take_damage"):
-		target.take_damage(damage)
+		target.take_damage(final_damage, self, damage_info)
 
 
 # =============================================================================

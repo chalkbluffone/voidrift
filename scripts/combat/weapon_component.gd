@@ -293,6 +293,9 @@ func _fire_orbit_weapon(weapon_id: String, data: Dictionary, _level: int) -> voi
 		bonus_proj = stats_component.get_stat_int(StatsComponentScript.STAT_PROJECTILE_COUNT)
 	config["projectile_count"] = maxi(1, base_proj_count + bonus_proj + weapon_bonus_proj)
 
+	config["crit_chance"] = float(config.get("crit_chance", 0.0)) + _inventory.get_weapon_flat(weapon_id, StatsComponentScript.STAT_CRIT_CHANCE)
+	config["crit_damage"] = float(config.get("crit_damage", 0.0)) + _inventory.get_weapon_flat(weapon_id, StatsComponentScript.STAT_CRIT_DAMAGE)
+
 	var spawner: Object = _spawners.get_or_create_spawner(weapon_id, data, get_tree().current_scene)
 	if spawner and spawner.has_method("spawn"):
 		var result: Variant = spawner.spawn(parent.global_position, config, parent)
@@ -334,6 +337,9 @@ func _fire_area_weapon(weapon_id: String, data: Dictionary, _level: int) -> void
 		var base_trigger_radius: float = float(config.get("trigger_radius", 52.0))
 		config["trigger_radius"] = maxf(8.0, base_trigger_radius * global_size_mult * (1.0 + weapon_size_mult))
 
+	config["crit_chance"] = float(config.get("crit_chance", 0.0)) + _inventory.get_weapon_flat(weapon_id, StatsComponentScript.STAT_CRIT_CHANCE)
+	config["crit_damage"] = float(config.get("crit_damage", 0.0)) + _inventory.get_weapon_flat(weapon_id, StatsComponentScript.STAT_CRIT_DAMAGE)
+
 	var spawner: Object = _spawners.get_or_create_spawner(weapon_id, data, get_tree().current_scene)
 	if spawner and spawner.has_method("spawn"):
 		var result: Variant = spawner.spawn(parent.global_position, config, parent)
@@ -346,6 +352,10 @@ func _fire_beam_weapon(weapon_id: String, data: Dictionary, _level: int) -> void
 	if not parent:
 		return
 	var config: Dictionary = WeaponDataFlattener.flatten(data).flat
+
+	config["crit_chance"] = float(config.get("crit_chance", 0.0)) + _inventory.get_weapon_flat(weapon_id, StatsComponentScript.STAT_CRIT_CHANCE)
+	config["crit_damage"] = float(config.get("crit_damage", 0.0)) + _inventory.get_weapon_flat(weapon_id, StatsComponentScript.STAT_CRIT_DAMAGE)
+
 	var direction: Vector2 = _get_fire_direction(data)
 	var spawner: Object = _spawners.get_or_create_spawner(weapon_id, data, get_tree().current_scene)
 	if spawner and spawner.has_method("spawn"):
@@ -359,6 +369,10 @@ func _fire_melee_weapon(weapon_id: String, data: Dictionary, _level: int) -> voi
 	if not parent:
 		return
 	var config: Dictionary = WeaponDataFlattener.flatten(data).flat
+
+	config["crit_chance"] = float(config.get("crit_chance", 0.0)) + _inventory.get_weapon_flat(weapon_id, StatsComponentScript.STAT_CRIT_CHANCE)
+	config["crit_damage"] = float(config.get("crit_damage", 0.0)) + _inventory.get_weapon_flat(weapon_id, StatsComponentScript.STAT_CRIT_DAMAGE)
+
 	_fire_via_spawner(weapon_id, config, parent)
 
 

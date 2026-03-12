@@ -184,6 +184,8 @@ Heal numbers (lifesteal) pass:
 
 Non-projectile sources (AoE, beams, mines) pass `{}` (default parameter) → displayed as normal white hits.
 
+Non-projectile sources (AoE, beams, orbit, melee, mines) also pass a full `damage_info` dict with crit status. **All weapon effects use `StatsComponent.calculate_damage()` and pass `damage_info` to `take_damage()`**, so every weapon can crit.
+
 ### Styling
 
 - **Normal**: White text, `DAMAGE_NUMBER_FONT_SIZE_NORMAL` (16), z_index=100

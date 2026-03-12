@@ -129,4 +129,6 @@ func spawn_from(spawn_pos: Vector2, direction: Vector2) -> RadiantArc:
 
 func set_follow_source(source: Node2D) -> RadiantArc:
 	_follow_source = source
+	if source and source.has_node("StatsComponent"):
+		_stats_component = source.get_node("StatsComponent")
 	return self

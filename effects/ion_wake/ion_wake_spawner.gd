@@ -34,7 +34,10 @@ func spawn(
 	
 	if params:
 		wake.setup(params)
-	
+
+	if follow_source and wake.has_method("set_source"):
+		wake.set_source(follow_source)
+
 	# Get spawn position parameters (relative to ship)
 	var spawn_angle_degrees: float = params.get("spawn_angle_degrees", 180.0)  # 0=forward, 180=behind
 	var spawn_distance: float = params.get("spawn_distance", 16.0)
