@@ -19,3 +19,6 @@ libsteam_api.dylib
 
 # SteamCMD output
 build/steam_output/
+
+# Local secrets — never commit
+.env

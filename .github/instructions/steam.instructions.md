@@ -123,6 +123,75 @@ All depot VDFs exclude `steam_appid.txt` via `FileExclusion`.
 
 The deploy VS Code task includes `-Username` and `-SteamCmdExe` so it runs without manual prompts. SteamCMD is NOT on PATH — always specify the full path via `-SteamCmdExe`.
 
+## Release Notes & Discord Notifications
+
+Release notes and Discord posting are handled by a **separate script** (`tools/push_release_notes.ps1`), called by the **release-ops agent** after a successful deploy. The deploy script itself (`tools/deploy.ps1`) remains unchanged — it only handles the Steam upload.
+
+### Full Agent-Driven Flow
+
+Tell the release-ops agent: **"build and deploy"** (or similar). It runs:
+
+```
+1. tools/build.ps1                    → export all platforms, headless sanity check
+2. tools/deploy.ps1                   → upload to Steam via SteamCMD
+3. tools/push_release_notes.ps1       → generate notes from commits + post to Discord
+```
+
+Step 3 only runs after a confirmed successful upload.
+
+### Discord Webhook Setup (One-Time)
+
+1. In your Discord server: right-click the target channel → **Edit Channel**
+2. **Integrations** → **Webhooks** → **New Webhook** → name it → **Copy Webhook URL**
+3. Open `.env` at the project root and set:
+   ```
+   DISCORD_DEPLOY_WEBHOOK=https://discord.com/api/webhooks/YOUR_ID/YOUR_TOKEN
+   ```
+4. **Never commit `.env`** — it is gitignored and contains a secret token
+
+To disable Discord without removing the URL:
+
+```powershell
+# Simply skip step 3 when running manually — or use -DryRun to preview:
+.\tools\push_release_notes.ps1 -DryRun
+```
+
+### Version Management
+
+Edit `tools/release_state.json` before a named release:
+
+```json
+{
+  "version": "0.2.0",
+  "summary": "New weapons and balance pass",
+  "last_deployed_commit": "...",
+  "last_build_id": "",
+  "last_deploy_time": ""
+}
+```
+
+`last_*` fields are auto-managed by `push_release_notes.ps1` after each successful post.
+
+### Commit Message Conventions (Improves Note Quality)
+
+| Commit contains…                                   | Player Category             |
+| -------------------------------------------------- | --------------------------- |
+| add, new, feat, weapon, enemy, ship, captain       | **New Features**            |
+| balance, nerf, buff, damage, hp, cooldown, spawn   | **Balance Changes**         |
+| fix, bug, crash, error, broken, incorrect, missing | **Bug Fixes**               |
+| ui, ux, hud, visual, cosmetic, color, animation    | **Quality of Life**         |
+| perf, optim, cache, fps, lag, memory, stutter      | **Performance & Stability** |
+| Merge branch / Merge pull request                  | _(skipped)_                 |
+
+Conventional commit prefixes (`feat:`, `fix:`, `balance:`, `ui:`, etc.) are stripped automatically.
+
+### Post-Deploy: Steam Community Hub
+
+SteamCMD cannot publish Community Hub announcements programmatically:
+
+1. Go to [Steamworks Builds](https://partner.steamgames.com/apps/builds/4502490) → Find BuildID → **Set Live** → Playtest branch
+2. Go to the Steam Community Hub → **Post Announcement** → paste player notes from Discord post (or copy from `build/release_notes_v*.md`)
+
 ## Post-Deploy Checklist
 
 1. Go to Steamworks → App Admin → SteamPipe → Builds
