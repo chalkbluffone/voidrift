@@ -148,6 +148,7 @@ const SHIELD_RECHARGE_RATE: float = 10.0   # Shield HP recovered per second
 const DIMINISHING_RETURNS_DENOMINATOR: float = 100.0  # DR formula: raw / (raw + DENOM)
 const WEAPON_TARGETING_RANGE: float = 500.0  # Auto-aim max distance (pixels)
 const PROJECTILE_DEFAULT_LIFETIME: float = 5.0  # Seconds before projectile self-destructs
+const WEAPON_MAX_FIRES_PER_SECOND: float = 20.0  # Hard cap on weapon fire rate (min cooldown = 1/N)
 
 # Hard caps for stats (stat_name → max value)
 const STAT_CAPS: Dictionary = {

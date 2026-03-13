@@ -166,7 +166,7 @@ func _draw_enemies(center: Vector2) -> void:
 	var radius: float = _map_size * 0.5
 	
 	for enemy: Node in enemies:
-		if not enemy is Node2D:
+			if not enemy is Node2D:
 			continue
 		var enemy_2d: Node2D = enemy as Node2D
 		var offset: Vector2 = enemy_2d.global_position * _world_to_map_scale

@@ -38,6 +38,8 @@ var _burst_timer: float = 0.0
 var _fire_origin: Vector2 = Vector2.ZERO
 var _fire_direction: Vector2 = Vector2.RIGHT
 var _rng: RandomNumberGenerator = null
+var _follow_source: Node2D = null
+var _current_target: Node2D = null
 
 
 func setup(params: Dictionary) -> TimmyGun:
@@ -52,10 +54,12 @@ func setup(params: Dictionary) -> TimmyGun:
 	return self
 
 
-func fire_from(spawn_pos: Vector2, direction: Vector2, stats_component: Node = null) -> void:
+func fire_from(spawn_pos: Vector2, direction: Vector2, stats_component: Node = null, follow_source: Node2D = null, target: Node2D = null) -> void:
 	if _rng == null:
 		_rng = GameSeed.rng("timmy_gun")
 	_stats_component = stats_component
+	_follow_source = follow_source
+	_current_target = target
 	_fire_origin = spawn_pos
 	_fire_direction = direction.normalized()
 	if _fire_direction.is_zero_approx():
@@ -73,6 +77,7 @@ func _process(delta: float) -> void:
 	if _burst_queue > 0:
 		_burst_timer -= delta
 		if _burst_timer <= 0.0:
+			_retarget_if_needed()
 			# Add slight random spread to each burst bullet for machine-gun feel
 			var spread_angle: float = _rng.randf_range(deg_to_rad(-spread_angle_deg), deg_to_rad(spread_angle_deg))
 			var bullet_dir: Vector2 = _fire_direction.rotated(spread_angle)
@@ -91,6 +96,31 @@ func _process(delta: float) -> void:
 	# Self-destruct when burst is done and all projectiles are gone
 	if _burst_queue <= 0 and _active_projectiles.is_empty():
 		queue_free()
+
+
+func _retarget_if_needed() -> void:
+	## If current target is dead, find the nearest enemy and re-aim.
+	## Also updates fire origin from the player's current position.
+	if is_instance_valid(_current_target):
+		# Target still alive — update aim direction from current positions
+		if is_instance_valid(_follow_source):
+			_fire_origin = _follow_source.global_position
+			global_position = _fire_origin
+		var dir: Vector2 = (_current_target.global_position - _fire_origin).normalized()
+		if not dir.is_zero_approx():
+			_fire_direction = dir
+		return
+
+	# Target is dead — find a new one
+	if is_instance_valid(_follow_source):
+		_fire_origin = _follow_source.global_position
+		global_position = _fire_origin
+	var new_target: Node2D = EffectUtils.find_nearest_enemy(get_tree(), _fire_origin)
+	if new_target:
+		_current_target = new_target
+		var dir: Vector2 = (new_target.global_position - _fire_origin).normalized()
+		if not dir.is_zero_approx():
+			_fire_direction = dir
 
 
 func _spawn_bullet(origin: Vector2, direction: Vector2, bounces_remaining: int) -> void:
@@ -122,7 +152,7 @@ func _spawn_bullet(origin: Vector2, direction: Vector2, bounces_remaining: int) 
 	glow.glow_strength = glow_strength
 	projectile.add_child(glow)
 
-	get_tree().current_scene.add_child(projectile)
+	get_tree().current_scene.call_deferred("add_child", projectile)
 	_active_projectiles.append(projectile)
 
 	# Connect hit signal for bounce mechanic

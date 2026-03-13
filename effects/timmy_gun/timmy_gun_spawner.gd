@@ -38,7 +38,7 @@ func spawn(
 		stats_component = follow_source.get_node("StatsComponent")
 
 	if instance.has_method("fire_from"):
-		instance.fire_from(spawn_pos, direction, stats_component)
+		instance.fire_from(spawn_pos, direction, stats_component, follow_source, nearest)
 
 	return instance
 

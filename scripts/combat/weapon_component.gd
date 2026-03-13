@@ -31,7 +31,9 @@ var _spawners: WeaponSpawnerCache = WeaponSpawnerCache.new()
 @onready var GameSeed: Node = get_node_or_null("/root/GameSeed")
 
 var _rng: RandomNumberGenerator = null
-var _dispatch_rotation_index: int = 0
+
+## Active SceneTreeTimers per weapon (weapon_id → SceneTreeTimer).
+var _weapon_timers: Dictionary = {}
 
 
 # ---------------------------------------------------------------------------
@@ -48,38 +50,42 @@ func _ready() -> void:
 		stats_component = parent.get_node("StatsComponent")
 
 
-func _process(delta: float) -> void:
-	_update_timers(delta)
-	if auto_fire_enabled:
-		_process_weapons()
+func _start_weapon_timer(weapon_id: String, delay: float) -> void:
+	## Start (or restart) an independent SceneTreeTimer for a weapon.
+	_cancel_weapon_timer(weapon_id)
+	if not auto_fire_enabled:
+		return
+	if not is_inside_tree():
+		return
+	var timer: SceneTreeTimer = get_tree().create_timer(maxf(0.01, delay), false)
+	_weapon_timers[weapon_id] = timer
+	timer.timeout.connect(_on_weapon_timer_timeout.bind(weapon_id), CONNECT_ONE_SHOT)
 
 
-func _update_timers(delta: float) -> void:
-	for weapon_id in _inventory.weapons:
-		_inventory.weapons[weapon_id].timer -= delta
+func _cancel_weapon_timer(weapon_id: String) -> void:
+	## Cancel an active SceneTreeTimer for a weapon if it exists.
+	if _weapon_timers.has(weapon_id):
+		var old_timer: SceneTreeTimer = _weapon_timers[weapon_id]
+		if old_timer and old_timer.timeout.is_connected(_on_weapon_timer_timeout):
+			old_timer.timeout.disconnect(_on_weapon_timer_timeout)
+		_weapon_timers.erase(weapon_id)
 
 
-func _process_weapons() -> void:
-	var weapon_ids_untyped: Array = _inventory.weapons.keys()
-	var weapon_count: int = weapon_ids_untyped.size()
-	if weapon_count == 0:
+func _on_weapon_timer_timeout(weapon_id: String) -> void:
+	## Fires one weapon and schedules the next shot.
+	_weapon_timers.erase(weapon_id)
+	if not auto_fire_enabled:
+		return
+	if not _inventory.has_weapon(weapon_id):
 		return
 
-	var start_index: int = _dispatch_rotation_index % weapon_count
-	_dispatch_rotation_index = (_dispatch_rotation_index + 1) % weapon_count
+	var weapon_state: Dictionary = _inventory.weapons.get(weapon_id, {})
+	if weapon_state.is_empty():
+		return
 
-	for offset: int in range(weapon_count):
-		var idx: int = (start_index + offset) % weapon_count
-		var weapon_id: String = String(weapon_ids_untyped[idx])
-		var weapon_state: Dictionary = _inventory.weapons.get(weapon_id, {})
-		if weapon_state.is_empty():
-			continue
-
-		if float(weapon_state.get("timer", 0.0)) > 0.0:
-			continue
-
-		_fire_weapon(weapon_id, weapon_state)
-		weapon_state.timer = _compute_next_shot_cooldown(weapon_id, weapon_state)
+	_fire_weapon(weapon_id, weapon_state)
+	var cooldown: float = _compute_next_shot_cooldown(weapon_id, weapon_state)
+	_start_weapon_timer(weapon_id, cooldown)
 
 
 func _compute_next_shot_cooldown(weapon_id: String, weapon_state: Dictionary) -> float:
@@ -97,20 +103,22 @@ func _compute_next_shot_cooldown(weapon_id: String, weapon_state: Dictionary) ->
 	cooldown /= weapon_attack_speed
 
 	var projectile_count: float = float(stats_dict.get("projectile_count", 1.0))
+	var burst_managed: bool = bool(data.get("burst_managed", false))
 	if weapon_id == "tothian_mines":
 		var weapon_bonus_projectiles: float = _inventory.get_weapon_flat(weapon_id, StatsComponentScript.STAT_PROJECTILE_COUNT)
 		projectile_count += weapon_bonus_projectiles
 		if stats_component:
 			projectile_count += float(stats_component.get_stat_int(StatsComponentScript.STAT_PROJECTILE_COUNT))
 		projectile_count = maxf(1.0, projectile_count)
-	if projectile_count > 1.0:
+	if projectile_count > 1.0 and not burst_managed:
 		cooldown /= projectile_count
 
 	var global_attack_speed: float = 1.0
 	if stats_component:
 		global_attack_speed = maxf(0.05, stats_component.get_stat(StatsComponentScript.STAT_ATTACK_SPEED))
 
-	return cooldown / global_attack_speed
+	var min_cooldown: float = 1.0 / GameConfig.WEAPON_MAX_FIRES_PER_SECOND
+	return maxf(min_cooldown, cooldown / global_attack_speed)
 
 
 # ---------------------------------------------------------------------------
@@ -540,7 +548,16 @@ func equip_weapon(weapon_id: String) -> bool:
 		return false
 
 	var _weapon_type: String = weapon_data.get("type", "projectile")
-	var _is_new: bool = _inventory.equip_weapon(weapon_id, weapon_data)
+	var is_new: bool = _inventory.equip_weapon(weapon_id, weapon_data)
+
+	# Start independent fire timer for newly equipped weapons
+	if is_new and auto_fire_enabled and is_inside_tree():
+		var weapon_state: Dictionary = _inventory.weapons.get(weapon_id, {})
+		var base_cooldown: float = _compute_next_shot_cooldown(weapon_id, weapon_state)
+		# Stagger initial fire based on how many weapons are already equipped
+		var weapon_count: int = _inventory.weapons.size()
+		var stagger_offset: float = base_cooldown * float(weapon_count - 1) / maxf(1.0, float(weapon_count))
+		_start_weapon_timer(weapon_id, stagger_offset)
 
 	weapon_equipped.emit(weapon_id)
 	return true
@@ -550,6 +567,7 @@ func remove_weapon(weapon_id: String) -> bool:
 	## Remove a weapon. Returns false if not equipped.
 	if not _inventory.has_weapon(weapon_id):
 		return false
+	_cancel_weapon_timer(weapon_id)
 	_spawners.cleanup_spawner(weapon_id)
 	_inventory.remove_weapon(weapon_id)
 	weapon_removed.emit(weapon_id)

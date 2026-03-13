@@ -17,10 +17,11 @@ func spawn(
 	params: Dictionary = {},
 	follow_source: Node2D = null
 ) -> Node2D:
-	var nearest: Node2D = EffectUtils.find_nearest_enemy(_parent_node.get_tree(), spawn_pos)
-	if nearest == null:
+	var targeting_range: float = GameConfig.WEAPON_TARGETING_RANGE
+	var targets: Array[Node2D] = EffectUtils.find_enemies_in_range(_parent_node.get_tree(), spawn_pos, targeting_range)
+	if targets.is_empty():
 		return null
-	direction = (nearest.global_position - spawn_pos).normalized()
+	direction = (targets[0].global_position - spawn_pos).normalized()
 
 	if direction.is_zero_approx():
 		direction = Vector2.RIGHT
@@ -38,7 +39,7 @@ func spawn(
 		stats_component = follow_source.get_node("StatsComponent")
 
 	if instance.has_method("fire_from"):
-		instance.fire_from(spawn_pos, direction, stats_component)
+		instance.fire_from(spawn_pos, direction, stats_component, follow_source, targets)
 
 	return instance
 

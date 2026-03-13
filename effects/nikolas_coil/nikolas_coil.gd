@@ -62,6 +62,7 @@ var _elapsed: float = 0.0
 var _is_active: bool = true
 var _hit_targets: Array = []
 var _max_bounces: int = 3
+var _exclude_first_targets: Array[Node2D] = []
 var _shader_res: Resource = null
 var _white_tex: ImageTexture = null
 
@@ -130,6 +131,11 @@ func set_follow_source(source: Node2D) -> NikolasCoil:
 
 func set_max_bounces(bounces: int) -> NikolasCoil:
 	_max_bounces = bounces
+	return self
+
+
+func set_exclude_first_targets(exclude: Array[Node2D]) -> NikolasCoil:
+	_exclude_first_targets = exclude
 	return self
 
 
@@ -289,13 +295,16 @@ func _find_chain_targets(origin: Vector2, max_bounces: int, radius: float) -> Ar
 	var current_pos: Vector2 = origin
 	var enemies: Array[Node] = FrameCache.enemies
 
-	for _i in range(max_bounces):
+	for bounce_idx in range(max_bounces):
 		var best_target: Node2D = null
 		var best_dist: float = radius
 		for enemy in enemies:
 			if not enemy is Node2D or not is_instance_valid(enemy):
 				continue
 			if enemy in visited:
+				continue
+			# For the first hop, skip enemies already claimed by other coils
+			if bounce_idx == 0 and enemy in _exclude_first_targets:
 				continue
 			var dist: float = current_pos.distance_to(enemy.global_position)
 			if dist < best_dist:

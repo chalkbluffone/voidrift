@@ -39,6 +39,9 @@ var _burst_timer: float = 0.0
 var _fire_origin: Vector2 = Vector2.ZERO
 var _fire_direction: Vector2 = Vector2.RIGHT
 var _rng: RandomNumberGenerator = null
+var _follow_source: Node2D = null
+var _target_queue: Array[Node2D] = []
+var _target_index: int = 0
 
 
 func setup(params: Dictionary) -> SpaceLasers:
@@ -52,18 +55,29 @@ func setup(params: Dictionary) -> SpaceLasers:
 	return self
 
 
-func fire_from(spawn_pos: Vector2, direction: Vector2, stats_component: Node = null) -> void:
+func fire_from(spawn_pos: Vector2, direction: Vector2, stats_component: Node = null, follow_source: Node2D = null, targets: Variant = null) -> void:
 	if _rng == null:
 		_rng = GameSeed.rng("space_lasers")
 	_stats_component = stats_component
+	_follow_source = follow_source
 	_fire_origin = spawn_pos
 	_fire_direction = direction.normalized()
 	if _fire_direction.is_zero_approx():
 		_fire_direction = Vector2.RIGHT
 	global_position = spawn_pos
 
-	# Fire first bolt immediately, queue the rest
+	# Build target queue from provided list
+	_target_queue.clear()
+	if targets is Array:
+		for t in targets:
+			if t is Node2D and is_instance_valid(t):
+				_target_queue.append(t)
+	_target_index = 0
+
+	# Aim first bolt at the first target
+	_aim_at_current_target()
 	_spawn_bolt(_fire_origin, _fire_direction, bounce_count)
+	_target_index += 1
 	_burst_queue = burst_count - 1
 	_burst_timer = burst_interval
 
@@ -73,9 +87,11 @@ func _process(delta: float) -> void:
 	if _burst_queue > 0:
 		_burst_timer -= delta
 		if _burst_timer <= 0.0:
+			_aim_at_current_target()
 			var spread_angle: float = _rng.randf_range(deg_to_rad(-spread_angle_deg), deg_to_rad(spread_angle_deg))
 			var bolt_dir: Vector2 = _fire_direction.rotated(spread_angle)
 			_spawn_bolt(_fire_origin, bolt_dir, bounce_count)
+			_target_index += 1
 			_burst_queue -= 1
 			_burst_timer = burst_interval
 
@@ -90,6 +106,38 @@ func _process(delta: float) -> void:
 	# Self-destruct when burst is done and all projectiles are gone
 	if _burst_queue <= 0 and _active_projectiles.is_empty():
 		queue_free()
+
+
+func _aim_at_current_target() -> void:
+	## Aim at the next target in the queue, cycling through enemies.
+	## Updates fire origin from player's current position.
+	if is_instance_valid(_follow_source):
+		_fire_origin = _follow_source.global_position
+		global_position = _fire_origin
+
+	# Prune dead targets from queue
+	var i: int = _target_queue.size() - 1
+	while i >= 0:
+		if not is_instance_valid(_target_queue[i]):
+			_target_queue.remove_at(i)
+			if _target_index > i:
+				_target_index -= 1
+		i -= 1
+
+	if _target_queue.is_empty():
+		# No targets left — try to find any enemy
+		var fallback: Node2D = EffectUtils.find_nearest_enemy(get_tree(), _fire_origin)
+		if fallback:
+			_target_queue.append(fallback)
+			_target_index = 0
+		return
+
+	# Wrap index to cycle through targets
+	var idx: int = _target_index % _target_queue.size()
+	var target: Node2D = _target_queue[idx]
+	var dir: Vector2 = (target.global_position - _fire_origin).normalized()
+	if not dir.is_zero_approx():
+		_fire_direction = dir
 
 
 func _spawn_bolt(origin: Vector2, direction: Vector2, bounces_remaining: int) -> void:
@@ -122,7 +170,7 @@ func _spawn_bolt(origin: Vector2, direction: Vector2, bounces_remaining: int) ->
 	glow.glow_strength = glow_strength
 	projectile.add_child(glow)
 
-	get_tree().current_scene.add_child(projectile)
+	get_tree().current_scene.call_deferred("add_child", projectile)
 	_active_projectiles.append(projectile)
 
 	# Connect hit signal for bounce mechanic

@@ -135,8 +135,8 @@
 			"hp_regen": 4.0,
 			"evasion": 10.0,
 			"crit_chance": 5.0,
-			"crit_damage": 0.25,
-			"attack_speed": 0.1,
+			"crit_damage": 2.25,
+			"attack_speed": 1.1,
 			"phase_shift_distance": 170.0
 		},
 		"starting_weapon": "timmy_gun",
@@ -176,7 +176,7 @@
 			"hp_regen": 7.0,
 			"shield": 30.0,
 			"pickup_range": 1.3,
-			"xp_gain": 0.1,
+			"xp_gain": 1.1,
 			"luck": 8.0,
 			"phase_shift_distance": 160.0
 		},

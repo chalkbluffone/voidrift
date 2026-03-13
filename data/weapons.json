@@ -475,6 +475,7 @@
 		}
 	},
 	"timmy_gun": {
+		"burst_managed": true,
 		"description": "The Timson Sub-Space Machine Gun model T2928A1, unloads a burst of physical rounds that ricochet off targets, bouncing to hit additional enemies before dissipating. Also, known as the \"Trench Broom\" as it was used in the great Balsurpian war of 2918 to disipate Balsurpians from the Ionic Trenches of Delton VII.",
 		"display_name": "Timmy Gun",
 		"enabled": true,
@@ -488,12 +489,12 @@
 		},
 		"spawner": "res://effects/timmy_gun/timmy_gun_spawner.gd",
 		"stats": {
-			"cooldown": 0.6,
-			"damage": 3.0,
+			"cooldown": 3.0,
+			"damage": 4.0,
 			"lifetime": 1.5,
 			"projectile_bounces": 1.0,
 			"projectile_count": 5.0,
-			"projectile_speed": 900.0
+			"projectile_speed": 420.0
 		},
 		"targeting": "nearest",
 		"type": "projectile",
@@ -532,6 +533,7 @@
 		}
 	},
 	"space_lasers": {
+		"burst_managed": true,
 		"description": "Fires focused neon-red laser bolts that lock onto the nearest target and ricochet to additional enemies on impact. Developed by the Crimson Array research division, each bolt seeks a new target after every hit, chaining damage across the battlefield.",
 		"display_name": "Space Lasers",
 		"enabled": true,
