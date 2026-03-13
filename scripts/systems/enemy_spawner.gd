@@ -8,6 +8,7 @@ signal swarm_started
 signal swarm_ended
 
 const XPPickupScene: PackedScene = preload("res://scenes/pickups/xp_pickup.tscn")
+const MergedXPPickupScene: PackedScene = preload("res://scenes/pickups/merged_xp_pickup.tscn")
 const StardustPickupScene: PackedScene = preload("res://scenes/pickups/stardust_pickup.tscn")
 
 ## Power-up scenes (randomly chosen from pool on enemy kill)
@@ -40,6 +41,9 @@ var _swarms_triggered: int = 0  # How many swarms have been triggered this run
 ## Freighter spawn control
 var _freighter_cooldown: float = 0.0
 var _rng: RandomNumberGenerator = null
+
+## XP merge timer — periodic pass to combine nearby idle XP pickups
+var _xp_merge_timer: float = 0.0
 
 @onready var RunManager: Node = get_node("/root/RunManager")
 @onready var GameConfig: Node = get_node("/root/GameConfig")
@@ -86,6 +90,12 @@ func _process(delta: float) -> void:
 		for i: int in range(batch_size):
 			_spawn_enemy()
 		_spawn_timer = _get_spawn_interval()
+
+	# Periodic XP merge pass (performance: reduces late-game pickup count)
+	_xp_merge_timer -= delta
+	if _xp_merge_timer <= 0.0:
+		_xp_merge_timer = GameConfig.XP_MERGE_INTERVAL
+		_try_merge_xp_pickups()
 
 
 func _find_player() -> void:
@@ -444,6 +454,61 @@ func _try_spawn_powerup(pos: Vector2) -> void:
 	)
 	powerup.global_position = pos + offset
 	get_tree().current_scene.call_deferred("add_child", powerup)
+
+
+# =============================================================================
+# XP MERGE (performance — reduces late-game pickup node count)
+# =============================================================================
+
+## Scan idle XP pickups, cluster nearby ones, and merge groups of 10+ into a single merged pickup.
+func _try_merge_xp_pickups() -> void:
+	var xp_nodes: Array[Node] = get_tree().get_nodes_in_group("xp_pickups")
+	# Filter to only idle (non-attracted) XP pickups
+	var xp_list: Array[Node2D] = []
+	for p: Node in xp_nodes:
+		if p is BasePickup and not (p as BasePickup)._is_attracted:
+			xp_list.append(p as Node2D)
+
+	if xp_list.size() < GameConfig.XP_MERGE_COUNT:
+		return
+
+	var merge_radius_sq: float = GameConfig.XP_MERGE_RADIUS * GameConfig.XP_MERGE_RADIUS
+	var visited: Dictionary = {}  # instance_id → true
+
+	for i: int in range(xp_list.size()):
+		var seed_pickup: Node2D = xp_list[i]
+		if visited.has(seed_pickup.get_instance_id()):
+			continue
+
+		# Gather cluster around this seed
+		var cluster: Array[Node2D] = [seed_pickup]
+		var seed_pos: Vector2 = seed_pickup.global_position
+
+		for j: int in range(i + 1, xp_list.size()):
+			var other: Node2D = xp_list[j]
+			if visited.has(other.get_instance_id()):
+				continue
+			if seed_pos.distance_squared_to(other.global_position) <= merge_radius_sq:
+				cluster.append(other)
+
+		if cluster.size() < GameConfig.XP_MERGE_COUNT:
+			continue
+
+		# Merge this cluster: sum XP, compute centroid, remove originals
+		var total_xp: float = 0.0
+		var centroid: Vector2 = Vector2.ZERO
+		for p: Node2D in cluster:
+			total_xp += float(p.get("xp_amount"))
+			centroid += p.global_position
+			visited[p.get_instance_id()] = true
+			p.queue_free()
+		centroid /= float(cluster.size())
+
+		# Spawn merged pickup at centroid
+		var merged: Area2D = MergedXPPickupScene.instantiate()
+		merged.global_position = centroid
+		merged.initialize(total_xp)
+		get_tree().current_scene.call_deferred("add_child", merged)
 
 
 # =============================================================================

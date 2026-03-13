@@ -7,7 +7,7 @@ extends BasePickup
 
 
 func _on_pickup_ready() -> void:
-	pass
+	add_to_group("xp_pickups")
 
 
 func initialize(amount: float) -> void:

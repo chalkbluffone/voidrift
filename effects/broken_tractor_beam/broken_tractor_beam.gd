@@ -186,7 +186,7 @@ func _find_nearest_enemy() -> Node2D:
 	var best: Node2D = null
 	var best_dist: float = search_radius
 	for enemy: Node in enemies:
-		if not enemy is Node2D or not is_instance_valid(enemy):
+		if not is_instance_valid(enemy) or not enemy is Node2D:
 			continue
 		var d: float = origin.distance_to(enemy.global_position)
 		if d < best_dist:
@@ -464,5 +464,3 @@ func _update_impact_particles() -> void:
 # =============================================================================
 # UTILITY
 # =============================================================================
-
-

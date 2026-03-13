@@ -74,6 +74,13 @@ const PICKUP_MAGNET_RADIUS: float = 150.0  # Base pixel radius to attract pickup
 const PICKUP_MAGNET_SPEED: float = 400.0  # Max speed pickups move toward player
 const PICKUP_MAGNET_ACCELERATION: float = 800.0  # How fast pickups accelerate
 
+# XP merge (performance — combines nearby idle XP pickups into larger glowing ones)
+const XP_MERGE_RADIUS: float = 100.0       # Pixel radius to cluster nearby XP for merging
+const XP_MERGE_COUNT: int = 5              # Minimum XP pickup count in cluster to trigger merge
+const XP_MERGE_INTERVAL: float = 2.0       # Seconds between merge scan passes
+const XP_MERGE_VISUAL_SIZE: float = 18.0   # Half-size of merged XP visual (pixels)
+const XP_MERGE_COLLISION_RADIUS: float = 12.0  # Collision radius for merged XP pickup
+
 # =============================================================================
 # CREDITS
 # =============================================================================

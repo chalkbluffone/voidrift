@@ -174,7 +174,7 @@ func _on_bullet_hit(enemy: Node2D, _damage_info: Dictionary, source_projectile: 
 	var nearest_dist: float = bounce_range
 	var enemies: Array = FrameCache.enemies
 	for enemy_any in enemies:
-		if not enemy_any is Node2D or not is_instance_valid(enemy_any):
+		if not is_instance_valid(enemy_any) or not enemy_any is Node2D:
 			continue
 		var e: Node2D = enemy_any as Node2D
 		if is_instance_valid(enemy) and e == enemy:
