@@ -86,12 +86,13 @@
 		"stats": {
 			"cooldown": 1.2,
 			"damage": 15.0,
-			"duration": 0.6
+			"duration": 0.6,
+			"projectile_bounces": 1.0
 		},
 		"type": "projectile",
 		"unlock_condition": "default",
 		"visual": {
-			"bolt_width": 0.5,
+			"bolt_width": 0.25,
 			"branch_intensity": 0.3,
 			"color_core": "#ffffff",
 			"color_fringe": "#8844cc",
@@ -398,14 +399,14 @@
 		},
 		"scene": "res://scenes/gameplay/projectile.tscn",
 		"shape": {
-			"explosion_radius": 96.0
+			"explosion_radius": 128.0
 		},
 		"spawner": "res://effects/space_nukes/space_nukes_spawner.gd",
 		"stats": {
 			"cooldown": 1.8,
 			"crit_chance": 0.0,
-			"damage": 15.0,
-			"projectile_count": 1.0,
+			"damage": 20.0,
+			"projectile_count": 3.0,
 			"projectile_speed": 520.0
 		},
 		"type": "projectile",
@@ -550,7 +551,7 @@
 			"cooldown": 1.0,
 			"damage": 5.0,
 			"lifetime": 1.5,
-			"projectile_bounces": 2.0,
+			"projectile_bounces": 1.0,
 			"projectile_count": 1.0,
 			"projectile_speed": 750.0
 		},

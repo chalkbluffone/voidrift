@@ -220,6 +220,13 @@ func _fire_projectile_via_spawner(weapon_id: String, data: Dictionary) -> void:
 	var weapon_size_mult: float = _inventory.get_weapon_mult(weapon_id, StatsComponentScript.STAT_SIZE)
 	config["size_mult"] = global_size_mult * (1.0 + weapon_size_mult)
 
+	var base_bounces: float = float(config.get("projectile_bounces", 0.0))
+	var weapon_bounces_flat: float = _inventory.get_weapon_flat(weapon_id, StatsComponentScript.STAT_PROJECTILE_BOUNCES)
+	var global_bounces: float = 0.0
+	if stats_component:
+		global_bounces = stats_component.get_stat(StatsComponentScript.STAT_PROJECTILE_BOUNCES)
+	config["projectile_bounces"] = maxi(0, int(base_bounces + weapon_bounces_flat + global_bounces))
+
 	var base_proj_count: int = int(config.get("projectile_count", 1))
 	var bonus_proj: int = 0
 	var weapon_bonus_proj: int = int(round(_inventory.get_weapon_flat(weapon_id, StatsComponentScript.STAT_PROJECTILE_COUNT)))

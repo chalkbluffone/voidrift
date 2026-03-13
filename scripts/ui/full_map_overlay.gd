@@ -166,7 +166,7 @@ func _draw_enemies(center: Vector2) -> void:
 	var radius: float = _map_size * 0.5
 	
 	for enemy: Node in enemies:
-			if not enemy is Node2D:
+		if not enemy is Node2D:
 			continue
 		var enemy_2d: Node2D = enemy as Node2D
 		var offset: Vector2 = enemy_2d.global_position * _world_to_map_scale
@@ -239,14 +239,12 @@ func _draw_powerup_icon(marker_pos: Vector2, marker_type: String, marker_color: 
 		draw_line(marker_pos + Vector2(0.0, -2.0) * icon_scale, marker_pos + Vector2(0.0, 2.0) * icon_scale, Color.WHITE, 1.4)
 	elif marker_type == "speed":
 		var bolt_points: PackedVector2Array = PackedVector2Array([
-			marker_pos + Vector2(-1.4, -2.0) * icon_scale,
-			marker_pos + Vector2(0.3, -2.0) * icon_scale,
-			marker_pos + Vector2(-0.6, 0.2) * icon_scale,
-			marker_pos + Vector2(1.4, 0.2) * icon_scale,
-			marker_pos + Vector2(-0.4, 2.1) * icon_scale,
-			marker_pos + Vector2(0.2, 0.6) * icon_scale
+			marker_pos + Vector2(0.3, -2.2) * icon_scale,
+			marker_pos + Vector2(-1.0, 0.2) * icon_scale,
+			marker_pos + Vector2(0.4, 0.2) * icon_scale,
+			marker_pos + Vector2(-0.3, 2.2) * icon_scale
 		])
-		draw_colored_polygon(bolt_points, Color.WHITE)
+		draw_polyline(bolt_points, Color.WHITE, 1.4)
 	elif marker_type == "stopwatch":
 		draw_circle(marker_pos, 2.0 * icon_scale, Color.WHITE)
 		draw_line(marker_pos + Vector2(0.0, -2.8) * icon_scale, marker_pos + Vector2(0.0, -1.9) * icon_scale, marker_color, 1.1)
