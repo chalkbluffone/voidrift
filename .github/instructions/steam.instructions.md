@@ -158,7 +158,11 @@ To disable Discord without removing the URL:
 
 ### Version Management
 
-Edit `tools/release_state.json` before a named release:
+**During playtest (0.x.y):** Auto-increment the **patch** version (third number) on every deploy. For example, `0.1.0` → `0.1.1` → `0.1.2`. The release-ops agent does this automatically before generating release notes.
+
+**For named releases:** Bump the **minor** version (second number) manually, e.g. `0.1.x` → `0.2.0`, and update the `summary` field.
+
+Edit `tools/release_state.json`:
 
 ```json
 {

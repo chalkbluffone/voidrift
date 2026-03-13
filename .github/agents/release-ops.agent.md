@@ -68,7 +68,11 @@ The script reads `build/release_notes.md`, wraps the content in a Discord embed,
 
 ## Version Management
 
-Edit `tools/release_state.json` before a named release. Only `version` and `summary` need editing:
+**During playtest (0.x.y):** Auto-increment the **patch** version (third number) on every deploy. For example, `0.1.0` → `0.1.1` → `0.1.2`. Do this by editing `tools/release_state.json` before Step 3 (release notes). No user prompt needed.
+
+**For named releases:** Bump the **minor** version (second number) manually, e.g. `0.1.x` → `0.2.0`, and update the `summary` field.
+
+Only `version` and `summary` need manual editing:
 
 ```json
 {
