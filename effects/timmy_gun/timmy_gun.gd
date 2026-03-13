@@ -29,6 +29,7 @@ const PROJECTILE_SCENE: PackedScene = preload("res://scenes/gameplay/projectile.
 
 @onready var FrameCache: Node = get_node("/root/FrameCache")
 @onready var GameSeed: Node = get_node("/root/GameSeed")
+@onready var ObjectPool: Node = get_node("/root/ObjectPool")
 
 # --- Internal ---
 var _stats_component: Node = null
@@ -124,7 +125,7 @@ func _retarget_if_needed() -> void:
 
 
 func _spawn_bullet(origin: Vector2, direction: Vector2, bounces_remaining: int) -> void:
-	var projectile: Node2D = PROJECTILE_SCENE.instantiate()
+	var projectile: Node2D = ObjectPool.acquire("projectile", PROJECTILE_SCENE)
 	projectile.z_index = -1
 	projectile.initialize(
 		damage,

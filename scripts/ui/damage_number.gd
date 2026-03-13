@@ -3,14 +3,34 @@ extends RichTextLabel
 
 ## Floating damage number that rises and fades out.
 ## Spawned by enemies on take_damage(). Supports normal, crit, and overcrit styling.
+## Supports object pooling — use ObjectPool instead of queue_free().
 
 const DAMAGE_NUMBER_FONT: Font = preload("res://assets/fonts/Orbitron-Bold.ttf")
 
 # GameConfig accessed via autoload name at class level
 
+var _in_group: bool = false
+
 
 func _ready() -> void:
+	if not _in_group:
+		_in_group = true
 	add_to_group("damage_numbers")
+
+
+## Reset this damage number to a clean state for pool reuse.
+func reset() -> void:
+
+	modulate = Color.WHITE
+	modulate.a = 1.0
+	self_modulate = Color.WHITE
+	scale = Vector2.ONE
+	text = ""
+	visible = true
+	bbcode_enabled = true
+	# Re-add to group (removed on release)
+	if not is_in_group("damage_numbers"):
+		add_to_group("damage_numbers")
 
 
 func setup(amount: float, damage_info: Dictionary, world_pos: Vector2) -> void:
@@ -115,7 +135,18 @@ func _animate(is_crit: bool, is_overcrit: bool) -> void:
 	tween.tween_property(self, "modulate:a", 0.0, duration * 0.6) \
 		.set_delay(duration * 0.4)
 	tween.set_parallel(false)
-	tween.tween_callback(queue_free)
+	tween.tween_callback(_return_to_pool)
+
+
+func _return_to_pool() -> void:
+	# Remove from group so FrameCache doesn't query dormant nodes
+	if is_in_group("damage_numbers"):
+		remove_from_group("damage_numbers")
+	var pool: Node = get_node_or_null("/root/ObjectPool")
+	if pool:
+		pool.release("damage_number", self)
+	else:
+		queue_free()
 
 
 func _format_compact_amount(amount: float) -> String:

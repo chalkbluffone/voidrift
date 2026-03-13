@@ -117,6 +117,9 @@ func end_run(victory: bool) -> void:
 
 
 func _reset_run_data() -> void:
+	var pool: Node = get_node_or_null("/root/ObjectPool")
+	if pool and pool.has_method("drain_all"):
+		pool.drain_all()
 	run_data = {
 		# Loadout
 		"ship_id": "",

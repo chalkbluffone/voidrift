@@ -559,7 +559,7 @@
 				"legendary": 0.4
 			},
 			"crit_chance": {
-				"common": 0.08,
+				"common": 0.8,
 				"uncommon": 0.1,
 				"rare": 0.11,
 				"epic": 0.13,
@@ -603,8 +603,8 @@
 				"legendary": 0.3
 			},
 			"crit_chance": {
-				"common": 0.07,
-				"uncommon": 0.08,
+				"common": 0.7,
+				"uncommon": 0.8,
 				"rare": 0.1,
 				"epic": 0.11,
 				"legendary": 0.14

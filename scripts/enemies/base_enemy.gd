@@ -27,6 +27,7 @@ var _hitbox: Area2D = null
 @onready var GameConfig: Node = get_node("/root/GameConfig")
 @onready var FrameCache: Node = get_node("/root/FrameCache")
 @onready var GameSeed: Node = get_node("/root/GameSeed")
+@onready var ObjectPool: Node = get_node("/root/ObjectPool")
 
 # --- Knockback ---
 var _knockback_velocity: Vector2 = Vector2.ZERO
@@ -221,7 +222,7 @@ func _spawn_damage_number(amount: float, damage_info: Dictionary) -> void:
 		if is_instance_valid(existing[0]):
 			existing[0].queue_free()
 	
-	var label: DamageNumber = _DAMAGE_NUMBER_SCENE.instantiate() as DamageNumber
+	var label: DamageNumber = ObjectPool.acquire("damage_number", _DAMAGE_NUMBER_SCENE) as DamageNumber
 	get_tree().current_scene.add_child(label)
 	label.setup(amount, damage_info, global_position)
 

@@ -19,6 +19,7 @@ const PROJECTILE_SCENE: PackedScene = preload("res://scenes/gameplay/projectile.
 @export var needle_width_px: float = 2.0
 @export var trail_alpha: float = 0.35
 
+@onready var ObjectPool: Node = get_node("/root/ObjectPool")
 var _projectile: Node2D = null
 var _spawn_pos: Vector2 = Vector2.ZERO
 
@@ -31,7 +32,7 @@ func setup(params: Dictionary) -> StraightLineNegotiator:
 
 
 func fire_from(spawn_pos: Vector2, direction: Vector2, stats_component: Node = null) -> void:
-	var projectile: Node2D = PROJECTILE_SCENE.instantiate()
+	var projectile: Node2D = ObjectPool.acquire("projectile", PROJECTILE_SCENE)
 	projectile.z_index = -1
 	projectile.initialize(
 		damage,
@@ -72,7 +73,7 @@ func _process(_delta: float) -> void:
 		queue_free()
 		return
 	if size > 0.0 and _projectile.global_position.distance_to(_spawn_pos) >= size:
-		_projectile.queue_free()
+		ObjectPool.release("projectile", _projectile)
 
 
 class _NeedleTracer extends NeonProjectileVisual:

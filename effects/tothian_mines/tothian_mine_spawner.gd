@@ -30,7 +30,12 @@ func spawn(spawn_pos: Vector2, params: Dictionary = {}, follow_source: Node2D = 
 	if scene == null:
 		return null
 
-	var mine: Node2D = scene.instantiate()
+	var pool: Node = _parent_node.get_node_or_null("/root/ObjectPool")
+	var mine: Node2D = null
+	if pool:
+		mine = pool.acquire("tothian_mine", scene)
+	else:
+		mine = scene.instantiate()
 	_parent_node.add_child(mine)
 
 	if params and mine.has_method("setup"):
@@ -54,7 +59,11 @@ func spawn(spawn_pos: Vector2, params: Dictionary = {}, follow_source: Node2D = 
 
 
 func cleanup() -> void:
+	var pool: Node = _parent_node.get_node_or_null("/root/ObjectPool") if _parent_node else null
 	for mine in _active_mines:
 		if is_instance_valid(mine):
-			mine.queue_free()
+			if pool:
+				pool.release("tothian_mine", mine)
+			else:
+				mine.queue_free()
 	_active_mines.clear()

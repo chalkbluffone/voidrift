@@ -6,10 +6,13 @@ class_name SpaceNukesSpawner
 
 var _parent_node: Node
 var _active_instances: Array = []
+var _dormant_instances: Array = []
 var _rng: RandomNumberGenerator = null
 var _launch_arc_min_deg: float
 var _launch_arc_max_deg: float
 var _base_targeting_radius: float
+var _effect_script: GDScript = preload("res://effects/space_nukes/space_nukes_effect.gd")
+var _max_dormant: int = 32
 
 
 func _init(parent: Node) -> void:
@@ -18,11 +21,35 @@ func _init(parent: Node) -> void:
 	_launch_arc_min_deg = config.NUKE_LAUNCH_ARC_MIN_DEG
 	_launch_arc_max_deg = config.NUKE_LAUNCH_ARC_MAX_DEG
 	_base_targeting_radius = config.NUKE_BASE_TARGETING_RADIUS
+	_max_dormant = config.POOL_MAX_DORMANT_EFFECTS
 	var game_seed: Node = _parent_node.get_node_or_null("/root/GameSeed")
 	if game_seed and game_seed.has_method("rng"):
 		_rng = game_seed.rng("space_nukes_spawner")
 	else:
 		_rng = RandomNumberGenerator.new()
+
+
+func _acquire_nuke() -> Node2D:
+	if _dormant_instances.size() > 0:
+		var recycled: Node2D = _dormant_instances.pop_back()
+		if is_instance_valid(recycled):
+			if recycled.has_method("reset"):
+				recycled.reset()
+			return recycled
+	var inst: Node2D = _effect_script.new()
+	inst._pool_return_callback = Callable(self, "_return_nuke")
+	return inst
+
+
+func _return_nuke(inst: Node2D) -> void:
+	if not is_instance_valid(inst):
+		return
+	if inst.is_inside_tree():
+		inst.get_parent().remove_child(inst)
+	if _dormant_instances.size() < _max_dormant:
+		_dormant_instances.append(inst)
+	else:
+		inst.queue_free()
 
 
 func spawn(
@@ -54,7 +81,6 @@ func spawn(
 		var swap: float = launch_arc_min_deg
 		launch_arc_min_deg = launch_arc_max_deg
 		launch_arc_max_deg = swap
-	var effect_script: GDScript = load("res://effects/space_nukes/space_nukes_effect.gd")
 
 	var first_instance: Node2D = null
 	for i in range(rockets_to_fire):
@@ -74,7 +100,7 @@ func spawn(
 		var arc_radians: float = deg_to_rad(_rng.randf_range(launch_arc_min_deg, launch_arc_max_deg)) * arc_sign
 		var launch_dir: Vector2 = travel_dir.rotated(arc_radians).normalized()
 
-		var instance: Node2D = effect_script.new()
+		var instance: Node2D = _acquire_nuke()
 		instance.z_index = -1
 		_parent_node.add_child(instance)
 
@@ -94,5 +120,9 @@ func spawn(
 func cleanup() -> void:
 	for inst in _active_instances:
 		if is_instance_valid(inst):
-			inst.queue_free()
+			_return_nuke(inst)
 	_active_instances.clear()
+	for inst in _dormant_instances:
+		if is_instance_valid(inst):
+			inst.queue_free()
+	_dormant_instances.clear()

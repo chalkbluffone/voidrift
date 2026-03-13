@@ -1,13 +1,12 @@
-[gd_scene load_steps=7 format=3 uid="uid://dmainmenu00001"]
+[gd_scene format=3 uid="uid://b6ofiq0km5m1u"]
 
-[ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_menu"]
-[ext_resource type="FontFile" path="res://assets/fonts/Orbitron-Bold.ttf" id="2_orbitron"]
+[ext_resource type="Script" uid="uid://dqbyaqegipprv" path="res://scripts/ui/main_menu.gd" id="1_menu"]
+[ext_resource type="FontFile" uid="uid://va2b5ca2fodd" path="res://assets/fonts/Orbitron-Bold.ttf" id="2_orbitron"]
 [ext_resource type="Material" uid="uid://byvccfmo8fywt" path="res://materials/stars_far.tres" id="3_starsfar"]
 [ext_resource type="Material" uid="uid://bc1yjbx4pki81" path="res://materials/stars_near.tres" id="4_starsnear"]
 [ext_resource type="Texture2D" uid="uid://bihjwqerr2jq7" path="res://assets/backgrounds/super_cool_space_game_main_title.png" id="5_title"]
-[ext_resource type="Shader" uid="uid://5inwhawvmwt3" path="res://shaders/title_glow.gdshader" id="6_titleglow"]
 
-[node name="MainMenu" type="Control"]
+[node name="MainMenu" type="Control" unique_id=1117954769]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -16,26 +15,26 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_menu")
 
-[node name="Starfield" type="Node2D" parent="."]
+[node name="Starfield" type="Node2D" parent="." unique_id=195688205]
 z_index = -100
 
-[node name="Nebula" type="Parallax2D" parent="Starfield"]
+[node name="Nebula" type="Parallax2D" parent="Starfield" unique_id=1571801090]
 scroll_scale = Vector2(0.05, 0.05)
 repeat_size = Vector2(1024, 1024)
 autoscroll = Vector2(5, 0)
 
-[node name="NebulaSprite" type="Sprite2D" parent="Starfield/Nebula"]
+[node name="NebulaSprite" type="Sprite2D" parent="Starfield/Nebula" unique_id=1268897094]
 texture_repeat = 2
 region_enabled = true
 region_rect = Rect2(0, 0, 8192, 8192)
 
-[node name="StarsFar" type="Parallax2D" parent="Starfield"]
+[node name="StarsFar" type="Parallax2D" parent="Starfield" unique_id=1058812975]
 scroll_scale = Vector2(0.12, 0.12)
 repeat_size = Vector2(4096, 4096)
 autoscroll = Vector2(15, 0)
 repeat_times = 3
 
-[node name="StarsFarRect" type="ColorRect" parent="Starfield/StarsFar"]
+[node name="StarsFarRect" type="ColorRect" parent="Starfield/StarsFar" unique_id=953731457]
 material = ExtResource("3_starsfar")
 anchors_preset = 15
 anchor_right = 1.0
@@ -46,13 +45,13 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 1)
 
-[node name="StarsNear" type="Parallax2D" parent="Starfield"]
+[node name="StarsNear" type="Parallax2D" parent="Starfield" unique_id=808134823]
 scroll_scale = Vector2(0.35, 0.35)
 repeat_size = Vector2(4096, 4096)
 autoscroll = Vector2(30, 0)
 repeat_times = 3
 
-[node name="StarsNearRect" type="ColorRect" parent="Starfield/StarsNear"]
+[node name="StarsNearRect" type="ColorRect" parent="Starfield/StarsNear" unique_id=884330536]
 material = ExtResource("4_starsnear")
 anchors_preset = 15
 anchor_right = 1.0
@@ -63,23 +62,19 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 1)
 
-[node name="TitleImage" type="TextureRect" parent="."]
+[node name="TitleImage" type="TextureRect" parent="." unique_id=1480781327]
 layout_mode = 1
-anchors_preset = 0
 texture = ExtResource("5_title")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="ButtonContainer" type="VBoxContainer" parent="."]
+[node name="ButtonContainer" type="VBoxContainer" parent="." unique_id=335265718]
 layout_mode = 1
-anchors_preset = 0
-offset_left = 0.0
-offset_top = 0.0
 offset_right = 300.0
 offset_bottom = 220.0
 theme_override_constants/separation = 15
 
-[node name="PlayButton" type="Button" parent="ButtonContainer"]
+[node name="PlayButton" type="Button" parent="ButtonContainer" unique_id=1061985876]
 custom_minimum_size = Vector2(300, 40)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -87,7 +82,7 @@ theme_override_fonts/font = ExtResource("2_orbitron")
 theme_override_font_sizes/font_size = 24
 text = "▶ Play"
 
-[node name="OptionsButton" type="Button" parent="ButtonContainer"]
+[node name="OptionsButton" type="Button" parent="ButtonContainer" unique_id=328714623]
 custom_minimum_size = Vector2(300, 40)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -95,7 +90,7 @@ theme_override_fonts/font = ExtResource("2_orbitron")
 theme_override_font_sizes/font_size = 24
 text = "⚙ Options"
 
-[node name="WeaponsLabButton" type="Button" parent="ButtonContainer"]
+[node name="WeaponsLabButton" type="Button" parent="ButtonContainer" unique_id=2072727615]
 custom_minimum_size = Vector2(300, 40)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -103,7 +98,7 @@ theme_override_fonts/font = ExtResource("2_orbitron")
 theme_override_font_sizes/font_size = 24
 text = "🔧 Weapons Lab"
 
-[node name="QuitButton" type="Button" parent="ButtonContainer"]
+[node name="QuitButton" type="Button" parent="ButtonContainer" unique_id=2059002907]
 custom_minimum_size = Vector2(300, 40)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -111,7 +106,7 @@ theme_override_fonts/font = ExtResource("2_orbitron")
 theme_override_font_sizes/font_size = 24
 text = "✕ Quit"
 
-[node name="VersionLabel" type="Label" parent="."]
+[node name="VersionLabel" type="Label" parent="." unique_id=428079821]
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0

@@ -35,6 +35,7 @@ const PROJECTILE_SCENE: PackedScene = preload("res://scenes/gameplay/projectile.
 @export var crit_damage: float = 0.0
 
 # --- Internal ---
+@onready var ObjectPool: Node = get_node("/root/ObjectPool")
 var _pellets: Array = []  # Array of projectile node refs
 var _spawn_origin: Vector2 = Vector2.ZERO
 var _stats_component: Node = null
@@ -84,7 +85,7 @@ func _spawn_pellet(angle: float, speed: float) -> void:
 	var dir: Vector2 = Vector2(cos(angle), sin(angle))
 
 	# Use the PROVEN projectile scene — guaranteed working collision
-	var pellet: Node2D = PROJECTILE_SCENE.instantiate()
+	var pellet: Node2D = ObjectPool.acquire("projectile", PROJECTILE_SCENE)
 	pellet.z_index = -1
 
 	# Initialize with standard projectile API

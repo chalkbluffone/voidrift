@@ -34,6 +34,29 @@ var _weave_seed: float = 0.0
 var _weave_sign: float = 1.0
 var _rng: RandomNumberGenerator = null
 
+## Callback set by spawner for pool return.
+var _pool_return_callback: Callable = Callable()
+
+
+## Reset this nuke to a clean state for pool reuse.
+func reset() -> void:
+	_exploded = false
+	_cleanup_timer = 0.0
+	_elapsed = 0.0
+	_missile_pos = Vector2.ZERO
+	_missile_dir = Vector2.RIGHT
+	_missile_speed = 0.0
+	_target_node = null
+	_target_pos = Vector2.ZERO
+	_source = null
+	_stats_component = null
+	_weave_seed = 0.0
+	_weave_sign = 1.0
+	visible = true
+	rotation = 0.0
+	if _missile_visual and is_instance_valid(_missile_visual):
+		_missile_visual.visible = true
+
 
 func setup(params: Dictionary) -> SpaceNukesEffect:
 	for key in params:
@@ -73,7 +96,7 @@ func _process(delta: float) -> void:
 	if _exploded:
 		_cleanup_timer -= delta
 		if _cleanup_timer <= 0.0:
-			queue_free()
+			_return_to_pool()
 		return
 
 	_elapsed += delta
@@ -207,6 +230,13 @@ func _spawn_explosion_flash(origin: Vector2) -> void:
 	flash.max_radius = explosion_radius * size_mult
 	flash.flash_color = explosion_color
 	scene_root.add_child(flash)
+
+
+func _return_to_pool() -> void:
+	if _pool_return_callback.is_valid():
+		_pool_return_callback.call(self)
+	else:
+		queue_free()
 
 
 class _MissileVisual extends Node2D:

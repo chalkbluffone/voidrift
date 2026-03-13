@@ -29,6 +29,7 @@ var _spawners: WeaponSpawnerCache = WeaponSpawnerCache.new()
 @onready var RunManager: Node = get_node_or_null("/root/RunManager")
 @onready var FrameCache: Node = get_node_or_null("/root/FrameCache")
 @onready var GameSeed: Node = get_node_or_null("/root/GameSeed")
+@onready var ObjectPool: Node = get_node("/root/ObjectPool")
 
 var _rng: RandomNumberGenerator = null
 
@@ -467,7 +468,7 @@ func _spawn_projectile(_weapon_id: String, direction: Vector2, damage: float, sp
 		push_warning("WeaponComponent: No projectile scene loaded")
 		return null
 
-	var projectile: Node2D = PROJECTILE_SCENE.instantiate()
+	var projectile: Node2D = ObjectPool.acquire("projectile", PROJECTILE_SCENE)
 	projectile.z_index = -1
 	var style: Dictionary = _get_projectile_style(_weapon_id)
 

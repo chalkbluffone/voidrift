@@ -23,12 +23,15 @@ var _area: Area2D = null
 var _collision: CollisionShape2D = null
 var _base_size: float = 0.0
 var _pulse_t: float = 0.0
+var _initialized: bool = false
 
 
 func _ready() -> void:
+	if not _initialized:
+		_initialized = true
+		_create_trigger_area()
 	_life_remaining = maxf(0.15, duration)
 	_base_size = maxf(8.0, size)
-	_create_trigger_area()
 	_update_trigger_shape()
 	queue_redraw()
 
@@ -61,7 +64,7 @@ func _process(delta: float) -> void:
 
 	_life_remaining -= delta
 	if _life_remaining <= 0.0:
-		queue_free()
+		_return_to_pool()
 		return
 
 	_pulse_t += delta * pulse_speed
@@ -153,14 +156,36 @@ func _explode() -> void:
 	_spawn_explosion_flash()
 	_apply_aoe_damage()
 	_play_detonation_sfx()
-	queue_free()
+	call_deferred("_return_to_pool")
+
+
+func _return_to_pool() -> void:
+	var pool: Node = get_node_or_null("/root/ObjectPool")
+	if pool:
+		pool.release("tothian_mine", self)
+	else:
+		queue_free()
+
+
+## Reset this mine to a clean state for pool reuse.
+func reset() -> void:
+	_exploded = false
+	_life_remaining = maxf(0.15, duration)
+	_base_size = maxf(8.0, size)
+	_pulse_t = 0.0
+	_stats_component = null
+	visible = true
+	if _area:
+		_area.set_deferred("monitoring", true)
+		_area.set_deferred("monitorable", true)
+	queue_redraw()
 
 
 func _apply_aoe_damage() -> void:
 	var hit_radius: float = maxf(8.0, size)
 	var enemies: Array = FrameCache.enemies
 	for enemy_any in enemies:
-		if not enemy_any is Node2D or not is_instance_valid(enemy_any):
+		if not is_instance_valid(enemy_any) or not enemy_any is Node2D:
 			continue
 
 		var enemy: Node2D = enemy_any as Node2D
