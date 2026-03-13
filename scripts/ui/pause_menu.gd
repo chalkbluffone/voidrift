@@ -74,7 +74,7 @@ func _input(event: InputEvent) -> void:
 func _pause() -> void:
 	_is_paused = true
 	visible = true
-	get_tree().paused = true
+	RunManager.pause_game()
 	if _stats_panel:
 		_stats_panel.snapshot()
 		_stats_panel.refresh()
@@ -90,7 +90,7 @@ func _unpause() -> void:
 	options_panel.visible = false
 	if _stats_panel:
 		_stats_panel.visible = false
-	get_tree().paused = false
+	RunManager.resume_game()
 	resumed.emit()
 
 
@@ -99,7 +99,7 @@ func _on_resume_pressed() -> void:
 
 
 func _on_restart_pressed() -> void:
-	get_tree().paused = false
+	RunManager.resume_game()
 	# Re-launch with the same ship and captain from the current run
 	var ship_id: String = String(RunManager.run_data.get("ship_id", ""))
 	var captain_id: String = String(RunManager.run_data.get("captain_id", ""))
@@ -116,7 +116,7 @@ func _on_options_pressed() -> void:
 
 
 func _on_quit_run_pressed() -> void:
-	get_tree().paused = false
+	RunManager.resume_game()
 	get_tree().change_scene_to_file(MAIN_MENU_SCENE)
 
 

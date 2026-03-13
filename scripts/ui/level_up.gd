@@ -606,6 +606,8 @@ func _on_card_input(event: InputEvent, index: int) -> void:
 		if mb.button_index == MOUSE_BUTTON_LEFT and mb.pressed:
 			_on_card_selected(index)
 	elif event.is_action_pressed("ui_accept"):
+		if event is InputEventKey and (event as InputEventKey).keycode == KEY_SPACE:
+			return
 		_on_card_selected(index)
 
 
@@ -746,6 +748,11 @@ func _hide_ui() -> void:
 
 func _input(event: InputEvent) -> void:
 	if not _is_showing:
+		return
+
+	# Block space bar to prevent accidental selections
+	if event is InputEventKey and (event as InputEventKey).keycode == KEY_SPACE:
+		get_viewport().set_input_as_handled()
 		return
 	
 	# Keyboard shortcuts for card selection

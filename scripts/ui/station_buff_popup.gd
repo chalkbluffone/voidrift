@@ -278,6 +278,11 @@ func _on_ignore_pressed() -> void:
 func _input(event: InputEvent) -> void:
 	if not visible:
 		return
+
+	# Block space bar to prevent accidental selections
+	if event is InputEventKey and (event as InputEventKey).keycode == KEY_SPACE:
+		get_viewport().set_input_as_handled()
+		return
 	
 	# Handle confirm on focused card/button (controller + keyboard)
 	if event.is_action_pressed("ui_accept"):
