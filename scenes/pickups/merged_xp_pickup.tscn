@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/pickups/merged_xp_pickup.gd" id="1_xp"]
 [ext_resource type="Shader" path="res://effects/merged_xp_glow/merged_xp_glow.gdshader" id="2_shader"]
@@ -9,6 +9,25 @@ shader_parameter/glow_intensity = 2.5
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_merged_xp"]
 radius = 12.0
+
+[sub_resource type="Gradient" id="Gradient_sparkle"]
+offsets = PackedFloat32Array(0.0, 0.3, 0.7, 1.0)
+colors = PackedColorArray(1, 1, 1, 0.8, 0.97, 0.02, 0.81, 1, 0.97, 0.02, 0.81, 0.6, 0.97, 0.02, 0.81, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_sparkle"]
+gradient = SubResource("Gradient_sparkle")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_sparkle"]
+emission_shape = 1
+emission_sphere_radius = 6.0
+direction = Vector3(0, 0, 0)
+spread = 180.0
+initial_velocity_min = 8.0
+initial_velocity_max = 15.0
+gravity = Vector3(0, 0, 0)
+scale_min = 1.0
+scale_max = 3.0
+color_ramp = SubResource("GradientTexture1D_sparkle")
 
 [node name="MergedXPPickup" type="Area2D"]
 collision_layer = 16
@@ -27,3 +46,10 @@ offset_top = -12.0
 offset_right = 12.0
 offset_bottom = 12.0
 color = Color(1, 1, 1, 1)
+
+[node name="SparkleParticles" type="GPUParticles2D" parent="."]
+amount = 10
+process_material = SubResource("ParticleProcessMaterial_sparkle")
+lifetime = 0.7
+local_coords = false
+visibility_rect = Rect2(-20, -20, 40, 40)

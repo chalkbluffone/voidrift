@@ -494,21 +494,52 @@ func _try_merge_xp_pickups() -> void:
 		if cluster.size() < GameConfig.XP_MERGE_COUNT:
 			continue
 
-		# Merge this cluster: sum XP, compute centroid, remove originals
+		# Merge this cluster: sum XP, compute centroid, animate fly-in
 		var total_xp: float = 0.0
 		var centroid: Vector2 = Vector2.ZERO
 		for p: Node2D in cluster:
 			total_xp += float(p.get("xp_amount"))
 			centroid += p.global_position
 			visited[p.get_instance_id()] = true
-			p.queue_free()
 		centroid /= float(cluster.size())
 
-		# Spawn merged pickup at centroid
-		var merged: Area2D = MergedXPPickupScene.instantiate()
-		merged.global_position = centroid
-		merged.initialize(total_xp)
-		get_tree().current_scene.call_deferred("add_child", merged)
+		# Disable originals so they can't be collected or re-merged during animation
+		for p: Node2D in cluster:
+			if p.is_in_group("xp_pickups"):
+				p.remove_from_group("xp_pickups")
+			(p as Area2D).monitoring = false
+			(p as Area2D).monitorable = false
+			(p as BasePickup)._is_attracted = true
+
+		# Animate originals flying to centroid while shrinking
+		var fly_duration: float = GameConfig.XP_MERGE_FLY_DURATION
+		var last_tween: Tween = null
+		for p: Node2D in cluster:
+			var tween: Tween = p.create_tween()
+			tween.set_parallel(true)
+			tween.tween_property(p, "global_position", centroid, fly_duration) \
+				.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+			tween.tween_property(p, "scale", Vector2.ZERO, fly_duration) \
+				.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+			tween.tween_property(p, "modulate:a", 0.0, fly_duration) \
+				.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+			last_tween = tween
+
+		# After fly-in completes: free originals, spawn merged pickup with entrance animation
+		var captured_cluster: Array[Node2D] = cluster
+		var captured_xp: float = total_xp
+		var captured_centroid: Vector2 = centroid
+		last_tween.finished.connect(func() -> void:
+			for p: Node2D in captured_cluster:
+				if is_instance_valid(p):
+					p.queue_free()
+			var merged: Area2D = MergedXPPickupScene.instantiate()
+			merged.global_position = captured_centroid
+			merged.initialize(captured_xp)
+			if is_instance_valid(get_tree()) and get_tree().current_scene:
+				get_tree().current_scene.call_deferred("add_child", merged)
+				merged.call_deferred("animate_entrance")
+		)
 
 
 # =============================================================================

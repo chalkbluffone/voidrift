@@ -81,6 +81,12 @@ const XP_MERGE_INTERVAL: float = 2.0       # Seconds between merge scan passes
 const XP_MERGE_VISUAL_SIZE: float = 18.0   # Half-size of merged XP visual (pixels)
 const XP_MERGE_COLLISION_RADIUS: float = 12.0  # Collision radius for merged XP pickup
 
+# XP merge animation
+const XP_MERGE_FLY_DURATION: float = 0.35      # Seconds for originals to fly to centroid
+const XP_MERGE_POP_DURATION: float = 0.25      # Seconds for merged pickup scale-pop entrance
+const XP_MERGE_POP_OVERSHOOT: float = 1.2      # Scale overshoot factor (TRANS_BACK)
+const XP_MERGE_FLASH_DURATION: float = 0.15    # Seconds for white flash fade on merged spawn
+
 # =============================================================================
 # CREDITS
 # =============================================================================
