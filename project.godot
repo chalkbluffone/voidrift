@@ -35,7 +35,6 @@ SteamManager="*res://globals/steam_manager.gd"
 FrameCache="*res://globals/frame_cache.gd"
 ObjectPool="*res://scripts/core/object_pool.gd"
 ControllerIcons="*uid://cmrs5nlmvh61n"
-DebugMenu="*uid://cggqb75a8w8r"
 
 [display]
 

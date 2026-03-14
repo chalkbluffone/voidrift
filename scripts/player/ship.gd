@@ -188,21 +188,14 @@ func _setup_captain_ability(captain_data: Dictionary) -> void:
 	var template: String = ability_data.get("template", "")
 	var ability: Node = null
 	
-	var ability_script: GDScript = null
 	match template:
 		"buff_self":
-			ability_script = load("res://scripts/core/abilities/buff_self_ability.gd") as GDScript
+			ability = BuffSelfAbility.new()
 		"area_effect":
-			ability_script = load("res://scripts/core/abilities/area_effect_ability.gd") as GDScript
+			ability = AreaEffectAbility.new()
 		_:
 			push_warning("Ship: Unknown ability template: " + template)
 			return
-	
-	if ability_script == null:
-		push_warning("Ship: Failed to load ability script for template: " + template)
-		return
-	
-	ability = ability_script.new()
 	
 	ability.name = "CaptainAbility"
 	add_child(ability)

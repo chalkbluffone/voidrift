@@ -260,6 +260,11 @@ const DAMAGE_NUMBER_OUTLINE_SIZE: int = 3           # Dark outline thickness for
 const ABILITY_DEFAULT_COOLDOWN: float = 75.0  # Fallback cooldown if captain JSON omits it
 const ABILITY_DEFAULT_DURATION: float = 5.0   # Fallback duration if captain JSON omits it
 
+# --- Subjugation (Zoltan) ---
+const SUBJUGATION_MAX_TARGETS: int = 5          # Max enemies converted per activation
+const SUBJUGATION_DAMAGE_MULT: float = 0.6      # Fraction of original damage dealt to former allies
+const SUBJUGATION_TINT_COLOR: Color = Color(0.2, 1.0, 0.4, 1.0)  # Green tint for converted enemies
+
 # =============================================================================
 # SHIP VISUAL DEFAULTS
 # =============================================================================

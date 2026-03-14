@@ -18,6 +18,7 @@ var cooldown: float = GameConfig.ABILITY_DEFAULT_COOLDOWN
 var duration: float = GameConfig.ABILITY_DEFAULT_DURATION
 var effects: Dictionary = {}
 var vfx_id: String = ""
+var radius: float = 0.0
 
 # --- State ---
 var _cooldown_remaining: float = 0.0
@@ -36,6 +37,7 @@ func configure(ability_data: Dictionary, ship: Node, stats: Node) -> void:
 	duration = float(ability_data.get("duration", GameConfig.ABILITY_DEFAULT_DURATION))
 	effects = ability_data.get("effects", {})
 	vfx_id = ability_data.get("vfx", "")
+	radius = float(ability_data.get("radius", 0.0))
 	_owner_ship = ship
 	_owner_stats = stats
 	# Ability starts uncharged — must charge up before first use

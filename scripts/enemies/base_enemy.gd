@@ -20,6 +20,12 @@ var enemy_type: String = "normal"  # "normal", "elite", "boss"
 ## When true, enemy stops moving (frozen by Stopwatch power-up).
 var is_frozen: bool = false
 
+## When true, enemy is subjugated (converted to player side).
+var is_subjugated: bool = false
+var _subjugation_damage_mult: float = 1.0
+var _original_collision_layer: int = 0
+var _original_collision_mask: int = 0
+
 # --- References ---
 var _target: Node2D = null
 var _hitbox: Area2D = null
@@ -72,7 +78,12 @@ func _process_contact_damage(delta: float) -> void:
 	if _damage_cooldown > 0:
 		_damage_cooldown -= delta
 		return
-	
+
+	# Subjugated enemies damage other enemies on contact
+	if is_subjugated:
+		_process_subjugated_contact_damage()
+		return
+
 	# Method 1: Check move_and_slide collisions
 	for i: int in range(get_slide_collision_count()):
 		var collision: KinematicCollision2D = get_slide_collision(i)
@@ -103,12 +114,53 @@ func _find_player() -> void:
 		_target = players[0]
 
 
+## Find the nearest non-subjugated enemy to chase (used by subjugated enemies).
+func _find_nearest_enemy() -> Node2D:
+	var nearest: Node2D = null
+	var nearest_dist_sq: float = INF
+	var my_pos: Vector2 = global_position
+	for enemy: Variant in FrameCache.enemies:
+		if not is_instance_valid(enemy) or enemy == self:
+			continue
+		var e: BaseEnemy = enemy as BaseEnemy
+		if e == null or e.is_subjugated or e._is_dying:
+			continue
+		var dist_sq: float = my_pos.distance_squared_to(e.global_position)
+		if dist_sq < nearest_dist_sq:
+			nearest_dist_sq = dist_sq
+			nearest = e
+	return nearest
+
+
+## Deal contact damage to other enemies when subjugated.
+func _process_subjugated_contact_damage() -> void:
+	for i: int in range(get_slide_collision_count()):
+		var collision: KinematicCollision2D = get_slide_collision(i)
+		var collider: Object = collision.get_collider()
+		if collider is BaseEnemy:
+			var target_enemy: BaseEnemy = collider as BaseEnemy
+			if target_enemy.is_subjugated or target_enemy._is_dying:
+				continue
+			var damage: float = contact_damage * _subjugation_damage_mult
+			target_enemy.take_damage(damage, self)
+			_damage_cooldown = GameConfig.ENEMY_CONTACT_DAMAGE_INTERVAL
+			return
+
+
 func _process_movement(_delta: float) -> void:
 	if is_frozen:
 		velocity = _knockback_velocity
 		_update_asteroid_visual(false)
 		return
-	if not _target:
+
+	# Subjugated enemies chase the nearest non-subjugated enemy
+	if is_subjugated:
+		_target = _find_nearest_enemy()
+		if not _target:
+			# No enemies nearby — drift idly
+			velocity = _knockback_velocity
+			return
+	elif not _target:
 		_find_player()
 		return
 
@@ -195,6 +247,9 @@ func _teleport_near_player() -> void:
 func take_damage(amount: float, _source: Node = null, damage_info: Dictionary = {}) -> void:
 	if _is_dying:
 		return
+	# Subjugated enemies ignore damage from player weapons (only take damage from other enemies)
+	if is_subjugated and _source != null and not (_source is BaseEnemy):
+		return
 	current_hp -= amount
 	
 	# Floating damage number
@@ -230,9 +285,10 @@ func _spawn_damage_number(amount: float, damage_info: Dictionary) -> void:
 func _flash_damage() -> void:
 	var sprite: Node = get_node_or_null("Sprite2D")
 	if sprite:
+		var base_color: Color = GameConfig.SUBJUGATION_TINT_COLOR if is_subjugated else Color.WHITE
 		var tween: Tween = create_tween()
 		tween.tween_property(sprite, "modulate", Color.RED, 0.05)
-		tween.tween_property(sprite, "modulate", Color.WHITE, 0.1)
+		tween.tween_property(sprite, "modulate", base_color, 0.1)
 
 
 func _die() -> void:
@@ -252,17 +308,67 @@ func apply_knockback(force: Vector2) -> void:
 	_knockback_velocity += force
 
 
-func apply_slow(amount: float, duration: float) -> void:
+func apply_slow(amount: float, slow_duration: float) -> void:
 	## Temporarily reduces move_speed by amount (fraction, e.g. 0.5 = 50% slower)
 	## for the given duration in seconds.
 	var original_speed: float = move_speed
 	move_speed = move_speed * (1.0 - clampf(amount, 0.0, 0.9))
 	# Restore after duration
-	get_tree().create_timer(duration).timeout.connect(
+	get_tree().create_timer(slow_duration).timeout.connect(
 		func() -> void:
 			if is_instance_valid(self):
 				move_speed = original_speed
 	)
+
+
+## Convert this enemy to fight for the player.
+func subjugate(_sub_duration: float, damage_mult: float) -> void:
+	if is_subjugated or _is_dying:
+		return
+	is_subjugated = true
+	_subjugation_damage_mult = damage_mult
+
+	# Save original collision settings
+	_original_collision_layer = collision_layer
+	_original_collision_mask = collision_mask
+
+	# Swap to player-aligned collision: enemy attacks other enemies
+	# Layer 4 (Projectiles) so other enemies can detect hits, mask 8 (Enemies) to collide with them
+	collision_layer = 4
+	collision_mask = 8
+	if _hitbox:
+		_hitbox.collision_layer = 4
+		_hitbox.collision_mask = 8
+
+	# Visual feedback: green tint
+	var sprite: Node = get_node_or_null("Sprite2D")
+	if sprite:
+		(sprite as CanvasItem).modulate = GameConfig.SUBJUGATION_TINT_COLOR
+
+	FileLogger.info("Enemy subjugated: %s" % name)
+
+
+## Revert this enemy back to normal behavior.
+func unsubjugate() -> void:
+	if not is_subjugated:
+		return
+	is_subjugated = false
+	_subjugation_damage_mult = 1.0
+
+	# Restore collision
+	collision_layer = _original_collision_layer
+	collision_mask = _original_collision_mask
+	if _hitbox:
+		_hitbox.collision_layer = _original_collision_layer
+		_hitbox.collision_mask = _original_collision_mask
+
+	# Restore visual
+	var sprite: Node = get_node_or_null("Sprite2D")
+	if sprite:
+		(sprite as CanvasItem).modulate = Color.WHITE
+
+	_find_player()
+	FileLogger.info("Enemy unsubjugated: %s" % name)
 
 
 func get_xp_value() -> float:

@@ -75,14 +75,14 @@
 		"active_ability": {
 			"id": "subjugation",
 			"name": "Subjugation",
-			"description": "Convert nearby enemies into loyal minions for 12 seconds. Converted enemies attack their former allies.",
+			"description": "Convert nearby enemies into loyal minions for 15 seconds. Converted enemies attack their former allies.",
 			"template": "area_effect",
-			"cooldown": 75.0,
-			"duration": 12.0,
+			"cooldown": 60.0,
+			"duration": 15.0,
 			"effects": {
-				"convert_enemies": 3.0
+				"convert_enemies": 1.0
 			},
-			"radius": 500.0,
+			"radius": 600.0,
 			"vfx": "subjugation"
 		},
 		"unlock_condition": {
