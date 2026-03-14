@@ -56,7 +56,7 @@ func _on_run_ended(victory: bool, stats: Dictionary) -> void:
 	level_label.text = "Level Reached: %d" % stats.get("level", 1)
 	kills_label.text = "Enemies Killed: %d" % stats.get("enemies_killed", 0)
 	credits_label.text = "⟐ Intergalactic Space Credits Earned: %d" % stats.get("credits_collected", 0)
-	stardust_label.text = "✦ Stardust Earned: 0"  # TODO: track stardust earned
+	stardust_label.text = "✦ Stardust Earned: %d" % stats.get("stardust_collected", 0)
 
 	# Style labels
 	_apply_synthwave_theme()

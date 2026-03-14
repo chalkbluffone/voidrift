@@ -121,4 +121,5 @@ const MAP_POWERUP_HEALTH: Color = Color(1.0, 0.25, 0.25, 1.0)
 const MAP_POWERUP_SPEED: Color = Color(0.3, 0.7, 1.0, 1.0)
 const MAP_POWERUP_STOPWATCH: Color = Color(1.0, 0.85, 0.25, 1.0)
 const MAP_POWERUP_GRAVITY: Color = Color(0.75, 0.45, 1.0, 1.0)
+const MAP_BEACON: Color = Color(0.75, 0.45, 1.0, 1.0)       # Purple (gravity well beacons)
 const MAP_BOUNDARY: Color = Color(1.0, 0.0, 1.0, 0.8)      # Pink

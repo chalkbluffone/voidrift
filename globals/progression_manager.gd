@@ -178,6 +178,7 @@ func spend_credits(amount: int) -> bool:
 
 func add_stardust(amount: int) -> void:
 	var actual: int = _apply_currency_mult(amount, "stardust_gain")
+	RunManager.run_data.stardust_collected += actual
 	PersistenceManager.persistent_data.stardust += actual
 	stardust_changed.emit(PersistenceManager.persistent_data.stardust)
 	PersistenceManager.save_game()

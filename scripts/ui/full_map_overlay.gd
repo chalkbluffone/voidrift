@@ -18,6 +18,7 @@ const COLOR_POWERUP_HEALTH: Color = UiColors.MAP_POWERUP_HEALTH
 const COLOR_POWERUP_SPEED: Color = UiColors.MAP_POWERUP_SPEED
 const COLOR_POWERUP_STOPWATCH: Color = UiColors.MAP_POWERUP_STOPWATCH
 const COLOR_POWERUP_GRAVITY: Color = UiColors.MAP_POWERUP_GRAVITY
+const COLOR_BEACON: Color = UiColors.MAP_BEACON
 const COLOR_BOUNDARY: Color = UiColors.MAP_BOUNDARY
 const COLOR_GRID: Color = Color(0.1, 0.1, 0.15, 0.5)
 
@@ -128,7 +129,10 @@ func _draw() -> void:
 
 	# Draw power-ups with unique icon/color markers
 	_draw_powerups(center)
-	
+
+	# Draw gravity well beacons
+	_draw_beacons(center)
+
 	# Draw player
 	if _player:
 		var player_offset: Vector2 = _player.global_position * _world_to_map_scale
@@ -275,6 +279,36 @@ func _get_powerup_marker_info(powerup: Node2D) -> Dictionary:
 		return {"marker_type": "gravity", "color": COLOR_POWERUP_GRAVITY}
 
 	return {"marker_type": "unknown", "color": COLOR_PICKUP}
+
+
+## Draw gravity well beacon circles on the full map (purple, 20% larger than enemies).
+func _draw_beacons(center: Vector2) -> void:
+	var beacons: Array[Node] = get_tree().get_nodes_in_group("gravity_well_beacons")
+	var radius: float = _map_size * 0.5
+
+	for beacon: Node in beacons:
+		if not beacon is Node2D:
+			continue
+		var beacon_2d: Node2D = beacon as Node2D
+
+		# Skip depleted beacons
+		if "_is_depleted" in beacon_2d and beacon_2d._is_depleted:
+			continue
+
+		var offset: Vector2 = beacon_2d.global_position * _world_to_map_scale
+
+		# Skip if outside map
+		if offset.length() > radius - 5.0:
+			continue
+
+		# Skip if in unexplored area
+		if _fog_of_war and not _fog_of_war.is_explored(beacon_2d.global_position):
+			continue
+
+		# Draw as purple circle, 20% larger than enemy dots (3.0 * 1.2 = 3.6)
+		var marker_pos: Vector2 = center + offset
+		draw_arc(marker_pos, 4.3, 0.0, TAU, 16, COLOR_BEACON, 1.8)
+		draw_circle(marker_pos, 1.5, COLOR_BEACON)
 
 
 ## Draw space station icons (only if revealed by fog of war).

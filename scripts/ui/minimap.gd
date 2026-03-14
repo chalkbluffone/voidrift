@@ -17,6 +17,7 @@ const COLOR_POWERUP_HEALTH: Color = UiColors.MAP_POWERUP_HEALTH
 const COLOR_POWERUP_SPEED: Color = UiColors.MAP_POWERUP_SPEED
 const COLOR_POWERUP_STOPWATCH: Color = UiColors.MAP_POWERUP_STOPWATCH
 const COLOR_POWERUP_GRAVITY: Color = UiColors.MAP_POWERUP_GRAVITY
+const COLOR_BEACON: Color = UiColors.MAP_BEACON
 const COLOR_BOUNDARY: Color = UiColors.MAP_BOUNDARY
 const COLOR_FOG: Color = Color(0.0, 0.0, 0.0, 0.9)
 const COLOR_EXPLORED: Color = Color(0.15, 0.15, 0.2, 0.6)
@@ -128,7 +129,10 @@ func _draw() -> void:
 
 	# Draw power-ups with unique icon/color markers
 	_draw_powerups(center, radius, player_pos)
-	
+
+	# Draw gravity well beacons
+	_draw_beacons(center, radius, player_pos)
+
 	# Draw player (always at center)
 	draw_circle(center, 4.0, COLOR_PLAYER)
 	
@@ -273,6 +277,35 @@ func _get_powerup_marker_info(powerup: Node2D) -> Dictionary:
 		return {"marker_type": "gravity", "color": COLOR_POWERUP_GRAVITY}
 
 	return {"marker_type": "unknown", "color": COLOR_PICKUP}
+
+
+## Draw gravity well beacon circles on the minimap (purple, 20% larger than enemies).
+func _draw_beacons(center: Vector2, radius: float, player_pos: Vector2) -> void:
+	var beacons: Array[Node] = get_tree().get_nodes_in_group("gravity_well_beacons")
+
+	for beacon: Node in beacons:
+		if not beacon is Node2D:
+			continue
+		var beacon_2d: Node2D = beacon as Node2D
+
+		# Skip depleted beacons
+		if "_is_depleted" in beacon_2d and beacon_2d._is_depleted:
+			continue
+
+		var offset: Vector2 = (beacon_2d.global_position - player_pos) * _world_to_minimap_scale
+
+		# Skip if outside minimap circle
+		if offset.length() > radius - 5.0:
+			continue
+
+		# Skip if in unexplored area
+		if _fog_of_war and not _fog_of_war.is_explored(beacon_2d.global_position):
+			continue
+
+		# Draw as purple circle, 20% larger than enemy dots (3.0 * 1.2 = 3.6)
+		var marker_pos: Vector2 = center + offset
+		draw_arc(marker_pos, 3.6, 0.0, TAU, 16, COLOR_BEACON, 1.5)
+		draw_circle(marker_pos, 1.2, COLOR_BEACON)
 
 
 ## Draw space station icons on the minimap (active stations only).

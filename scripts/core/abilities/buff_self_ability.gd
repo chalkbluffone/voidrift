@@ -21,6 +21,10 @@ func _activate() -> void:
 			_granted_invulnerability = true
 			if _owner_ship and _owner_ship.has_method("_set_invincible"):
 				_owner_ship._set_invincible(true)
+			# Visual feedback: 50% transparent while invulnerable
+			if _owner_ship and "sprite" in _owner_ship and _owner_ship.sprite:
+				var tween: Tween = _owner_ship.create_tween()
+				tween.tween_property(_owner_ship.sprite, "modulate:a", 0.5, 0.15)
 			continue
 
 		if key == "heal_percent":
@@ -50,3 +54,7 @@ func _on_expire() -> void:
 		_granted_invulnerability = false
 		if _owner_ship and _owner_ship.has_method("_set_invincible"):
 			_owner_ship._set_invincible(false)
+		# Restore full opacity
+		if _owner_ship and "sprite" in _owner_ship and _owner_ship.sprite:
+			var tween: Tween = _owner_ship.create_tween()
+			tween.tween_property(_owner_ship.sprite, "modulate:a", 1.0, 0.15)

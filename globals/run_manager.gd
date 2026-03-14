@@ -151,6 +151,7 @@ func _reset_run_data() -> void:
 		"damage_dealt": 0.0,
 		"damage_taken": 0.0,
 		"credits_collected": 0,
+		"stardust_collected": 0,
 		"xp_collected": 0.0,
 		"distance_traveled": 0.0,
 		"phases_performed": 0,

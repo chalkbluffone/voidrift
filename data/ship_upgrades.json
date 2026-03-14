@@ -7,7 +7,7 @@
 		"description": "Enhances weapon output systems",
 		"icon": "res://assets/icons/upgrades/damage_module.png",
 		"stat": "damage",
-		"per_level": 0.08,
+		"per_level": 0.15,
 		"max_level": 99.0,
 		"unlock_condition": "default",
 		"rarity_weights": {

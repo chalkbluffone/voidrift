@@ -73,7 +73,7 @@ const DEFAULT_BASE_STATS: Dictionary = {
 	
 	STAT_MOVEMENT_SPEED: 1.0,  # multiplier
 	STAT_EXTRA_PHASE_SHIFTS: 0.0,  # bonus charges added to character base
-	STAT_PHASE_SHIFT_DISTANCE: 250.0,  # pixels
+	STAT_PHASE_SHIFT_DISTANCE: 312.0,  # pixels
 	STAT_PICKUP_RANGE: 1.0,  # multiplier
 	STAT_XP_GAIN: 1.0,  # multiplier (capped at 10x)
 	STAT_CREDITS_GAIN: 1.0,  # multiplier

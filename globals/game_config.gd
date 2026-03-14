@@ -55,8 +55,8 @@ const ELITE_COLOR: Color = Color(1.0, 0.4, 0.2, 1.0)  # Orange tint for elites
 # =============================================================================
 # SPAWNING
 # =============================================================================
-const SPAWN_RADIUS_MIN: float = 400.0
-const SPAWN_RADIUS_MAX: float = 600.0
+const SPAWN_RADIUS_MIN: float = 500.0
+const SPAWN_RADIUS_MAX: float = 750.0
 const BASE_SPAWN_RATE: float = 0.4  # Enemies per second at start (slow burn)
 const SPAWN_RATE_GROWTH: float = 0.2  # Additional enemies/sec per minute (during countdown)
 const SPAWN_BATCH_MIN_MINUTE: float = 3.0  # Minutes before batch spawns begin
@@ -191,7 +191,7 @@ const CAMERA_ZOOM_LERP: float = 3.0       # Zoom transition smoothing speed
 # Slots full → only upgrade existing. Slots open → only offer new.
 
 # Base weights when slots are partially filled
-const OFFER_WEIGHT_EXISTING_WEAPON: float = 1.0
+const OFFER_WEIGHT_EXISTING_WEAPON: float = 3.0
 const OFFER_WEIGHT_NEW_WEAPON: float = 1.5
 const OFFER_WEIGHT_EXISTING_MODULE: float = 1.0
 const OFFER_WEIGHT_NEW_MODULE: float = 1.2
