@@ -114,8 +114,9 @@ Write-Output "Account: $Username"
 Write-Output ""
 
 try {
-    & $SteamCmdExe +login $Username +run_app_build $tempVdf +quit
+    $steamOutput = & $SteamCmdExe +login $Username +run_app_build $tempVdf +quit 2>&1
     $exitCode = $LASTEXITCODE
+    $steamOutput | ForEach-Object { Write-Output $_ }
 } catch {
     Write-Error "SteamCMD failed to execute. Is it installed and on PATH?"
     Write-Error $_.Exception.Message
@@ -132,9 +133,27 @@ if ($exitCode -ne 0) {
     exit $exitCode
 }
 
+# --- Extract BuildID and save to release_state.json ---
+$buildId = ""
+foreach ($line in $steamOutput) {
+    if ($line -match 'Successfully finished AppID \d+ build \(BuildID (\d+)\)') {
+        $buildId = $Matches[1]
+        break
+    }
+}
+
+$stateFile = Join-Path $PSScriptRoot "release_state.json"
+if ((Test-Path $stateFile) -and $buildId) {
+    $state = Get-Content $stateFile -Raw | ConvertFrom-Json
+    $state.last_build_id = $buildId
+    $state | ConvertTo-Json -Depth 3 | Set-Content -Path $stateFile -Encoding UTF8
+    Write-Output "Updated release_state.json with BuildID $buildId"
+}
+
 Write-Output ""
 Write-Output "=== Upload Complete ==="
 Write-Output "Build has been uploaded to Steamworks."
+if ($buildId) { Write-Output "BuildID: $buildId" }
 Write-Output ""
 Write-Output "Next steps:"
 Write-Output "  1. Go to https://partner.steamgames.com/apps/builds/4502490"
