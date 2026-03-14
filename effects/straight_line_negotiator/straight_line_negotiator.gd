@@ -74,6 +74,8 @@ func _process(_delta: float) -> void:
 		return
 	if size > 0.0 and _projectile.global_position.distance_to(_spawn_pos) >= size:
 		ObjectPool.release("projectile", _projectile)
+		_projectile = null
+		queue_free()
 
 
 class _NeedleTracer extends NeonProjectileVisual:

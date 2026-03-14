@@ -32,6 +32,7 @@
 		}
 	},
 	"ion_wake": {
+		"burst_managed": true,
 		"description": "Periodically drops ionized damage circles behind your ship that grow and explode into synthwave particles. Higher spawn rate means more circles left in your wake.",
 		"display_name": "Ion Wake",
 		"enabled": true,
@@ -53,7 +54,7 @@
 		},
 		"spawn": {
 			"spawn_angle_degrees": 180.0,
-			"spawn_distance": 16.0
+			"spawn_distance": 24.0
 		},
 		"spawner": "res://effects/ion_wake/ion_wake_spawner.gd",
 		"stats": {

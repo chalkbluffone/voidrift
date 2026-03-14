@@ -21,10 +21,8 @@ extends CanvasLayer
 
 # Bottom left - debug stats
 @onready var debug_container: VBoxContainer = $BottomLeftDebug
-var fps_label: Label = null
 var nodes_label: Label = null
 var draw_calls_label: Label = null
-var vram_label: Label = null
 
 # Bottom - XP bar stretched across screen
 @onready var xp_bar: ProgressBar = $BottomXP/XPBar
@@ -233,10 +231,8 @@ func _apply_synthwave_theme() -> void:
 ## Create debug stat labels programmatically in the bottom-left VBoxContainer.
 func _build_debug_labels() -> void:
 	xp_label = _make_debug_label("XP: 0 / 7")
-	fps_label = _make_debug_label("FPS: 0")
 	nodes_label = _make_debug_label("NODES: 0")
 	draw_calls_label = _make_debug_label("DRAW: 0")
-	vram_label = _make_debug_label("VRAM: 0 MB")
 
 
 ## Factory for a single debug label with consistent style.
@@ -350,15 +346,10 @@ void fragment() {
 func _process(_delta: float) -> void:
 	# Update debug stats (only when visible)
 	if debug_container.visible:
-		if fps_label:
-			fps_label.text = "FPS: %d" % Engine.get_frames_per_second()
 		if nodes_label:
 			nodes_label.text = "NODES: %d" % int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT))
 		if draw_calls_label:
 			draw_calls_label.text = "DRAW: %d" % int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME))
-		if vram_label:
-			var vram_mb: float = Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / (1024.0 * 1024.0)
-			vram_label.text = "VRAM: %.1f MB" % vram_mb
 	
 	# Update timer (countdown)
 	if RunManager.current_state == RunManager.GameState.PLAYING:

@@ -386,6 +386,47 @@ func _fire_melee_weapon(weapon_id: String, data: Dictionary, _level: int) -> voi
 		return
 	var config: Dictionary = WeaponDataFlattener.flatten(data).flat
 
+	# --- Damage ---
+	var weapon_damage_flat: float = _inventory.get_weapon_flat(weapon_id, StatsComponentScript.STAT_DAMAGE)
+	var weapon_damage_mult: float = _inventory.get_weapon_mult(weapon_id, StatsComponentScript.STAT_DAMAGE)
+	var base_damage: float = float(config.get("damage", 10.0))
+	config["damage"] = (base_damage + weapon_damage_flat) * (1.0 + weapon_damage_mult)
+
+	# --- Size ---
+	var global_size_mult: float = 1.0
+	if stats_component:
+		global_size_mult = stats_component.get_stat(StatsComponentScript.STAT_SIZE)
+	var weapon_size_mult: float = _inventory.get_weapon_mult(weapon_id, StatsComponentScript.STAT_SIZE)
+	var combined_size_mult: float = global_size_mult * (1.0 + weapon_size_mult)
+	if config.has("size"):
+		config["size"] = maxf(8.0, float(config["size"]) * combined_size_mult)
+	if config.has("radius"):
+		config["radius"] = maxf(8.0, float(config["radius"]) * combined_size_mult)
+	if config.has("thickness"):
+		config["thickness"] = maxf(4.0, float(config["thickness"]) * combined_size_mult)
+	config["size_mult"] = combined_size_mult
+
+	# --- Duration (hold_time for ion_wake, duration for radiant_arc) ---
+	var global_duration_mult: float = 1.0
+	if stats_component:
+		global_duration_mult = stats_component.get_stat(StatsComponentScript.STAT_DURATION)
+	var weapon_duration_flat: float = _inventory.get_weapon_flat(weapon_id, StatsComponentScript.STAT_DURATION)
+	var weapon_duration_mult: float = _inventory.get_weapon_mult(weapon_id, StatsComponentScript.STAT_DURATION)
+	for dur_key: String in ["duration", "hold_time"]:
+		if config.has(dur_key):
+			var base_dur: float = float(config[dur_key])
+			if base_dur > 0.0:
+				config[dur_key] = maxf(0.15, (base_dur + weapon_duration_flat) * (global_duration_mult * (1.0 + weapon_duration_mult)))
+
+	# --- Projectile count ---
+	var base_proj_count: int = int(config.get("projectile_count", 1))
+	var bonus_proj: int = 0
+	var weapon_bonus_proj: int = int(round(_inventory.get_weapon_flat(weapon_id, StatsComponentScript.STAT_PROJECTILE_COUNT)))
+	if stats_component:
+		bonus_proj = stats_component.get_stat_int(StatsComponentScript.STAT_PROJECTILE_COUNT)
+	config["projectile_count"] = maxi(1, base_proj_count + bonus_proj + weapon_bonus_proj)
+
+	# --- Crit ---
 	config["crit_chance"] = float(config.get("crit_chance", 0.0)) + _inventory.get_weapon_flat(weapon_id, StatsComponentScript.STAT_CRIT_CHANCE)
 	config["crit_damage"] = float(config.get("crit_damage", 0.0)) + _inventory.get_weapon_flat(weapon_id, StatsComponentScript.STAT_CRIT_DAMAGE)
 

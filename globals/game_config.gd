@@ -127,7 +127,7 @@ const LEVEL_UP_QUEUE_FLASH_DELAY: float = 0.3
 # =============================================================================
 # PHASE SHIFT
 # =============================================================================
-const PHASE_SHIFT_DURATION: float = 0.3   # How long the dash lasts (seconds)
+const PHASE_SHIFT_DURATION: float = 0.5   # How long the dash lasts (seconds)
 const PHASE_SHIFT_COOLDOWN: float = 0.5   # Min time between phases (seconds)
 const PHASE_RECHARGE_TIME: float = 3.0    # Seconds to recharge one phase charge
 const POST_PHASE_IFRAMES: float = 0.2     # Brief i-frames after phase ends (seconds)

@@ -171,7 +171,7 @@ func _spawn_bolt(origin: Vector2, direction: Vector2, bounces_remaining: int) ->
 	glow.glow_strength = glow_strength
 	projectile.add_child(glow)
 
-	get_tree().current_scene.call_deferred("add_child", projectile)
+	get_tree().current_scene.add_child(projectile)
 	_active_projectiles.append(projectile)
 
 	# Connect hit signal for bounce mechanic
