@@ -245,7 +245,11 @@ func _spawn_enemy() -> void:
 	enemy.contact_damage *= damage_mult
 	
 	# XP is static (no scaling) — set based on enemy type
-	enemy.xp_value = GameConfig.ENEMY_XP_ELITE if is_elite else GameConfig.ENEMY_XP_NORMAL
+	if is_elite:
+		enemy.xp_value = _rng.randf_range(GameConfig.ENEMY_XP_ELITE_MIN, GameConfig.ENEMY_XP_ELITE_MAX)
+		enemy.credit_value = _rng.randi_range(GameConfig.ENEMY_CREDITS_ELITE_MIN, GameConfig.ENEMY_CREDITS_ELITE_MAX)
+	else:
+		enemy.xp_value = GameConfig.ENEMY_XP_NORMAL
 
 	# Overtime difficulty multiplier — scales HP, damage, and speed after countdown hits zero
 	var overtime_mult: float = RunManager.get_overtime_multiplier()

@@ -37,7 +37,13 @@ const DIFFICULTY_SPAWN_WEIGHT: float = 0.4    # How much difficulty affects spaw
 
 # --- XP Drops (static, no scaling) ---
 const ENEMY_XP_NORMAL: float = 1.0   # XP dropped by normal enemies
-const ENEMY_XP_ELITE: float = 3.0    # XP dropped by elite enemies
+const ENEMY_XP_ELITE_MIN: float = 2.0 # Min XP dropped by elite enemies
+const ENEMY_XP_ELITE_MAX: float = 5.0 # Max XP dropped by elite enemies
+
+# --- Credit Drops ---
+const ENEMY_CREDITS_NORMAL: int = 1       # Credits dropped by normal enemies
+const ENEMY_CREDITS_ELITE_MIN: int = 2    # Min credits dropped by elite enemies
+const ENEMY_CREDITS_ELITE_MAX: int = 5    # Max credits dropped by elite enemies
 
 # --- Elite Enemies ---
 const ELITE_BASE_CHANCE: float = 0.05       # 5% base chance to spawn elite

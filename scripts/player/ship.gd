@@ -477,11 +477,11 @@ func _process_iframes(delta: float) -> void:
 
 # --- Damage ---
 
-func take_damage(amount: float, source: Node = null, bypass_shield: bool = false) -> float:
+func take_damage(amount: float, source: Node = null, bypass_shield: bool = false, ignore_iframes: bool = false) -> float:
 	if _is_phasing:
 		_spawn_evade_popup()
 		return 0.0
-	if _is_invincible:
+	if _is_invincible and not ignore_iframes:
 		return 0.0
 	
 	# Run damage interceptors (e.g. Nope Bubble shield)
@@ -499,15 +499,16 @@ func take_damage(amount: float, source: Node = null, bypass_shield: bool = false
 		RunManager.record_damage_taken(actual_damage)
 		_flash_damage()
 		
-		# Apply knockback away from source
-		if source and source is Node2D:
-			var source_2d: Node2D = source as Node2D
-			var knockback_dir: Vector2 = (global_position - source_2d.global_position).normalized()
-			_knockback_velocity = knockback_dir * GameConfig.PLAYER_KNOCKBACK_FORCE
-		
-		# Brief i-frames to prevent rapid damage
-		_set_invincible(true)
-		_iframes_timer = GameConfig.DAMAGE_IFRAMES
+		if not ignore_iframes:
+			# Apply knockback away from source
+			if source and source is Node2D:
+				var source_2d: Node2D = source as Node2D
+				var knockback_dir: Vector2 = (global_position - source_2d.global_position).normalized()
+				_knockback_velocity = knockback_dir * GameConfig.PLAYER_KNOCKBACK_FORCE
+			
+			# Brief i-frames to prevent rapid damage
+			_set_invincible(true)
+			_iframes_timer = GameConfig.DAMAGE_IFRAMES
 	
 	return actual_damage
 

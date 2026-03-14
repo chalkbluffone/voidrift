@@ -29,11 +29,10 @@ func _xp_threshold(level: int) -> float:
 
 XP drops are **not scaled** by time or difficulty:
 
-```gdscript
-enemy.xp_value = GameConfig.ENEMY_XP_ELITE if is_elite else GameConfig.ENEMY_XP_NORMAL
-```
+- Normal enemies drop `ENEMY_XP_NORMAL` (1 XP)
+- Elites drop a random amount between `ENEMY_XP_ELITE_MIN` and `ENEMY_XP_ELITE_MAX` (2–5 XP)
 
-**Constants:** `ENEMY_XP_NORMAL`, `ENEMY_XP_ELITE`
+**Constants:** `ENEMY_XP_NORMAL`, `ENEMY_XP_ELITE_MIN`, `ENEMY_XP_ELITE_MAX`
 
 ## Difficulty Stat
 
@@ -86,8 +85,8 @@ Enemy kills produce two categories of collectibles:
 
 - Attracted by player's magnet/PickupRange (collision mask includes layer 32)
 - Vacuumed by Gravity Well beacons and Gravity Well power-ups
-- **XP**: Static amount per kill (`ENEMY_XP_NORMAL`, `ENEMY_XP_ELITE`), no time scaling
-- **Credits**: Guaranteed 1 per kill (base `credit_value` from enemy data). `credits_gain` stat multiplies final amount via ProgressionManager. **No physical credit pickup is spawned** — credits are granted instantly on enemy death (including freighter jackpots) for performance.
+- **XP**: Static amount per kill (`ENEMY_XP_NORMAL` for normals, random `ENEMY_XP_ELITE_MIN`–`ENEMY_XP_ELITE_MAX` for elites), no time scaling
+- **Credits**: Normal enemies drop `ENEMY_CREDITS_NORMAL` (1). Elites drop random `ENEMY_CREDITS_ELITE_MIN`–`ENEMY_CREDITS_ELITE_MAX` (2–5). `credits_gain` stat multiplies final amount via ProgressionManager. **No physical credit pickup is spawned** — credits are granted instantly on enemy death (including freighter jackpots) for performance.
 - **Stardust**: Chance-based drop for normal enemies (`STARDUST_BASE_DROP_CHANCE` × `stardust_gain` stat). Enemies must have `stardust_value > 0` in `enemies.json`. Loot Freighters always drop their full `stardust_value` (no chance roll).
 
 ### Power-Ups (Health, Speed, Stopwatch, Gravity Well)
