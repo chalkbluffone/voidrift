@@ -42,7 +42,7 @@
 		"icon": "res://assets/icons/upgrades/burst_capacitor.png",
 		"stat": "projectile_count",
 		"per_level": 1.0,
-		"max_level": 5.0,
+		"max_level": 99.0,
 		"unlock_condition": "default",
 		"rarity_weights": {
 			"common": 45.0,
@@ -404,7 +404,7 @@
 		"icon": "res://assets/icons/upgrades/phase_coils.png",
 		"stat": "extra_phase_shifts",
 		"per_level": 1.0,
-		"max_level": 3.0,
+		"max_level": 20.0,
 		"unlock_condition": {
 			"type": "use_phase_shift",
 			"count": 200.0

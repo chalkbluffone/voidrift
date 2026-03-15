@@ -772,11 +772,18 @@ func _refresh_weapon_list() -> void:
 		var id: String = String(s.get("id", ""))
 		var level: int = int(s.get("level", 1))
 		var weapon_name: String = _resolve_weapon_display_name(id)
+		var weapon_data: Dictionary = DataLoader.get_weapon(id)
+		var max_level_w: int = int(weapon_data.get("max_level", GameConfig.MAX_WEAPON_LEVEL))
+		var is_maxed: bool = level >= max_level_w
 		var label: Label = Label.new()
-		label.text = "%s  LV %d" % [weapon_name.to_upper(), level]
+		if is_maxed:
+			label.text = "%s  MAX" % [weapon_name.to_upper()]
+			label.add_theme_color_override("font_color", Color(1.0, 1.0, 0.0, 1.0))
+		else:
+			label.text = "%s  LV %d" % [weapon_name.to_upper(), level]
+			label.add_theme_color_override("font_color", Color(1, 1, 1, 0.95))
 		label.clip_text = true
 		label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		label.add_theme_color_override("font_color", Color(1, 1, 1, 0.95))
 		label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
 		label.add_theme_constant_override("outline_size", 2)
 		label.add_theme_font_override("font", FONT_HEADER)
@@ -818,11 +825,18 @@ func _refresh_modules_list() -> void:
 		var id: String = String(u.get("id", ""))
 		var level: int = int(u.get("stacks", 1))
 		var display_name: String = _resolve_module_display_name(id)
+		var module_data: Dictionary = DataLoader.get_ship_upgrade(id)
+		var max_level_m: int = int(module_data.get("max_level", 99))
+		var is_maxed: bool = level >= max_level_m
 		var label: Label = Label.new()
-		label.text = "%s  LV %d" % [display_name.to_upper(), level]
+		if is_maxed:
+			label.text = "%s  MAX" % [display_name.to_upper()]
+			label.add_theme_color_override("font_color", Color(1.0, 1.0, 0.0, 1.0))
+		else:
+			label.text = "%s  LV %d" % [display_name.to_upper(), level]
+			label.add_theme_color_override("font_color", Color(1, 1, 1, 0.90))
 		label.clip_text = true
 		label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		label.add_theme_color_override("font_color", Color(1, 1, 1, 0.90))
 		label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
 		label.add_theme_constant_override("outline_size", 2)
 		label.add_theme_font_override("font", FONT_HEADER)
