@@ -54,6 +54,25 @@ count = int(stats.get("count", count))
 enabled = bool(stats.get("enabled", enabled))
 ```
 
+## Seeded Randomness (Required for Gameplay)
+
+**Never use `randf()`, `randi()`, `randf_range()`, `randi_range()`, `Array.shuffle()`, or `Array.pick_random()` for gameplay logic.** These use Godot's global unseeded RNG and break run determinism.
+
+Use `GameSeed.rng(namespace)` streams instead. See `progression.instructions.md` for the full stream table and rules.
+
+```gdscript
+# WRONG — unseeded, breaks determinism
+var roll: float = randf()
+pool.shuffle()
+
+# RIGHT — seeded via GameSeed stream
+var rng: RandomNumberGenerator = GameSeed.rng("my_system")
+var roll: float = rng.randf()
+# For shuffle, use Fisher-Yates with seeded RNG
+```
+
+**Autoloads** must fetch `GameSeed.rng()` fresh inside each function call (not at `_ready()`). Scene nodes may cache at `_ready()` since they are instantiated after the run seed is set.
+
 ## Naming Conventions
 
 | Type      | Convention      | Example                          |

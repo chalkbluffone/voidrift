@@ -129,3 +129,40 @@ The filter is in `DataLoader.get_available_weapons()` which requires `unlock_con
 - Swarm events at 4 min and 7 min (see `enemies.instructions.md`)
 - Final boss via beacon mechanic (not yet implemented)
 - Run tracking includes `swarms_completed` count
+- Each run is assigned a unique **Run ID** (UUID v4 string) stored in `RunManager.run_data.run_id`
+
+## Run Seed & Deterministic RNG
+
+All gameplay randomness is seeded from a per-run UUID string:
+
+- `RunManager.start_run()` generates a fresh UUID via `UUID.v4()` and calls `GameSeed.set_seed_from_string(run_id)`
+- Every restart or new run generates a **new** UUID — no two runs share a seed
+- Same seed + same player choices = identical gameplay outcomes (full deterministic replays)
+- Rerolls (refresh button in level-up UI) consume the seeded sequence deterministically
+
+### RNG Stream Rules
+
+- **Autoloads** (e.g. `UpgradeService`) must **never** cache `GameSeed.rng()` at `_ready()` — the run seed isn't set yet. Fetch RNG fresh inside each function call.
+- **Scene nodes** (enemies, weapons, spawners) may cache `GameSeed.rng()` at `_ready()` because they are instantiated after the run seed is set.
+- **Unseeded APIs** (`randf()`, `randi()`, `Array.shuffle()`, `Array.pick_random()`) must **never** be used for gameplay randomness. Use `GameSeed.rng(namespace)` streams instead.
+- For seeded array shuffling, use a Fisher-Yates shuffle with a seeded RNG (see `UpgradeService._seeded_shuffle()`).
+- Menu/cosmetic randomness (e.g. nebula selection) and dev tooling may use unseeded APIs.
+
+### Active GameSeed Streams
+
+| Stream                   | Owner                    | Scope                                                             |
+| ------------------------ | ------------------------ | ----------------------------------------------------------------- |
+| `"upgrade_service"`      | UpgradeService           | Level-up option generation, rarity rolls, module effect selection |
+| `"weapon_upgrade"`       | UpgradeService           | Weapon tier upgrade stat picks                                    |
+| `"station_buffs"`        | StationService           | Station buff generation                                           |
+| `"enemy_spawner"`        | EnemySpawner             | Spawn positions, elite rolls, drops, power-ups                    |
+| `"base_enemy"`           | BaseEnemy                | Knockback variation                                               |
+| `"loot_freighter"`       | LootFreighter            | Flee behavior                                                     |
+| `"weapon_component"`     | WeaponComponent          | Targeting fallback                                                |
+| `"stats_component"`      | StatsComponent           | Crit, evasion, lifesteal rolls                                    |
+| `"space_lasers"`         | SpaceLasers              | Projectile spread                                                 |
+| `"timmy_gun"`            | TimmyGun                 | Burst spread                                                      |
+| `"stations"`             | StationSpawner           | Station placement                                                 |
+| `"asteroids"`            | AsteroidSpawner          | Asteroid geometry + placement                                     |
+| `"gravity_well_beacons"` | GravityWellBeaconSpawner | Beacon placement                                                  |
+| `"damage_numbers"`       | DamageNumber             | Offset scatter                                                    |

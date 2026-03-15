@@ -99,9 +99,10 @@ func start_run(ship_id: String, captain_id: String) -> void:
 	var starting_weapon: String = ship.get("starting_weapon", "plasma_cannon")
 	run_data.weapons.append(starting_weapon)
 	
-	# Set deterministic run seed (use timestamp for now, could be user-provided seed later)
-	var seed_value: int = Time.get_ticks_msec()
-	GameSeed.set_seed_from_int(seed_value)
+	# Set deterministic run seed from a fresh UUID (unique per run/restart)
+	var run_id: String = UUID.v4()
+	run_data.run_id = run_id
+	GameSeed.set_seed_from_string(run_id)
 	seed(GameSeed.seed_int)
 	
 	current_state = GameState.PLAYING
@@ -121,6 +122,9 @@ func _reset_run_data() -> void:
 	if pool and pool.has_method("drain_all"):
 		pool.drain_all()
 	run_data = {
+		# Run identity
+		"run_id": "",
+		
 		# Loadout
 		"ship_id": "",
 		"ship_data": {},

@@ -280,8 +280,8 @@ const RARITY_ORDER: Array[String] = ["common", "uncommon", "rare", "epic", "lege
 
 # Default weights when a specific upgrade/weapon does not provide its own rarity_weights.
 const RARITY_DEFAULT_WEIGHTS: Dictionary = {
-	"common": 60.0,
-	"uncommon": 25.0,
+	"common": 50.0,
+	"uncommon": 35.0,
 	"rare": 10.0,
 	"epic": 4.0,
 	"legendary": 1.0,

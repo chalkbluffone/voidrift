@@ -11,6 +11,7 @@ const CARD_HOVER_FX_SCRIPT: Script = preload("res://scripts/ui/card_hover_fx.gd"
 @onready var kills_label: Label = $VBoxContainer/StatsContainer/KillsLabel
 @onready var credits_label: Label = $VBoxContainer/StatsContainer/CreditsLabel
 @onready var stardust_label: Label = $VBoxContainer/StatsContainer/StardustLabel
+@onready var run_id_label: Label = $VBoxContainer/StatsContainer/RunIdLabel
 @onready var retry_button: Button = $VBoxContainer/ButtonsContainer/RetryButton
 @onready var main_menu_button: Button = $VBoxContainer/ButtonsContainer/MainMenuButton
 
@@ -57,6 +58,7 @@ func _on_run_ended(victory: bool, stats: Dictionary) -> void:
 	kills_label.text = "Enemies Killed: %d" % stats.get("enemies_killed", 0)
 	credits_label.text = "⟐ Intergalactic Space Credits Earned: %d" % stats.get("credits_collected", 0)
 	stardust_label.text = "✦ Stardust Earned: %d" % stats.get("stardust_collected", 0)
+	run_id_label.text = "Run ID: %s" % stats.get("run_id", "unknown")
 
 	# Style labels
 	_apply_synthwave_theme()
@@ -86,6 +88,10 @@ func _apply_synthwave_theme() -> void:
 	for label: Label in [time_label, level_label, kills_label, credits_label, stardust_label]:
 		label.add_theme_color_override("font_color", UiColors.CYAN)
 		label.add_theme_font_size_override("font_size", 20)
+
+	# Run ID — smaller, subtle
+	run_id_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.6, 0.8))
+	run_id_label.add_theme_font_size_override("font_size", 14)
 
 	# Buttons - synthwave style with focus support
 	for button: Button in [retry_button, main_menu_button]:

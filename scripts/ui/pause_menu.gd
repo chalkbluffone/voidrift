@@ -17,6 +17,7 @@ const STATS_PANEL_SCENE: PackedScene = preload("res://scenes/ui/stats_panel.tscn
 @onready var quit_run_button: Button = $Panel/VBoxContainer/QuitRunButton
 @onready var exit_button: Button = $Panel/VBoxContainer/ExitButton
 @onready var panel: PanelContainer = $Panel
+@onready var run_id_label: Label = $Panel/VBoxContainer/RunIdLabel
 @onready var options_panel: OptionsPanel = $OptionsPanel
 
 var _is_paused: bool = false
@@ -36,6 +37,10 @@ func _ready() -> void:
 	# Style all buttons with synthwave focus/hover support
 	for button: Button in [resume_button, restart_button, options_button, quit_run_button, exit_button]:
 		CARD_HOVER_FX_SCRIPT.style_synthwave_button(button, UiColors.BUTTON_PRIMARY, _button_hover_tweens, 4)
+
+	# Style Run ID label — subtle
+	run_id_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.6, 0.8))
+	run_id_label.add_theme_font_size_override("font_size", 12)
 
 	# Connect shared options panel back signal
 	options_panel.back_pressed.connect(_close_options)
@@ -75,6 +80,7 @@ func _pause() -> void:
 	_is_paused = true
 	visible = true
 	RunManager.pause_game()
+	run_id_label.text = "Run ID: %s" % String(RunManager.run_data.get("run_id", ""))
 	if _stats_panel:
 		_stats_panel.snapshot()
 		_stats_panel.refresh()

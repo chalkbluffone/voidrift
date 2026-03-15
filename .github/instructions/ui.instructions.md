@@ -112,6 +112,12 @@ Controller support details:
 
 - `GAME_OVER_DELAY` controls delay before showing screen
 - Displays run stats summary
+- Shows **Run ID** (UUID) at the bottom of the stats list in subtle gray (font size 14)
+
+## Pause Menu
+
+- Shows **Run ID** below the "PAUSED" title in subtle gray (font size 12)
+- Run ID is populated from `RunManager.run_data.run_id` each time the pause menu opens
 
 ## Main Menu / Title Screen
 

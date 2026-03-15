@@ -33,16 +33,13 @@ const FLAT_STATS: Dictionary = {
 @onready var GameConfig: Node = get_node("/root/GameConfig")
 @onready var GameSeed: Node = get_node("/root/GameSeed")
 
-var _rng: RandomNumberGenerator = null
-
-
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	_rng = GameSeed.rng("upgrade_service")
 
 
 func generate_level_up_options() -> Array[Dictionary]:
 	## Generate 3-4 upgrade options for level up selection.
+	var _rng: RandomNumberGenerator = GameSeed.rng("upgrade_service")
 	var available_upgrades: Array = DataLoader.get_all_ship_upgrades()
 	var luck: float = _get_player_luck()
 	var weapon_rng: RandomNumberGenerator = GameSeed.rng("weapon_upgrade")
@@ -86,7 +83,7 @@ func generate_level_up_options() -> Array[Dictionary]:
 
 	var candidates: Array[Dictionary] = []
 	candidates.append_array(_build_module_candidates(
-		available_upgrades, owned_modules, module_slots_full, luck,
+		available_upgrades, owned_modules, module_slots_full, luck, _rng,
 		w_existing_module, w_new_module
 	))
 	candidates.append_array(_build_weapon_candidates(
@@ -94,12 +91,12 @@ func generate_level_up_options() -> Array[Dictionary]:
 		w_existing_weapon, w_new_weapon
 	))
 
-	return _select_from_candidates(candidates, int(GameConfig.LEVEL_UP_OPTION_COUNT))
+	return _select_from_candidates(candidates, int(GameConfig.LEVEL_UP_OPTION_COUNT), _rng)
 
 
 func _build_module_candidates(
 	available_upgrades: Array, owned_modules: Array, module_slots_full: bool,
-	luck: float, w_existing: float, w_new: float
+	luck: float, rng: RandomNumberGenerator, w_existing: float, w_new: float
 ) -> Array[Dictionary]:
 	## Build candidate entries for ship-upgrade (module) options.
 	var candidates: Array[Dictionary] = []
@@ -117,8 +114,8 @@ func _build_module_candidates(
 		var is_owned: bool = upgrade_id in owned_modules
 		if (not is_owned) and module_slots_full:
 			continue
-		var rarity: String = _roll_rarity(upgrade.get("rarity_weights", {}), luck)
-		var effects: Array = _build_upgrade_effects(upgrade, rarity)
+		var rarity: String = _roll_rarity(upgrade.get("rarity_weights", {}), luck, rng)
+		var effects: Array = _build_upgrade_effects(upgrade, rarity, rng)
 		candidates.append({
 			"weight": w_existing if is_owned else w_new,
 			"type": "upgrade",
@@ -147,7 +144,7 @@ func _build_weapon_candidates(
 		var current_level_w: int = _get_weapon_level(weapon_id)
 		if current_level_w >= max_level_w:
 			continue
-		var weapon_rarity: String = _roll_rarity({}, luck)
+		var weapon_rarity: String = _roll_rarity({}, luck, weapon_rng)
 		var weapon_effects: Array = _build_weapon_effects(weapon_id, weapon_rarity, weapon_rng)
 		candidates.append({
 			"weight": w_existing,
@@ -181,12 +178,12 @@ func _build_weapon_candidates(
 	return candidates
 
 
-func _select_from_candidates(candidates: Array[Dictionary], count: int) -> Array[Dictionary]:
+func _select_from_candidates(candidates: Array[Dictionary], count: int, rng: RandomNumberGenerator) -> Array[Dictionary]:
 	## Pick up to count options via weighted sampling without replacement.
 	var options: Array[Dictionary] = []
 	var picks: int = mini(count, candidates.size())
 	for _i in range(picks):
-		var idx: int = _pick_weighted_index(candidates)
+		var idx: int = _pick_weighted_index(candidates, rng)
 		if idx < 0:
 			break
 		var chosen: Dictionary = candidates[idx]
@@ -202,7 +199,7 @@ func _pick_weighted_index(items: Array[Dictionary], rng: RandomNumberGenerator =
 		total += float(it.get("weight", 1.0))
 	if total <= 0.0:
 		return -1
-	var rng_to_use: RandomNumberGenerator = rng if rng else _rng
+	var rng_to_use: RandomNumberGenerator = rng if rng else GameSeed.rng("upgrade_service")
 	var roll: float = rng_to_use.randf() * total
 	var acc: float = 0.0
 	for i in range(items.size()):
@@ -228,7 +225,7 @@ func _get_player_luck() -> float:
 	return 0.0
 
 
-func _roll_rarity(weights: Dictionary, luck: float) -> String:
+func _roll_rarity(weights: Dictionary, luck: float, rng: RandomNumberGenerator) -> String:
 	var w: Dictionary = {
 		"common": float(weights.get("common", GameConfig.RARITY_DEFAULT_WEIGHTS.get("common", 60.0))),
 		"uncommon": float(weights.get("uncommon", GameConfig.RARITY_DEFAULT_WEIGHTS.get("uncommon", 25.0))),
@@ -249,7 +246,7 @@ func _roll_rarity(weights: Dictionary, luck: float) -> String:
 	if total <= 0.0:
 		return "common"
 
-	var roll: float = _rng.randf() * total
+	var roll: float = rng.randf() * total
 	var acc: float = 0.0
 	for key in GameConfig.RARITY_ORDER:
 		acc += w.get(key, 0.0)
@@ -258,7 +255,7 @@ func _roll_rarity(weights: Dictionary, luck: float) -> String:
 	return "common"
 
 
-func _build_upgrade_effects(upgrade_data: Dictionary, rarity: String) -> Array[Dictionary]:
+func _build_upgrade_effects(upgrade_data: Dictionary, rarity: String, rng: RandomNumberGenerator) -> Array[Dictionary]:
 	var effects: Array[Dictionary] = []
 	if upgrade_data.has("effects") and upgrade_data["effects"] is Array:
 		for effect in upgrade_data["effects"]:
@@ -287,7 +284,7 @@ func _build_upgrade_effects(upgrade_data: Dictionary, rarity: String) -> Array[D
 	for extra in GameConfig.MODULE_EXTRA_EFFECT_POOL:
 		if not used_stats.has(extra.get("stat", "")):
 			pool.append(extra)
-	pool.shuffle()
+	_seeded_shuffle(pool, rng)
 
 	while effects.size() < desired_count and pool.size() > 0:
 		var extra: Dictionary = pool.pop_back()
@@ -400,3 +397,12 @@ func _normalize_stat_per_level(stat_name: String, per_level_raw: float) -> Dicti
 	if absf(amount) >= 1.0:
 		amount = amount / 100.0
 	return {"stat": stat_name, "kind": "mult", "amount": amount}
+
+
+## Fisher-Yates shuffle using a seeded RNG for deterministic ordering.
+func _seeded_shuffle(arr: Array, rng: RandomNumberGenerator) -> void:
+	for i in range(arr.size() - 1, 0, -1):
+		var j: int = rng.randi() % (i + 1)
+		var tmp: Variant = arr[i]
+		arr[i] = arr[j]
+		arr[j] = tmp
