@@ -296,3 +296,33 @@ static func make_radial_texture(size: int, falloff_power: float = 2.0) -> ImageT
 	var tex: ImageTexture = ImageTexture.create_from_image(img)
 	_radial_tex_cache[cache_key] = tex
 	return tex
+
+
+## Return a spawn position on the source collision boundary along [param direction].
+## Falls back to [param fallback_origin] when source or shape data is unavailable.
+static func source_edge_origin(source: Node2D, direction: Vector2, fallback_origin: Vector2) -> Vector2:
+	if not is_instance_valid(source):
+		return fallback_origin
+
+	var dir: Vector2 = direction.normalized()
+	if dir.is_zero_approx():
+		dir = Vector2.RIGHT
+
+	var collision: CollisionShape2D = source.get_node_or_null("CollisionShape2D") as CollisionShape2D
+	if collision == null or collision.shape == null:
+		return source.global_position + dir * GameConfig.DEFAULT_COLLISION_RADIUS
+
+	var base_radius: float = GameConfig.DEFAULT_COLLISION_RADIUS
+	if collision.shape is CircleShape2D:
+		var circle: CircleShape2D = collision.shape as CircleShape2D
+		base_radius = circle.radius
+	elif collision.shape is CapsuleShape2D:
+		var capsule: CapsuleShape2D = collision.shape as CapsuleShape2D
+		base_radius = capsule.radius + capsule.height * 0.5
+	elif collision.shape is RectangleShape2D:
+		var rect: RectangleShape2D = collision.shape as RectangleShape2D
+		base_radius = rect.size.length() * 0.5
+
+	var scale_factor: float = maxf(absf(source.global_scale.x), absf(source.global_scale.y))
+	var world_radius: float = maxf(1.0, base_radius * scale_factor)
+	return source.global_position + dir * world_radius

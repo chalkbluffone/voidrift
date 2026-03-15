@@ -31,7 +31,8 @@ func setup(params: Dictionary) -> StraightLineNegotiator:
 	return self
 
 
-func fire_from(spawn_pos: Vector2, direction: Vector2, stats_component: Node = null) -> void:
+func fire_from(spawn_pos: Vector2, direction: Vector2, stats_component: Node = null, follow_source: Node2D = null) -> void:
+	var origin: Vector2 = EffectUtils.source_edge_origin(follow_source, direction, spawn_pos)
 	var projectile: Node2D = ObjectPool.acquire("projectile", PROJECTILE_SCENE)
 	projectile.z_index = -1
 	projectile.initialize(
@@ -45,7 +46,7 @@ func fire_from(spawn_pos: Vector2, direction: Vector2, stats_component: Node = n
 		crit_chance,
 		crit_damage
 	)
-	projectile.global_position = spawn_pos
+	projectile.global_position = origin
 	projectile._lifetime = lifetime
 
 	var sprite: Sprite2D = projectile.get_node_or_null("Sprite2D")
@@ -63,7 +64,7 @@ func fire_from(spawn_pos: Vector2, direction: Vector2, stats_component: Node = n
 
 	get_tree().current_scene.add_child(projectile)
 	_projectile = projectile
-	_spawn_pos = spawn_pos
+	_spawn_pos = origin
 
 
 func _process(_delta: float) -> void:

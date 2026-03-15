@@ -65,7 +65,8 @@ func fire_from(spawn_pos: Vector2, direction: Vector2, stats_component: Node = n
 	_fire_direction = direction.normalized()
 	if _fire_direction.is_zero_approx():
 		_fire_direction = Vector2.RIGHT
-	global_position = spawn_pos
+	_fire_origin = EffectUtils.source_edge_origin(_follow_source, _fire_direction, _fire_origin)
+	global_position = _fire_origin
 
 	# Fire first bullet immediately, queue the rest
 	_spawn_bullet(_fire_origin, _fire_direction, bounce_count)
@@ -105,16 +106,19 @@ func _retarget_if_needed() -> void:
 	if is_instance_valid(_current_target):
 		# Target still alive — update aim direction from current positions
 		if is_instance_valid(_follow_source):
-			_fire_origin = _follow_source.global_position
+			_fire_origin = EffectUtils.source_edge_origin(_follow_source, _fire_direction, _fire_origin)
 			global_position = _fire_origin
 		var dir: Vector2 = (_current_target.global_position - _fire_origin).normalized()
 		if not dir.is_zero_approx():
 			_fire_direction = dir
+		if is_instance_valid(_follow_source):
+			_fire_origin = EffectUtils.source_edge_origin(_follow_source, _fire_direction, _fire_origin)
+			global_position = _fire_origin
 		return
 
 	# Target is dead — find a new one
 	if is_instance_valid(_follow_source):
-		_fire_origin = _follow_source.global_position
+		_fire_origin = EffectUtils.source_edge_origin(_follow_source, _fire_direction, _fire_origin)
 		global_position = _fire_origin
 	var new_target: Node2D = EffectUtils.find_nearest_enemy(get_tree(), _fire_origin)
 	if new_target:
@@ -122,6 +126,9 @@ func _retarget_if_needed() -> void:
 		var dir: Vector2 = (new_target.global_position - _fire_origin).normalized()
 		if not dir.is_zero_approx():
 			_fire_direction = dir
+		if is_instance_valid(_follow_source):
+			_fire_origin = EffectUtils.source_edge_origin(_follow_source, _fire_direction, _fire_origin)
+			global_position = _fire_origin
 
 
 func _spawn_bullet(origin: Vector2, direction: Vector2, bounces_remaining: int) -> void:

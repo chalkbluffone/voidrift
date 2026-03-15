@@ -7,6 +7,7 @@ class_name SpaceLasers
 ## Projectile count scales with the projectile_count stat.
 
 const PROJECTILE_SCENE: PackedScene = preload("res://scenes/gameplay/projectile.tscn")
+const LASER_BULLET_TEXTURE: Texture2D = preload("res://assets/lasers/laser_bullet.png")
 
 # --- Stats ---
 @export var damage: float = 5.0
@@ -26,6 +27,13 @@ const PROJECTILE_SCENE: PackedScene = preload("res://scenes/gameplay/projectile.
 @export var glow_strength: float = 1.5
 @export var bolt_length: float = 12.0
 @export var bolt_width: float = 2.0
+@export var use_texture_driven_color: bool = false
+@export var sprite_scale: float = 0.42
+@export var sprite_width_mult: float = 0.50
+@export var front_rotation_offset_deg: float = 90.0
+@export var enable_glow_overlay: bool = true
+@export var glow_overlay_scale_mult: float = 1.65
+@export var glow_overlay_alpha: float = 0.35
 @export var spread_angle_deg: float = 3.0
 
 @onready var FrameCache: Node = get_node("/root/FrameCache")
@@ -43,6 +51,7 @@ var _rng: RandomNumberGenerator = null
 var _follow_source: Node2D = null
 var _target_queue: Array[Node2D] = []
 var _target_index: int = 0
+var _source_collision_radius: float = GameConfig.DEFAULT_COLLISION_RADIUS
 
 
 func setup(params: Dictionary) -> SpaceLasers:
@@ -61,11 +70,12 @@ func fire_from(spawn_pos: Vector2, direction: Vector2, stats_component: Node = n
 		_rng = GameSeed.rng("space_lasers")
 	_stats_component = stats_component
 	_follow_source = follow_source
+	_source_collision_radius = _resolve_source_collision_radius()
 	_fire_origin = spawn_pos
 	_fire_direction = direction.normalized()
 	if _fire_direction.is_zero_approx():
 		_fire_direction = Vector2.RIGHT
-	global_position = spawn_pos
+	_set_fire_origin_from_source_edge(_fire_direction)
 
 	# Build target queue from provided list
 	_target_queue.clear()
@@ -111,10 +121,9 @@ func _process(delta: float) -> void:
 
 func _aim_at_current_target() -> void:
 	## Aim at the next target in the queue, cycling through enemies.
-	## Updates fire origin from player's current position.
+	## Updates fire origin from the ship collision edge in shot direction.
 	if is_instance_valid(_follow_source):
-		_fire_origin = _follow_source.global_position
-		global_position = _fire_origin
+		_source_collision_radius = _resolve_source_collision_radius()
 
 	# Prune dead targets from queue
 	var i: int = _target_queue.size() - 1
@@ -131,6 +140,7 @@ func _aim_at_current_target() -> void:
 		if fallback:
 			_target_queue.append(fallback)
 			_target_index = 0
+		_set_fire_origin_from_source_edge(_fire_direction)
 		return
 
 	# Wrap index to cycle through targets
@@ -139,6 +149,43 @@ func _aim_at_current_target() -> void:
 	var dir: Vector2 = (target.global_position - _fire_origin).normalized()
 	if not dir.is_zero_approx():
 		_fire_direction = dir
+
+	_set_fire_origin_from_source_edge(_fire_direction)
+
+
+func _set_fire_origin_from_source_edge(direction: Vector2) -> void:
+	if is_instance_valid(_follow_source):
+		var dir: Vector2 = direction.normalized()
+		if dir.is_zero_approx():
+			dir = Vector2.RIGHT
+		var center: Vector2 = _follow_source.global_position
+		_fire_origin = center + dir * _source_collision_radius
+		global_position = _fire_origin
+	else:
+		global_position = _fire_origin
+
+
+func _resolve_source_collision_radius() -> float:
+	if not is_instance_valid(_follow_source):
+		return GameConfig.DEFAULT_COLLISION_RADIUS
+
+	var collision: CollisionShape2D = _follow_source.get_node_or_null("CollisionShape2D") as CollisionShape2D
+	if collision == null or collision.shape == null:
+		return GameConfig.DEFAULT_COLLISION_RADIUS
+
+	var base_radius: float = GameConfig.DEFAULT_COLLISION_RADIUS
+	if collision.shape is CircleShape2D:
+		var circle: CircleShape2D = collision.shape as CircleShape2D
+		base_radius = circle.radius
+	elif collision.shape is CapsuleShape2D:
+		var capsule: CapsuleShape2D = collision.shape as CapsuleShape2D
+		base_radius = capsule.radius + capsule.height * 0.5
+	elif collision.shape is RectangleShape2D:
+		var rect: RectangleShape2D = collision.shape as RectangleShape2D
+		base_radius = rect.size.length() * 0.5
+
+	var scale_factor: float = maxf(absf(_follow_source.global_scale.x), absf(_follow_source.global_scale.y))
+	return maxf(1.0, base_radius * scale_factor)
 
 
 func _spawn_bolt(origin: Vector2, direction: Vector2, bounces_remaining: int) -> void:
@@ -163,13 +210,21 @@ func _spawn_bolt(origin: Vector2, direction: Vector2, bounces_remaining: int) ->
 	if sprite:
 		sprite.visible = false
 
-	var glow: _NeonLaserVisual = _NeonLaserVisual.new()
-	glow.bolt_length = bolt_length
-	glow.bolt_width = bolt_width
-	glow.color_core = color_core
-	glow.color_glow = color_glow
-	glow.glow_strength = glow_strength
-	projectile.add_child(glow)
+	var visual: _LaserBulletVisual = _LaserBulletVisual.new()
+	visual.bullet_texture = LASER_BULLET_TEXTURE
+	visual.use_texture_driven_color = use_texture_driven_color
+	visual.bolt_length = bolt_length
+	visual.bolt_width = bolt_width
+	visual.color_core = color_core
+	visual.color_glow = color_glow
+	visual.glow_strength = glow_strength
+	visual.sprite_scale = sprite_scale
+	visual.sprite_width_mult = sprite_width_mult
+	visual.front_rotation_offset_rad = deg_to_rad(front_rotation_offset_deg)
+	visual.enable_glow_overlay = enable_glow_overlay
+	visual.glow_overlay_scale_mult = glow_overlay_scale_mult
+	visual.glow_overlay_alpha = glow_overlay_alpha
+	projectile.add_child(visual)
 
 	get_tree().current_scene.add_child(projectile)
 	_active_projectiles.append(projectile)
@@ -216,51 +271,70 @@ func _on_bolt_hit(enemy: Node2D, _damage_info: Dictionary, source_projectile: No
 	call_deferred("_spawn_bolt", hit_pos, bounce_dir, bounces_remaining - 1)
 
 
-## Elongated neon-red laser bolt visual. Drawn procedurally as a stretched
-## glowing capsule shape oriented along the projectile's travel direction.
-class _NeonLaserVisual extends NeonProjectileVisual:
+## Laser bullet visual with additive sprite front and compact rear spark trail.
+## Projectile node rotation controls travel direction. The PNG top is treated
+## as the forward-facing tip via front_rotation_offset_rad.
+class _LaserBulletVisual extends NeonProjectileVisual:
+	var bullet_texture: Texture2D = null
+	var use_texture_driven_color: bool = false
 	var bolt_length: float = 12.0
 	var bolt_width: float = 2.0
+	var sprite_scale: float = 0.42
+	var sprite_width_mult: float = 0.50
+	var front_rotation_offset_rad: float = PI * 0.5
+	var enable_glow_overlay: bool = true
+	var glow_overlay_scale_mult: float = 1.65
+	var glow_overlay_alpha: float = 0.35
+
+	var _sprite: Sprite2D = null
+	var _glow_sprite: Sprite2D = null
 
 	func _ready() -> void:
-		queue_redraw()
+		_build_glow_sprite()
+		_build_sprite()
 
-	func _process(_delta: float) -> void:
-		queue_redraw()
+	func _build_glow_sprite() -> void:
+		if not enable_glow_overlay:
+			return
+		_glow_sprite = Sprite2D.new()
+		_glow_sprite.texture = bullet_texture
+		_glow_sprite.centered = true
+		_glow_sprite.scale = Vector2(
+			maxf(0.01, sprite_scale * sprite_width_mult * glow_overlay_scale_mult),
+			maxf(0.01, sprite_scale * glow_overlay_scale_mult)
+		)
+		_glow_sprite.rotation = front_rotation_offset_rad
+		_glow_sprite.material = _make_additive_material()
+		_glow_sprite.modulate = Color(
+			color_glow.r,
+			color_glow.g,
+			color_glow.b,
+			clampf(glow_overlay_alpha, 0.0, 1.0)
+		)
+		add_child(_glow_sprite)
+
+	func _build_sprite() -> void:
+		_sprite = Sprite2D.new()
+		_sprite.texture = bullet_texture
+		_sprite.centered = true
+		_sprite.scale = Vector2(
+			maxf(0.01, sprite_scale * sprite_width_mult),
+			maxf(0.01, sprite_scale)
+		)
+		_sprite.rotation = front_rotation_offset_rad
+		_sprite.material = _make_additive_material()
+		if use_texture_driven_color:
+			_sprite.modulate = Color(1.0, 1.0, 1.0, 1.0)
+		else:
+			_sprite.modulate = Color(color_core.r, color_core.g, color_core.b, 0.95)
+		add_child(_sprite)
+
+	func _make_additive_material() -> CanvasItemMaterial:
+		var mat: CanvasItemMaterial = CanvasItemMaterial.new()
+		mat.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+		return mat
 
 	func _draw() -> void:
-		var l: float = maxf(4.0, bolt_length)
-		var w: float = maxf(1.0, bolt_width)
-
-		# Draw along the local X axis (projectile rotation handles direction)
-		# Points run from -l to 0 (tail to head)
-		var half_w: float = w
-
-		# Outer glow layers (3 concentric elongated ellipses, fading out)
-		for i in range(3, 0, -1):
-			var t: float = float(i) / 3.0
-			var glow_w: float = half_w * (1.0 + t * 3.0)
-			var glow_l: float = l * (1.0 + t * 0.5)
-			_draw_capsule(Vector2(-glow_l * 0.5, 0.0), glow_l, glow_w, _glow_color(t, 0.10))
-
-		# Bright glow body
-		var bright_col: Color = Color(color_glow.r, color_glow.g, color_glow.b, 0.55)
-		_draw_capsule(Vector2(-l * 0.45, 0.0), l * 0.9, half_w * 1.4, bright_col)
-
-		# Core beam
-		_draw_capsule(Vector2(-l * 0.4, 0.0), l * 0.8, half_w * 0.85, color_core)
-
-		# Hot center line
-		var hot_col: Color = Color(1.0, 1.0, 1.0, 0.92)
-		_draw_capsule(Vector2(-l * 0.3, 0.0), l * 0.6, half_w * 0.3, hot_col)
-
-
-	## Draw a filled capsule (rectangle with rounded ends) centered at a position.
-	func _draw_capsule(center: Vector2, length: float, radius: float, color: Color) -> void:
-		var half_l: float = length * 0.5
-		# Central rectangle
-		var rect: Rect2 = Rect2(center.x - half_l, center.y - radius, length, radius * 2.0)
-		draw_rect(rect, color)
-		# End caps (circles)
-		draw_circle(Vector2(center.x - half_l, center.y), radius, color)
-		draw_circle(Vector2(center.x + half_l, center.y), radius, color)
+		# Keep rendering sprite-only to avoid Metal fence stalls from heavy
+		# procedural capsule primitives on large projectile counts.
+		return

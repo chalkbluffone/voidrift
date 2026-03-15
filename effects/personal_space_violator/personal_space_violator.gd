@@ -40,6 +40,7 @@ var _pellets: Array = []  # Array of projectile node refs
 var _spawn_origin: Vector2 = Vector2.ZERO
 var _stats_component: Node = null
 var _rng: RandomNumberGenerator = null
+var _source_node: Node2D = null
 
 
 func setup(params: Dictionary) -> PersonalSpaceViolator:
@@ -56,6 +57,7 @@ func setup(params: Dictionary) -> PersonalSpaceViolator:
 
 
 func set_source(source: Node2D) -> void:
+	_source_node = source
 	if source and source.has_node("StatsComponent"):
 		_stats_component = source.get_node("StatsComponent")
 
@@ -64,8 +66,8 @@ func fire_burst(origin: Vector2, direction: Vector2) -> void:
 	if _rng == null:
 		var game_seed: Node = get_node_or_null("/root/GameSeed")
 		_rng = game_seed.rng("personal_space_violator") if game_seed else RandomNumberGenerator.new()
-	_spawn_origin = origin
-	global_position = origin
+	_spawn_origin = EffectUtils.source_edge_origin(_source_node, direction, origin)
+	global_position = _spawn_origin
 
 	var base_angle: float = direction.angle()
 	var half_spread: float = deg_to_rad(spread_degrees) / 2.0

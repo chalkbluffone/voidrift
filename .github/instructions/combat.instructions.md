@@ -31,6 +31,22 @@ This avoids persistent priority bias where one burst weapon can repeatedly starv
 - Per-weapon rarity tier stat tables in `data/weapon_upgrades.json`
 - `WeaponComponent` (`scripts/combat/weapon_component.gd`) manages auto-fire and projectile spawning
 
+### Space Lasers Visual Contract
+
+- Space Lasers uses `assets/lasers/laser_bullet.png` for projectile visuals.
+- The bullet's **top of PNG is the nose** and must face travel direction via a forward-rotation offset (default `90.0` degrees).
+- Bolts spawn from the ship collision boundary (not ship center): source origin = ship center + normalized shot direction \* ship collision radius.
+- Space Lasers does not use a particle trail; keep the projectile read as a clean additive bullet sprite.
+- Optional glow should be texture-based (secondary additive Sprite2D overlay) instead of procedural draw primitives.
+- Preserve JSON-driven visual controls in `data/weapons.json` under `space_lasers.visual` (texture-driven color toggle, sprite scaling, and glow overlay tuning).
+- Avoid procedural `draw_circle`/`draw_rect` capsule overlays in Space Lasers on macOS Metal; this can trigger `timeout waiting for fence` under high projectile counts.
+
+### Projectile Spawn Origin Rule
+
+- Projectile-style weapons should spawn from the firing ship collision edge, not center.
+- Use `EffectUtils.source_edge_origin(source, direction, fallback_origin)` when a follow/source node is available.
+- Apply the edge-origin rule for initial shots and any burst re-aim/retarget shots.
+
 ## Weapon Tier Upgrade System
 
 Weapons level up through rarity tiers: Common → Uncommon → Rare → Epic → Legendary. Each tier applies stat multipliers defined in `weapon_upgrades.json`. Key constants in GameConfig:

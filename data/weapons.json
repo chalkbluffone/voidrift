@@ -564,7 +564,14 @@
 			"bolt_width": 2.0,
 			"color_core": "#ff2222",
 			"color_glow": "#ff0000",
-			"glow_strength": 1.5
+			"enable_glow_overlay": true,
+			"front_rotation_offset_deg": 90.0,
+			"glow_overlay_alpha": 0.35,
+			"glow_overlay_scale_mult": 1.65,
+			"glow_strength": 1.5,
+			"sprite_scale": 0.42,
+			"sprite_width_mult": 0.5,
+			"use_texture_driven_color": false
 		}
 	}
 }
