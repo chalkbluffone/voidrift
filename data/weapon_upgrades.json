@@ -579,7 +579,7 @@
 			"crit",
 			"close_range"
 		],
-		"strategy_synergies": "Count boosts pellet count; damage and crit solid; size for spread control",
+		"strategy_synergies": "Count boosts pellet count; damage and crit solid; size increases pellet hit radius",
 		"tier_stats": {
 			"damage": {
 				"common": 0.3,

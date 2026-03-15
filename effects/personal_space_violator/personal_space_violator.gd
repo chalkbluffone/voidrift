@@ -9,6 +9,7 @@ class_name PersonalSpaceViolator
 ## guarantees working collision detection — no dynamic Area2D creation.
 
 const PROJECTILE_SCENE: PackedScene = preload("res://scenes/gameplay/projectile.tscn")
+const LASER_BULLET_TEXTURE_PATH: String = "res://assets/lasers/laser_bullet_green.png"
 
 # --- Stats ---
 @export var damage: float = 18.0
@@ -22,15 +23,11 @@ const PROJECTILE_SCENE: PackedScene = preload("res://scenes/gameplay/projectile.
 @export var falloff_end: float = 350.0
 @export var falloff_min_mult: float = 0.15
 
-# --- Shape ---
-@export var pellet_radius: float = 0.5
-
 # --- Visual ---
-@export var color_core: Color = Color(1.0, 1.0, 1.0, 1.0)
 @export var color_glow: Color = Color(0.224, 1.0, 0.078, 1.0)
-@export var glow_strength: float = 2.5
-@export var bloom_intensity: float = 3.0
-@export var pellet_height_px: int = 5
+@export var sprite_scale: float = 0.315
+@export var edge_fade_start_ratio: float = 0.85
+@export var edge_fade_duration: float = 0.08
 @export var crit_chance: float = 0.0
 @export var crit_damage: float = 0.0
 
@@ -41,6 +38,13 @@ var _spawn_origin: Vector2 = Vector2.ZERO
 var _stats_component: Node = null
 var _rng: RandomNumberGenerator = null
 var _source_node: Node2D = null
+var _runtime_size_mult: float = 1.0
+var _laser_bullet_texture: Texture2D = null
+var _fading_pellet_ids: Dictionary = {}
+
+
+func _ready() -> void:
+	_laser_bullet_texture = ResourceLoader.load(LASER_BULLET_TEXTURE_PATH) as Texture2D
 
 
 func setup(params: Dictionary) -> PersonalSpaceViolator:
@@ -52,7 +56,7 @@ func setup(params: Dictionary) -> PersonalSpaceViolator:
 	if params.has("projectile_speed"):
 		pellet_speed = float(params["projectile_speed"])
 	if params.has("size_mult"):
-		pellet_radius *= float(params["size_mult"])
+		_runtime_size_mult = float(params["size_mult"])
 	return self
 
 
@@ -92,22 +96,21 @@ func _spawn_pellet(angle: float, speed: float) -> void:
 
 	# Initialize with standard projectile API
 	var style: Dictionary = {"color": color_glow}
-	pellet.initialize(damage, dir, speed, 0, 1.0, _stats_component, style, crit_chance, crit_damage)
+	pellet.initialize(damage, dir, speed, 0, _runtime_size_mult, _stats_component, style, crit_chance, crit_damage)
 	pellet._lifetime = lifetime
 	pellet.global_position = _spawn_origin
 
-	# Hide standard bullet sprite, replace with neon glow
+	# Hide default sprite only when custom texture visual is available.
 	var sprite: Node = pellet.get_node_or_null("Sprite2D")
-	if sprite:
+	if sprite and _laser_bullet_texture:
 		sprite.visible = false
 
-	var glow: _NeonGlow = _NeonGlow.new()
-	glow.pellet_radius = pellet_radius
-	glow.color_core = color_core
-	glow.color_glow = color_glow
-	glow.glow_strength = glow_strength
-	glow.bloom_intensity = bloom_intensity
-	pellet.add_child(glow)
+	if _laser_bullet_texture:
+		var visual: _PelletSpriteVisual = _PelletSpriteVisual.new()
+		visual.texture_asset = _laser_bullet_texture
+		visual.sprite_scale = sprite_scale
+		visual.color_glow = color_glow
+		pellet.add_child(visual)
 
 	# Add to scene tree (same as WeaponComponent._spawn_projectile)
 	get_tree().current_scene.add_child(pellet)
@@ -120,11 +123,13 @@ func _process(_delta: float) -> void:
 	var to_remove: Array = []
 	for pellet in _pellets:
 		if not is_instance_valid(pellet):
+			_fading_pellet_ids.erase(pellet.get_instance_id())
 			to_remove.append(pellet)
 			continue
 		# Continuously update damage based on travel distance
 		var dist: float = pellet.global_position.distance_to(_spawn_origin)
 		pellet.damage = damage * _calculate_falloff(dist)
+		_maybe_start_edge_fade(pellet, dist)
 
 	for p in to_remove:
 		_pellets.erase(p)
@@ -132,6 +137,24 @@ func _process(_delta: float) -> void:
 	# Self-destruct when all pellets are gone
 	if _pellets.is_empty():
 		queue_free()
+
+
+func _maybe_start_edge_fade(pellet: Node2D, distance: float) -> void:
+	var pellet_id: int = pellet.get_instance_id()
+	if _fading_pellet_ids.has(pellet_id):
+		return
+	var max_distance: float = pellet.speed * lifetime
+	if max_distance <= 0.0:
+		return
+	var clamped_ratio: float = clampf(edge_fade_start_ratio, 0.0, 0.99)
+	var fade_start_distance: float = max_distance * clamped_ratio
+	if distance < fade_start_distance:
+		return
+	_fading_pellet_ids[pellet_id] = true
+	var tween: Tween = pellet.create_tween()
+	tween.set_trans(Tween.TRANS_SINE)
+	tween.set_ease(Tween.EASE_OUT)
+	tween.tween_property(pellet, "modulate:a", 0.0, maxf(0.01, edge_fade_duration))
 
 
 func _calculate_falloff(distance: float) -> float:
@@ -145,22 +168,29 @@ func _calculate_falloff(distance: float) -> float:
 
 
 
-# --- Neon glow visual (replaces bullet sprite) ---
+# --- Sprite visual (replaces bullet sprite) ---
 
-class _NeonGlow extends NeonProjectileVisual:
-	var pellet_radius: float = 0.5
-	var bloom_intensity: float = 3.0
+class _PelletSpriteVisual extends NeonProjectileVisual:
+	var texture_asset: Texture2D = null
+	var sprite_scale: float = 0.315
+	var _sprite: Sprite2D = null
+
+	func _ready() -> void:
+		_sprite = Sprite2D.new()
+		_sprite.texture = texture_asset
+		_sprite.centered = true
+		_sprite.scale = Vector2.ONE * maxf(0.01, sprite_scale)
+		# PNG top is the projectile nose; rotate so top points along travel direction.
+		_sprite.rotation = PI * 0.5
+		_sprite.modulate = Color(color_glow.r, color_glow.g, color_glow.b, 1.0)
+		_sprite.material = _make_additive_material()
+		add_child(_sprite)
+
+	func _make_additive_material() -> CanvasItemMaterial:
+		var additive_mat: CanvasItemMaterial = CanvasItemMaterial.new()
+		additive_mat.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+		return additive_mat
 
 	func _draw() -> void:
-		# Outer bloom layers
-		var bloom_layers: int = 4
-		for i in range(bloom_layers, 0, -1):
-			var t: float = float(i) / float(bloom_layers)
-			var r: float = pellet_radius * (1.0 + t * bloom_intensity)
-			draw_circle(Vector2.ZERO, r, _glow_color(t, 0.15))
-		# Core glow ring
-		draw_circle(Vector2.ZERO, pellet_radius * 1.2, Color(color_glow.r, color_glow.g, color_glow.b, 0.6))
-		# Bright core
-		draw_circle(Vector2.ZERO, pellet_radius * 0.7, color_core)
-		# Hot center dot
-		draw_circle(Vector2.ZERO, pellet_radius * 0.3, Color(1.0, 1.0, 1.0, 0.9))
+		# Sprite-only rendering avoids heavy procedural draw calls.
+		return

@@ -141,7 +141,7 @@
 		},
 		"scene": "res://effects/personal_space_violator/PersonalSpaceViolator.tscn",
 		"shape": {
-			"pellet_radius": 2.0
+
 		},
 		"spawner": "res://effects/personal_space_violator/personal_space_violator_spawner.gd",
 		"stats": {
@@ -157,11 +157,10 @@
 		"type": "projectile",
 		"unlock_condition": "default",
 		"visual": {
-			"bloom_intensity": 3.0,
-			"color_core": "#ffffff",
 			"color_glow": "#39ff14",
-			"glow_strength": 0.5,
-			"pellet_height_px": 5.0
+			"edge_fade_duration": 0.08,
+			"edge_fade_start_ratio": 0.85,
+			"sprite_scale": 0.315
 		}
 	},
 	"proximity_tax": {

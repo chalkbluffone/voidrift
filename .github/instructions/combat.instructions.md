@@ -41,6 +41,12 @@ This avoids persistent priority bias where one burst weapon can repeatedly starv
 - Preserve JSON-driven visual controls in `data/weapons.json` under `space_lasers.visual` (texture-driven color toggle, sprite scaling, and glow overlay tuning).
 - Avoid procedural `draw_circle`/`draw_rect` capsule overlays in Space Lasers on macOS Metal; this can trigger `timeout waiting for fence` under high projectile counts.
 
+### Personal Space Violator Visual/Size Contract
+
+- Personal Space Violator projectiles use `assets/lasers/laser_bullet_green.png` via a sprite-based additive visual helper.
+- Keep PSP sprite scale fixed from `data/weapons.json` (`personal_space_violator.visual.sprite_scale`); weapon `size` upgrades must not inflate the visual sprite.
+- PSP weapon `size` upgrades must increase projectile collision reach (hit radius) by flowing runtime `size_mult` into projectile initialization.
+
 ### Projectile Spawn Origin Rule
 
 - Projectile-style weapons should spawn from the firing ship collision edge, not center.
