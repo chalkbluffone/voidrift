@@ -23,6 +23,7 @@ extends Node2D
 @export var cooldown: float = 3.0  # Used for display only; spawner handles regen timing
 @export var crit_chance: float = 0.0
 @export var crit_damage: float = 0.0
+@export var projectile_speed_mult: float = 1.0
 
 @onready var FrameCache: Node = get_node("/root/FrameCache")
 
@@ -73,8 +74,11 @@ func setup(params: Dictionary) -> void:
 	if old_max == 0:
 		# First-time init
 		_current_layers = _max_layers
+	elif _max_layers > old_max:
+		# Layers increased mid-run — instantly fill to new max
+		_current_layers = _max_layers
 	else:
-		# Live update: clamp current layers to new max, don't reset
+		# Max decreased or unchanged — clamp current layers
 		_current_layers = mini(_current_layers, _max_layers)
 	# Always apply visual changes so live updates take effect immediately
 	_update_visuals()
@@ -137,9 +141,10 @@ func _process(delta: float) -> void:
 		var pulse: float = _hit_flash_timer / _hit_flash_duration if _hit_flash_duration > 0 else 0.0
 		_shader_material.set_shader_parameter("pulse", pulse)
 	
-	# Self-managed layer regen timer
+	# Self-managed layer regen timer (projectile_speed_mult makes regen faster)
 	if _regen_active and _current_layers < _max_layers:
-		_regen_timer -= delta
+		var effective_speed: float = maxf(0.1, projectile_speed_mult)
+		_regen_timer -= delta * effective_speed
 		if _regen_timer <= 0.0:
 			add_layer()
 			if _current_layers < _max_layers:

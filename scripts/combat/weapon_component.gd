@@ -111,7 +111,8 @@ func _compute_next_shot_cooldown(weapon_id: String, weapon_state: Dictionary) ->
 		if stats_component:
 			projectile_count += float(stats_component.get_stat_int(StatsComponentScript.STAT_PROJECTILE_COUNT))
 		projectile_count = maxf(1.0, projectile_count)
-	if projectile_count > 1.0 and not burst_managed:
+	var weapon_type: String = data.get("type", "projectile")
+	if projectile_count > 1.0 and not burst_managed and weapon_type != "area":
 		cooldown /= projectile_count
 
 	var global_attack_speed: float = 1.0
@@ -355,6 +356,21 @@ func _fire_area_weapon(weapon_id: String, data: Dictionary, _level: int) -> void
 
 	config["crit_chance"] = float(config.get("crit_chance", 0.0)) + _inventory.get_weapon_flat(weapon_id, StatsComponentScript.STAT_CRIT_CHANCE)
 	config["crit_damage"] = float(config.get("crit_damage", 0.0)) + _inventory.get_weapon_flat(weapon_id, StatsComponentScript.STAT_CRIT_DAMAGE)
+
+	# --- Projectile count bonuses (layers for nope_bubble, concurrent instances for others) ---
+	var base_proj_count: int = int(config.get("projectile_count", 1))
+	var bonus_proj: int = 0
+	var weapon_bonus_proj: int = int(round(_inventory.get_weapon_flat(weapon_id, StatsComponentScript.STAT_PROJECTILE_COUNT)))
+	if stats_component:
+		bonus_proj = stats_component.get_stat_int(StatsComponentScript.STAT_PROJECTILE_COUNT)
+	config["projectile_count"] = maxi(1, base_proj_count + bonus_proj + weapon_bonus_proj)
+
+	# --- Projectile speed multiplier (used by nope_bubble for regen scaling) ---
+	var area_global_speed_mult: float = 1.0
+	if stats_component:
+		area_global_speed_mult = stats_component.get_stat(StatsComponentScript.STAT_PROJECTILE_SPEED)
+	var area_weapon_speed_mult: float = _inventory.get_weapon_mult(weapon_id, StatsComponentScript.STAT_PROJECTILE_SPEED)
+	config["projectile_speed_mult"] = maxf(0.1, area_global_speed_mult * (1.0 + area_weapon_speed_mult))
 
 	var spawner: Object = _spawners.get_or_create_spawner(weapon_id, data, get_tree().current_scene)
 	if spawner and spawner.has_method("spawn"):
