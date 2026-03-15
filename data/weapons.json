@@ -214,6 +214,7 @@
 		}
 	},
 	"radiant_arc": {
+		"burst_managed": true,
 		"description": "Emits a short-range photonic slash in a wide arc from the ship’s forward edge, instantly cutting through and damaging any targets caught in its path. Really cool looking.",
 		"display_name": "Radiant Arc",
 		"enabled": true,
@@ -250,7 +251,9 @@
 		"stats": {
 			"cooldown": 1.0,
 			"damage": 15.0,
-			"duration": 1.0
+			"duration": 1.0,
+			"knockback": 200.0,
+			"projectile_count": 1.0
 		},
 		"type": "melee",
 		"unlock_condition": "default",

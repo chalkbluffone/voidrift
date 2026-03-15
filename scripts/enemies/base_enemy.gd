@@ -168,9 +168,8 @@ func _process_movement(_delta: float) -> void:
 	var desired_dir: Vector2 = (_target.global_position - global_position).normalized()
 	velocity = desired_dir * speed + _knockback_velocity
 
-	# Face movement direction
-	if velocity.length() > 10:
-		rotation = velocity.angle()
+	# Face toward target, ignoring knockback
+	rotation = desired_dir.angle()
 
 
 ## Check if this enemy overlaps any asteroid and return the adjusted speed.

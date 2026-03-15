@@ -85,8 +85,8 @@ func _chase_movement(_delta: float) -> void:
 	var desired_dir: Vector2 = (_target.global_position - global_position).normalized()
 	velocity = desired_dir * speed + _knockback_velocity
 
-	if velocity.length() > 10:
-		rotation = velocity.angle()
+	# Face toward target, ignoring knockback
+	rotation = desired_dir.angle()
 
 
 func _flee_movement(delta: float) -> void:
@@ -109,5 +109,5 @@ func _flee_movement(delta: float) -> void:
 	var speed: float = _get_asteroid_adjusted_speed(flee_speed)
 	velocity = _flee_direction * speed + _knockback_velocity
 
-	if velocity.length() > 10:
-		rotation = velocity.angle()
+	# Face flee direction, ignoring knockback
+	rotation = _flee_direction.angle()

@@ -426,6 +426,15 @@ func _fire_melee_weapon(weapon_id: String, data: Dictionary, _level: int) -> voi
 		bonus_proj = stats_component.get_stat_int(StatsComponentScript.STAT_PROJECTILE_COUNT)
 	config["projectile_count"] = maxi(1, base_proj_count + bonus_proj + weapon_bonus_proj)
 
+	# --- Knockback ---
+	var knockback_mult: float = 1.0
+	if stats_component:
+		knockback_mult = stats_component.get_stat(StatsComponentScript.STAT_KNOCKBACK)
+	var weapon_knockback_flat: float = _inventory.get_weapon_flat(weapon_id, StatsComponentScript.STAT_KNOCKBACK)
+	var weapon_knockback_mult: float = _inventory.get_weapon_mult(weapon_id, StatsComponentScript.STAT_KNOCKBACK)
+	var base_knockback: float = float(config.get("knockback", 0.0))
+	config["knockback"] = (base_knockback + weapon_knockback_flat) * (knockback_mult * (1.0 + weapon_knockback_mult))
+
 	# --- Crit ---
 	config["crit_chance"] = float(config.get("crit_chance", 0.0)) + _inventory.get_weapon_flat(weapon_id, StatsComponentScript.STAT_CRIT_CHANCE)
 	config["crit_damage"] = float(config.get("crit_damage", 0.0)) + _inventory.get_weapon_flat(weapon_id, StatsComponentScript.STAT_CRIT_DAMAGE)

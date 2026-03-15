@@ -89,6 +89,7 @@ class DebugCapsule extends Node2D:
 @export var rotation_offset_deg: float = 0.0
 @export var seed_offset: float = 0.0
 @export var damage: float = 25.0
+@export var knockback: float = 0.0
 @export var crit_chance: float = 0.0
 @export var crit_damage: float = 0.0
 
@@ -437,10 +438,17 @@ func _on_hitbox_area_entered(area: Area2D) -> void:
 		final_damage = float(damage_info.get("damage", damage))
 		if _stats_component.has_method("roll_lifesteal"):
 			_stats_component.roll_lifesteal()
+	var target_node: Node = null
 	if area.has_method("take_damage"):
 		area.take_damage(final_damage, self, damage_info)
+		target_node = area
 	elif area.get_parent() and area.get_parent().has_method("take_damage"):
 		area.get_parent().take_damage(final_damage, self, damage_info)
+		target_node = area.get_parent()
+
+	if knockback > 0.0 and target_node and target_node.has_method("apply_knockback"):
+		var kb_dir: Vector2 = (area.global_position - global_position).normalized()
+		target_node.apply_knockback(kb_dir * knockback)
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -574,7 +582,7 @@ func _recreate_particles() -> void:
 # ══════════════════════════════════════════════════════════════════════════
 
 func _update_shader_uniforms() -> void:
-	if not _shader_material:
+	if not _shader_material or not _shader_material.shader:
 		return
 
 	var sweep_alpha: Dictionary = _compute_sweep_and_alpha()
