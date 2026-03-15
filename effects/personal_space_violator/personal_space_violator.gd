@@ -112,10 +112,42 @@ func _spawn_pellet(angle: float, speed: float) -> void:
 		visual.color_glow = color_glow
 		pellet.add_child(visual)
 
+	_attach_spark_trail(pellet)
+
 	# Add to scene tree (same as WeaponComponent._spawn_projectile)
 	get_tree().current_scene.add_child(pellet)
 
 	_pellets.append(pellet)
+
+
+func _attach_spark_trail(pellet: Node2D) -> void:
+	var spark_color: Color = Color(color_glow.r, color_glow.g, color_glow.b, 0.9)
+	var trail: Node2D = EffectUtils.create_particles(pellet, {
+		"amount": 8,
+		"lifetime": 0.18,
+		"local_coords": false,
+		"emitting": true,
+		"one_shot": false,
+		"explosiveness": 0.0,
+		"randomness": 0.6,
+		"direction": Vector2.ZERO,
+		"spread": 180.0,
+		"initial_velocity_min": 2.0,
+		"initial_velocity_max": 12.0,
+		"gravity": Vector2.ZERO,
+		"damping_min": 8.0,
+		"damping_max": 20.0,
+		"scale_amount_min": 0.4,
+		"scale_amount_max": 1.0,
+		"color": spark_color,
+		"color_ramp": EffectUtils.make_gradient([
+			[0.0, Color(1.0, 1.0, 1.0, 1.0)],
+			[0.4, spark_color],
+			[1.0, Color(spark_color.r, spark_color.g, spark_color.b, 0.0)],
+		]),
+		"texture": EffectUtils.get_white_pixel_texture(1),
+	})
+	trail.z_index = -2
 
 
 func _process(_delta: float) -> void:
