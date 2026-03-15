@@ -84,7 +84,7 @@ const PICKUP_MAGNET_ACCELERATION: float = 800.0  # How fast pickups accelerate
 const XP_MERGE_RADIUS: float = 100.0       # Pixel radius to cluster nearby XP for merging
 const XP_MERGE_COUNT: int = 5              # Minimum XP pickup count in cluster to trigger merge
 const XP_MERGE_INTERVAL: float = 2.0       # Seconds between merge scan passes
-const XP_MERGE_VISUAL_SIZE: float = 18.0   # Half-size of merged XP visual (pixels)
+const XP_MERGE_VISUAL_SIZE: float = 12.0   # Half-size of merged XP glow footprint (pixels)
 const XP_MERGE_COLLISION_RADIUS: float = 12.0  # Collision radius for merged XP pickup
 
 # XP merge animation
