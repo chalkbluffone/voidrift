@@ -30,6 +30,7 @@ var _initialized: bool = false
 func _ready() -> void:
 	if not _initialized:
 		_initialized = true
+		add_to_group("projectiles")
 		# Connect signals only once — they persist across pool cycles
 		body_entered.connect(_on_body_entered)
 		area_entered.connect(_on_area_entered)

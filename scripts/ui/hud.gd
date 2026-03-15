@@ -21,6 +21,9 @@ extends CanvasLayer
 
 # Bottom left - debug stats
 @onready var debug_container: VBoxContainer = $BottomLeftDebug
+var enemies_label: Label = null
+var xp_shards_label: Label = null
+var projectiles_label: Label = null
 var nodes_label: Label = null
 var draw_calls_label: Label = null
 
@@ -230,6 +233,9 @@ func _apply_synthwave_theme() -> void:
 
 ## Create debug stat labels programmatically in the bottom-left VBoxContainer.
 func _build_debug_labels() -> void:
+	enemies_label = _make_debug_label("ENEMIES: 0")
+	xp_shards_label = _make_debug_label("XP SHARDS: 0")
+	projectiles_label = _make_debug_label("PROJECTILES: 0")
 	xp_label = _make_debug_label("XP: 0 / 7")
 	nodes_label = _make_debug_label("NODES: 0")
 	draw_calls_label = _make_debug_label("DRAW: 0")
@@ -346,6 +352,12 @@ void fragment() {
 func _process(_delta: float) -> void:
 	# Update debug stats (only when visible)
 	if debug_container.visible:
+		if enemies_label:
+			enemies_label.text = "ENEMIES: %d" % FrameCache.enemies.size()
+		if xp_shards_label:
+			xp_shards_label.text = "XP SHARDS: %d" % get_tree().get_nodes_in_group("xp_pickups").size()
+		if projectiles_label:
+			projectiles_label.text = "PROJECTILES: %d" % get_tree().get_nodes_in_group("projectiles").size()
 		if nodes_label:
 			nodes_label.text = "NODES: %d" % int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT))
 		if draw_calls_label:
