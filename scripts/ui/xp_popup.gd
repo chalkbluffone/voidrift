@@ -2,7 +2,7 @@ class_name XpPopup
 extends RichTextLabel
 
 ## Persistent accumulated XP counter that follows the player ship.
-## Increments on each XP pickup and fades out after an idle timeout.
+## Lives in screen space (HUD CanvasLayer). Position is set externally by HUD.
 
 const XP_POPUP_FONT: Font = preload("res://assets/fonts/Orbitron-Bold.ttf")
 
@@ -26,7 +26,6 @@ func _ready() -> void:
 	add_theme_constant_override("outline_size", GameConfig.XP_POPUP_OUTLINE_SIZE)
 	add_theme_color_override("font_outline_color", Color.BLACK)
 	self_modulate = GameConfig.XP_POPUP_COLOR
-	z_index = 98
 	visible = false
 	set_process(false)
 
@@ -56,9 +55,10 @@ func add_xp(amount: float) -> void:
 	_play_punch()
 
 
-## Update the popup's world position to follow the player.
-func update_position(player_pos: Vector2) -> void:
-	global_position = player_pos + _offset
+## Position the popup at a fixed offset from screen center.
+func update_screen_position() -> void:
+	var screen_center: Vector2 = get_viewport_rect().size * 0.5
+	position = (screen_center + _offset).round()
 
 
 func _process(delta: float) -> void:
@@ -83,7 +83,6 @@ func _play_punch() -> void:
 
 func _start_fade() -> void:
 	_is_active = false
-	set_process(false)
 	_fade_tween = create_tween()
 	_fade_tween.tween_property(self, "modulate:a", 0.0, GameConfig.XP_POPUP_FADE_DURATION) \
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
@@ -92,6 +91,7 @@ func _start_fade() -> void:
 
 func _on_fade_complete() -> void:
 	visible = false
+	set_process(false)
 	_accumulated_xp = 0.0
 	scale = Vector2.ONE
 	text = ""

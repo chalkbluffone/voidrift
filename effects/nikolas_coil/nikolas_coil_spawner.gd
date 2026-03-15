@@ -21,10 +21,12 @@ func spawn(
 	## first enemy. Returns the first coil instance (or null if no enemies in range).
 
 	var search_radius: float = float(params.get("search_radius", 300.0))
+	var size_mult: float = float(params.get("size_mult", 1.0))
+	var effective_radius: float = search_radius * size_mult
 	var proj_count: int = maxi(1, int(params.get("projectile_count", 1)))
 
 	# Find sorted targets up-front so each coil can claim a different first enemy
-	var sorted_targets: Array[Node2D] = EffectUtils.find_enemies_in_range(_parent_node.get_tree(), spawn_pos, search_radius)
+	var sorted_targets: Array[Node2D] = EffectUtils.find_enemies_in_range(_parent_node.get_tree(), spawn_pos, effective_radius)
 	if sorted_targets.is_empty():
 		return null
 

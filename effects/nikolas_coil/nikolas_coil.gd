@@ -16,6 +16,7 @@ class_name NikolasCoil
 # Shape
 @export var arc_width: float = 8.0        # Base width of each bolt segment in pixels
 @export var search_radius: float = 300.0  # Max range to find first target AND chain hops
+@export var size_mult: float = 1.0        # Combined player size × weapon size multiplier (scales reach)
 
 # Motion / Timing
 @export var cascade_delay: float = 0.08   # Seconds between each chain hop reveal
@@ -150,8 +151,9 @@ func fire_from(origin_pos: Vector2) -> NikolasCoil:
 	_shader_res = load("res://effects/nikolas_coil/nikolas_coil.gdshader")
 	_white_tex = EffectUtils.get_white_pixel_texture()
 
-	# Find chain targets
-	_chain_targets = _find_chain_targets(_origin, _max_bounces, search_radius)
+	# Find chain targets (search_radius scaled by player + weapon size)
+	var effective_radius: float = search_radius * size_mult
+	_chain_targets = _find_chain_targets(_origin, _max_bounces, effective_radius)
 
 	if _chain_targets.is_empty():
 		_is_active = false

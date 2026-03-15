@@ -128,7 +128,8 @@ func _setup_focus_navigation() -> void:
 		card.focus_neighbor_right = card.get_path()
 
 	_cards[_cards.size() - 1].focus_neighbor_bottom = ignore_button.get_path()
-	ignore_button.focus_neighbor_top = _cards[0].get_path()
+	ignore_button.focus_neighbor_top = _cards[_cards.size() - 1].get_path()
+	ignore_button.focus_neighbor_bottom = _cards[0].get_path()
 	ignore_button.focus_neighbor_left = ignore_button.get_path()
 	ignore_button.focus_neighbor_right = ignore_button.get_path()
 
@@ -143,6 +144,15 @@ func _style_card(card: PanelContainer) -> void:
 	card.add_theme_stylebox_override("panel", style)
 	card.focus_mode = Control.FOCUS_ALL
 	card.custom_minimum_size = Vector2(500, 80)
+
+	# Hover overlay (required for setup_card_focus scale+glow tween)
+	CARD_HOVER_FX_SCRIPT.ensure_hover_overlay(
+		card,
+		CARD_HOVER_SHADER,
+		UiColors.PARTICLE_PINK,
+		UiColors.PARTICLE_CYAN,
+		UiColors.CLICK_FLASH
+	)
 
 
 func _on_buff_triggered(options: Array) -> void:
@@ -217,9 +227,11 @@ func _show_popup() -> void:
 		_stats_panel.refresh()
 		_stats_panel.visible = true
 	
-	# Focus first card
-	if _cards.size() > 0 and _cards[0].visible:
-		_cards[0].grab_focus()
+	# Focus the first visible card for controller navigation
+	for card: PanelContainer in _cards:
+		if card.visible:
+			card.call_deferred("grab_focus")
+			break
 
 
 func _hide_popup() -> void:
@@ -235,6 +247,10 @@ func _on_card_input(event: InputEvent, index: int) -> void:
 		var mb: InputEventMouseButton = event as InputEventMouseButton
 		if mb.button_index == MOUSE_BUTTON_LEFT and mb.pressed:
 			_select_option(index)
+	elif event.is_action_pressed("ui_accept"):
+		if event is InputEventKey and (event as InputEventKey).keycode == KEY_SPACE:
+			return
+		_select_option(index)
 
 
 func _on_card_mouse_entered(index: int) -> void:
@@ -283,27 +299,22 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventKey and (event as InputEventKey).keycode == KEY_SPACE:
 		get_viewport().set_input_as_handled()
 		return
-	
-	# Handle confirm on focused card/button (controller + keyboard)
-	if event.is_action_pressed("ui_accept"):
-		if ignore_button.has_focus():
-			_on_ignore_pressed()
-			get_viewport().set_input_as_handled()
-			return
-		for i: int in range(_cards.size()):
-			if _cards[i].has_focus():
-				_select_option(i)
-				get_viewport().set_input_as_handled()
-				return
 
-		# Safety fallback: if no card is focused, focus the first visible card.
-		for card: PanelContainer in _cards:
-			if card.visible:
-				card.grab_focus()
-				break
-		get_viewport().set_input_as_handled()
-		return
-	
+	# Keyboard shortcuts for card selection (1–3)
+	if event is InputEventKey and event.pressed:
+		match (event as InputEventKey).keycode:
+			KEY_1:
+				if _current_options.size() > 0:
+					_select_option(0)
+			KEY_2:
+				if _current_options.size() > 1:
+					_select_option(1)
+			KEY_3:
+				if _current_options.size() > 2:
+					_select_option(2)
+
+	# ui_accept on focused card/button is handled by gui_input / native Button
+
 	# Handle cancel to ignore
 	if event.is_action_pressed("ui_cancel"):
 		_on_ignore_pressed()

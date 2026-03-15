@@ -444,9 +444,9 @@ func _joypad_button_name(index: int) -> String:
 func _joypad_axis_name(axis: int, value: float) -> String:
 	match axis:
 		JOY_AXIS_TRIGGER_LEFT:
-			return "LT"
+			return "Left Trigger"
 		JOY_AXIS_TRIGGER_RIGHT:
-			return "RT"
+			return "Right Trigger"
 		JOY_AXIS_LEFT_X:
 			return "LS←" if value < 0 else "LS→"
 		JOY_AXIS_LEFT_Y:

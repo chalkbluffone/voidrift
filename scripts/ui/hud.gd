@@ -380,9 +380,9 @@ func _process(_delta: float) -> void:
 		var max_shield: float = _player.stats.get_stat("shield")
 		_update_shield(current_shield, max_shield)
 
-	# Keep XP popup following the player
-	if _player and _xp_popup and is_instance_valid(_xp_popup) and _xp_popup.visible:
-		_xp_popup.update_position(_player.global_position)
+	# Keep XP popup pinned near screen center
+	if _xp_popup and is_instance_valid(_xp_popup) and _xp_popup.visible:
+		_xp_popup.update_screen_position()
 
 
 func _find_player() -> void:
@@ -703,7 +703,7 @@ func _on_xp_gained(actual_amount: float, _player_position: Vector2) -> void:
 	# Lazy-init the single XP popup instance
 	if _xp_popup == null or not is_instance_valid(_xp_popup):
 		_xp_popup = XP_POPUP_SCENE.instantiate() as XpPopup
-		get_tree().current_scene.add_child(_xp_popup)
+		self.add_child(_xp_popup)
 
 	_xp_popup.add_xp(actual_amount)
 
