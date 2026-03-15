@@ -30,7 +30,6 @@ func _ready() -> void:
 	# Register known pool caps from GameConfig
 	_caps["projectile"] = GameConfig.POOL_MAX_DORMANT_PROJECTILES
 	_caps["damage_number"] = GameConfig.POOL_MAX_DORMANT_DAMAGE_NUMBERS
-	_caps["xp_popup"] = GameConfig.POOL_MAX_DORMANT_XP_POPUPS
 	_caps["tothian_mine"] = GameConfig.POOL_MAX_DORMANT_EFFECTS
 	_caps["space_nuke"] = GameConfig.POOL_MAX_DORMANT_EFFECTS
 

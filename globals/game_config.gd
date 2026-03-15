@@ -265,12 +265,13 @@ const DAMAGE_NUMBER_OUTLINE_SIZE: int = 3           # Dark outline thickness for
 # XP POPUP NUMBERS
 # =============================================================================
 const XP_POPUP_FONT_SIZE: int = 14                  # Font size for XP gain popup
-const XP_POPUP_DURATION: float = 0.6                # Lifetime in seconds
-const XP_POPUP_RISE_DISTANCE: float = 25.0          # Pixels the popup floats upward
-const XP_POPUP_RADIUS: float = 30.0                 # Distance from ship center (pixels)
-const XP_POPUP_ANGLE_DEG: float = 210.0             # Angle around ship in degrees (0=right, 90=down, 210=10 o'clock)
+const XP_POPUP_RADIUS: float = 95.0                 # Distance from ship center (pixels)
+const XP_POPUP_ANGLE_DEG: float = 230.0             # Angle around ship in degrees (0=right, 90=down, 210=10 o'clock)
 const XP_POPUP_OUTLINE_SIZE: int = 2                # Outline for readability
-const XP_POPUP_COLOR: Color = Color(0.4, 1.0, 0.5, 1.0)  # Soft green
+const XP_POPUP_COLOR: Color = Color(0.2, 0.5, 1.0, 1.0)  # Synthwave rare blue
+const XP_POPUP_IDLE_TIMEOUT: float = 1.0            # Seconds of no XP before fade-out
+const XP_POPUP_FADE_DURATION: float = 0.3           # Fade-out animation duration
+const XP_POPUP_PUNCH_SCALE: float = 1.3             # Scale punch factor on increment
 
 # =============================================================================
 # BONUS XP ORBS
@@ -544,7 +545,6 @@ const STATION_FLAT_STATS: Array[String] = [
 # =============================================================================
 const POOL_MAX_DORMANT_PROJECTILES: int = 256    # Max dormant base projectiles in pool
 const POOL_MAX_DORMANT_DAMAGE_NUMBERS: int = 64  # Max dormant damage number labels in pool
-const POOL_MAX_DORMANT_XP_POPUPS: int = 32       # Max dormant XP popup labels in pool
 const POOL_MAX_DORMANT_EFFECTS: int = 32         # Max dormant per-effect pool (mines, nukes)
 
 # =============================================================================

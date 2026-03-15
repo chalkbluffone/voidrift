@@ -373,8 +373,8 @@ func _normalize_effect(effect: Dictionary) -> Dictionary:
 			"kind": kind,
 			"amount": amount_raw,
 		}
-	var amount_raw: float = float(effect.get("amount", effect.get("per_level", 0.0)))
-	return _normalize_stat_per_level(stat_name, amount_raw)
+	var fallback_raw: float = float(effect.get("amount", effect.get("per_level", 0.0)))
+	return _normalize_stat_per_level(stat_name, fallback_raw)
 
 
 func _normalize_stat_per_level(stat_name: String, per_level_raw: float) -> Dictionary:

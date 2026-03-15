@@ -1,76 +1,97 @@
 class_name XpPopup
 extends RichTextLabel
 
-## Floating "+X.X XP" popup that appears near the player ship when XP is collected.
-## Positioned at a configurable angle and radius from the ship center.
-## Uses object pooling via ObjectPool.
+## Persistent accumulated XP counter that follows the player ship.
+## Increments on each XP pickup and fades out after an idle timeout.
 
 const XP_POPUP_FONT: Font = preload("res://assets/fonts/Orbitron-Bold.ttf")
 
+var _accumulated_xp: float = 0.0
+var _idle_timer: float = 0.0
+var _is_active: bool = false
+var _fade_tween: Tween = null
+var _punch_tween: Tween = null
+var _offset: Vector2 = Vector2.ZERO
+
 
 func _ready() -> void:
-	add_to_group("damage_numbers")
-
-
-func reset() -> void:
-	modulate = Color.WHITE
-	modulate.a = 1.0
-	self_modulate = Color.WHITE
-	scale = Vector2.ONE
-	text = ""
-	visible = true
-	bbcode_enabled = true
-	if not is_in_group("damage_numbers"):
-		add_to_group("damage_numbers")
-
-
-func setup(amount: float, player_pos: Vector2) -> void:
-	## Position at the configured angle and radius from the player.
 	var angle_rad: float = deg_to_rad(GameConfig.XP_POPUP_ANGLE_DEG)
-	var offset: Vector2 = Vector2(cos(angle_rad), sin(angle_rad)) * GameConfig.XP_POPUP_RADIUS
-	global_position = player_pos + offset
+	_offset = Vector2(cos(angle_rad), sin(angle_rad)) * GameConfig.XP_POPUP_RADIUS
 
-	# Font styling
+	# Font styling (applied once)
 	add_theme_font_override("bold_font", XP_POPUP_FONT)
 	add_theme_font_override("normal_font", XP_POPUP_FONT)
 	add_theme_font_size_override("bold_font_size", GameConfig.XP_POPUP_FONT_SIZE)
 	add_theme_font_size_override("normal_font_size", GameConfig.XP_POPUP_FONT_SIZE)
 	add_theme_constant_override("outline_size", GameConfig.XP_POPUP_OUTLINE_SIZE)
 	add_theme_color_override("font_outline_color", Color.BLACK)
-
 	self_modulate = GameConfig.XP_POPUP_COLOR
-	z_index = 98  # Below damage numbers
-
-	# Format: "+1.2 XP" or "+1 XP" for whole numbers
-	var display: String = ""
-	if absf(amount - roundf(amount)) < 0.01:
-		display = "+%d XP" % int(amount)
-	else:
-		display = "+%.1f XP" % amount
-	text = "[b]" + display + "[/b]"
-
-	_animate()
+	z_index = 98
+	visible = false
+	set_process(false)
 
 
-func _animate() -> void:
-	var duration: float = GameConfig.XP_POPUP_DURATION
-	var rise: float = GameConfig.XP_POPUP_RISE_DISTANCE
+## Add XP to the accumulated counter. Resets idle timer and shows the label.
+func add_xp(amount: float) -> void:
+	_accumulated_xp += amount
+	_idle_timer = GameConfig.XP_POPUP_IDLE_TIMEOUT
 
-	var tween: Tween = create_tween()
-	tween.set_parallel(true)
-	tween.tween_property(self, "position:y", position.y - rise, duration) \
-		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	tween.tween_property(self, "modulate:a", 0.0, duration * 0.5) \
-		.set_delay(duration * 0.5)
-	tween.set_parallel(false)
-	tween.tween_callback(_return_to_pool)
+	var display_value: int = maxi(int(_accumulated_xp), 1)
+
+	# Cancel any ongoing fade
+	if _fade_tween and _fade_tween.is_valid():
+		_fade_tween.kill()
+		_fade_tween = null
+
+	# Show and reset opacity
+	modulate.a = 1.0
+	visible = true
+	_is_active = true
+	set_process(true)
+
+	# Update text
+	text = "[b]+%d[/b]" % display_value
+
+	# Scale punch animation
+	_play_punch()
 
 
-func _return_to_pool() -> void:
-	if is_in_group("damage_numbers"):
-		remove_from_group("damage_numbers")
-	var pool: Node = get_node_or_null("/root/ObjectPool")
-	if pool:
-		pool.release("xp_popup", self)
-	else:
-		queue_free()
+## Update the popup's world position to follow the player.
+func update_position(player_pos: Vector2) -> void:
+	global_position = player_pos + _offset
+
+
+func _process(delta: float) -> void:
+	if not _is_active:
+		return
+	_idle_timer -= delta
+	if _idle_timer <= 0.0:
+		_start_fade()
+
+
+func _play_punch() -> void:
+	if _punch_tween and _punch_tween.is_valid():
+		_punch_tween.kill()
+	scale = Vector2.ONE
+	_punch_tween = create_tween()
+	var punch: float = GameConfig.XP_POPUP_PUNCH_SCALE
+	_punch_tween.tween_property(self, "scale", Vector2(punch, punch), 0.06) \
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_punch_tween.tween_property(self, "scale", Vector2.ONE, 0.1) \
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+
+
+func _start_fade() -> void:
+	_is_active = false
+	set_process(false)
+	_fade_tween = create_tween()
+	_fade_tween.tween_property(self, "modulate:a", 0.0, GameConfig.XP_POPUP_FADE_DURATION) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	_fade_tween.tween_callback(_on_fade_complete)
+
+
+func _on_fade_complete() -> void:
+	visible = false
+	_accumulated_xp = 0.0
+	scale = Vector2.ONE
+	text = ""

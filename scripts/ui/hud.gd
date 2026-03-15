@@ -80,6 +80,7 @@ var _swarm_warning_label: Label = null
 var _minimap: Control = null
 var _full_map_overlay: Control = null
 var _map_stats_panel: PanelContainer = null
+var _xp_popup: XpPopup = null
 
 
 func _ready() -> void:
@@ -378,6 +379,10 @@ func _process(_delta: float) -> void:
 		var current_shield: float = _player.stats.current_shield
 		var max_shield: float = _player.stats.get_stat("shield")
 		_update_shield(current_shield, max_shield)
+
+	# Keep XP popup following the player
+	if _player and _xp_popup and is_instance_valid(_xp_popup) and _xp_popup.visible:
+		_xp_popup.update_position(_player.global_position)
 
 
 func _find_player() -> void:
@@ -688,20 +693,19 @@ func _on_xp_changed(current: float, required: float, level: int) -> void:
 	_update_level(level)
 
 
-func _on_xp_gained(actual_amount: float, player_position: Vector2) -> void:
-	## Spawn a floating "+X XP" popup near the player ship.
+func _on_xp_gained(actual_amount: float, _player_position: Vector2) -> void:
+	## Accumulate XP into a single persistent popup near the player ship.
 	@warning_ignore("unsafe_property_access")
 	var show_numbers: bool = get_node("/root/PersistenceManager").persistent_data.settings.get("show_damage_numbers", true)
 	if not show_numbers:
 		return
 
-	var existing: Array[Node] = FrameCache.damage_numbers
-	if existing.size() >= GameConfig.DAMAGE_NUMBER_MAX_COUNT:
-		return
+	# Lazy-init the single XP popup instance
+	if _xp_popup == null or not is_instance_valid(_xp_popup):
+		_xp_popup = XP_POPUP_SCENE.instantiate() as XpPopup
+		get_tree().current_scene.add_child(_xp_popup)
 
-	var popup: XpPopup = ObjectPool.acquire("xp_popup", XP_POPUP_SCENE) as XpPopup
-	get_tree().current_scene.add_child(popup)
-	popup.setup(actual_amount, player_position)
+	_xp_popup.add_xp(actual_amount)
 
 
 func _on_credits_changed(amount: int) -> void:
