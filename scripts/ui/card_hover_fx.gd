@@ -14,6 +14,7 @@ static func ensure_hover_overlay(
 ) -> void:
 	if not card.has_meta(HOVER_META_KEY):
 		var hover_rect: ColorRect = ColorRect.new()
+		hover_rect.color = Color(0, 0, 0, 0)
 		hover_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		hover_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		var hover_mat: ShaderMaterial = ShaderMaterial.new()

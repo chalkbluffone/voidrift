@@ -179,10 +179,7 @@ func _build_ship_card(data: Dictionary) -> PanelContainer:
 		+ "}\n" \
 		+ "\n" \
 		+ "void fragment() {\n" \
-		+ "    float s1 = star_layer(UV, layer_scale, scroll_speed, 0.0);\n" \
-		+ "    float s2 = star_layer(UV, layer_scale * 0.6, scroll_speed * 0.5, 42.0) * 0.5;\n" \
-		+ "    float s3 = star_layer(UV, layer_scale * 1.4, scroll_speed * 1.5, 99.0) * 0.7;\n" \
-		+ "    float stars = s1 + s2 + s3;\n" \
+		+ "    float stars = star_layer(UV, layer_scale, scroll_speed, 0.0);\n" \
 		+ "    vec3 col = bg_color + vec3(0.8, 0.85, 1.0) * stars;\n" \
 		+ "    COLOR = vec4(col, 1.0);\n" \
 		+ "}\n"

@@ -18,6 +18,12 @@ float rounded_rect_mask(vec2 uv, float radius) {
 }
 
 void fragment() {
+    // Skip all computation when nothing is visible
+    if (hover_strength <= 0.001 && click_strength <= 0.001) {
+        COLOR = vec4(0.0);
+        return;
+    }
+
     float body_mask = rounded_rect_mask(UV, corner_radius);
 
     float left = smoothstep(0.0, edge_thickness, UV.x);

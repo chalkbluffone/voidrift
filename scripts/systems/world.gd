@@ -7,6 +7,7 @@ const ArenaBoundaryScene: PackedScene = preload("res://scenes/gameplay/arena_bou
 
 @onready var _settings: Node = get_node("/root/SettingsManager")
 var _stars_near_layer: Node = null
+var _starfield: Node2D = null
 var _arena_boundary: Node2D = null
 var _asteroid_spawner: AsteroidSpawner = null
 var _station_spawner: StationSpawner = null
@@ -19,6 +20,9 @@ func _enter_tree() -> void:
 func _ready() -> void:
 	_set_star_seed(stars_far_rect_path, "stars_far")
 	_set_star_seed(stars_near_rect_path, "stars_near")
+
+	# Cache the Starfield parent node for pause-time hiding
+	_starfield = get_node_or_null("Starfield") as Node2D
 
 	# Cache the StarsNear Parallax2D parent for quality toggling
 	var near_rect: ColorRect = get_node_or_null(stars_near_rect_path) as ColorRect
@@ -52,6 +56,17 @@ func _ready() -> void:
 		RunManager.current_state = RunManager.GameState.PLAYING
 		RunManager.run_data.time_elapsed = 0.0
 		RunManager.run_data.time_remaining = RunManager.run_duration
+
+
+## Hide expensive starfield shaders when game is paused (level-up, station buff, pause menu).
+## Rendering continues during pause — hiding avoids GPU waste behind opaque overlays.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PAUSED:
+		if _starfield:
+			_starfield.visible = false
+	elif what == NOTIFICATION_UNPAUSED:
+		if _starfield:
+			_starfield.visible = true
 
 
 ## Setup the arena boundary (radiation belt).
