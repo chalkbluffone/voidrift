@@ -86,9 +86,13 @@ func _process(delta: float) -> void:
 	
 	_spawn_timer -= delta
 	if _spawn_timer <= 0:
-		var batch_size: int = _get_batch_size()
-		for i: int in range(batch_size):
-			_spawn_enemy()
+		var alive_count: int = get_tree().get_nodes_in_group("enemies").size()
+		if alive_count < GameConfig.MAX_ENEMY_COUNT:
+			var batch_size: int = _get_batch_size()
+			var room: int = GameConfig.MAX_ENEMY_COUNT - alive_count
+			var to_spawn: int = mini(batch_size, room)
+			for i: int in range(to_spawn):
+				_spawn_enemy()
 		_spawn_timer = _get_spawn_interval()
 
 	# Periodic XP merge pass (performance: reduces late-game pickup count)
@@ -369,8 +373,13 @@ func _on_enemy_died(enemy: Node, death_position: Vector2) -> void:
 		elif drop_type == "credits" and enemy.get_credit_value() > 0:
 			_spawn_burst_credits(death_position, enemy.get_credit_value(), burst_count)
 	else:
-		# Normal enemy drops: XP + guaranteed 1 credit
-		_spawn_xp(death_position, enemy.get_xp_value())
+		# Normal/Elite enemy drops
+		var is_elite: bool = enemy.enemy_type == "elite"
+		if is_elite:
+			# Elite burst: scatter multiple XP orbs for visual feedback
+			_spawn_burst_xp(death_position, enemy.get_xp_value(), GameConfig.ELITE_XP_BURST_COUNT)
+		else:
+			_spawn_xp(death_position, enemy.get_xp_value())
 		_spawn_credits(death_position, enemy.get_credit_value())
 
 	# Stardust drops (chance-based for normal enemies, guaranteed for enemies with stardust_value > 0)
@@ -600,8 +609,19 @@ func _end_swarm() -> void:
 ## Roll to determine if the next enemy should be an elite.
 func _roll_for_elite() -> bool:
 	var base_chance: float = GameConfig.ELITE_BASE_CHANCE
+	var time_minutes: float = RunManager.run_data.time_elapsed / 60.0
+
+	# Time-scaled elite chance: ramps from base to cap over the run
+	var time_chance: float = base_chance + (time_minutes * GameConfig.ELITE_CHANCE_GROWTH_PER_MINUTE)
+
+	# During overtime, spike to high elite chance
+	if RunManager.run_data.time_remaining < 0.0:
+		time_chance = maxf(time_chance, GameConfig.ELITE_OVERTIME_CHANCE)
+	else:
+		time_chance = minf(time_chance, GameConfig.ELITE_CHANCE_CAP)
+
 	var elite_mult: float = _get_player_elite_spawn_rate()
-	var final_chance: float = base_chance * elite_mult
+	var final_chance: float = time_chance * elite_mult
 	return _rng.randf() < final_chance
 
 

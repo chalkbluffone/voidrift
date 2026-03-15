@@ -37,16 +37,20 @@ const DIFFICULTY_SPAWN_WEIGHT: float = 0.4    # How much difficulty affects spaw
 
 # --- XP Drops (static, no scaling) ---
 const ENEMY_XP_NORMAL: float = 1.0   # XP dropped by normal enemies
-const ENEMY_XP_ELITE_MIN: float = 2.0 # Min XP dropped by elite enemies
-const ENEMY_XP_ELITE_MAX: float = 5.0 # Max XP dropped by elite enemies
+const ENEMY_XP_ELITE_MIN: float = 5.0 # Min XP dropped by elite enemies
+const ENEMY_XP_ELITE_MAX: float = 15.0 # Max XP dropped by elite enemies
+const ELITE_XP_BURST_COUNT: int = 5   # Number of XP orbs to scatter on elite death
 
 # --- Credit Drops ---
 const ENEMY_CREDITS_NORMAL: int = 1       # Credits dropped by normal enemies
-const ENEMY_CREDITS_ELITE_MIN: int = 2    # Min credits dropped by elite enemies
-const ENEMY_CREDITS_ELITE_MAX: int = 5    # Max credits dropped by elite enemies
+const ENEMY_CREDITS_ELITE_MIN: int = 5    # Min credits dropped by elite enemies
+const ENEMY_CREDITS_ELITE_MAX: int = 15   # Max credits dropped by elite enemies
 
 # --- Elite Enemies ---
 const ELITE_BASE_CHANCE: float = 0.05       # 5% base chance to spawn elite
+const ELITE_CHANCE_GROWTH_PER_MINUTE: float = 0.05 # Elite chance increases 5% per minute
+const ELITE_CHANCE_CAP: float = 0.50        # Max elite chance during normal play (50%)
+const ELITE_OVERTIME_CHANCE: float = 0.80   # Elite chance during overtime (80%)
 const ELITE_HP_MULT: float = 3.0            # Elite HP multiplier
 const ELITE_DAMAGE_MULT: float = 2.0        # Elite damage multiplier
 const ELITE_SIZE_SCALE: float = 1.3         # Elite visual scale
@@ -55,6 +59,7 @@ const ELITE_COLOR: Color = Color(1.0, 0.4, 0.2, 1.0)  # Orange tint for elites
 # =============================================================================
 # SPAWNING
 # =============================================================================
+const MAX_ENEMY_COUNT: int = 120      # Hard cap on alive enemies (performance)
 const SPAWN_RADIUS_MIN: float = 500.0
 const SPAWN_RADIUS_MAX: float = 750.0
 const BASE_SPAWN_RATE: float = 0.4  # Enemies per second at start (slow burn)
