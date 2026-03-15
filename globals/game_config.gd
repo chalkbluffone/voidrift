@@ -342,13 +342,14 @@ const MODULE_EFFECT_COUNT_BY_RARITY: Dictionary = {
 }
 
 # Modules: small secondary bonuses added on higher rarities.
+# Percentage-point stats use 0-1 format (0.02 = 2%) — converted at load boundary.
 const MODULE_EXTRA_EFFECT_POOL: Array[Dictionary] = [
 	{"stat": "max_hp", "kind": "flat", "amount": 5.0},
 	{"stat": "damage", "kind": "mult", "amount": 0.03},
 	{"stat": "attack_speed", "kind": "mult", "amount": 0.03},
 	{"stat": "movement_speed", "kind": "mult", "amount": 0.03},
 	{"stat": "pickup_range", "kind": "mult", "amount": 0.10},
-	{"stat": "crit_chance", "kind": "flat", "amount": 2.0},
+	{"stat": "crit_chance", "kind": "flat", "amount": 0.02},
 	{"stat": "duration", "kind": "mult", "amount": 0.03},
 	{"stat": "crit_damage", "kind": "mult", "amount": 0.05},
 ]
@@ -361,6 +362,41 @@ const WEAPON_EFFECT_COUNT_BY_RARITY: Dictionary = {
 	"epic": 2,
 	"legendary": 3,
 }
+
+# =============================================================================
+# STAT CLASSIFICATION (single source of truth for all consumers)
+# =============================================================================
+
+## Stats expressed as percentage points in the internal 0-100 system.
+## JSON data stores these in 0-1 format (0.05 = 5%); convert via json_pct_to_stat().
+const PERCENTAGE_POINT_STATS: Dictionary = {
+	"armor": true,
+	"evasion": true,
+	"crit_chance": true,
+	"luck": true,
+	"difficulty": true,
+	"lifesteal": true,
+}
+
+## Stats that are flat absolute additions (HP, shield, projectile count, etc.).
+const FLAT_ABSOLUTE_STATS: Dictionary = {
+	"max_hp": true,
+	"hp_regen": true,
+	"overheal": true,
+	"shield": true,
+	"hull_shock": true,
+	"projectile_count": true,
+	"projectile_bounces": true,
+	"extra_phase_shifts": true,
+	"phase_shift_distance": true,
+}
+
+## Convert a JSON 0-1 decimal value to the internal 0-100 stat scale
+## for percentage-point stats. Non-percentage stats pass through unchanged.
+static func json_pct_to_stat(stat_name: String, value: float) -> float:
+	if PERCENTAGE_POINT_STATS.has(stat_name):
+		return value * 100.0
+	return value
 
 # =============================================================================
 # WEAPON TIER UPGRADE SYSTEM (Megabonk hybrid model)

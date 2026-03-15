@@ -256,6 +256,11 @@ func _fire_projectile_via_spawner(weapon_id: String, data: Dictionary) -> void:
 	config["crit_chance"] = float(config.get("crit_chance", 0.0)) + _inventory.get_weapon_flat(weapon_id, StatsComponentScript.STAT_CRIT_CHANCE)
 	config["crit_damage"] = float(config.get("crit_damage", 0.0)) + _inventory.get_weapon_flat(weapon_id, StatsComponentScript.STAT_CRIT_DAMAGE)
 
+	# Inject effective cooldown so burst_managed spawners can space shots correctly.
+	var weapon_state_for_cd: Dictionary = _inventory.weapons.get(weapon_id, {})
+	if not weapon_state_for_cd.is_empty():
+		config["cooldown"] = _compute_next_shot_cooldown(weapon_id, weapon_state_for_cd)
+
 	var spawner: Object = _spawners.get_or_create_spawner(weapon_id, data, get_tree().current_scene)
 	if spawner == null:
 		return

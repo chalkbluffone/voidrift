@@ -255,11 +255,11 @@
 				"legendary": 0.6
 			},
 			"size": {
-				"common": 0.2,
-				"uncommon": 0.2,
-				"rare": 0.2,
-				"epic": 0.3,
-				"legendary": 0.3
+				"common": 0.03,
+				"uncommon": 0.11,
+				"rare": 0.21,
+				"epic": 0.37,
+				"legendary": 0.5
 			},
 			"crit_chance": {
 				"common": 0.08,

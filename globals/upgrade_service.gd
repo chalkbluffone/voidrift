@@ -3,29 +3,6 @@ extends Node
 ## UpgradeService - Handles upgrade/weapon selection, rarity rolling, and effect generation.
 ## Autoload singleton: UpgradeService
 
-# Stats that are expressed as percentage points (0..100), not multipliers.
-const PERCENT_POINT_STATS: Dictionary = {
-	"armor": true,
-	"evasion": true,
-	"crit_chance": true,
-	"luck": true,
-	"difficulty": true,
-	"lifesteal": true,
-}
-
-# Stats that should be treated as flat additions.
-const FLAT_STATS: Dictionary = {
-	"max_hp": true,
-	"hp_regen": true,
-	"overheal": true,
-	"shield": true,
-	"hull_shock": true,
-	"projectile_count": true,
-	"projectile_bounces": true,
-	"extra_phase_shifts": true,
-	"phase_shift_distance": true,
-}
-
 @onready var DataLoader: Node = get_node("/root/DataLoader")
 @onready var RunManager: Node = get_node("/root/RunManager")
 @onready var PersistenceManager: Node = get_node("/root/PersistenceManager")
@@ -289,7 +266,12 @@ func _build_upgrade_effects(upgrade_data: Dictionary, rarity: String, rng: Rando
 	while effects.size() < desired_count and pool.size() > 0:
 		var extra: Dictionary = pool.pop_back()
 		var extra_scaled: Dictionary = extra.duplicate(true)
-		extra_scaled["amount"] = float(extra_scaled.get("amount", 0.0)) * tier_mult
+		var extra_stat: String = String(extra_scaled.get("stat", ""))
+		var extra_kind: String = String(extra_scaled.get("kind", "mult"))
+		var extra_amount: float = float(extra_scaled.get("amount", 0.0))
+		if extra_kind == "flat" and GameConfig.PERCENTAGE_POINT_STATS.has(extra_stat):
+			extra_amount = GameConfig.json_pct_to_stat(extra_stat, extra_amount)
+		extra_scaled["amount"] = extra_amount * tier_mult
 		effects.append(extra_scaled)
 
 	return effects
@@ -351,6 +333,9 @@ func _build_weapon_effects(weapon_id: String, rarity: String, rng: RandomNumberG
 		var stat_tiers: Dictionary = tier_stats.get(stat_name_c, {})
 		var base_delta: float = float(stat_tiers.get(rarity, 0.0))
 
+		# Convert percentage-point stats from 0-1 JSON to 0-100 internal
+		base_delta = GameConfig.json_pct_to_stat(stat_name_c, base_delta)
+
 		# Apply rarity factor scaling
 		var scaled_delta: float = base_delta * rarity_factor
 
@@ -379,24 +364,26 @@ func _build_weapon_effects(weapon_id: String, rarity: String, rng: RandomNumberG
 func _normalize_effect(effect: Dictionary) -> Dictionary:
 	var stat_name: String = effect.get("stat", "")
 	if effect.has("kind"):
+		var amount_raw: float = float(effect.get("amount", 0.0))
+		var kind: String = String(effect.get("kind", "mult"))
+		if kind == "flat" and GameConfig.PERCENTAGE_POINT_STATS.has(stat_name):
+			amount_raw = GameConfig.json_pct_to_stat(stat_name, amount_raw)
 		return {
 			"stat": stat_name,
-			"kind": String(effect.get("kind", "mult")),
-			"amount": float(effect.get("amount", 0.0)),
+			"kind": kind,
+			"amount": amount_raw,
 		}
 	var amount_raw: float = float(effect.get("amount", effect.get("per_level", 0.0)))
 	return _normalize_stat_per_level(stat_name, amount_raw)
 
 
 func _normalize_stat_per_level(stat_name: String, per_level_raw: float) -> Dictionary:
-	if FLAT_STATS.has(stat_name):
+	if GameConfig.FLAT_ABSOLUTE_STATS.has(stat_name):
 		return {"stat": stat_name, "kind": "flat", "amount": per_level_raw}
-	if PERCENT_POINT_STATS.has(stat_name):
-		return {"stat": stat_name, "kind": "flat", "amount": per_level_raw}
-	var amount: float = per_level_raw
-	if absf(amount) >= 1.0:
-		amount = amount / 100.0
-	return {"stat": stat_name, "kind": "mult", "amount": amount}
+	if GameConfig.PERCENTAGE_POINT_STATS.has(stat_name):
+		return {"stat": stat_name, "kind": "flat", "amount": GameConfig.json_pct_to_stat(stat_name, per_level_raw)}
+	# Multiplier stat: value is already a 0-1 fraction in JSON.
+	return {"stat": stat_name, "kind": "mult", "amount": per_level_raw}
 
 
 ## Fisher-Yates shuffle using a seeded RNG for deterministic ordering.

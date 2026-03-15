@@ -488,7 +488,7 @@ func _format_weapon_effects_line(effects: Array) -> String:
 			if stat in ["armor", "evasion", "crit_chance", "luck", "difficulty"]:
 				parts.append("+%.1f%% %s" % [amount, _format_stat_name(stat)])
 			elif stat == "crit_damage":
-				parts.append("+%.2f %s" % [amount, _format_stat_name(stat)])
+				parts.append("+%.0f%% %s" % [amount * 100.0, _format_stat_name(stat)])
 			else:
 				parts.append("+%.0f %s" % [amount, _format_stat_name(stat)])
 

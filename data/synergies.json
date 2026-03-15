@@ -8,7 +8,7 @@
 		"description": "Nimble frame lets overdrive target weak points.",
 		"discovered_text": "Something clicks between the scout's agile frame and your combat instincts...",
 		"effects": {
-			"crit_chance": 3.0,
+			"crit_chance": 0.03,
 			"crit_damage": 0.05
 		}
 	},
@@ -19,7 +19,7 @@
 		"description": "Light hull makes the most of defensive reflexes.",
 		"discovered_text": "The scout weaves naturally around incoming fire under your careful hand...",
 		"effects": {
-			"evasion": 5.0
+			"evasion": 0.05
 		}
 	},
 	"starchaser+captain_zoltan": {
@@ -63,7 +63,7 @@
 		"discovered_text": "At interceptor speeds, your scanner array covers twice the ground...",
 		"effects": {
 			"xp_gain": 0.08,
-			"luck": 5.0
+			"luck": 0.05
 		}
 	},
 	"dreadnought+captain_nightmare": {
@@ -84,7 +84,7 @@
 		"description": "Maximum armor on maximum hull. Nothing gets through.",
 		"discovered_text": "The fortress becomes nearly indestructible under your defensive mastery...",
 		"effects": {
-			"armor": 8.0,
+			"armor": 0.08,
 			"hp_regen": 2.0
 		}
 	},
@@ -108,7 +108,7 @@
 		"discovered_text": "The Viper's guns sing under your reckless trigger discipline...",
 		"effects": {
 			"attack_speed": 0.08,
-			"crit_chance": 3.0
+			"crit_chance": 0.03
 		}
 	},
 	"viper+captain_finswick": {
@@ -118,7 +118,7 @@
 		"description": "Insurance-grade evasion in a frame that was never meant to survive.",
 		"discovered_text": "Finswick's risk assessment somehow keeps this fragile ship in one piece...",
 		"effects": {
-			"evasion": 8.0,
+			"evasion": 0.08,
 			"hp_regen": 3.0
 		}
 	},
@@ -130,7 +130,7 @@
 		"discovered_text": "At these speeds, Zoltan's tentacles scoop up every piece of debris in the sector...",
 		"effects": {
 			"pickup_range": 0.15,
-			"luck": 5.0
+			"luck": 0.05
 		}
 	},
 	"prometheus+captain_nightmare": {
@@ -152,7 +152,7 @@
 		"discovered_text": "Finswick files a satisfied smile alongside the Prometheus's third backup shield generator...",
 		"effects": {
 			"shield": 15.0,
-			"armor": 5.0
+			"armor": 0.05
 		}
 	},
 	"prometheus+captain_zoltan": {
@@ -175,7 +175,7 @@
 		"discovered_text": "SPECTRA sighs: 'Finally, a ship that can keep up with my targeting solutions. Barely.'",
 		"effects": {
 			"attack_speed": 0.06,
-			"evasion": 4.0
+			"evasion": 0.04
 		}
 	},
 	"phantom+captain_spectra": {
@@ -185,7 +185,7 @@
 		"description": "AI-optimized blink timing turns every teleport exit into a kill window.",
 		"discovered_text": "SPECTRA quips: 'Blink in, delete everything, blink out. I've automated your entire personality.'",
 		"effects": {
-			"crit_chance": 4.0,
+			"crit_chance": 0.04,
 			"attack_speed": 0.05
 		}
 	},

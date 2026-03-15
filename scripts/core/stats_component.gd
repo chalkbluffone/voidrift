@@ -145,7 +145,7 @@ func _ready() -> void:
 		var json_stats: Dictionary = DataLoader.get_base_player_stats()
 		for stat_name in json_stats:
 			if base_stats.has(stat_name):
-				base_stats[stat_name] = float(json_stats[stat_name])
+				base_stats[stat_name] = GameConfig.json_pct_to_stat(stat_name, float(json_stats[stat_name]))
 	
 	_recalculate_all()
 	current_hp = get_stat(STAT_MAX_HP)
@@ -192,37 +192,19 @@ func apply_level_up_upgrade(option: Dictionary) -> void:
 
 
 func _apply_effect(stat_name: String, per_level_raw: float) -> void:
-	# Some data are stored as percent points (e.g. 15 means 15%), while others are flat.
-	var flat_stats: Dictionary = {
-		STAT_MAX_HP: true,
-		STAT_HP_REGEN: true,
-		STAT_OVERHEAL: true,
-		STAT_SHIELD: true,
-		STAT_HULL_SHOCK: true,
-		STAT_PROJECTILE_COUNT: true,
-		STAT_PROJECTILE_BOUNCES: true,
-		STAT_EXTRA_PHASE_SHIFTS: true,
-		STAT_PHASE_SHIFT_DISTANCE: true,
-	}
-	var percent_point_stats: Dictionary = {
-		STAT_ARMOR: true,
-		STAT_EVASION: true,
-		STAT_CRIT_CHANCE: true,
-		STAT_LUCK: true,
-		STAT_DIFFICULTY: true,
-		STAT_LIFESTEAL: true,
-	}
-
-	if flat_stats.has(stat_name) or percent_point_stats.has(stat_name):
+	if GameConfig.FLAT_ABSOLUTE_STATS.has(stat_name):
 		add_flat_bonus(stat_name, per_level_raw)
 		_apply_post_gain(stat_name, per_level_raw)
 		return
 
-	# Multiplier stat: store as fraction. If the data looks like percent points, convert.
-	var amount: float = per_level_raw
-	if absf(amount) >= 1.0:
-		amount = amount / 100.0
-	add_multiplier_bonus(stat_name, amount)
+	if GameConfig.PERCENTAGE_POINT_STATS.has(stat_name):
+		var converted: float = GameConfig.json_pct_to_stat(stat_name, per_level_raw)
+		add_flat_bonus(stat_name, converted)
+		_apply_post_gain(stat_name, converted)
+		return
+
+	# Multiplier stat: value is already a 0-1 fraction in JSON.
+	add_multiplier_bonus(stat_name, per_level_raw)
 
 
 func _apply_post_gain(stat_name: String, flat_amount: float) -> void:
@@ -247,18 +229,18 @@ func initialize_from_loadout(ship_data: Dictionary, captain_data: Dictionary, sy
 	var ship_base_stats: Dictionary = ship_data.get("base_stats", {})
 	for stat_name in ship_base_stats:
 		if base_stats.has(stat_name):
-			base_stats[stat_name] = float(ship_base_stats[stat_name])
+			base_stats[stat_name] = GameConfig.json_pct_to_stat(stat_name, float(ship_base_stats[stat_name]))
 	
 	# Layer 2: Captain passive effects (flat bonuses)
 	var passive: Dictionary = captain_data.get("passive", {})
 	var passive_effects: Dictionary = passive.get("effects", {})
 	for stat_name in passive_effects:
-		add_flat_bonus(stat_name, float(passive_effects[stat_name]))
+		add_flat_bonus(stat_name, GameConfig.json_pct_to_stat(stat_name, float(passive_effects[stat_name])))
 	
 	# Layer 3: Synergy effects (flat bonuses, small nudges)
 	var synergy_effects: Dictionary = synergy_data.get("effects", {})
 	for stat_name in synergy_effects:
-		add_flat_bonus(stat_name, float(synergy_effects[stat_name]))
+		add_flat_bonus(stat_name, GameConfig.json_pct_to_stat(stat_name, float(synergy_effects[stat_name])))
 	
 	_recalculate_all()
 	current_hp = get_stat(STAT_MAX_HP)

@@ -446,6 +446,7 @@
 		}
 	},
 	"straight_line_negotiator": {
+		"burst_managed": true,
 		"description": "Fires a magnet-accelerated spike that travels in a perfectly straight line and pierces through multiple enemies. Definitely not a space sniper rifle. Honest.",
 		"display_name": "Straight-Line Negotiator",
 		"enabled": true,
@@ -460,11 +461,11 @@
 		"stats": {
 			"cooldown": 1.0,
 			"damage": 15.0,
-			"lifetime": 1.1,
+			"lifetime": 1.4,
 			"piercing": 3.0,
 			"projectile_count": 1.0,
 			"projectile_speed": 500.0,
-			"size": 200.0
+			"size": 300.0
 		},
 		"targeting": "nearest",
 		"type": "projectile",

@@ -73,7 +73,8 @@ func _process(_delta: float) -> void:
 	if not is_instance_valid(_projectile):
 		queue_free()
 		return
-	if size > 0.0 and _projectile.global_position.distance_to(_spawn_pos) >= size:
+	var effective_range: float = size * size_mult
+	if effective_range > 0.0 and _projectile.global_position.distance_to(_spawn_pos) >= effective_range:
 		ObjectPool.release("projectile", _projectile)
 		_projectile = null
 		queue_free()

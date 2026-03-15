@@ -39,7 +39,7 @@
 			"name": "Hardened Hull",
 			"description": "+10 armor, +20 shield",
 			"effects": {
-				"armor": 10.0,
+				"armor": 0.1,
 				"shield": 20.0
 			}
 		},
