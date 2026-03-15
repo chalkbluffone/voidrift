@@ -1,7 +1,7 @@
 ﻿{
-    "version":  "0.1.2",
+    "version":  "0.1.3",
     "summary":  "Playtest build",
-    "last_deployed_commit":  "be21d95344746653d9dabb9d9b2dc96dc32b413a",
-    "last_build_id":  "22339509",
-    "last_deploy_time":  "2026-03-13 22:22"
+    "last_deployed_commit":  "b7ccc3a00c9af2a7620b15cd2f3227e36428abea",
+    "last_build_id":  "22354359",
+    "last_deploy_time":  "2026-03-15 18:22"
 }
