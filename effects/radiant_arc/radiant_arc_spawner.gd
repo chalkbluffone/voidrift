@@ -2,9 +2,6 @@ class_name RadiantArcSpawner
 
 const RADIANT_ARC_SCENE: PackedScene = preload("res://effects/radiant_arc/RadiantArc.tscn")
 
-## Angular spread between extra arcs (degrees).
-const ARC_SPREAD_DEG: float = 25.0
-
 var _parent_node: Node
 
 
@@ -73,11 +70,12 @@ func _spawn_single(
 	direction: Vector2,
 	follow_source: Node2D
 ) -> RadiantArc:
+	var spread_deg: float = GameConfig.RADIANT_ARC_SPREAD_DEG
 	var angle_offset: float = 0.0
 	if count > 1:
 		angle_offset = deg_to_rad(lerpf(
-			-ARC_SPREAD_DEG * float(count - 1) / 2.0,
-			ARC_SPREAD_DEG * float(count - 1) / 2.0,
+			-spread_deg * float(count - 1) / 2.0,
+			spread_deg * float(count - 1) / 2.0,
 			float(index) / float(count - 1)
 		))
 
@@ -87,10 +85,20 @@ func _spawn_single(
 	arc.z_index = -1
 	_parent_node.add_child(arc)
 
+	# Set sweep_reversed BEFORE setup() so _generate_arc_mesh() builds correct UVs
+	if index % 2 == 1:
+		arc.sweep_reversed = true
+
 	if params:
 		arc.setup(params)
 
+	# Per-arc visual variation: unique seed + gradient offset (shader-only, order doesn't matter)
+	var base_seed: float = float(params.get("seed_offset", 81.0))
+	arc.seed_offset = base_seed + float(index) * 37.0
+	arc.gradient_offset = float(index) * 0.15
+
 	arc.spawn_from(spawn_pos, arc_dir)
+	arc.set_angle_offset(angle_offset)
 
 	if is_instance_valid(follow_source):
 		arc.set_follow_source(follow_source)

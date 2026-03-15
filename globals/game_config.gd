@@ -536,6 +536,11 @@ const STATION_RARITY_COLORS: Dictionary = {
 }
 
 # =============================================================================
+# RADIANT ARC (melee arc weapon)
+# =============================================================================
+const RADIANT_ARC_SPREAD_DEG: float = 25.0  # Angular spread between extra arcs (degrees)
+
+# =============================================================================
 # SPACE NUKES (missile weapon)
 # =============================================================================
 const NUKE_LAUNCH_ARC_MIN_DEG: float = 18.0     # Minimum launch angle offset from target direction

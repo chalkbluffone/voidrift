@@ -88,6 +88,7 @@ class DebugCapsule extends Node2D:
 
 @export var rotation_offset_deg: float = 0.0
 @export var seed_offset: float = 0.0
+@export var sweep_reversed: bool = false  ## Reverses sweep direction (odd arcs in a fan)
 @export var damage: float = 25.0
 @export var knockback: float = 0.0
 @export var crit_chance: float = 0.0
@@ -152,6 +153,10 @@ func _compute_sweep_and_alpha() -> Dictionary:
 	var base_sweep_duration: float = duration * 0.7
 	var sweep_duration: float = base_sweep_duration / max(sweep_speed, 0.1)
 	var sweep_progress: float = clamp(_elapsed / sweep_duration, 0.0, 1.0)
+
+	# Reverse sweep direction for alternating arcs in a fan
+	if sweep_reversed:
+		sweep_progress = 1.0 - sweep_progress
 
 	var alpha: float = 1.0
 	if _elapsed < fade_in:
@@ -281,10 +286,11 @@ func _generate_arc_mesh() -> void:
 		var p_in: Vector2 = dir * current_inner_r * length_scale + Vector2(distance, 0.0)
 		var p_out: Vector2 = dir * current_outer_r * length_scale + Vector2(distance, 0.0)
 
+		var uv_x: float = 1.0 - t if sweep_reversed else t
 		vertices.push_back(p_in)
-		uvs.push_back(Vector2(t, 1.0))
+		uvs.push_back(Vector2(uv_x, 1.0))
 		vertices.push_back(p_out)
-		uvs.push_back(Vector2(t, 0.0))
+		uvs.push_back(Vector2(uv_x, 0.0))
 
 	var arrays: Array = []
 	arrays.resize(Mesh.ARRAY_MAX)

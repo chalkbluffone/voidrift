@@ -18,6 +18,7 @@ var _follow_source: Node2D = null
 var _start_pos: Vector2
 var _start_rotation: float
 var _aim_direction: Vector2 = Vector2.RIGHT
+var _spawn_angle_offset: float = 0.0  ## Per-arc angular offset (radians) from spawner fan
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -44,9 +45,9 @@ func _process(delta: float) -> void:
 		queue_free()
 		return
 
-	# Follow source's facing direction (rotation)
+	# Follow source's facing direction (rotation) while preserving per-arc spread
 	if _follow_source and is_instance_valid(_follow_source):
-		rotation = _follow_source.rotation + deg_to_rad(rotation_offset_deg)
+		rotation = _follow_source.rotation + deg_to_rad(rotation_offset_deg) + _spawn_angle_offset
 		global_position = _follow_source.global_position
 	elif speed > 0.0:
 		var direction: Vector2 = Vector2.RIGHT.rotated(rotation)
@@ -124,6 +125,11 @@ func spawn_from(spawn_pos: Vector2, direction: Vector2) -> RadiantArc:
 	set_direction(direction)
 	_start_pos = global_position
 	_start_rotation = rotation
+	return self
+
+
+func set_angle_offset(offset_rad: float) -> RadiantArc:
+	_spawn_angle_offset = offset_rad
 	return self
 
 
