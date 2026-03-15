@@ -218,7 +218,7 @@
 		"description": "Increases experience gain",
 		"icon": "res://assets/icons/upgrades/xp_scanner.png",
 		"stat": "xp_gain",
-		"per_level": 9.0,
+		"per_level": 15.0,
 		"max_level": 99.0,
 		"unlock_condition": {
 			"type": "mine_asteroids",

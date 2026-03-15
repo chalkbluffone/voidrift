@@ -37,14 +37,17 @@ const DIFFICULTY_SPAWN_WEIGHT: float = 0.4    # How much difficulty affects spaw
 
 # --- XP Drops (static, no scaling) ---
 const ENEMY_XP_NORMAL: float = 1.0   # XP dropped by normal enemies
-const ENEMY_XP_ELITE_MIN: float = 5.0 # Min XP dropped by elite enemies
-const ENEMY_XP_ELITE_MAX: float = 15.0 # Max XP dropped by elite enemies
+const ENEMY_XP_ELITE_MIN: float = 2.0 # Min XP dropped by elite enemies
+const ENEMY_XP_ELITE_MAX: float = 5.0 # Max XP dropped by elite enemies
 const ELITE_XP_BURST_COUNT: int = 5   # Number of XP orbs to scatter on elite death
+
+# --- Bonus XP Orbs (visual reward for high xp_gain stat) ---
+# See also BONUS_XP_ORB_* constants in the XP Popup section below.
 
 # --- Credit Drops ---
 const ENEMY_CREDITS_NORMAL: int = 1       # Credits dropped by normal enemies
-const ENEMY_CREDITS_ELITE_MIN: int = 5    # Min credits dropped by elite enemies
-const ENEMY_CREDITS_ELITE_MAX: int = 15   # Max credits dropped by elite enemies
+const ENEMY_CREDITS_ELITE_MIN: int = 2    # Min credits dropped by elite enemies
+const ENEMY_CREDITS_ELITE_MAX: int = 5    # Max credits dropped by elite enemies
 
 # --- Elite Enemies ---
 const ELITE_BASE_CHANCE: float = 0.05       # 5% base chance to spawn elite
@@ -176,7 +179,6 @@ const WEAPON_MAX_FIRES_PER_SECOND: float = 20.0  # Hard cap on weapon fire rate 
 
 # Hard caps for stats (stat_name → max value)
 const STAT_CAPS: Dictionary = {
-	"xp_gain": 10.0,
 	"armor": 90.0,
 	"evasion": 90.0,
 }
@@ -258,6 +260,25 @@ const DAMAGE_NUMBER_MAX_COUNT: int = 30             # Soft cap — oldest remove
 const DAMAGE_NUMBER_CRIT_SCALE: float = 1.4         # Peak bounce scale for crit numbers
 const DAMAGE_NUMBER_OVERCRIT_SCALE: float = 1.6     # Peak bounce scale for overcrit numbers
 const DAMAGE_NUMBER_OUTLINE_SIZE: int = 3           # Dark outline thickness for readability (pixels)
+
+# =============================================================================
+# XP POPUP NUMBERS
+# =============================================================================
+const XP_POPUP_FONT_SIZE: int = 14                  # Font size for XP gain popup
+const XP_POPUP_DURATION: float = 0.6                # Lifetime in seconds
+const XP_POPUP_RISE_DISTANCE: float = 25.0          # Pixels the popup floats upward
+const XP_POPUP_RADIUS: float = 30.0                 # Distance from ship center (pixels)
+const XP_POPUP_ANGLE_DEG: float = 210.0             # Angle around ship in degrees (0=right, 90=down, 210=10 o'clock)
+const XP_POPUP_OUTLINE_SIZE: int = 2                # Outline for readability
+const XP_POPUP_COLOR: Color = Color(0.4, 1.0, 0.5, 1.0)  # Soft green
+
+# =============================================================================
+# BONUS XP ORBS
+# =============================================================================
+const BONUS_XP_ORB_THRESHOLD: float = 1.5           # xp_gain stat must be >= this to trigger bonus orbs
+const BONUS_XP_ORB_CHANCE_PER_POINT: float = 0.15   # Extra % chance per 1.0 xp_gain above threshold (15% per 1x)
+const BONUS_XP_ORB_MAX_CHANCE: float = 0.6           # Hard cap on bonus orb chance (60%)
+const BONUS_XP_ORB_VALUE_FRACTION: float = 0.5       # Bonus orb is worth this fraction of the original drop
 
 # =============================================================================
 # ABILITY DEFAULTS
@@ -487,6 +508,7 @@ const STATION_FLAT_STATS: Array[String] = [
 # =============================================================================
 const POOL_MAX_DORMANT_PROJECTILES: int = 256    # Max dormant base projectiles in pool
 const POOL_MAX_DORMANT_DAMAGE_NUMBERS: int = 64  # Max dormant damage number labels in pool
+const POOL_MAX_DORMANT_XP_POPUPS: int = 32       # Max dormant XP popup labels in pool
 const POOL_MAX_DORMANT_EFFECTS: int = 32         # Max dormant per-effect pool (mines, nukes)
 
 # =============================================================================

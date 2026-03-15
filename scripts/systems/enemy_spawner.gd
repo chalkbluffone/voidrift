@@ -382,6 +382,9 @@ func _on_enemy_died(enemy: Node, death_position: Vector2) -> void:
 			_spawn_xp(death_position, enemy.get_xp_value())
 		_spawn_credits(death_position, enemy.get_credit_value())
 
+		# Bonus XP orb (visual reward for high xp_gain stat)
+		_try_spawn_bonus_xp_orb(death_position, enemy.get_xp_value())
+
 	# Stardust drops (chance-based for normal enemies, guaranteed for enemies with stardust_value > 0)
 	var stardust: int = enemy.get_stardust_value()
 	if is_freighter:
@@ -429,6 +432,21 @@ func _spawn_burst_xp(pos: Vector2, total_amount: float, count: int) -> void:
 	for i: int in range(count):
 		var offset: Vector2 = Vector2(_rng.randf_range(-GameConfig.PICKUP_SCATTER_BURST, GameConfig.PICKUP_SCATTER_BURST), _rng.randf_range(-GameConfig.PICKUP_SCATTER_BURST, GameConfig.PICKUP_SCATTER_BURST))
 		_spawn_xp(pos + offset, per_orb)
+
+
+## Roll for a bonus XP orb when player has high xp_gain stat.
+## Gives visual feedback that the stat is working — extra orbs appear on kill.
+func _try_spawn_bonus_xp_orb(pos: Vector2, base_xp: float) -> void:
+	if not _player or not _player.stats:
+		return
+	var xp_gain: float = _player.stats.get_stat("xp_gain")
+	if xp_gain < GameConfig.BONUS_XP_ORB_THRESHOLD:
+		return
+	var excess: float = xp_gain - GameConfig.BONUS_XP_ORB_THRESHOLD
+	var chance: float = minf(excess * GameConfig.BONUS_XP_ORB_CHANCE_PER_POINT, GameConfig.BONUS_XP_ORB_MAX_CHANCE)
+	if _rng.randf() < chance:
+		var bonus_amount: float = base_xp * GameConfig.BONUS_XP_ORB_VALUE_FRACTION
+		_spawn_xp(pos, bonus_amount)
 
 
 ## Spawn a burst of credit pickups scattered around a position (for freighter jackpot).

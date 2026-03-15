@@ -9,6 +9,10 @@ signal credits_changed(amount: int)
 signal stardust_changed(amount: int)
 signal xp_changed(current: float, required: float, level: int)
 
+## Emitted when XP is gained, with the actual multiplied amount and player position.
+## Used by the XP popup system for visual feedback.
+signal xp_gained(actual_amount: float, player_position: Vector2)
+
 ## Number of queued level-ups still waiting to be shown (excludes the one currently active).
 var _pending_level_ups: int = 0
 
@@ -63,6 +67,10 @@ func add_xp(amount: float) -> void:
 	var actual_xp: float = amount * xp_mult
 	RunManager.run_data.xp += actual_xp
 	RunManager.run_data.xp_collected += actual_xp
+
+	# Emit for XP popup display
+	if player and player is Node2D:
+		xp_gained.emit(actual_xp, (player as Node2D).global_position)
 
 	# Count how many levels this XP grants
 	var levels_gained: int = 0

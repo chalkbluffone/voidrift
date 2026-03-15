@@ -73,6 +73,7 @@ const MINIMAP_SCENE: PackedScene = preload("res://scenes/ui/minimap.tscn")
 const FullMapOverlayScript: GDScript = preload("res://scripts/ui/full_map_overlay.gd")
 const STATS_PANEL_SCENE: PackedScene = preload("res://scenes/ui/stats_panel.tscn")
 const HEAL_NUMBER_SCENE: PackedScene = preload("res://scenes/ui/damage_number.tscn")
+const XP_POPUP_SCENE: PackedScene = preload("res://scenes/ui/xp_popup.tscn")
 
 var _debug_xp_graph: Control = null
 var _swarm_warning_label: Label = null
@@ -105,6 +106,7 @@ func _ready() -> void:
 	
 	# Connect to service signals
 	ProgressionManager.xp_changed.connect(_on_xp_changed)
+	ProgressionManager.xp_gained.connect(_on_xp_gained)
 	ProgressionManager.credits_changed.connect(_on_credits_changed)
 	ProgressionManager.stardust_changed.connect(_on_stardust_changed)
 	ProgressionManager.level_up_completed.connect(_on_level_up_completed)
@@ -684,6 +686,22 @@ func _on_lifesteal_healed(amount: float, world_pos: Vector2) -> void:
 func _on_xp_changed(current: float, required: float, level: int) -> void:
 	_update_xp(current, required)
 	_update_level(level)
+
+
+func _on_xp_gained(actual_amount: float, player_position: Vector2) -> void:
+	## Spawn a floating "+X XP" popup near the player ship.
+	@warning_ignore("unsafe_property_access")
+	var show_numbers: bool = get_node("/root/PersistenceManager").persistent_data.settings.get("show_damage_numbers", true)
+	if not show_numbers:
+		return
+
+	var existing: Array[Node] = FrameCache.damage_numbers
+	if existing.size() >= GameConfig.DAMAGE_NUMBER_MAX_COUNT:
+		return
+
+	var popup: XpPopup = ObjectPool.acquire("xp_popup", XP_POPUP_SCENE) as XpPopup
+	get_tree().current_scene.add_child(popup)
+	popup.setup(actual_amount, player_position)
 
 
 func _on_credits_changed(amount: int) -> void:
