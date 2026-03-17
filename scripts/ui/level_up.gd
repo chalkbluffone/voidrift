@@ -297,12 +297,11 @@ func _update_card(index: int, option: Dictionary) -> void:
 	
 	# Determine current level / stacks (unified for both types)
 	var current_level: int = 0
-	var is_new: bool = false
+	var is_new: bool = bool(option.get("is_new", false))
 	if option_type == "upgrade":
 		current_level = _get_current_stacks(option_id)
 	else:
 		current_level = int(option.get("current_level", 0))
-		is_new = bool(option.get("is_new", false))
 	
 	# Level line (skip for brand-new items — NEW tag handles that)
 	if not is_new and current_level > 0:

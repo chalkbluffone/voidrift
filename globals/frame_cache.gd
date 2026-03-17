@@ -38,6 +38,11 @@ var player: Node2D = null
 ## Spatial hash grid for fast enemy neighbor queries (separation, targeting).
 var enemy_grid: SpatialHashGrid = null
 
+## Per-frame record of which enemies have been targeted by weapons.
+## Cleared each frame in _rebuild().  Used by EffectUtils.find_spread_target()
+## to distribute weapon fire across multiple enemies.
+var weapon_targets: Dictionary = {}
+
 ## The physics frame counter used to detect stale data.
 var _last_frame: int = -1
 
@@ -67,11 +72,23 @@ func invalidate_stations() -> void:
 	stations = get_tree().get_nodes_in_group("stations")
 
 
+func register_weapon_target(enemy: Node2D) -> void:
+	var id: int = enemy.get_instance_id()
+	weapon_targets[id] = weapon_targets.get(id, 0) + 1
+
+
+func get_target_count(enemy: Node2D) -> int:
+	return weapon_targets.get(enemy.get_instance_id(), 0)
+
+
 func _rebuild() -> void:
 	var frame: int = Engine.get_process_frames()
 	if frame == _last_frame:
 		return
 	_last_frame = frame
+
+	# --- Weapon target spread tracking ---
+	weapon_targets.clear()
 
 	# --- Enemy list + spatial grid ---
 	enemies = get_tree().get_nodes_in_group("enemies")

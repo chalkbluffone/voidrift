@@ -92,6 +92,9 @@ func setup(params: Dictionary) -> SpaceNapalm:
 	for key in params:
 		if key in self:
 			set(key, params[key])
+
+	# Regenerate fire disc to match the actual size_mult (mesh was built at default in _ready)
+	_regenerate_fire_disc()
 	return self
 
 

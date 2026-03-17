@@ -203,15 +203,17 @@ func _spawn_bounce_bullet(hit_pos: Vector2, hit_enemy: Node2D, source_data: Weap
 	if bounce_dir.is_zero_approx():
 		return
 
-	# Spawn at the edge of the hit enemy, not its center
+	# Spawn at the edge of the hit enemy, offset by the bullet's collision half-size
+	var extra: Dictionary = source_data.extra
 	var enemy_radius: float = 22.0
 	var col_shape: CollisionShape2D = hit_enemy.get_node_or_null("CollisionShape2D") as CollisionShape2D
 	if col_shape and col_shape.shape is CircleShape2D:
 		enemy_radius = (col_shape.shape as CircleShape2D).radius * hit_enemy.scale.x
-	var spawn_pos: Vector2 = enemy_pos + bounce_dir * (enemy_radius + 4.0)
+	var col_size: Vector2 = extra.get("collision_shape_size", Vector2(8, 8))
+	var bullet_half: float = col_size.x / 2.0
+	var spawn_pos: Vector2 = enemy_pos + bounce_dir * (enemy_radius + bullet_half + 2.0)
 
 	# Build single-bullet BB2D spawn for the bounce
-	var extra: Dictionary = source_data.extra
 	var texture: Texture2D = extra.get("texture") as Texture2D
 	if not texture:
 		return

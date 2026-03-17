@@ -376,8 +376,14 @@ func _on_enemy_died(enemy: Node, death_position: Vector2) -> void:
 		# Normal/Elite enemy drops
 		var is_elite: bool = enemy.enemy_type == "elite"
 		if is_elite:
-			# Elite burst: scatter multiple XP orbs for visual feedback
-			_spawn_burst_xp(death_position, enemy.get_xp_value(), GameConfig.ELITE_XP_BURST_COUNT)
+			var xp: float = enemy.get_xp_value()
+			if xp >= GameConfig.ENEMY_XP_ELITE_MAX:
+				# High-value elite: single red merged shard worth the full amount
+				_spawn_merged_xp(death_position, xp)
+			else:
+				# Lower-value elite: scatter blue shards matching XP value
+				var burst_count: int = maxi(1, roundi(xp))
+				_spawn_burst_xp(death_position, xp, burst_count)
 		else:
 			_spawn_xp(death_position, enemy.get_xp_value())
 		_spawn_credits(death_position, enemy.get_credit_value())
@@ -417,6 +423,15 @@ func _spawn_xp(pos: Vector2, amount: float) -> void:
 	
 	# Use call_deferred to avoid physics query flushing error
 	get_tree().current_scene.call_deferred("add_child", xp)
+
+
+## Spawn a single red merged XP shard (used for elite drops).
+func _spawn_merged_xp(pos: Vector2, amount: float) -> void:
+	var merged: Area2D = MergedXPPickupScene.instantiate()
+	merged.global_position = pos
+	merged.initialize(amount)
+	get_tree().current_scene.call_deferred("add_child", merged)
+	merged.call_deferred("animate_entrance")
 
 
 func _spawn_credits(_pos: Vector2, amount: int) -> void:

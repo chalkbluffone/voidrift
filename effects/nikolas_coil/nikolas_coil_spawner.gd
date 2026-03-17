@@ -30,7 +30,7 @@ func spawn(
 	if sorted_targets.is_empty():
 		return null
 
-	var bounces: int = int(params.get("projectile_bounces", 3))
+	var bounces: int = mini(int(params.get("projectile_bounces", 3)), GameConfig.NIKOLAS_COIL_MAX_BOUNCES)
 	var first_coil: Node2D = null
 	var claimed_first_targets: Array[Node2D] = []
 

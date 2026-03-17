@@ -158,6 +158,16 @@ The title screen (`scenes/ui/main_menu.tscn`, `scripts/ui/main_menu.gd`) feature
 - Do **NOT** animate Control node `position` in `_process()` for smooth float effects — the layout system recalculates and causes jerkiness.
 - Use vertex shader `VERTEX` offset instead for buttery-smooth GPU-driven motion.
 
+## XP Popup
+
+Persistent accumulated XP counter that appears near the player ship. Shows `+N` in bold Orbitron, punches on increment, fades after idle timeout.
+
+- **Rendering**: Screen space — child of the HUD `CanvasLayer`, NOT world space or ship child
+- **Positioning**: Fixed offset from viewport center using `GameConfig.XP_POPUP_RADIUS` and `XP_POPUP_ANGLE_DEG` (polar→cartesian), snapped to integer pixels via `.round()`
+- **Key files**: `scripts/ui/xp_popup.gd` (`XpPopup` class), `scenes/ui/xp_popup.tscn`
+- **Lazy-init**: Created on first XP gain event, added as child of HUD (`self.add_child()`)
+- **Gotcha**: Do NOT place the XP popup in world space or as a ship child — sub-pixel camera offsets and ship rotation cause visible text vibration. Screen-space with viewport-center offset eliminates jitter entirely.
+
 ## Debug XP Graph
 
 Visual XP graph overlay in HUD for debugging progression curve during play.
@@ -185,3 +195,4 @@ Floating `RichTextLabel` nodes spawned in world space at enemy hit positions or 
 - **HUD shield bar invisible**: `get_stat("max_shield")` doesn't exist — the stat is `"shield"`. Fixed to `get_stat("shield")`.
 - **Minimap polygon triangulation spam (60K errors)**: Clamping asteroid vertices to circle edge creates degenerate shapes. Fixed by drawing `draw_circle()` dot when any vertex is clamped instead of attempting `draw_colored_polygon()`.
 - **Missing phase-shift feedback**: Added `Evaded!` popup text when incoming hits are ignored during active phase shift, with cooldown via `GameConfig.EVADE_POPUP_COOLDOWN` to prevent spam.
+- **XP popup text vibration**: World-space or ship-child positioning caused sub-pixel jitter from camera transform and ship rotation. Fixed by moving the popup to screen space (HUD CanvasLayer child) with a fixed offset from viewport center.

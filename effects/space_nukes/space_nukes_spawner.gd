@@ -121,9 +121,9 @@ func spawn(
 	var data: Object = ClassDB.instantiate(&"DirectionalBulletsData2D")
 	data.textures = _textures
 	data.default_change_texture_time = 0.033  # 30fps animation
-	# Native texture size: 24×13 px — scaled up 50%
-	data.texture_size = Vector2(36.0, 19.5) * size_mult
-	data.collision_shape_size = Vector2(21.0, 12.0) * size_mult
+	# Native texture size: 24×13 px — scaled up 87.5%
+	data.texture_size = Vector2(45.0, 24.375) * size_mult
+	data.collision_shape_size = Vector2(26.25, 15.0) * size_mult
 	data.set_collision_layer_from_array([3])
 	data.set_collision_mask_from_array([4])
 	data.monitorable = true

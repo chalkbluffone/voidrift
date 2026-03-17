@@ -107,13 +107,13 @@
 		"active_ability": {
 			"id": "overclock",
 			"name": "Overclock",
-			"description": "Overclock all weapon systems for 10 seconds: +300% fire rate and +15 projectiles per volley.",
+			"description": "Overclock all weapon systems for 10 seconds: +90% fire rate and +5 projectiles per volley.",
 			"template": "buff_self",
 			"cooldown": 75.0,
 			"duration": 10.0,
 			"effects": {
-				"attack_speed": 3.0,
-				"projectile_count": 15.0
+				"attack_speed": 0.9,
+				"projectile_count": 5.0
 			},
 			"vfx": "overclock"
 		},

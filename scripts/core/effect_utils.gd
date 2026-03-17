@@ -46,6 +46,38 @@ static func find_nearest_enemy(tree: SceneTree, origin: Vector2) -> Node2D:
 	return nearest
 
 
+## Return the best target considering distance and whether other weapons have
+## already targeted it this frame.  Already-targeted enemies receive a virtual
+## distance penalty, naturally spreading fire across the field.
+## Falls back to pure nearest when FrameCache is unavailable.
+static func find_spread_target(tree: SceneTree, origin: Vector2) -> Node2D:
+	var cache: Node = tree.root.get_node_or_null("/root/FrameCache")
+	if cache == null:
+		return find_nearest_enemy(tree, origin)
+	var best: Node2D = null
+	var best_score: float = INF
+	var penalty: float = GameConfig.WEAPON_TARGET_SPREAD_PENALTY
+	for enemy in _get_enemies(tree):
+		if not enemy is Node2D or not is_instance_valid(enemy):
+			continue
+		var e: Node2D = enemy as Node2D
+		var dist: float = origin.distance_to(e.global_position)
+		var target_count: int = cache.get_target_count(e)
+		var score: float = dist + float(target_count) * penalty
+		if score < best_score:
+			best_score = score
+			best = e
+	return best
+
+
+## Register an enemy as a weapon target for this frame so subsequent
+## find_spread_target() calls prefer untargeted enemies.
+static func register_weapon_target(tree: SceneTree, enemy: Node2D) -> void:
+	var cache: Node = tree.root.get_node_or_null("/root/FrameCache")
+	if cache:
+		cache.register_weapon_target(enemy)
+
+
 ## Return true if at least one valid enemy in the "enemies" group is within
 ## [param radius] of [param origin].  Useful for pre-checks that skip
 ## spawning when no targets exist nearby (e.g. nikolas coil, tractor beam).

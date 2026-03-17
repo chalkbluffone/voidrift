@@ -51,6 +51,18 @@ Six projectile weapons use the [BlastBullets2D](https://github.com/nikoladevelop
 
 **BB2D weapons:** Personal Space Violator, Space Lasers, Straight-Line Negotiator, Timmy Gun, Space Nukes. Space Napalm is shader-driven (not BB2D).
 
+**BB2D weapon texture sizes (tuned values, not raw PNG):**
+
+| Weapon                   | `texture_size`         | Scales with `size_mult`?                 |
+| ------------------------ | ---------------------- | ---------------------------------------- |
+| Personal Space Violator  | `Vector2(76.5, 59.85)` | Yes                                      |
+| Space Lasers             | `Vector2(114.0, 16.7)` | No — size only increases targeting range |
+| Timmy Gun                | `Vector2(33.75, 34.5)` | Yes                                      |
+| Straight-Line Negotiator | `Vector2(40.0, 8.0)`   | Yes                                      |
+| Space Nukes              | `Vector2(36.0, 19.5)`  | Yes                                      |
+
+**Bounce bullet edge spawning:** Bounce bullets (Space Lasers, Timmy Gun) spawn from the edge of the hit enemy facing the next target, not from the enemy center. Uses the enemy's `CollisionShape2D` `CircleShape2D` radius + 4px padding. Code in `BulletFactoryRef._spawn_bounce_bullet()`.
+
 **Gotchas:**
 
 - **`max_speed` MUST be set** on every `BulletSpeedData2D`. It defaults to `0.0` and BB2D clamps speed to `max_speed`, so bullets with unset `max_speed` will never move. For constant-speed bullets: `spd.max_speed = spd.speed`. For accelerating bullets (e.g., Space Nukes): set `max_speed` higher than `speed` to allow acceleration room (e.g., `spd.max_speed = projectile_speed * 2.0`).
@@ -266,3 +278,7 @@ Guard `_hit_enemy()` by enemy instance ID so each projectile can only apply dama
 Orbit weapons should not use a fixed extra radius for all enemies. Use enemy hitbox shape dimensions (`HitboxArea/HitboxShape`) when computing contact threshold.
 
 This keeps PSP-9000 collisions reliable against large freighters and other non-circular enemies.
+
+### Nikola's Coil Size Scaling
+
+Nikola's Coil (`effects/nikolas_coil/`) scales its targeting reach (`search_radius`) with the combined player `size` × weapon `size` stat multiplier via a `size_mult` property on the coil script. Both the spawner's initial target pre-sort and the coil's chain hop targeting use the scaled radius. Visual bolt width (`arc_width`) and fork length are NOT scaled — only targeting range. The `setup()` method automatically picks up `size_mult` from the weapon component's params dict.

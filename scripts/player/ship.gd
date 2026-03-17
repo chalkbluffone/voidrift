@@ -554,8 +554,8 @@ func _flash_damage() -> void:
 			tween.tween_property(sprite, "modulate:a", 1.0, 0.05)
 
 
-func heal(amount: float) -> void:
-	stats.heal(amount)
+func heal(amount: float, allow_overheal: bool = false) -> void:
+	stats.heal(amount, allow_overheal)
 
 
 ## Apply an external force to the player (e.g., radiation belt push, wind).

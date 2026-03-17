@@ -45,6 +45,14 @@ func spawn(
 	if targets.is_empty():
 		return null
 
+	# Use spread-aware targeting for the primary target so multi-weapon loadouts
+	# distribute fire across different enemies.
+	var primary: Node2D = EffectUtils.find_spread_target(_parent_node.get_tree(), origin)
+	if primary and primary in targets:
+		targets.erase(primary)
+		targets.insert(0, primary)
+	EffectUtils.register_weapon_target(_parent_node.get_tree(), targets[0])
+
 	# Extract params
 	var projectile_count: int = maxi(1, int(params.get("projectile_count", 1)))
 	var cooldown: float = float(params.get("cooldown", 1.0))

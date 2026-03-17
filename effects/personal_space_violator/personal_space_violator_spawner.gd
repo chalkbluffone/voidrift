@@ -75,8 +75,8 @@ func spawn(
 	var data: Object = ClassDB.instantiate(&"DirectionalBulletsData2D")
 	data.textures = [_texture]
 	# Native texture size: 170×133 px — scaled down for gameplay
-	data.texture_size = Vector2(76.5, 59.85) * size_mult
-	data.collision_shape_size = Vector2(10.0, 10.0) * size_mult
+	data.texture_size = Vector2(68.85, 53.865) * size_mult
+	data.collision_shape_size = Vector2(9.0, 9.0) * size_mult
 	data.set_collision_layer_from_array([3])  # Layer 3 = Projectiles (bitmask 4)
 	data.set_collision_mask_from_array([4])   # Layer 4 = Enemies (bitmask 8)
 	data.monitorable = true

@@ -18,7 +18,7 @@ func _init(parent: Node) -> void:
 ## Returns null — BB2D manages all bullet lifecycle.
 func spawn(
 	spawn_pos: Vector2,
-	direction: Vector2,
+	_direction: Vector2,
 	params: Dictionary = {},
 	follow_source: Node2D = null
 ) -> Node2D:
@@ -26,10 +26,28 @@ func spawn(
 	if not factory_ref or not factory_ref.factory:
 		return null
 
-	var nearest: Node2D = EffectUtils.find_nearest_enemy(_parent_node.get_tree(), spawn_pos)
-	if nearest == null:
+	if not is_instance_valid(_parent_node) or not _parent_node.is_inside_tree():
 		return null
-	direction = (nearest.global_position - spawn_pos).normalized()
+
+	var origin: Vector2 = spawn_pos
+	if is_instance_valid(follow_source):
+		origin = follow_source.global_position
+
+	# Build target list: enemies in range sorted nearest-first, then cycle burst bolts across them
+	var targeting_range: float = GameConfig.WEAPON_TARGETING_RANGE
+	var targets: Array[Node2D] = EffectUtils.find_enemies_in_range(
+		_parent_node.get_tree(), origin, targeting_range
+	)
+	if targets.is_empty():
+		return null
+
+	# Use spread-aware targeting for the primary target so multi-weapon loadouts
+	# distribute fire across different enemies.
+	var primary: Node2D = EffectUtils.find_spread_target(_parent_node.get_tree(), origin)
+	if primary and primary in targets:
+		targets.erase(primary)
+		targets.insert(0, primary)
+	EffectUtils.register_weapon_target(_parent_node.get_tree(), targets[0])
 
 	# Extract params
 	var burst_count: int = maxi(1, int(params.get("projectile_count", 1)))
@@ -63,26 +81,30 @@ func spawn(
 		"collision_shape_size": Vector2(8.0, 8.0),
 	}
 
-	# Fire first bolt immediately
-	_fire_bolt(follow_source, direction, bolt_config, factory_ref, rng)
+	# Fire first bolt immediately at primary target
+	var first_dir: Vector2 = (targets[0].global_position - origin).normalized()
+	_fire_bolt(follow_source, first_dir, bolt_config, factory_ref, rng)
 
-	# Schedule remaining burst bolts with SceneTreeTimers
+	# Schedule remaining burst bolts, cycling through the target list
 	for i: int in range(1, burst_count):
+		var target_index: int = i % targets.size()
 		var delay: float = burst_interval * float(i)
 		var timer: SceneTreeTimer = _parent_node.get_tree().create_timer(delay, false)
 		timer.timeout.connect(
-			_fire_bolt_retarget.bind(follow_source, bolt_config, factory_ref, rng),
+			_fire_delayed.bind(target_index, targets, bolt_config, factory_ref, follow_source, rng),
 			CONNECT_ONE_SHOT
 		)
 
 	return null
 
 
-## Fire a burst bolt, re-targeting the nearest enemy from the ship's current position.
-func _fire_bolt_retarget(
-	follow_source: Node2D,
+## Fire a burst bolt at the assigned target, falling back to nearest if it died.
+func _fire_delayed(
+	target_index: int,
+	targets: Array[Node2D],
 	bolt_config: Dictionary,
 	factory_ref: Node,
+	follow_source: Node2D,
 	rng: RandomNumberGenerator
 ) -> void:
 	if not is_instance_valid(follow_source):
@@ -90,11 +112,17 @@ func _fire_bolt_retarget(
 	if not factory_ref or not factory_ref.factory:
 		return
 
-	var pos: Vector2 = follow_source.global_position
-	var nearest: Node2D = EffectUtils.find_nearest_enemy(_parent_node.get_tree(), pos)
-	if nearest == null:
+	var origin: Vector2 = follow_source.global_position
+
+	var target: Node2D = null
+	if target_index < targets.size() and is_instance_valid(targets[target_index]):
+		target = targets[target_index]
+	else:
+		target = EffectUtils.find_nearest_enemy(_parent_node.get_tree(), origin)
+	if target == null:
 		return
-	var dir: Vector2 = (nearest.global_position - pos).normalized()
+
+	var dir: Vector2 = (target.global_position - origin).normalized()
 	_fire_bolt(follow_source, dir, bolt_config, factory_ref, rng)
 
 

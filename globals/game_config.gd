@@ -39,7 +39,6 @@ const DIFFICULTY_SPAWN_WEIGHT: float = 0.4    # How much difficulty affects spaw
 const ENEMY_XP_NORMAL: float = 1.0   # XP dropped by normal enemies
 const ENEMY_XP_ELITE_MIN: float = 2.0 # Min XP dropped by elite enemies
 const ENEMY_XP_ELITE_MAX: float = 5.0 # Max XP dropped by elite enemies
-const ELITE_XP_BURST_COUNT: int = 5   # Number of XP orbs to scatter on elite death
 
 # --- Bonus XP Orbs (visual reward for high xp_gain stat) ---
 # See also BONUS_XP_ORB_* constants in the XP Popup section below.
@@ -174,8 +173,10 @@ const SHIELD_RECHARGE_DELAY: float = 5.0   # Seconds before shield starts rechar
 const SHIELD_RECHARGE_RATE: float = 10.0   # Shield HP recovered per second
 const DIMINISHING_RETURNS_DENOMINATOR: float = 100.0  # DR formula: raw / (raw + DENOM)
 const WEAPON_TARGETING_RANGE: float = 500.0  # Auto-aim max distance (pixels)
+const WEAPON_TARGET_SPREAD_PENALTY: float = 250.0  # Virtual distance added per existing targeting (distributes fire)
 const PROJECTILE_DEFAULT_LIFETIME: float = 5.0  # Seconds before projectile self-destructs
 const WEAPON_MAX_FIRES_PER_SECOND: float = 20.0  # Hard cap on weapon fire rate (min cooldown = 1/N)
+const NIKOLAS_COIL_MAX_BOUNCES: int = 2  # Hard cap on chain lightning bounces
 
 # Hard caps for stats (stat_name → max value)
 const STAT_CAPS: Dictionary = {
@@ -537,7 +538,7 @@ const STATION_BUFFABLE_STATS: Array[String] = [
 const STATION_FLAT_STATS: Array[String] = [
 	"max_hp", "hp_regen", "overheal", "shield", "crit_chance", "crit_damage",
 	"projectile_count", "projectile_bounces", "extra_phase_shifts", "phase_shift_distance",
-	"luck", "difficulty", "lifesteal",
+	"luck", "lifesteal",
 ]
 
 # =============================================================================

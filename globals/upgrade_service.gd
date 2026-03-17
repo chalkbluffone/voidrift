@@ -100,6 +100,7 @@ func _build_module_candidates(
 			"rarity": rarity,
 			"effects": effects,
 			"data": upgrade,
+			"is_new": not is_owned,
 		})
 	return candidates
 
@@ -142,11 +143,14 @@ func _build_weapon_candidates(
 			if not PersistenceManager.is_weapon_unlocked(wid):
 				continue
 			var w_data: Dictionary = DataLoader.weapons[wid]
+			var new_weapon_rarity: String = _roll_rarity({}, luck, weapon_rng)
+			var new_weapon_effects: Array = _build_weapon_effects(wid, new_weapon_rarity, weapon_rng)
 			candidates.append({
 				"weight": w_new,
 				"type": "weapon",
 				"id": wid,
-				"rarity": String(w_data.get("rarity", "common")),
+				"rarity": new_weapon_rarity,
+				"effects": new_weapon_effects,
 				"data": w_data,
 				"is_new": true,
 				"current_level": 0,
