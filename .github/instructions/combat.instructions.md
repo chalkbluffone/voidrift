@@ -31,6 +31,34 @@ This avoids persistent priority bias where one burst weapon can repeatedly starv
 - Per-weapon rarity tier stat tables in `data/weapon_upgrades.json`
 - `WeaponComponent` (`scripts/combat/weapon_component.gd`) manages auto-fire and projectile spawning
 
+### BlastBullets2D (BB2D) Integration
+
+Six projectile weapons use the [BlastBullets2D](https://github.com/nikoladevelops/godot-blast-bullets-2d) GDExtension for optimized MultiMesh bullet spawning. Plugin lives in `blastbullets2d/`, docs in `documentation/blast_bullets_2d_documentation.md`.
+
+**Key classes (GDExtension — use `ClassDB.instantiate()` since editor locks DLL):**
+
+- `BulletFactory2D` — scene node that spawns/manages bullets. Exposed via `BulletFactoryRef` autoload (`globals/bullet_factory_ref.gd`).
+- `DirectionalBulletsData2D` — data class for per-bullet direction/speed. Key properties: `transforms`, `all_bullet_speed_data`, `textures`, `texture_size`, `collision_shape_size`, `max_life_time`, `bullet_max_collision_count`, `monitorable`, `bullets_custom_data`.
+- `BulletSpeedData2D` — per-bullet speed data. Properties: `speed`, `max_speed`, `acceleration`. **Not** `speed_acceleration` (that name is invalid and silently ignored).
+- `DirectionalBullets2D` — runtime multimesh instance returned by `spawn_controllable_directional_bullets()`. Has homing, orbiting, curves, attachments, movement pattern features.
+
+**Spawn functions:**
+
+- `spawn_directional_bullets(data)` — fire-and-forget, no reference returned. Use for simple projectiles.
+- `spawn_controllable_directional_bullets(data)` — returns `DirectionalBullets2D` instance for homing, orbiting, etc.
+
+**Collision routing:** `BulletFactoryRef._on_body_entered` / `_on_area_entered` → `_handle_enemy_hit()`. Weapon-specific logic (PSV falloff, Space Nukes AoE, Space Lasers bounce) via `weapon_id` dispatch.
+
+**BB2D weapons:** Personal Space Violator, Space Lasers, Straight-Line Negotiator, Timmy Gun, Space Nukes. Space Napalm is shader-driven (not BB2D).
+
+**Gotchas:**
+
+- **`max_speed` MUST be set** on every `BulletSpeedData2D`. It defaults to `0.0` and BB2D clamps speed to `max_speed`, so bullets with unset `max_speed` will never move. For constant-speed bullets: `spd.max_speed = spd.speed`. For accelerating bullets (e.g., Space Nukes): set `max_speed` higher than `speed` to allow acceleration room (e.g., `spd.max_speed = projectile_speed * 2.0`).
+- `texture_size` controls rendered size, NOT the raw PNG pixel dimensions. Scale appropriately for the weapon's visual intent (e.g., sniper needle ≈ 40×8, not 237×136).
+- Collision layers use array indices (1-based): `set_collision_layer_from_array([3])` = layer 3 = Projectiles (bitmask 4). Mask `[4]` = layer 4 = Enemies (bitmask 8).
+- `bullet_max_collision_count` exists on both data class and runtime instance. Set on data class for `spawn_directional_bullets`; set on runtime instance for `spawn_controllable_directional_bullets`.
+- BB2D has automatic object pooling. No manual pool management needed.
+
 ### Space Lasers Visual Contract
 
 - Space Lasers uses `assets/lasers/laser_bullet.png` for projectile visuals.

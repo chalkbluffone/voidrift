@@ -86,7 +86,7 @@ func reset() -> void:
 		sprite.visible = true
 		sprite.modulate = Color.WHITE
 		sprite.region_enabled = false
-	# Remove dynamically-added visual children (NeonProjectileVisual subclasses)
+	# Remove dynamically-added visual children
 	for child in get_children():
 		if child == collision_shape or child == sprite:
 			continue

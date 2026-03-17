@@ -118,6 +118,9 @@ func end_run(victory: bool) -> void:
 
 
 func _reset_run_data() -> void:
+	var bullet_factory_ref: Node = get_node_or_null("/root/BulletFactoryRef")
+	if bullet_factory_ref and bullet_factory_ref.has_method("clear_factory"):
+		bullet_factory_ref.clear_factory()
 	var pool: Node = get_node_or_null("/root/ObjectPool")
 	if pool and pool.has_method("drain_all"):
 		pool.drain_all()

@@ -139,7 +139,6 @@
 		"motion": {
 			"spread_degrees": 45.0
 		},
-		"scene": "res://effects/personal_space_violator/PersonalSpaceViolator.tscn",
 		"shape": {
 
 		},
@@ -400,7 +399,6 @@
 			"launch_arc_min_deg": 35.0,
 			"lifetime": 2.2
 		},
-		"scene": "res://scenes/gameplay/projectile.tscn",
 		"shape": {
 			"explosion_radius": 128.0
 		},
@@ -453,7 +451,6 @@
 		"motion": {
 
 		},
-		"scene": "res://effects/straight_line_negotiator/StraightLineNegotiator.tscn",
 		"shape": {
 
 		},
@@ -488,7 +485,6 @@
 			"burst_interval": 0.06,
 			"spread_angle_deg": 4.0
 		},
-		"scene": "res://effects/timmy_gun/TimmyGun.tscn",
 		"shape": {
 			"bounce_range": 400.0
 		},
@@ -546,7 +542,6 @@
 			"burst_interval": 0.04,
 			"spread_angle_deg": 3.0
 		},
-		"scene": "res://effects/space_lasers/SpaceLasers.tscn",
 		"shape": {
 			"bounce_range": 400.0
 		},

@@ -5,8 +5,8 @@ extends Node
 ## of dormant Node instances removed from the scene tree.
 ##
 ## Usage:
-##   var node: Node = ObjectPool.acquire("projectile", PROJECTILE_SCENE)
-##   ObjectPool.release("projectile", node)
+##   var node: Node = ObjectPool.acquire("damage_number", DAMAGE_NUMBER_SCENE)
+##   ObjectPool.release("damage_number", node)
 
 ## Pool storage: { pool_name: Array[Node] }
 var _pools: Dictionary = {}
@@ -28,10 +28,8 @@ const _DEFAULT_CAP: int = 128
 
 func _ready() -> void:
 	# Register known pool caps from GameConfig
-	_caps["projectile"] = GameConfig.POOL_MAX_DORMANT_PROJECTILES
 	_caps["damage_number"] = GameConfig.POOL_MAX_DORMANT_DAMAGE_NUMBERS
 	_caps["tothian_mine"] = GameConfig.POOL_MAX_DORMANT_EFFECTS
-	_caps["space_nuke"] = GameConfig.POOL_MAX_DORMANT_EFFECTS
 
 
 ## Acquire a node from the pool. Returns a recycled instance if available,

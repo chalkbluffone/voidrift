@@ -543,9 +543,8 @@ const STATION_FLAT_STATS: Array[String] = [
 # =============================================================================
 # OBJECT POOL
 # =============================================================================
-const POOL_MAX_DORMANT_PROJECTILES: int = 256    # Max dormant base projectiles in pool
 const POOL_MAX_DORMANT_DAMAGE_NUMBERS: int = 64  # Max dormant damage number labels in pool
-const POOL_MAX_DORMANT_EFFECTS: int = 32         # Max dormant per-effect pool (mines, nukes)
+const POOL_MAX_DORMANT_EFFECTS: int = 32         # Max dormant per-effect pool (mines, etc.)
 
 # =============================================================================
 # GRAVITY WELL (pickup vacuum system)

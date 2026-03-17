@@ -47,6 +47,9 @@ func _ready() -> void:
 	# Spawn player at random safe position (avoids asteroids)
 	_setup_player_spawn(asteroid_positions)
 
+	# Set up BulletFactory2D for BlastBullets2D weapon effects
+	_setup_bullet_factory()
+
 	# Cache static groups in FrameCache now that all world objects are spawned
 	var _frame_cache: Node = get_node("/root/FrameCache")
 	_frame_cache.cache_statics()
@@ -162,6 +165,15 @@ func _apply_background_quality() -> void:
 		var mat: ShaderMaterial = far_rect.material as ShaderMaterial
 		if mat:
 			mat.set_shader_parameter("twinkle", 0.1 if quality >= 1 else 0.0)
+
+
+## Create a BulletFactory2D for BlastBullets2D projectile weapons.
+func _setup_bullet_factory() -> void:
+	var bullet_factory: Node = ClassDB.instantiate(&"BulletFactory2D")
+	bullet_factory.name = "BulletFactory"
+	add_child(bullet_factory)
+	var factory_ref: Node = get_node("/root/BulletFactoryRef")
+	factory_ref.register_factory(bullet_factory)
 
 
 func _set_star_seed(rect_path: NodePath, ns: String) -> void:
