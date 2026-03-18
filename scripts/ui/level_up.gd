@@ -292,29 +292,26 @@ func _update_card(index: int, option: Dictionary) -> void:
 	var display_name: String = data.get("name", data.get("display_name", option_id))
 	name_label.text = display_name
 	
-	# Set description based on type
-	var description: String = data.get("description", "No description")
+	# Set description based on type — prefer short description for level-up cards
+	var description: String = data.get("description_short", data.get("description", "No description"))
 	
 	# Determine current level / stacks (unified for both types)
 	var current_level: int = 0
 	var is_new: bool = bool(option.get("is_new", false))
-	if option_type == "upgrade":
-		current_level = _get_current_stacks(option_id)
-	else:
-		current_level = int(option.get("current_level", 0))
+	current_level = int(option.get("current_level", 0))
 	
-	# Level line (skip for brand-new items — NEW tag handles that)
+	# Build level line text (skip for brand-new items — NEW tag handles that)
+	var level_line: String = ""
 	if not is_new and current_level > 0:
-		description = "%s\nLevel: %d → %d" % [description, current_level, current_level + 1]
+		level_line = "Level %d → %d" % [current_level, current_level + 1]
 	
-	# Effects line (same format for both types)
+	# Build effects/bonus line text
 	var effects: Array = option.get("effects", [])
 	var bonus_line: String = _format_weapon_effects_line(effects)
-	if bonus_line != "":
-		description = "%s\n%s" % [description, bonus_line]
 	
 	_update_card_border(card, rarity_color)
 	
+	# Description label — just the short description text
 	desc_label.text = description
 	desc_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8, 1.0))
 	desc_label.add_theme_font_size_override("font_size", 16)
@@ -330,7 +327,7 @@ func _update_card(index: int, option: Dictionary) -> void:
 		# Remove ALL old dynamic labels immediately (queue_free defers, causing duplicates)
 		var to_remove: Array[Node] = []
 		for child: Node in info_box.get_children():
-			if child.name == &"RaritySubtitle" or child.name == &"NewTag":
+			if child.name == &"RaritySubtitle" or child.name == &"NewTag" or child.name == &"LevelLine" or child.name == &"BonusLine":
 				to_remove.append(child)
 		for node: Node in to_remove:
 			info_box.remove_child(node)
@@ -359,6 +356,27 @@ func _update_card(index: int, option: Dictionary) -> void:
 			new_tag.add_theme_font_size_override("font_size", 18)
 			new_tag.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			info_box.add_child(new_tag)
+
+		# Level line — cyan, appears after description
+		if level_line != "":
+			var level_label: Label = Label.new()
+			level_label.name = "LevelLine"
+			level_label.text = level_line
+			level_label.add_theme_color_override("font_color", UiColors.CYAN)
+			level_label.add_theme_font_size_override("font_size", 16)
+			level_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			info_box.add_child(level_label)
+
+		# Bonus line — white bold, appears last
+		if bonus_line != "":
+			var bonus_label: Label = Label.new()
+			bonus_label.name = "BonusLine"
+			bonus_label.text = bonus_line
+			bonus_label.add_theme_color_override("font_color", Color.WHITE)
+			bonus_label.add_theme_font_override("font", FONT_HEADER)
+			bonus_label.add_theme_font_size_override("font_size", 15)
+			bonus_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			info_box.add_child(bonus_label)
 
 
 func _update_card_border(card: PanelContainer, color: Color) -> void:
@@ -451,20 +469,13 @@ func _get_rarity_color(rarity: String) -> Color:
 			return COLOR_COMMON
 
 
-func _get_current_stacks(upgrade_id: String) -> int:
-	for upgrade in RunManager.run_data.ship_upgrades:
-		if upgrade.id == upgrade_id:
-			return upgrade.stacks
-	return 0
-
-
 func _format_stat_name(stat: String) -> String:
 	# Convert snake_case to Title Case
 	return stat.replace("_", " ").capitalize()
 
 
 func _format_weapon_effects_line(effects: Array) -> String:
-	# Returns a single readable line like: "Bonus: +8% Damage / +1 Projectile"
+	# Returns a single readable line like: "+8% Damage / +1 Projectile"
 	if effects.is_empty():
 		return ""
 
@@ -493,7 +504,7 @@ func _format_weapon_effects_line(effects: Array) -> String:
 
 	if parts.is_empty():
 		return ""
-	return "Bonus: %s" % " / ".join(parts)
+	return " / ".join(parts)
 
 
 func _update_refresh_button() -> void:

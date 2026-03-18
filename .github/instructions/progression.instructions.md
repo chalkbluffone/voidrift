@@ -63,6 +63,7 @@ On level up, player chooses 1 of `LEVEL_UP_OPTION_COUNT` (default 3) upgrade opt
 - `UpgradeService.generate_level_up_options()` rolls rarity, picks stats
 - `OFFER_WEIGHT_*` constants control weapon vs module frequency
 - `MAX_WEAPON_SLOTS` and `MAX_MODULE_SLOTS` limit loadout size
+- Both weapon and module candidates include `"current_level"` in their option dicts so the UI can show "Level X → Y" uniformly
 - While weapon slots are still open, offer pool includes both:
 - Existing weapon level-up options for currently owned weapons
 - New weapon offers for unlocked, unequipped weapons

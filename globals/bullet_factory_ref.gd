@@ -110,6 +110,11 @@ func _handle_enemy_hit(enemy: Node2D, multimesh: Object, bullet_index: int, cust
 		enemy.take_damage(final_damage, null, damage_info)
 		_run_manager.record_damage_dealt(final_damage)
 
+	# Apply knockback along pellet travel direction
+	if bullet_data.knockback > 0.0 and enemy.has_method("apply_knockback"):
+		var kb_dir: Vector2 = (enemy.global_position - bullet_data.spawn_origin).normalized()
+		enemy.apply_knockback(kb_dir * bullet_data.knockback)
+
 	# Bounce chain: spawn a new bullet toward the nearest other enemy
 	if bullet_data.bounces_remaining > 0:
 		var hit_pos: Vector2 = Vector2(_bullet_transform.origin.x, _bullet_transform.origin.y)

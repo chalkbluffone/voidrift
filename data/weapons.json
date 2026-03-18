@@ -1,6 +1,7 @@
 {
 	"broken_tractor_beam": {
 		"description": "Tethers to a target with a malfunctioning tractor beam that irradiates it over time and stays locked on until the target dies… on accident. Whoops.",
+		"description_short": "Malfunctioning beam that accidentally irradiates targets to death.",
 		"display_name": "Broken Tractor Beam",
 		"enabled": true,
 		"motion": {
@@ -34,6 +35,7 @@
 	"ion_wake": {
 		"burst_managed": true,
 		"description": "Periodically drops ionized damage circles behind your ship that grow and explode into synthwave particles. Higher spawn rate means more circles left in your wake.",
+		"description_short": "Drops explosive ion circles behind your ship like breadcrumbs of doom.",
 		"display_name": "Ion Wake",
 		"enabled": true,
 		"motion": {
@@ -70,6 +72,7 @@
 	},
 	"nikolas_coil": {
 		"description": "Fires an instant Tesla arc that chains to nearby enemies via successive bounces. Not a trendy car.",
+		"description_short": "Tesla arc that chain-bounces between enemies — not a trendy car.",
 		"display_name": "Nikola's Coil",
 		"enabled": true,
 		"motion": {
@@ -105,6 +108,7 @@
 	},
 	"nope_bubble": {
 		"description": "Blocks hits with rechargeable shield charges, consuming one per block and releasing a staggering shockwave.",
+		"description_short": "Shield charges that block hits and release staggering shockwaves.",
 		"display_name": "Nope Bubble",
 		"enabled": true,
 		"motion": {
@@ -134,6 +138,7 @@
 	},
 	"personal_space_violator": {
 		"description": "Unleashes a wide spray of neon pellets that shred anything foolish enough to get close. Devastating at point-blank range but loses punch fast — if they're far away, you're just tickling them with glowing confetti.",
+		"description_short": "Point-blank neon pellet shredder with savage falloff.",
 		"display_name": "Personal Space Violator",
 		"enabled": true,
 		"motion": {
@@ -148,6 +153,7 @@
 			"damage": 15.0,
 			"falloff_end": 350.0,
 			"falloff_start": 80.0,
+			"knockback": 280.0,
 			"lifetime": 0.8,
 			"projectile_count": 3.0,
 			"projectile_speed": 600.0
@@ -164,6 +170,7 @@
 	},
 	"proximity_tax": {
 		"description": "Imposes a damaging aura around the ship that harms enemies who get too close. It's like a tax, but in space...and kills bad guys.",
+		"description_short": "Passive damage aura for enemies who lack personal boundaries.",
 		"display_name": "Proximity Tax",
 		"enabled": true,
 		"motion": {
@@ -187,6 +194,7 @@
 	},
 	"psp_9000": {
 		"description": "PSP or Personal Space Program, deploys orbiting security drones that body-check nearby enemies for physical damage and knockback. Not to be confused with a certain handheld gaming device.",
+		"description_short": "Orbiting security drones that body-check nearby enemies.",
 		"display_name": "PSP-9000",
 		"enabled": true,
 		"motion": {
@@ -215,6 +223,7 @@
 	"radiant_arc": {
 		"burst_managed": true,
 		"description": "Emits a short-range photonic slash in a wide arc from the ship’s forward edge, instantly cutting through and damaging any targets caught in its path. Really cool looking.",
+		"description_short": "Photonic slash that sweeps a wide arc from your ship.",
 		"display_name": "Radiant Arc",
 		"enabled": true,
 		"motion": {
@@ -275,6 +284,7 @@
 	},
 	"snarky_comeback": {
 		"description": "Throws a radiant arc projectile that returns back… created by General Cliff Snarky during the Great Flobus Wars of Quadrant 12. Also talks a grip of shit.",
+		"description_short": "Boomerang arc projectile that talks trash on the return trip.",
 		"display_name": "Snarky Comeback",
 		"enabled": true,
 		"motion": {
@@ -338,6 +348,7 @@
 	},
 	"space_napalm": {
 		"description": "Launches a volatile incendiary orb that detonates on impact, blanketing the blast radius with burning damage over time. Not to be confused with regular napalm.",
+		"description_short": "Incendiary orb that detonates into a burning damage zone.",
 		"display_name": "Space Napalm",
 		"enabled": true,
 		"motion": {
@@ -392,6 +403,7 @@
 	},
 	"space_nukes": {
 		"description": "Launches a barrage of explosive projectiles that detonate on impact, causing area damage to nearby enemies. It's like fireworks, but deadlier. In space.",
+		"description_short": "Explosive barrage that detonates on impact for area damage.",
 		"display_name": "Space Nukes",
 		"enabled": true,
 		"motion": {
@@ -419,6 +431,7 @@
 	},
 	"spin_cycle": {
 		"description": "Creates a swirling vortex of energy around the ship, damaging enemies caught within its radius. It's like a cosmic washing machine for bad guys.",
+		"description_short": "Swirling energy vortex that launders enemies around your ship.",
 		"display_name": "Spin Cycle",
 		"enabled": true,
 		"motion": {
@@ -446,6 +459,7 @@
 	"straight_line_negotiator": {
 		"burst_managed": true,
 		"description": "Fires a magnet-accelerated spike that travels in a perfectly straight line and pierces through multiple enemies. Definitely not a space sniper rifle. Honest.",
+		"description_short": "Piercing mag-rail spike that flies perfectly straight through targets.",
 		"display_name": "Straight-Line Negotiator",
 		"enabled": true,
 		"motion": {
@@ -479,6 +493,7 @@
 	"timmy_gun": {
 		"burst_managed": true,
 		"description": "The Timson Sub-Space Machine Gun model T2928A1, unloads a burst of physical rounds that ricochet off targets, bouncing to hit additional enemies before dissipating. Also, known as the \"Trench Broom\" as it was used in the great Balsurpian war of 2918 to disipate Balsurpians from the Ionic Trenches of Delton VII.",
+		"description_short": "Sub-space machine gun burst that ricochets between enemies.",
 		"display_name": "Timmy Gun",
 		"enabled": true,
 		"motion": {
@@ -509,6 +524,7 @@
 	},
 	"tothian_mines": {
 		"description": "Deploys proximity-triggered mines that detonate when enemies come near, dealing area damage. Inspired by the ancient Tothian defense systems.",
+		"description_short": "Proximity mines that detonate when enemies wander too close.",
 		"display_name": "Tothian Mines",
 		"enabled": true,
 		"motion": {
@@ -536,6 +552,7 @@
 	"space_lasers": {
 		"burst_managed": true,
 		"description": "Fires focused neon-red laser bolts that lock onto the nearest target and ricochet to additional enemies on impact. Developed by the Crimson Array research division, each bolt seeks a new target after every hit, chaining damage across the battlefield.",
+		"description_short": "Neon-red laser bolts that ricochet to chain damage across targets.",
 		"display_name": "Space Lasers",
 		"enabled": true,
 		"motion": {

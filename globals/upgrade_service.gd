@@ -101,6 +101,7 @@ func _build_module_candidates(
 			"effects": effects,
 			"data": upgrade,
 			"is_new": not is_owned,
+			"current_level": current_stacks,
 		})
 	return candidates
 

@@ -74,13 +74,14 @@ func spawn(
 	# Build BB2D bullet data
 	var data: Object = ClassDB.instantiate(&"DirectionalBulletsData2D")
 	data.textures = [_texture]
-	# Native texture size: 170×133 px — scaled down for gameplay
-	data.texture_size = Vector2(68.85, 53.865) * size_mult
-	data.collision_shape_size = Vector2(9.0, 9.0) * size_mult
+	# Native texture size: 170×133 px — scaled down for gameplay (static, not affected by size stat)
+	data.texture_size = Vector2(68.85, 53.865)
+	data.collision_shape_size = Vector2(9.0, 9.0)
 	data.set_collision_layer_from_array([3])  # Layer 3 = Projectiles (bitmask 4)
 	data.set_collision_mask_from_array([4])   # Layer 4 = Enemies (bitmask 8)
 	data.monitorable = true
-	data.max_life_time = lifetime
+	# Size stat increases travel distance (lifetime) rather than pellet visual size
+	data.max_life_time = lifetime * size_mult
 	data.transforms = transforms
 	data.all_bullet_speed_data = speed_data_arr
 
@@ -91,10 +92,12 @@ func spawn(
 	bullet_meta.crit_chance = crit_chance
 	bullet_meta.crit_damage = crit_damage
 	bullet_meta.size_mult = size_mult
+	bullet_meta.knockback = float(params.get("knockback", 0.0))
 	bullet_meta.spawn_origin = origin
 	bullet_meta.extra = {
 		"falloff_start": falloff_start,
-		"falloff_end": falloff_end,
+		# Falloff end scales with size so damage curve stretches with travel distance
+		"falloff_end": falloff_end * size_mult,
 	}
 	if follow_source and follow_source.has_node("StatsComponent"):
 		bullet_meta.set_stats_component(follow_source.get_node("StatsComponent"))

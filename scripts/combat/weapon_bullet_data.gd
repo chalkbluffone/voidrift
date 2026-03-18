@@ -11,6 +11,7 @@ extends Resource
 @export var bounces_remaining: int = 0
 @export var bounce_range: float = 0.0
 @export var size_mult: float = 1.0
+@export var knockback: float = 0.0
 @export var spawn_origin: Vector2 = Vector2.ZERO
 @export var extra: Dictionary = {}
 

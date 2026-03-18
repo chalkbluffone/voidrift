@@ -64,6 +64,21 @@ The HUD uses Orbitron-Bold font throughout with synthwave neon styling.
 - `LEVEL_UP_OPTION_COUNT` controls number of options shown
 - Upgrade card hover shader: `shaders/ui_upgrade_card_hover.gdshader`
 
+### Card Content Layout
+
+Each upgrade card shows (top to bottom):
+
+1. **Weapon/module name** — header font, rarity-colored
+2. **Short description** — uses `description_short` field from JSON with fallback to `description`; gray text (`Color(0.8, 0.8, 0.8)`)
+3. **Level line** (if upgrading existing item) — cyan (`UiColors.CYAN`), format: `"Level X → Y"`; hidden for brand-new items (NEW tag handles that)
+4. **Bonus line** (weapons only) — white bold (`FONT_HEADER`), shows stat effects like `"+8% Damage / +1 Projectile"`
+
+Both level and bonus lines are separate `Label` nodes (`"LevelLine"`, `"BonusLine"`) dynamically created and cleaned up on card refresh.
+
+### Module Level Display
+
+`UpgradeService._build_module_candidates()` includes `"current_level"` in the module option dict (matching weapon behavior). The UI uses a unified `int(option.get("current_level", 0))` lookup for all upgrade types.
+
 ## Ability Ring Indicator
 
 Combined HUD element at bottom-center, 50% overlapping the XP bar. Shows captain ability cooldown (center circle) surrounded by a 360° ring of phase shift charge segments. Two keybind badges: below center (ability key), bottom-left (phase shift key).

@@ -49,17 +49,19 @@ Six projectile weapons use the [BlastBullets2D](https://github.com/nikoladevelop
 
 **Collision routing:** `BulletFactoryRef._on_body_entered` / `_on_area_entered` → `_handle_enemy_hit()`. Weapon-specific logic (PSV falloff, Space Nukes AoE, Space Lasers bounce) via `weapon_id` dispatch.
 
+**Generic knockback:** `WeaponBulletData` has a `knockback: float` field. When `> 0.0` and the hit enemy has `apply_knockback()`, `BulletFactoryRef._handle_enemy_hit()` applies knockback along the pellet's travel direction (from `spawn_origin` toward enemy). Any BB2D weapon can opt in by setting `bullet_meta.knockback` in its spawner.
+
 **BB2D weapons:** Personal Space Violator, Space Lasers, Straight-Line Negotiator, Timmy Gun, Space Nukes. Space Napalm is shader-driven (not BB2D).
 
 **BB2D weapon texture sizes (tuned values, not raw PNG):**
 
-| Weapon                   | `texture_size`         | Scales with `size_mult`?                 |
-| ------------------------ | ---------------------- | ---------------------------------------- |
-| Personal Space Violator  | `Vector2(76.5, 59.85)` | Yes                                      |
-| Space Lasers             | `Vector2(114.0, 16.7)` | No — size only increases targeting range |
-| Timmy Gun                | `Vector2(33.75, 34.5)` | Yes                                      |
-| Straight-Line Negotiator | `Vector2(40.0, 8.0)`   | Yes                                      |
-| Space Nukes              | `Vector2(36.0, 19.5)`  | Yes                                      |
+| Weapon                   | `texture_size`           | Scales with `size_mult`?                                             |
+| ------------------------ | ------------------------ | -------------------------------------------------------------------- |
+| Personal Space Violator  | `Vector2(68.85, 53.865)` | No — size scales lifetime/falloff (travel distance), not visual size |
+| Space Lasers             | `Vector2(114.0, 16.7)`   | No — size only increases targeting range                             |
+| Timmy Gun                | `Vector2(33.75, 34.5)`   | Yes                                                                  |
+| Straight-Line Negotiator | `Vector2(40.0, 8.0)`     | Yes                                                                  |
+| Space Nukes              | `Vector2(36.0, 19.5)`    | Yes                                                                  |
 
 **Bounce bullet edge spawning:** Bounce bullets (Space Lasers, Timmy Gun) spawn from the edge of the hit enemy facing the next target, not from the enemy center. Uses the enemy's `CollisionShape2D` `CircleShape2D` radius + 4px padding. Code in `BulletFactoryRef._spawn_bounce_bullet()`.
 
@@ -84,8 +86,9 @@ Six projectile weapons use the [BlastBullets2D](https://github.com/nikoladevelop
 ### Personal Space Violator Visual/Size Contract
 
 - Personal Space Violator projectiles use `assets/lasers/laser_bullet_green.png` via a sprite-based additive visual helper.
-- Keep PSP sprite scale fixed from `data/weapons.json` (`personal_space_violator.visual.sprite_scale`); weapon `size` upgrades must not inflate the visual sprite.
-- PSP weapon `size` upgrades must increase projectile collision reach (hit radius) by flowing runtime `size_mult` into projectile initialization.
+- Keep PSV sprite scale and collision shape fixed; weapon `size` upgrades must **not** inflate them.
+- PSV weapon `size` upgrades scale `lifetime` (travel distance) and `falloff_end` (damage falloff range), not `texture_size` or `collision_shape_size`.
+- PSV supports knockback via `WeaponBulletData.knockback` — force is applied along each pellet's travel direction.
 
 ### Projectile Spawn Origin Rule
 
