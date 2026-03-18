@@ -9,6 +9,7 @@ signal swarm_ended
 
 const XPPickupScene: PackedScene = preload("res://scenes/pickups/xp_pickup.tscn")
 const MergedXPPickupScene: PackedScene = preload("res://scenes/pickups/merged_xp_pickup.tscn")
+const GoldXPPickupScene: PackedScene = preload("res://scenes/pickups/gold_xp_pickup.tscn")
 const StardustPickupScene: PackedScene = preload("res://scenes/pickups/stardust_pickup.tscn")
 
 ## Power-up scenes (randomly chosen from pool on enemy kill)
@@ -100,6 +101,7 @@ func _process(delta: float) -> void:
 	if _xp_merge_timer <= 0.0:
 		_xp_merge_timer = GameConfig.XP_MERGE_INTERVAL
 		_try_merge_xp_pickups()
+		_try_merge_merged_xp_pickups()
 
 
 func _find_player() -> void:
@@ -585,6 +587,82 @@ func _try_merge_xp_pickups() -> void:
 			if is_instance_valid(get_tree()) and get_tree().current_scene:
 				get_tree().current_scene.call_deferred("add_child", merged)
 				merged.call_deferred("animate_entrance")
+		)
+
+
+## Scan idle merged (red) XP pickups and combine clusters of 5+ into a single gold pickup.
+func _try_merge_merged_xp_pickups() -> void:
+	var merged_nodes: Array[Node] = get_tree().get_nodes_in_group("merged_xp_pickups")
+	var merged_list: Array[Node2D] = []
+	for p: Node in merged_nodes:
+		if p is BasePickup and not (p as BasePickup)._is_attracted:
+			merged_list.append(p as Node2D)
+
+	if merged_list.size() < GameConfig.XP_MERGE_COUNT:
+		return
+
+	var merge_radius_sq: float = GameConfig.GOLD_XP_MERGE_RADIUS * GameConfig.GOLD_XP_MERGE_RADIUS
+	var visited: Dictionary = {}
+
+	for i: int in range(merged_list.size()):
+		var seed_pickup: Node2D = merged_list[i]
+		if visited.has(seed_pickup.get_instance_id()):
+			continue
+
+		var cluster: Array[Node2D] = [seed_pickup]
+		var seed_pos: Vector2 = seed_pickup.global_position
+
+		for j: int in range(i + 1, merged_list.size()):
+			var other: Node2D = merged_list[j]
+			if visited.has(other.get_instance_id()):
+				continue
+			if seed_pos.distance_squared_to(other.global_position) <= merge_radius_sq:
+				cluster.append(other)
+
+		if cluster.size() < GameConfig.XP_MERGE_COUNT:
+			continue
+
+		var total_xp: float = 0.0
+		var centroid: Vector2 = Vector2.ZERO
+		for p: Node2D in cluster:
+			total_xp += float(p.get("xp_amount"))
+			centroid += p.global_position
+			visited[p.get_instance_id()] = true
+		centroid /= float(cluster.size())
+
+		for p: Node2D in cluster:
+			if p.is_in_group("merged_xp_pickups"):
+				p.remove_from_group("merged_xp_pickups")
+			(p as Area2D).monitoring = false
+			(p as Area2D).monitorable = false
+			(p as BasePickup)._is_attracted = true
+
+		var fly_duration: float = GameConfig.XP_MERGE_FLY_DURATION
+		var last_tween: Tween = null
+		for p: Node2D in cluster:
+			var tween: Tween = p.create_tween()
+			tween.set_parallel(true)
+			tween.tween_property(p, "global_position", centroid, fly_duration) \
+				.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+			tween.tween_property(p, "scale", Vector2.ZERO, fly_duration) \
+				.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+			tween.tween_property(p, "modulate:a", 0.0, fly_duration) \
+				.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+			last_tween = tween
+
+		var captured_cluster: Array[Node2D] = cluster
+		var captured_xp: float = total_xp
+		var captured_centroid: Vector2 = centroid
+		last_tween.finished.connect(func() -> void:
+			for p: Node2D in captured_cluster:
+				if is_instance_valid(p):
+					p.queue_free()
+			var gold: Area2D = GoldXPPickupScene.instantiate()
+			gold.global_position = captured_centroid
+			gold.initialize(captured_xp)
+			if is_instance_valid(get_tree()) and get_tree().current_scene:
+				get_tree().current_scene.call_deferred("add_child", gold)
+				gold.call_deferred("animate_entrance")
 		)
 
 

@@ -86,6 +86,12 @@ Enemy kills produce two categories of collectibles:
 - Attracted by player's magnet/PickupRange (collision mask includes layer 32)
 - Vacuumed by Gravity Well beacons and Gravity Well power-ups
 - **XP**: Static amount per kill (`ENEMY_XP_NORMAL` for normals, random `ENEMY_XP_ELITE_MIN`–`ENEMY_XP_ELITE_MAX` for elites), no time scaling
+- **XP merge tiers**: Idle XP pickups are periodically clustered and merged for performance:
+  - **Blue → Red**: 5 blue crystals (1 XP each) within `XP_MERGE_RADIUS` (100px) merge into 1 red crystal. Blue crystals join `"xp_pickups"` group.
+  - **Red → Gold**: 5 red crystals within `GOLD_XP_MERGE_RADIUS` (200px) merge into 1 gold crystal (25 XP). Red crystals join `"merged_xp_pickups"` group.
+  - **Gold = terminal**: Gold crystals join no group and cannot merge further.
+  - Merge scan runs every `XP_MERGE_INTERVAL` (2s) in `enemy_spawner._process()`. Both passes run in the same tick.
+  - Merge animation: originals fly to centroid (0.35s), then spawned crystal plays scale-pop + white flash entrance.
 - **Credits**: Normal enemies drop `ENEMY_CREDITS_NORMAL` (1). Elites drop random `ENEMY_CREDITS_ELITE_MIN`–`ENEMY_CREDITS_ELITE_MAX` (2–5). `credits_gain` stat multiplies final amount via ProgressionManager. **No physical credit pickup is spawned** — credits are granted instantly on enemy death (including freighter jackpots) for performance.
 - **Stardust**: Chance-based drop for normal enemies (`STARDUST_BASE_DROP_CHANCE` × `stardust_gain` stat). Enemies must have `stardust_value > 0` in `enemies.json`. Loot Freighters always drop their full `stardust_value` (no chance roll).
 

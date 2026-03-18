@@ -89,6 +89,7 @@ const PICKUP_MAGNET_ACCELERATION: float = 800.0  # How fast pickups accelerate
 
 # XP merge (performance — combines nearby idle XP pickups into larger glowing ones)
 const XP_MERGE_RADIUS: float = 100.0       # Pixel radius to cluster nearby XP for merging
+const GOLD_XP_MERGE_RADIUS: float = 200.0  # Pixel radius to cluster red XP for gold merging
 const XP_MERGE_COUNT: int = 5              # Minimum XP pickup count in cluster to trigger merge
 const XP_MERGE_INTERVAL: float = 2.0       # Seconds between merge scan passes
 const XP_MERGE_VISUAL_SIZE: float = 12.0   # Half-size of merged XP glow footprint (pixels)

@@ -1,18 +1,18 @@
 extends "res://scripts/pickups/xp_pickup.gd"
 
-## MergedXPPickup — same as XPPickup but excluded from further merge passes.
+## GoldXPPickup — terminal merge tier. NOT added to any merge group.
 ## Supports animated entrance (scale pop + flash) when spawned by merge system.
 
 
 func _on_pickup_ready() -> void:
-	add_to_group("merged_xp_pickups")
+	pass
 
 
 ## Plays bouncy scale-pop + white flash entrance animation.
 ## Called by enemy_spawner after the fly-in tween completes.
 func animate_entrance() -> void:
 	scale = Vector2.ZERO
-	modulate = Color(3.0, 3.0, 3.0, 1.0)  # Bright white flash
+	modulate = Color(3.0, 3.0, 3.0, 1.0)
 
 	var tween: Tween = create_tween()
 	tween.set_parallel(true)
