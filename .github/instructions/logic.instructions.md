@@ -265,6 +265,20 @@ _active_instances = _active_instances.filter(func(inst) -> bool: return is_insta
 
 Checklist: `visible = true`? Texture assigned? `z_index` correct? `scale` non-zero? `modulate` alpha > 0?
 
+### Scale Tween Grows in Wrong Direction (Controls)
+
+When tweening `scale` on a `Control` node, the scale pivot defaults to the **top-left corner** (0, 0). For centered UI elements, set `pivot_offset` to the visual center so the tween expands symmetrically:
+
+```gdscript
+# Label centered in a 200px-wide container — pivot at top-center
+pivot_offset = Vector2(100, 0)
+
+# Ability ring indicator — pivot at ring center
+pivot_offset = Vector2(size.x * 0.5, size.y - 40.0)
+```
+
+This can be set in the `.tscn` file or in `_ready()`. Without it, scale tweens visually grow toward the bottom-right.
+
 ---
 
 ## Debugging: FileLogger

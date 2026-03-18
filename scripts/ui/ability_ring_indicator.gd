@@ -18,6 +18,7 @@ const RING_OUTER: float = 72.0            # Ring outer edge
 const RING_WIDTH: float = 12.0            # Stroke width for draw_arc
 const RING_GAP_DEGREES: float = 6.0       # Gap between segments in degrees
 const ARC_POINT_COUNT: int = 16           # Points per arc segment
+const PORTRAIT_RADIUS: float = 46.0       # Portrait circle radius (inset from INNER_RADIUS)
 
 const BADGE_SIZE: Vector2 = Vector2(36.0, 24.0)
 const BADGE_FONT_SIZE: int = 14
@@ -69,6 +70,11 @@ var _ship: Node = null
 var _font: Font = null
 var _glow_pulse: float = 0.0  # 0–1 oscillation for active glow
 
+# Portrait visuals
+var _portrait_rect: ColorRect = null
+var _portrait_material: ShaderMaterial = null
+var _has_portrait: bool = false
+
 # Charge-up visuals
 var _charge_particles: GPUParticles2D = null
 var _charge_material: ParticleProcessMaterial = null
@@ -79,6 +85,7 @@ var _flash_tween: Tween = null
 
 func _ready() -> void:
 	custom_minimum_size = Vector2(INDICATOR_SIZE, INDICATOR_SIZE)
+	pivot_offset = Vector2(size.x * 0.5, size.y - 40.0)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if ResourceLoader.exists(FONT_PATH):
 		_font = load(FONT_PATH) as Font
@@ -133,6 +140,9 @@ func setup(ship: Node) -> void:
 	# Resolve keybinds
 	_ability_keybind = _resolve_keybind_label("captain_ability", _input_device)
 	_phase_keybind = _resolve_keybind_label("phase_shift", _input_device)
+
+	# Setup captain portrait inside the ability circle
+	_setup_portrait()
 
 	# Setup charging particles
 	_setup_charge_particles()
@@ -238,22 +248,28 @@ func _draw_ring_segments(center: Vector2) -> void:
 # =============================================================================
 func _draw_ability_circle(center: Vector2) -> void:
 	var is_charging: bool = _ability_cooldown_progress > 0.001 and not _ability_active
+	var is_ready: bool = _ability_cooldown_progress <= 0.001 and not _ability_active and _has_ability
 
-	# Background circle — darker when charging
-	var bg_color: Color = COLOR_CHARGING_BG if is_charging else COLOR_ABILITY_BG
-	draw_circle(center, INNER_RADIUS, bg_color)
+	# Background circle — only draw when no portrait is present
+	if not _has_portrait:
+		var bg_color: Color = COLOR_CHARGING_BG if is_charging else COLOR_ABILITY_BG
+		draw_circle(center, INNER_RADIUS, bg_color)
+	elif not is_charging:
+		# Dark ring border between portrait edge and ability circle boundary (skip during charging)
+		draw_circle(center, INNER_RADIUS, Color(0.06, 0.06, 0.1, 0.675))
 
-	# Charging state: thin progress ring around the circle edge (no pie, no text)
+	# Charging state: thin progress ring around the circle edge
 	if is_charging:
 		var charge_progress: float = 1.0 - _ability_cooldown_progress
 		var charge_color: Color = _get_charge_color(charge_progress)
-		# Draw a partial arc showing how much is charged
 		if charge_progress > 0.005:
 			var arc_end: float = -PI / 2.0 + TAU * charge_progress
 			draw_arc(center, INNER_RADIUS - 2.0, -PI / 2.0, arc_end, 32, charge_color, 3.0, true)
-		return
+		# With portrait, don't return early — still draw border ring below
+		if not _has_portrait:
+			return
 
-	# Ability text (name or cooldown seconds)
+	# Text: only show countdown during active, or "-" when no ability, or nothing with portrait
 	if _font:
 		var display_text: String = ""
 		var text_color: Color = COLOR_ABILITY_READY
@@ -261,28 +277,34 @@ func _draw_ability_circle(center: Vector2) -> void:
 		if _ability_active:
 			display_text = "%d" % ceili(_ability_duration_remaining)
 			text_color = COLOR_ACTIVE_GLOW
-		elif _has_ability:
-			# Show full ability name, scaled to fit
-			display_text = _ability_name.to_upper() if _ability_name.length() > 0 else "?"
-			text_color = COLOR_ABILITY_READY
-		else:
+		elif is_ready and _has_portrait:
+			display_text = "READY"
+			text_color = COLOR_ACTIVE_GLOW
+		elif not _has_ability:
 			display_text = "-"
 			text_color = COLOR_CHARGE_EMPTY
+		elif not _has_portrait and _has_ability and is_ready:
+			# Fallback: show ability name only when no portrait
+			display_text = _ability_name.to_upper() if _ability_name.length() > 0 else "?"
+			text_color = COLOR_ABILITY_READY
 
-		# Scale font size to fit inside the circle
-		var max_text_width: float = INNER_RADIUS * 1.6
-		var font_size: int = 20
-		var measured: float = _font.get_string_size(display_text, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size).x
-		while measured > max_text_width and font_size > 8:
-			font_size -= 1
-			measured = _font.get_string_size(display_text, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size).x
+		if display_text.length() > 0:
+			var max_text_width: float = INNER_RADIUS * 1.6
+			var font_size: int = 20
+			var measured: float = _font.get_string_size(display_text, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size).x
+			while measured > max_text_width and font_size > 8:
+				font_size -= 1
+				measured = _font.get_string_size(display_text, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size).x
 
-		var text_size: Vector2 = _font.get_string_size(display_text, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size)
-		var text_pos: Vector2 = center + Vector2(-text_size.x * 0.5, text_size.y * 0.3)
-		draw_string(_font, text_pos, display_text, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size, text_color)
+			var text_size: Vector2 = _font.get_string_size(display_text, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size)
+			var text_pos: Vector2 = center + Vector2(-text_size.x * 0.5, text_size.y * 0.3)
+			# Draw outline for readability on portrait
+			if _has_portrait and (_ability_active or is_ready):
+				draw_string_outline(_font, text_pos, display_text, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size, 3, Color(0, 0, 0, 0.8))
+			draw_string(_font, text_pos, display_text, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size, text_color)
 
 	# Thin border ring when ready
-	if _ability_cooldown_progress <= 0.001 and not _ability_active and _has_ability:
+	if is_ready:
 		draw_arc(center, INNER_RADIUS, 0.0, TAU, 32, COLOR_ABILITY_READY, 2.5, true)
 
 
@@ -500,6 +522,92 @@ func _on_input_device_changed(device: String) -> void:
 
 
 # =============================================================================
+# CAPTAIN PORTRAIT (inside ability circle)
+# =============================================================================
+
+## Build a circular-masked captain portrait inside the ability circle.
+## Inserted as child index 1 (after ReadyGlowRect at 0), so it renders
+## behind _draw() content (arcs, text) but in front of the glow.
+func _setup_portrait() -> void:
+	@warning_ignore("unsafe_method_access")
+	var RunManager: Node = get_node_or_null("/root/RunManager")
+	if not RunManager:
+		return
+	var captain_data: Dictionary = RunManager.run_data.get("captain_data", {})
+	var sprite_path: String = String(captain_data.get("sprite", ""))
+	if sprite_path.is_empty() or not ResourceLoader.exists(sprite_path):
+		return
+
+	var tex: Texture2D = load(sprite_path) as Texture2D
+	if tex == null:
+		return
+
+	var tex_size: Vector2 = tex.get_size()
+	var tex_aspect: float = tex_size.x / tex_size.y if tex_size.y > 0.0 else 1.0
+
+	var GameConfig: Node = get_node_or_null("/root/GameConfig")
+	var crop_fraction: float = GameConfig.HUD_AVATAR_CROP_FRACTION if GameConfig else 0.65
+
+	# Portrait ColorRect with shader that crops, circles, and vignettes
+	_portrait_rect = ColorRect.new()
+	_portrait_rect.color = Color(1, 1, 1, 1)
+	_portrait_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var portrait_size: float = PORTRAIT_RADIUS * 2.0
+	var center: Vector2 = Vector2(size.x * 0.5, size.y - 40.0)
+	_portrait_rect.position = center - Vector2(portrait_size * 0.5, portrait_size * 0.5)
+	_portrait_rect.size = Vector2(portrait_size, portrait_size)
+
+	var shader_code: String = """
+shader_type canvas_item;
+
+uniform sampler2D portrait_tex : filter_linear;
+uniform float crop_fraction : hint_range(0.1, 1.0) = 0.5;
+uniform float tex_aspect = 1.0;
+uniform float vignette_strength : hint_range(0.0, 1.0) = 0.0;
+
+void fragment() {
+	vec2 sample_uv;
+	if (tex_aspect >= 1.0) {
+		float x_span = crop_fraction / tex_aspect;
+		sample_uv.x = mix(0.5 - x_span * 0.5, 0.5 + x_span * 0.5, UV.x);
+		sample_uv.y = UV.y * crop_fraction;
+	} else {
+		float half_crop = crop_fraction * 0.5;
+		sample_uv.x = mix(0.5 - half_crop, 0.5 + half_crop, UV.x);
+		sample_uv.y = UV.y * tex_aspect * crop_fraction;
+	}
+
+	vec4 col = texture(portrait_tex, sample_uv);
+
+	// Circle mask with inset edge (slightly smaller than container)
+	vec2 centered = UV - vec2(0.5);
+	float dist = length(centered);
+	col.a *= 1.0 - smoothstep(0.45, 0.48, dist);
+
+	// Subtle edge vignette (darkens edges when vignette_strength > 0)
+	float vignette = smoothstep(0.2, 0.48, dist);
+	col.rgb *= 1.0 - vignette * vignette_strength * 0.5;
+
+	COLOR = col;
+}
+"""
+	var shader: Shader = Shader.new()
+	shader.code = shader_code
+	_portrait_material = ShaderMaterial.new()
+	_portrait_material.shader = shader
+	_portrait_material.set_shader_parameter("portrait_tex", tex)
+	_portrait_material.set_shader_parameter("crop_fraction", crop_fraction)
+	_portrait_material.set_shader_parameter("tex_aspect", tex_aspect)
+	_portrait_material.set_shader_parameter("vignette_strength", 0.0)
+	_portrait_rect.material = _portrait_material
+
+	_portrait_rect.show_behind_parent = true
+	add_child(_portrait_rect)
+
+	_has_portrait = true
+
+
+# =============================================================================
 # CHARGE-UP VISUAL SYSTEM
 # =============================================================================
 
@@ -519,9 +627,8 @@ func _setup_ready_glow() -> void:
 	_ready_glow_rect.material = _ready_glow_material
 	_ready_glow_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_ready_glow_rect.visible = false
-	# Insert at index 0 so it renders behind our _draw() content
+	_ready_glow_rect.show_behind_parent = true
 	add_child(_ready_glow_rect)
-	move_child(_ready_glow_rect, 0)
 
 
 ## Setup charging spiral particles using GPUParticles2D.
@@ -616,6 +723,15 @@ func _update_charge_visuals() -> void:
 			var glow_size: float = INNER_RADIUS * 3.0
 			_ready_glow_rect.position = center - Vector2(glow_size * 0.5, glow_size * 0.5)
 			_ready_glow_rect.size = Vector2(glow_size, glow_size)
+
+	# --- Portrait vignette: medium when active, subtle when ready, clear when charging ---
+	if _portrait_material:
+		if _ability_active:
+			_portrait_material.set_shader_parameter("vignette_strength", 1.0)
+		elif is_ready:
+			_portrait_material.set_shader_parameter("vignette_strength", 0.6)
+		else:
+			_portrait_material.set_shader_parameter("vignette_strength", 0.0)
 
 
 ## Get the interpolated charge color based on progress (0.0 = start, 1.0 = complete).

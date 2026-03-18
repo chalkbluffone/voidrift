@@ -10,7 +10,7 @@ script = ExtResource("1_hud")
 [node name="TopLeft" type="Control" parent="."]
 anchors_preset = 0
 offset_right = 320.0
-offset_bottom = 100.0
+offset_bottom = 140.0
 
 [node name="LeftWeapons" type="Control" parent="."]
 anchors_preset = 4
@@ -56,7 +56,7 @@ layout_mode = 0
 offset_left = 12.0
 offset_top = 8.0
 offset_right = 308.0
-offset_bottom = 38.0
+offset_bottom = 28.0
 max_value = 100.0
 value = 0.0
 show_percentage = false
@@ -72,7 +72,7 @@ grow_vertical = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 12
 text = "0 / 0"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -82,7 +82,7 @@ layout_mode = 0
 offset_left = 12.0
 offset_top = 10.0
 offset_right = 308.0
-offset_bottom = 50.0
+offset_bottom = 30.0
 max_value = 100.0
 value = 100.0
 show_percentage = false
@@ -97,10 +97,36 @@ grow_vertical = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 12
 text = "100 / 100"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="InfoLabels" type="VBoxContainer" parent="TopLeft"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 50.0
+offset_right = 308.0
+offset_bottom = 130.0
+theme_override_constants/separation = 2
+
+[node name="CreditsLabel" type="Label" parent="TopLeft/InfoLabels"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.1, 1)
+theme_override_colors/font_outline_color = Color(0.4, 0.3, 0, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 16
+text = "\u27d0 0"
+horizontal_alignment = 0
+
+[node name="StardustLabel" type="Label" parent="TopLeft/InfoLabels"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.85, 1.0, 1)
+theme_override_colors/font_outline_color = Color(0.1, 0.2, 0.4, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 16
+text = "\u2726 0"
+horizontal_alignment = 0
 
 [node name="TopCenter" type="Control" parent="."]
 anchors_preset = 5
@@ -108,7 +134,7 @@ anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -100.0
 offset_right = 100.0
-offset_bottom = 80.0
+offset_bottom = 95.0
 grow_horizontal = 2
 pivot_offset = Vector2(100, 0)
 
@@ -120,6 +146,7 @@ anchor_bottom = 1.0
 offset_top = 15.0
 grow_horizontal = 2
 grow_vertical = 2
+pivot_offset = Vector2(100, 0)
 theme_override_colors/font_color = Color(1, 0.95, 0.2, 1)
 theme_override_colors/font_outline_color = Color(1, 0.5, 0, 0.8)
 theme_override_constants/outline_size = 3
@@ -127,13 +154,23 @@ theme_override_font_sizes/font_size = 24
 text = "LV 1"
 horizontal_alignment = 1
 
+[node name="TimerLabel" type="Label" parent="TopCenter"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 42.0
+offset_bottom = 70.0
+theme_override_font_sizes/font_size = 28
+text = "00:00"
+horizontal_alignment = 1
+
 [node name="OvertimeLabel" type="Label" parent="TopCenter"]
 visible = false
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_top = 45.0
-offset_bottom = 70.0
+offset_top = 68.0
+offset_bottom = 93.0
 grow_horizontal = 2
 theme_override_colors/font_color = Color(1, 0.6, 0.1, 1)
 theme_override_colors/font_outline_color = Color(0.4, 0.15, 0, 0.8)
@@ -142,67 +179,12 @@ theme_override_font_sizes/font_size = 18
 text = ""
 horizontal_alignment = 1
 
-[node name="TopRight" type="Control" parent="."]
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -220.0
-offset_bottom = 100.0
-grow_horizontal = 0
-pivot_offset = Vector2(220, 0)
-
-[node name="HBoxContainer" type="HBoxContainer" parent="TopRight"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = 10.0
-offset_right = -10.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/separation = 10
-alignment = 1
-
-[node name="VBoxContainer" type="VBoxContainer" parent="TopRight/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 5
-
-[node name="TimerLabel" type="Label" parent="TopRight/HBoxContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 28
-text = "00:00"
-horizontal_alignment = 2
-
-[node name="CreditsLabel" type="Label" parent="TopRight/HBoxContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.85, 0.1, 1)
-theme_override_colors/font_outline_color = Color(0.4, 0.3, 0, 1)
-theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 18
-text = "⟐ 0"
-horizontal_alignment = 2
-
-[node name="StardustLabel" type="Label" parent="TopRight/HBoxContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.6, 0.85, 1.0, 1)
-theme_override_colors/font_outline_color = Color(0.1, 0.2, 0.4, 1)
-theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 18
-text = "✦ 0"
-horizontal_alignment = 2
-
-[node name="CaptainAvatar" type="Control" parent="TopRight/HBoxContainer"]
-layout_mode = 2
-custom_minimum_size = Vector2(72, 72)
-size_flags_vertical = 4
-
 [node name="BottomXP" type="Control" parent="."]
 anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -40.0
+offset_top = -20.0
 grow_horizontal = 2
 grow_vertical = 0
 
@@ -236,7 +218,7 @@ anchor_bottom = 1.0
 offset_left = 10.0
 offset_top = -170.0
 offset_right = 400.0
-offset_bottom = -44.0
+offset_bottom = -24.0
 grow_vertical = 0
 theme_override_constants/separation = 2
 

@@ -10,19 +10,35 @@ The HUD uses Orbitron-Bold font throughout with synthwave neon styling.
 
 ### Health & Shield Bars
 
-- **Shield bar**: Neon blue `ProgressBar` above HP bar. Auto-shows when `max_shield > 0` (uses `get_stat("shield")` — the stat name is `"shield"`, not `"max_shield"`). Repositions HP bar dynamically.
-- **HP bar**: Hot pink `ProgressBar` below shield bar. When overhealed, the bar's `max_value` expands to `max_hp + overheal_cap` and the fill switches to synthwave yellow (`COLOR_OVERHEAL = Color(1.0, 0.95, 0.2, 1.0)`). Reverts to hot pink when overheal drains back to normal HP.
+- **Shield bar**: Neon blue `ProgressBar` above HP bar, **20px tall** (same as HP bar). Auto-shows when `max_shield > 0` (uses `get_stat("shield")` — the stat name is `"shield"`, not `"max_shield"`). Repositions HP bar dynamically via `_reposition_bars()`.
+- **HP bar**: Hot pink `ProgressBar` below shield bar, **20px tall**. When overhealed, the bar's `max_value` expands to `max_hp + overheal_cap` and the fill switches to synthwave yellow (`COLOR_OVERHEAL = Color(1.0, 0.95, 0.2, 1.0)`). Reverts to hot pink when overheal drains back to normal HP.
 - `StatsComponent._recalculate_all()` emits `hp_changed`/`shield_changed` signals to keep HUD in sync.
+- Bar positions (`_reposition_bars()`): Shield 8→28, HP 32→52 when both visible; HP 10→30 when no shield.
 
 ### Overtime Multiplier Label
 
-- **Position**: Top-center, below the player level label ("LV X")
+- **Position**: Top-center, below the timer label
 - **Display**: Shows during overtime only (hidden during countdown). Format: "1.0x", "2.5x", etc.
 - **Color coding**: Synthwave cyan (1.0x–2.0x) → orange (2.5x–5.0x) → red (5.5x–10.0x)
 - **Source**: `RunManager.get_overtime_multiplier()` called every frame
 - **Scene node**: `TopCenter/OvertimeLabel` in `hud.tscn`
 - **Font**: Orbitron-Bold, 18px, with outline
 - See `enemies.instructions.md` for overtime multiplier escalation mechanics
+
+### Top-Center Layout
+
+The `TopCenter` Control (200px wide, centered) holds three labels stacked vertically:
+
+1. **LevelLabel** — "LV X", neon yellow, 24px. Has `pivot_offset = Vector2(100, 0)` for centered scale tween on level-up.
+2. **TimerLabel** — "MM:SS" countdown, 22px, centered. Synthwave cyan with teal outline.
+3. **OvertimeLabel** — Multiplier display, hidden until overtime.
+
+### Top-Left Info Labels
+
+Below the HP/Shield bars in TopLeft, a VBoxContainer holds:
+
+- **CreditsLabel** — Gold text, ◈ prefix
+- **StardustLabel** — Light blue text, ✦ prefix
 
 ### Lifesteal Heal Numbers
 
@@ -36,7 +52,8 @@ The HUD uses Orbitron-Bold font throughout with synthwave neon styling.
 
 ### Ship Avatar
 
-- `HUD_AVATAR_SIZE` and `HUD_AVATAR_CROP_FRACTION` control avatar display size.
+- Captain portrait is displayed inside the ability ring circle (bottom-center), not in the top-right.
+- `HUD_AVATAR_SIZE` and `HUD_AVATAR_CROP_FRACTION` control portrait display size.
 
 ## Minimap
 
@@ -83,6 +100,16 @@ Both level and bonus lines are separate `Label` nodes (`"LevelLine"`, `"BonusLin
 
 Combined HUD element at bottom-center, 50% overlapping the XP bar. Shows captain ability cooldown (center circle) surrounded by a 360° ring of phase shift charge segments. Two keybind badges: below center (ability key), bottom-left (phase shift key).
 
+### Captain Portrait (inside ability circle)
+
+The captain's portrait is rendered as a child `ColorRect` with a circle-mask + vignette shader, inserted below `_draw()` content via `show_behind_parent = true`. Three vignette states based on ability phase:
+
+- **Charging**: `vignette_strength = 0.0` (clear portrait, no dark overlay circle)
+- **Ready**: `vignette_strength = 0.6` (subtle edge dimming), dark overlay circle at alpha 0.675, "READY" text overlay
+- **Active**: `vignette_strength = 1.0` (medium dimming), dark overlay circle, countdown text
+
+Z-order (bottom to top): ReadyGlow → Portrait → `_draw()` (dark circle, arcs, text) → ChargeParticles.
+
 ### Charge-Up System
 
 The captain ability starts **uncharged** at run start (full cooldown duration, typically 75s). Three visual states:
@@ -97,7 +124,7 @@ Key files:
 - `scenes/ui/ability_ring_indicator.tscn` — Control wrapper
 - `shaders/ability_ready_glow.gdshader` — ready-state glow (layered smoothstep: halo + ring + dual shimmer + color cycle)
 
-Constants: `INNER_RADIUS=50`, `RING_INNER=60`, `RING_OUTER=72`, `RING_WIDTH=12`. Ring center at `size.y - 40.0` (XP bar top edge).
+Constants: `INNER_RADIUS=50`, `RING_INNER=60`, `RING_OUTER=72`, `RING_WIDTH=12`. Ring center at `size.y - 40.0` (XP bar top edge). `pivot_offset` set to ring center for correct scale pop direction.
 
 ### Keybind Badges
 

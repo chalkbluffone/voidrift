@@ -9,15 +9,14 @@ extends CanvasLayer
 @onready var hp_bar: ProgressBar = $TopLeft/HPBar
 @onready var hp_label: Label = $TopLeft/HPBar/HPLabel
 
-# Top center - Level
+# Top center - Level + Timer
 @onready var level_label: Label = $TopCenter/LevelLabel
+@onready var timer_label: Label = $TopCenter/TimerLabel
 @onready var overtime_label: Label = $TopCenter/OvertimeLabel
 
-# Top right
-@onready var timer_label: Label = $TopRight/HBoxContainer/VBoxContainer/TimerLabel
-@onready var credits_label: Label = $TopRight/HBoxContainer/VBoxContainer/CreditsLabel
-@onready var stardust_label: Label = $TopRight/HBoxContainer/VBoxContainer/StardustLabel
-@onready var captain_avatar: Control = $TopRight/HBoxContainer/CaptainAvatar
+# Top left - Info
+@onready var credits_label: Label = $TopLeft/InfoLabels/CreditsLabel
+@onready var stardust_label: Label = $TopLeft/InfoLabels/StardustLabel
 
 # Bottom left - debug stats
 @onready var debug_container: VBoxContainer = $BottomLeftDebug
@@ -87,9 +86,6 @@ func _ready() -> void:
 	# Apply synthwave colors
 	_apply_synthwave_theme()
 	
-	# Build captain avatar portrait
-	_build_captain_avatar()
-	
 	# Build debug XP graph (in left debug panel)
 	_build_debug_xp_graph()
 	
@@ -151,7 +147,7 @@ func _apply_synthwave_theme() -> void:
 	shield_label.add_theme_font_override("font", FONT_HEADER)
 	shield_label.add_theme_color_override("font_color", Color(1, 1, 1, 1))
 	shield_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
-	shield_label.add_theme_constant_override("outline_size", 4)
+	shield_label.add_theme_constant_override("outline_size", 2)
 	
 	# HP Bar - Hot pink
 	var hp_style: StyleBoxFlat = StyleBoxFlat.new()
@@ -174,7 +170,7 @@ func _apply_synthwave_theme() -> void:
 	hp_label.add_theme_font_override("font", FONT_HEADER)
 	hp_label.add_theme_color_override("font_color", Color(1, 1, 1, 1))
 	hp_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
-	hp_label.add_theme_constant_override("outline_size", 4)
+	hp_label.add_theme_constant_override("outline_size", 2)
 	
 	# XP Bar - Neon purple
 	var xp_style: StyleBoxFlat = StyleBoxFlat.new()
@@ -257,99 +253,6 @@ func _make_debug_label(initial_text: String) -> Label:
 	return label
 
 
-## Avatar circle diameter in pixels.
-## Tuned in GameConfig: HUD_AVATAR_SIZE, HUD_AVATAR_CROP_FRACTION
-
-## Build a circular-masked captain portrait in the CaptainAvatar container.
-func _build_captain_avatar() -> void:
-	if not captain_avatar:
-		return
-	var captain_data: Dictionary = RunManager.run_data.get("captain_data", {})
-	var sprite_path: String = String(captain_data.get("sprite", ""))
-	if sprite_path.is_empty() or not ResourceLoader.exists(sprite_path):
-		captain_avatar.visible = false
-		return
-
-	var tex: Texture2D = load(sprite_path) as Texture2D
-	if tex == null:
-		captain_avatar.visible = false
-		return
-
-	# Compute texture aspect ratio so the shader can correct for non-square images
-	var tex_size: Vector2 = tex.get_size()
-	var tex_aspect: float = tex_size.x / tex_size.y if tex_size.y > 0.0 else 1.0
-
-	# Portrait — use a ColorRect with a shader that does everything:
-	# 1. Samples the texture with correct aspect ratio
-	# 2. Shows only the top portion (head & shoulders)
-	# 3. Masks to a perfect circle
-	var portrait: ColorRect = ColorRect.new()
-	portrait.color = Color(1, 1, 1, 1)
-	portrait.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	captain_avatar.add_child(portrait)
-
-	var shader_code: String = """
-shader_type canvas_item;
-
-uniform sampler2D portrait_tex : filter_linear;
-uniform float crop_fraction : hint_range(0.1, 1.0) = 0.5;
-uniform float tex_aspect = 1.0;
-
-void fragment() {
-	// Sample a square region from the texture with uniform scaling on both axes.
-	// crop_fraction zooms in (smaller = tighter crop on head).
-	vec2 sample_uv;
-	if (tex_aspect >= 1.0) {
-		// Wide or square texture: fit full height, center-crop width
-		float x_span = crop_fraction / tex_aspect;
-		sample_uv.x = mix(0.5 - x_span * 0.5, 0.5 + x_span * 0.5, UV.x);
-		sample_uv.y = UV.y * crop_fraction;
-	} else {
-		// Tall texture (typical portrait): fit full width, crop from top
-		float half_crop = crop_fraction * 0.5;
-		sample_uv.x = mix(0.5 - half_crop, 0.5 + half_crop, UV.x);
-		sample_uv.y = UV.y * tex_aspect * crop_fraction;
-	}
-
-	vec4 col = texture(portrait_tex, sample_uv);
-
-	// Perfect circle mask
-	vec2 centered = UV - vec2(0.5);
-	float dist = length(centered);
-	col.a *= 1.0 - smoothstep(0.47, 0.5, dist);
-	COLOR = col;
-}
-"""
-	var shader: Shader = Shader.new()
-	shader.code = shader_code
-	var mat: ShaderMaterial = ShaderMaterial.new()
-	mat.shader = shader
-	mat.set_shader_parameter("portrait_tex", tex)
-	mat.set_shader_parameter("crop_fraction", GameConfig.HUD_AVATAR_CROP_FRACTION)
-	mat.set_shader_parameter("tex_aspect", tex_aspect)
-	portrait.material = mat
-
-	# Circular border ring (synthwave cyan)
-	var border_rect: ColorRect = ColorRect.new()
-	border_rect.color = Color(1, 1, 1, 1)
-	border_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	captain_avatar.add_child(border_rect)
-
-	var border_shader_code: String = """
-shader_type canvas_item;
-
-void fragment() {
-	vec2 centered = UV - vec2(0.5);
-	float dist = length(centered);
-	float ring = smoothstep(0.46, 0.48, dist) * (1.0 - smoothstep(0.49, 0.51, dist));
-	COLOR = vec4(0.0, 1.0, 0.9, ring);
-}
-"""
-	var border_shader: Shader = Shader.new()
-	border_shader.code = border_shader_code
-	var border_mat: ShaderMaterial = ShaderMaterial.new()
-	border_mat.shader = border_shader
-	border_rect.material = border_mat
 
 
 func _process(_delta: float) -> void:
@@ -464,13 +367,13 @@ func _reposition_bars() -> void:
 	if shield_bar.visible:
 		# Shield bar on top, HP bar below
 		shield_bar.offset_top = 8.0
-		shield_bar.offset_bottom = 38.0
-		hp_bar.offset_top = 42.0
-		hp_bar.offset_bottom = 72.0
+		shield_bar.offset_bottom = 28.0
+		hp_bar.offset_top = 32.0
+		hp_bar.offset_bottom = 52.0
 	else:
 		# Only HP bar, centered vertically
 		hp_bar.offset_top = 10.0
-		hp_bar.offset_bottom = 50.0
+		hp_bar.offset_bottom = 30.0
 
 
 func _update_xp(current: float, required: float) -> void:
@@ -582,8 +485,8 @@ func _build_minimap() -> void:
 	var minimap_size: float = GameConfig.MINIMAP_SIZE
 	_minimap.offset_left = -minimap_size - 10.0
 	_minimap.offset_right = -10.0
-	_minimap.offset_top = -minimap_size - 50.0  # Above XP bar
-	_minimap.offset_bottom = -50.0
+	_minimap.offset_top = -minimap_size - 30.0  # Above XP bar
+	_minimap.offset_bottom = -30.0
 	add_child(_minimap)
 
 
