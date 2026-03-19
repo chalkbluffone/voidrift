@@ -149,12 +149,6 @@ func _apply_synthwave_theme() -> void:
 	for card in _cards:
 		_style_card(card)
 	
-	# Add starfield backgrounds to icon areas (matching loadout screen)
-	for i: int in range(_cards.size()):
-		var icon_area: Control = _cards[i].find_child("IconArea%d" % (i + 1)) as Control
-		if icon_area:
-			_add_icon_starfield_bg(icon_area)
-	
 	# Style action buttons (shared synthwave button helper)
 	CARD_HOVER_FX_SCRIPT.style_synthwave_button(refresh_button, COLOR_BUTTON, _button_hover_tweens, 4, 16, 8)
 	CARD_HOVER_FX_SCRIPT.style_synthwave_button(skip_button, UiColors.BUTTON_NEUTRAL, _button_hover_tweens, 4, 16, 8)
@@ -187,6 +181,30 @@ func _style_card(card: PanelContainer) -> void:
 	style.corner_radius_bottom_right = 8
 	card.add_theme_stylebox_override("panel", style)
 	
+	# Style icon area with drop shadow
+	var icon_shadow_key: String = "_icon_shadow"
+	var icon_area: Control = card.find_child("IconArea%d" % (_cards.find(card) + 1)) as Control
+	if icon_area:
+		# Prevent IconArea from stretching vertically in the HBox
+		icon_area.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		if not icon_area.has_meta(icon_shadow_key):
+			var shadow_panel: PanelContainer = PanelContainer.new()
+			shadow_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			shadow_panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+			var shadow_style: StyleBoxFlat = StyleBoxFlat.new()
+			shadow_style.bg_color = Color(0, 0, 0, 0)
+			shadow_style.shadow_color = Color(0, 0, 0, 0.35)
+			shadow_style.shadow_size = 12
+			shadow_style.shadow_offset = Vector2(5, 5)
+			shadow_style.corner_radius_top_left = 4
+			shadow_style.corner_radius_top_right = 4
+			shadow_style.corner_radius_bottom_left = 4
+			shadow_style.corner_radius_bottom_right = 4
+			shadow_panel.add_theme_stylebox_override("panel", shadow_style)
+			icon_area.add_child(shadow_panel)
+			icon_area.move_child(shadow_panel, 0)
+			icon_area.set_meta(icon_shadow_key, shadow_panel)
+
 	# Add gradient overlay (matching loadout screen style)
 	var gradient_key: String = "_gradient_rect"
 	if not card.has_meta(gradient_key):
@@ -197,15 +215,28 @@ func _style_card(card: PanelContainer) -> void:
 		var grad_shader: Shader = Shader.new()
 		grad_shader.code = "shader_type canvas_item;\n" \
 			+ "uniform vec4 color_edge : source_color = vec4(0.0);\n" \
+			+ "uniform float rect_height = 120.0;\n" \
+			+ "uniform float band_height = 120.0;\n" \
 			+ "void fragment() {\n" \
-			+ "    COLOR = vec4(color_edge.rgb, color_edge.a * (1.0 - UV.x));\n" \
+			+ "    float pixel_y = UV.y * rect_height;\n" \
+			+ "    float v_fade = clamp(1.0 - pixel_y / band_height, 0.0, 1.0);\n" \
+			+ "    COLOR = vec4(color_edge.rgb, color_edge.a * (1.0 - UV.x) * v_fade);\n" \
 			+ "}\n"
 		grad_mat.shader = grad_shader
 		var default_color: Color = Color(UiColors.PANEL_BORDER.r, UiColors.PANEL_BORDER.g, UiColors.PANEL_BORDER.b, 0.35)
 		grad_mat.set_shader_parameter("color_edge", default_color)
 		grad_rect.material = grad_mat
 		card.add_child(grad_rect)
+		card.move_child(grad_rect, 0)
 		card.set_meta(gradient_key, grad_rect)
+		# Update rect_height when card resizes
+		card.resized.connect(func() -> void:
+			grad_mat.set_shader_parameter("rect_height", card.size.y)
+		)
+		# Set initial value deferred so layout is resolved
+		card.ready.connect(func() -> void:
+			grad_mat.set_shader_parameter("rect_height", card.size.y)
+		)
 
 	var hover_key: String = "_hover_rect"
 	if not card.has_meta(hover_key):
@@ -278,11 +309,21 @@ func _populate_cards() -> void:
 func _update_card(index: int, option: Dictionary) -> void:
 	var card: PanelContainer = _cards[index]
 	
-	var _icon: TextureRect = card.find_child("Icon%d" % (index + 1)) as TextureRect
+	var icon_rect: TextureRect = card.find_child("Icon%d" % (index + 1)) as TextureRect
 	var name_label: Label = card.find_child("Name%d" % (index + 1)) as Label
 	var desc_label: Label = card.find_child("Desc%d" % (index + 1)) as Label
 	
 	var data: Dictionary = option.get("data", {})
+	
+	# Load card image from JSON "image" field
+	if icon_rect:
+		var image_path: String = String(data.get("image", ""))
+		if image_path != "" and ResourceLoader.exists("res://" + image_path):
+			icon_rect.texture = load("res://" + image_path)
+		else:
+			icon_rect.texture = preload("res://icon.svg")
+			if image_path != "":
+				FileLogger.warn("Card image not found: %s" % image_path)
 	var option_type: String = option.get("type", "upgrade")
 	var option_id: String = option.get("id", "")
 	var rarity: String = option.get("rarity", "common")
@@ -327,10 +368,16 @@ func _update_card(index: int, option: Dictionary) -> void:
 		# Remove ALL old dynamic labels immediately (queue_free defers, causing duplicates)
 		var to_remove: Array[Node] = []
 		for child: Node in info_box.get_children():
-			if child.name == &"RaritySubtitle" or child.name == &"NewTag" or child.name == &"LevelLine" or child.name == &"BonusLine":
+			if child.name == &"RaritySubtitle" or child.name == &"LevelLine" or child.name == &"BonusLine":
 				to_remove.append(child)
+		# Also clean up NewTag overlay from card (it's positioned absolutely)
+		var old_new_tag: Node = card.find_child("NewTag", true)
+		while old_new_tag:
+			old_new_tag.get_parent().remove_child(old_new_tag)
+			old_new_tag.free()
+			old_new_tag = card.find_child("NewTag", true)
 		for node: Node in to_remove:
-			info_box.remove_child(node)
+			node.get_parent().remove_child(node)
 			node.free()
 		
 		# Rarity subtitle — smaller, rarity-colored, inserted after name label
@@ -346,17 +393,30 @@ func _update_card(index: int, option: Dictionary) -> void:
 		info_box.add_child(rarity_label)
 		info_box.move_child(rarity_label, name_idx + 1)
 		
-		# Add NEW tag if this is a new item
-		if is_new:
-			var new_tag: Label = Label.new()
-			new_tag.name = "NewTag"
-			new_tag.text = "NEW"
-			new_tag.add_theme_color_override("font_color", UiColors.NEON_YELLOW)
-			new_tag.add_theme_font_override("font", FONT_HEADER)
-			new_tag.add_theme_font_size_override("font_size", 18)
-			new_tag.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			info_box.add_child(new_tag)
+	# Add NEW tag pinned to top-right corner of the card
+	if is_new:
+		# Use a non-managing Control overlay so anchors work correctly
+		var overlay: Control = Control.new()
+		overlay.name = "NewTag"
+		overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		card.add_child(overlay)
+		var new_tag: Label = Label.new()
+		new_tag.text = "NEW"
+		new_tag.add_theme_color_override("font_color", UiColors.NEON_YELLOW)
+		new_tag.add_theme_font_override("font", FONT_HEADER)
+		new_tag.add_theme_font_size_override("font_size", 18)
+		new_tag.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		new_tag.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		overlay.add_child(new_tag)
+		new_tag.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+		new_tag.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+		new_tag.offset_top = 8.0
+		new_tag.offset_right = -10.0
+		new_tag.offset_left = -60.0
+		new_tag.offset_bottom = 30.0
 
+	if info_box:
 		# Level line — cyan, appears after description
 		if level_line != "":
 			var level_label: Label = Label.new()
@@ -374,7 +434,7 @@ func _update_card(index: int, option: Dictionary) -> void:
 			bonus_label.text = bonus_line
 			bonus_label.add_theme_color_override("font_color", Color.WHITE)
 			bonus_label.add_theme_font_override("font", FONT_HEADER)
-			bonus_label.add_theme_font_size_override("font_size", 15)
+			bonus_label.add_theme_font_size_override("font_size", 13)
 			bonus_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			info_box.add_child(bonus_label)
 
@@ -406,53 +466,6 @@ func _update_card_border(card: PanelContainer, color: Color) -> void:
 		var glow_color: Color = color.lerp(UiColors.PARTICLE_CYAN, 0.45)
 		var click_color: Color = color.lerp(UiColors.CLICK_FLASH, 0.65)
 		CARD_HOVER_FX_SCRIPT.set_hover_colors(card, color, glow_color, click_color)
-
-
-## Add animated starfield background to an icon area control (matching loadout screen).
-func _add_icon_starfield_bg(area: Control) -> void:
-	var star_bg: ColorRect = ColorRect.new()
-	star_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	star_bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var star_mat: ShaderMaterial = ShaderMaterial.new()
-	var star_shader: Shader = Shader.new()
-	star_shader.code = "shader_type canvas_item;\n" \
-		+ "uniform float scroll_speed = 0.15;\n" \
-		+ "uniform float layer_scale = 40.0;\n" \
-		+ "uniform float density = 0.35;\n" \
-		+ "uniform float star_size = 0.04;\n" \
-		+ "uniform vec3 bg_color = vec3(0.04, 0.02, 0.1);\n" \
-		+ "float hash21(vec2 p) {\n" \
-		+ "    vec3 p3 = fract(vec3(p.xyx) * 0.1031);\n" \
-		+ "    p3 += dot(p3, p3.yzx + 33.33);\n" \
-		+ "    return fract((p3.x + p3.y) * p3.z);\n" \
-		+ "}\n" \
-		+ "vec2 hash22(vec2 p) {\n" \
-		+ "    return vec2(hash21(p), hash21(p + 19.19));\n" \
-		+ "}\n" \
-		+ "float star_layer(vec2 uv, float scale, float spd, float seed_off) {\n" \
-		+ "    vec2 scroll_uv = uv * scale + vec2(TIME * spd, TIME * spd * 0.3) + seed_off;\n" \
-		+ "    vec2 cell = floor(scroll_uv);\n" \
-		+ "    vec2 f = fract(scroll_uv);\n" \
-		+ "    float r = hash21(cell + seed_off);\n" \
-		+ "    float has_star = step(r, density);\n" \
-		+ "    vec2 center = hash22(cell + 7.7 + seed_off) * 0.8 + 0.1;\n" \
-		+ "    float sz = star_size * mix(0.5, 1.5, hash21(cell + 13.13 + seed_off));\n" \
-		+ "    float d = distance(f, center);\n" \
-		+ "    float core = smoothstep(sz, 0.0, d);\n" \
-		+ "    float glow = smoothstep(sz * 2.5, 0.0, d) * 0.3;\n" \
-		+ "    float twinkle = 1.0 + sin(TIME * mix(1.0, 3.0, r) + r * 6.28) * 0.3;\n" \
-		+ "    return (core + glow) * has_star * twinkle;\n" \
-		+ "}\n" \
-		+ "void fragment() {\n" \
-		+ "    float stars = star_layer(UV, layer_scale, scroll_speed, 0.0);\n" \
-		+ "    vec3 col = bg_color + vec3(0.8, 0.85, 1.0) * stars;\n" \
-		+ "    COLOR = vec4(col, 1.0);\n" \
-		+ "}\n"
-	star_mat.shader = star_shader
-	star_bg.material = star_mat
-	# Insert behind the Icon TextureRect
-	area.add_child(star_bg)
-	area.move_child(star_bg, 0)
 
 
 func _get_rarity_color(rarity: String) -> Color:

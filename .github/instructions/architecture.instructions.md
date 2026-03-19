@@ -37,17 +37,17 @@ build/          Export output (windows/, linux/, macos/) — gitignored
 
 ## Data Files (`data/`)
 
-| File                     | Content                                                   |
-| ------------------------ | --------------------------------------------------------- |
-| `base_player_stats.json` | Universal default stats                                   |
-| `weapons.json`           | Weapon definitions + visual config + `description_short`  |
-| `weapon_upgrades.json`   | Per-weapon rarity tier stat tables                        |
-| `ships.json`             | Ship definitions (speed, stats, phase shift)              |
-| `captains.json`          | Captain passive + active ability                          |
-| `synergies.json`         | Ship+Captain combo bonuses                                |
-| `ship_upgrades.json`     | Passive upgrade definitions (tomes) + `description_short` |
-| `items.json`             | Pickup items + effects                                    |
-| `enemies.json`           | Enemy types, stats, behaviors                             |
+| File                     | Content                                                             |
+| ------------------------ | ------------------------------------------------------------------- |
+| `base_player_stats.json` | Universal default stats                                             |
+| `weapons.json`           | Weapon definitions + visual config + `description_short` + `image`  |
+| `weapon_upgrades.json`   | Per-weapon rarity tier stat tables                                  |
+| `ships.json`             | Ship definitions (speed, stats, phase shift)                        |
+| `captains.json`          | Captain passive + active ability                                    |
+| `synergies.json`         | Ship+Captain combo bonuses                                          |
+| `ship_upgrades.json`     | Passive upgrade definitions (tomes) + `description_short` + `image` |
+| `items.json`             | Pickup items + effects                                              |
+| `enemies.json`           | Enemy types, stats, behaviors                                       |
 
 Mods load from `user://mods/` and merge with base data.
 

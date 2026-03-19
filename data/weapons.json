@@ -4,6 +4,7 @@
 		"description_short": "Malfunctioning beam that accidentally irradiates targets to death.",
 		"display_name": "Broken Tractor Beam",
 		"enabled": true,
+		"image": "assets/weapons/broken_tractor_beam.png",
 		"motion": {
 			"burst_multiplier": 2.0,
 			"pull_speed": 80.0
@@ -38,6 +39,7 @@
 		"description_short": "Drops explosive ion circles behind your ship like breadcrumbs of doom.",
 		"display_name": "Ion Wake",
 		"enabled": true,
+		"image": "assets/weapons/ion_wake.png",
 		"motion": {
 			"hold_time": 1.0
 		},
@@ -75,6 +77,7 @@
 		"description_short": "Tesla arc that chain-bounces between enemies — not a trendy car.",
 		"display_name": "Nikola's Coil",
 		"enabled": true,
+		"image": "assets/weapons/nikolas_coil.png",
 		"motion": {
 			"cascade_delay": 0.08,
 			"fade_in": 0.04,
@@ -111,6 +114,7 @@
 		"description_short": "Shield charges that block hits and release staggering shockwaves.",
 		"display_name": "Nope Bubble",
 		"enabled": true,
+		"image": "assets/weapons/nope_bubble.png",
 		"motion": {
 
 		},
@@ -141,6 +145,7 @@
 		"description_short": "Point-blank neon pellet shredder with savage falloff.",
 		"display_name": "Personal Space Violator",
 		"enabled": true,
+		"image": "assets/weapons/personal_space_violator.png",
 		"motion": {
 			"spread_degrees": 45.0
 		},
@@ -173,6 +178,7 @@
 		"description_short": "Passive damage aura for enemies who lack personal boundaries.",
 		"display_name": "Proximity Tax",
 		"enabled": true,
+		"image": "assets/weapons/proximity_tax.png",
 		"motion": {
 
 		},
@@ -197,6 +203,7 @@
 		"description_short": "Orbiting security drones that body-check nearby enemies.",
 		"display_name": "PSP-9000",
 		"enabled": true,
+		"image": "assets/weapons/psp_9000.png",
 		"motion": {
 
 		},
@@ -226,6 +233,7 @@
 		"description_short": "Photonic slash that sweeps a wide arc from your ship.",
 		"display_name": "Radiant Arc",
 		"enabled": true,
+		"image": "assets/weapons/radiant_arc.png",
 		"motion": {
 			"fade_in": 0.18,
 			"fade_out": 0.15,
@@ -287,6 +295,7 @@
 		"description_short": "Boomerang arc projectile that talks trash on the return trip.",
 		"display_name": "Snarky Comeback",
 		"enabled": true,
+		"image": "assets/weapons/snarky_comeback.png",
 		"motion": {
 			"fade_in": 0.18,
 			"fade_out": 0.3,
@@ -351,6 +360,7 @@
 		"description_short": "Incendiary orb that detonates into a burning damage zone.",
 		"display_name": "Space Napalm",
 		"enabled": true,
+		"image": "assets/weapons/space_napalm.png",
 		"motion": {
 			"fade_in": 0.08,
 			"fade_out": 0.5,
@@ -406,6 +416,7 @@
 		"description_short": "Explosive barrage that detonates on impact for area damage.",
 		"display_name": "Space Nukes",
 		"enabled": true,
+		"image": "assets/weapons/space_nukes.png",
 		"motion": {
 			"launch_arc_max_deg": 71.0,
 			"launch_arc_min_deg": 35.0,
@@ -434,6 +445,7 @@
 		"description_short": "Swirling energy vortex that launders enemies around your ship.",
 		"display_name": "Spin Cycle",
 		"enabled": true,
+		"image": "assets/weapons/spin_cycle.png",
 		"motion": {
 
 		},
@@ -462,6 +474,7 @@
 		"description_short": "Piercing mag-rail spike that flies perfectly straight through targets.",
 		"display_name": "Straight-Line Negotiator",
 		"enabled": true,
+		"image": "assets/weapons/straight_line_negotiator.png",
 		"motion": {
 
 		},
@@ -496,6 +509,7 @@
 		"description_short": "Sub-space machine gun burst that ricochets between enemies.",
 		"display_name": "Timmy Gun",
 		"enabled": true,
+		"image": "assets/weapons/timmy_gun.png",
 		"motion": {
 			"burst_interval": 0.06,
 			"spread_angle_deg": 4.0
@@ -527,6 +541,7 @@
 		"description_short": "Proximity mines that detonate when enemies wander too close.",
 		"display_name": "Tothian Mines",
 		"enabled": true,
+		"image": "assets/weapons/tothian_mines.png",
 		"motion": {
 
 		},
@@ -555,6 +570,7 @@
 		"description_short": "Neon-red laser bolts that ricochet to chain damage across targets.",
 		"display_name": "Space Lasers",
 		"enabled": true,
+		"image": "assets/weapons/space_lasers.png",
 		"motion": {
 			"burst_interval": 0.04,
 			"spread_angle_deg": 3.0

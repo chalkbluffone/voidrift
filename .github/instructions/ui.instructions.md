@@ -80,17 +80,43 @@ Below the HP/Shield bars in TopLeft, a VBoxContainer holds:
 - Synthwave-styled card selection (choose 1 of 3 upgrades)
 - `LEVEL_UP_OPTION_COUNT` controls number of options shown
 - Upgrade card hover shader: `shaders/ui_upgrade_card_hover.gdshader`
+- Card minimum width: 625px
+
+### Card Visual Layers (draw order, bottom to top)
+
+1. **Panel background** — `StyleBoxFlat` with `COLOR_PANEL_BG`, 2px border, 8px corner radius
+2. **Gradient overlay** — `ColorRect` at child index 0 (behind content). Shader fades left-to-right AND top-to-bottom (120px band height via `rect_height` uniform synced to card size on `resized` signal). Color matches rarity border at 35% alpha.
+3. **Content** — `MarginContainer` → `HBoxContainer` with icon + info
+4. **Hover overlay** — Shader-driven edge glow, scanlines, click flash (`ui_upgrade_card_hover.gdshader`)
+5. **NEW badge** — Top-right corner label for brand-new items
+
+### Card Image
+
+- Each card has an `IconArea` (96×96, `clip_contents = true`) containing a `TextureRect`
+- Images loaded from `data.get("image")` field in JSON (`weapons.json`, `ship_upgrades.json`)
+- Path format: `"assets/weapons/[id].png"` or `"assets/ship_upgrades/[id].png"`
+- Fallback: `icon.svg` if image not found
+- **Icon area uses `SIZE_SHRINK_BEGIN`** to prevent vertical stretching in HBox
+- **Drop shadow**: `PanelContainer` with `StyleBoxFlat` (shadow_color 0.35 alpha, size 12, offset 5,5, corner radius 4) inserted at index 0 inside `IconArea`
 
 ### Card Content Layout
 
 Each upgrade card shows (top to bottom):
 
 1. **Weapon/module name** — header font, rarity-colored
-2. **Short description** — uses `description_short` field from JSON with fallback to `description`; gray text (`Color(0.8, 0.8, 0.8)`)
-3. **Level line** (if upgrading existing item) — cyan (`UiColors.CYAN`), format: `"Level X → Y"`; hidden for brand-new items (NEW tag handles that)
-4. **Bonus line** (weapons only) — white bold (`FONT_HEADER`), shows stat effects like `"+8% Damage / +1 Projectile"`
+2. **Rarity subtitle** — rarity name in rarity color, 14px
+3. **Short description** — uses `description_short` field from JSON with fallback to `description`; gray text (`Color(0.8, 0.8, 0.8)`)
+4. **Level line** (if upgrading existing item) — cyan (`UiColors.CYAN`), format: `"Level X → Y"`; hidden for brand-new items (NEW tag handles that)
+5. **Bonus line** (weapons only) — white bold (`FONT_HEADER`), 13px, shows stat effects like `"+8% Damage / +1 Projectile"`
 
 Both level and bonus lines are separate `Label` nodes (`"LevelLine"`, `"BonusLine"`) dynamically created and cleaned up on card refresh.
+
+### NEW Badge
+
+- Shown for brand-new weapons/modules (not upgrades of existing items)
+- Positioned top-right corner of card with margin
+- Red text (`Color.RED`), `FONT_HEADER`, 18px
+- `mouse_filter = MOUSE_FILTER_IGNORE`
 
 ### Module Level Display
 
