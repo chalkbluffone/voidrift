@@ -1,0 +1,12 @@
+ERROR: Failed to open 'C:/git/voidrift/blastbullets2d/./bin/windows/~blastbullets2d.windows.template_debug.x86_64.single.dll'.
+   at: copy (core/io/dir_access.cpp:423)
+ERROR: Error copying library: C:/git/voidrift/blastbullets2d/./bin/windows/blastbullets2d.windows.template_debug.x86_64.single.dll
+   at: open_dynamic_library (platform/windows/os_windows.cpp:503)
+ERROR: Condition "!FileAccess::exists(path)" is true. Returning: ERR_FILE_NOT_FOUND
+   at: open_dynamic_library (platform/windows/os_windows.cpp:487)
+ERROR: GDExtension dynamic library not found: 'res://blastbullets2d/blastbullets2d.gdextension'.
+   at: open_library (core/extension/gdextension.cpp:740)
+ERROR: Error loading extension: 'res://blastbullets2d/blastbullets2d.gdextension'.
+   at: load_extensions (core/extension/gdextension_manager.cpp:329)
+WARNING: Canceling suspended execution of "_ready" due to a script reload.
+   at: cancel_pending_functions (modules/gdscript/gdscript.cpp:1485)

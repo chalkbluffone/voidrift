@@ -1,6 +1,6 @@
 # Note: The code might not be as pretty it could be, since it's written
 # in a way that maximizes performance. Methods are inlined and loops are avoided.
-class_name UUID
+# class_name UUID  — declared in uuid.gd; removed here to avoid duplicate
 
 const BYTE_MASK: int = 0b11111111
 
