@@ -308,7 +308,15 @@ func _populate_cards() -> void:
 
 func _update_card(index: int, option: Dictionary) -> void:
 	var card: PanelContainer = _cards[index]
-	
+
+	# Always clean up stale NewTag overlays from previous renders
+	# owned=false is required because dynamically created nodes have no owner
+	var old_new_tag: Node = card.find_child("NewTag", true, false)
+	while old_new_tag:
+		old_new_tag.get_parent().remove_child(old_new_tag)
+		old_new_tag.free()
+		old_new_tag = card.find_child("NewTag", true, false)
+
 	var icon_rect: TextureRect = card.find_child("Icon%d" % (index + 1)) as TextureRect
 	var name_label: Label = card.find_child("Name%d" % (index + 1)) as Label
 	var desc_label: Label = card.find_child("Desc%d" % (index + 1)) as Label
@@ -370,12 +378,6 @@ func _update_card(index: int, option: Dictionary) -> void:
 		for child: Node in info_box.get_children():
 			if child.name == &"RaritySubtitle" or child.name == &"LevelLine" or child.name == &"BonusLine":
 				to_remove.append(child)
-		# Also clean up NewTag overlay from card (it's positioned absolutely)
-		var old_new_tag: Node = card.find_child("NewTag", true)
-		while old_new_tag:
-			old_new_tag.get_parent().remove_child(old_new_tag)
-			old_new_tag.free()
-			old_new_tag = card.find_child("NewTag", true)
 		for node: Node in to_remove:
 			node.get_parent().remove_child(node)
 			node.free()

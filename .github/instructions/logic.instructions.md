@@ -228,6 +228,18 @@ for entity: Variant in bucket:
         ...
 ```
 
+### `find_child()` Doesn't Find Dynamically Created Nodes by Default
+
+`find_child(pattern, recursive, owned)` defaults `owned=true`, meaning it only matches nodes whose `owner` is non-null. Nodes created dynamically via `Node.new()` + `add_child()` have `owner == null` and are **invisible** to `find_child` with the default parameter. Always pass `owned=false` when searching for dynamically created children:
+
+```gdscript
+# WRONG — never finds dynamically created "MyOverlay" node
+var overlay: Node = parent.find_child("MyOverlay", true)
+
+# RIGHT — owned=false includes unowned (dynamic) nodes
+var overlay: Node = parent.find_child("MyOverlay", true, false)
+```
+
 ### Autoload Not Found at Runtime
 
 Ensure autoload is registered in Project Settings. Use `@onready` to defer until tree is ready:

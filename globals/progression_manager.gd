@@ -105,15 +105,22 @@ func _level_up() -> void:
 func select_level_up_option(option: Dictionary) -> void:
 	var type: String = option.get("type", "")
 	var id: String = option.get("id", "")
+	var rarity: String = String(option.get("rarity", "common"))
 	
 	if type == "upgrade":
-		_add_ship_upgrade(id)
+		_add_ship_upgrade(id, rarity)
 	elif type == "weapon":
 		if id not in RunManager.run_data.weapons and RunManager.run_data.weapons.size() < GameConfig.MAX_WEAPON_SLOTS:
 			# New weapon — add to loadout
 			RunManager.run_data.weapons.append(id)
+			# Pass rarity to weapon component for initial equip
+			var player: Node = RunManager.get_player()
+			if player and player.has_method("get_weapon_component"):
+				var wc: Node = player.get_weapon_component()
+				if wc and wc.has_method("equip_weapon"):
+					wc.equip_weapon(id, rarity)
 		elif id in RunManager.run_data.weapons:
-			# Existing weapon re-pick — apply level-up stat effects
+			# Existing weapon re-pick — apply level-up stat effects + update rarity
 			var effects: Array = option.get("effects", [])
 			if effects.size() > 0:
 				var player: Node = RunManager.get_player()
@@ -121,6 +128,8 @@ func select_level_up_option(option: Dictionary) -> void:
 					var wc: Node = player.get_weapon_component()
 					if wc and wc.has_method("apply_level_up_effects"):
 						wc.apply_level_up_effects(id, effects)
+					if wc and wc.has_method("update_weapon_rarity"):
+						wc.update_weapon_rarity(id, rarity)
 	
 	level_up_completed.emit(option)
 	RunManager.resume_game()
@@ -152,19 +161,25 @@ func get_upgrade_stacks(upgrade_id: String) -> int:
 	return 0
 
 
-func _add_ship_upgrade(upgrade_id: String) -> void:
+func _add_ship_upgrade(upgrade_id: String, rarity: String = "common") -> void:
 	for i in range(RunManager.run_data.ship_upgrades.size()):
 		var u_any: Variant = RunManager.run_data.ship_upgrades[i]
 		if u_any is Dictionary and String(u_any.get("id", "")) == upgrade_id:
 			var u: Dictionary = u_any
 			u["stacks"] = int(u.get("stacks", 0)) + 1
+			# Keep highest rarity tier
+			var old_rarity: String = String(u.get("rarity", "common"))
+			var old_idx: int = GameConfig.RARITY_ORDER.find(old_rarity)
+			var new_idx: int = GameConfig.RARITY_ORDER.find(rarity)
+			if new_idx > old_idx:
+				u["rarity"] = rarity
 			RunManager.run_data.ship_upgrades[i] = u
 			return
 	
 	if RunManager.run_data.ship_upgrades.size() >= GameConfig.MAX_MODULE_SLOTS:
 		return
 	
-	RunManager.run_data.ship_upgrades.append({"id": upgrade_id, "stacks": 1})
+	RunManager.run_data.ship_upgrades.append({"id": upgrade_id, "stacks": 1, "rarity": rarity})
 
 
 # --- Currency ---

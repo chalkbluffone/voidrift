@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bawr4y1o2oixy"
-path="res://.godot/imported/parasidic_hull.png-7ac68955e98b936a9326b77ee4e6f5dc.ctex"
+uid="uid://dl5cpv1h6y14r"
+path="res://.godot/imported/parasitic_hull.png-25f78a2e5591733b433953f8f28ef37d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ship_modules/parasidic_hull.png"
-dest_files=["res://.godot/imported/parasidic_hull.png-7ac68955e98b936a9326b77ee4e6f5dc.ctex"]
+source_file="res://assets/ship_modules/parasitic_hull.png"
+dest_files=["res://.godot/imported/parasitic_hull.png-25f78a2e5591733b433953f8f28ef37d.ctex"]
 
 [params]
 

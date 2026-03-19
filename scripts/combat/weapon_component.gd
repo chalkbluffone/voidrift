@@ -619,7 +619,7 @@ func _find_nearest_enemy() -> Node2D:
 # Public API  (thin facades over WeaponInventory + WeaponSpawnerCache)
 # ---------------------------------------------------------------------------
 
-func equip_weapon(weapon_id: String) -> bool:
+func equip_weapon(weapon_id: String, rarity: String = "common") -> bool:
 	## Equip a weapon by ID. Returns false if weapon not found.
 	var weapon_data: Dictionary = DataLoader.get_weapon(weapon_id)
 	if weapon_data.is_empty():
@@ -627,7 +627,7 @@ func equip_weapon(weapon_id: String) -> bool:
 		return false
 
 	var _weapon_type: String = weapon_data.get("type", "projectile")
-	var is_new: bool = _inventory.equip_weapon(weapon_id, weapon_data)
+	var is_new: bool = _inventory.equip_weapon(weapon_id, weapon_data, rarity)
 
 	# Start independent fire timer for newly equipped weapons
 	if is_new and auto_fire_enabled and is_inside_tree():
@@ -662,6 +662,10 @@ func clear_all_weapons() -> void:
 
 func apply_level_up_effects(weapon_id: String, effects_any: Array) -> void:
 	_inventory.apply_level_up_effects(weapon_id, effects_any)
+
+
+func update_weapon_rarity(weapon_id: String, rarity: String) -> void:
+	_inventory.update_weapon_rarity(weapon_id, rarity)
 
 
 func has_weapon(weapon_id: String) -> bool:

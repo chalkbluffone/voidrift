@@ -12,44 +12,36 @@ anchors_preset = 0
 offset_right = 320.0
 offset_bottom = 140.0
 
-[node name="LeftWeapons" type="Control" parent="."]
-anchors_preset = 4
-anchor_left = 0.0
-anchor_top = 0.5
-anchor_right = 0.0
-anchor_bottom = 0.5
-offset_left = 10.0
-offset_top = -140.0
-offset_right = 350.0
-offset_bottom = 140.0
-grow_vertical = 2
-
-[node name="VBox" type="VBoxContainer" parent="LeftWeapons"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
+[node name="BottomLeftWeapons" type="HBoxContainer" parent="."]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
 anchor_bottom = 1.0
+offset_left = -416.0
+offset_top = -84.0
+offset_right = -148.0
+offset_bottom = -20.0
 grow_horizontal = 2
-grow_vertical = 2
+grow_vertical = 0
+mouse_filter = 2
 theme_override_constants/separation = 4
 
-[node name="Title" type="Label" parent="LeftWeapons/VBox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "WEAPONS"
-
-[node name="WeaponsList" type="VBoxContainer" parent="LeftWeapons/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 2
-
-[node name="ModulesTitle" type="Label" parent="LeftWeapons/VBox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "MODULES"
-
-[node name="ModulesList" type="VBoxContainer" parent="LeftWeapons/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 2
+[node name="BottomRightModules" type="HBoxContainer" parent="."]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = 148.0
+offset_top = -84.0
+offset_right = 416.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+layout_direction = 1
+theme_override_constants/separation = 4
 
 [node name="ShieldBar" type="ProgressBar" parent="TopLeft"]
 layout_mode = 0
@@ -187,6 +179,7 @@ anchor_bottom = 1.0
 offset_top = -20.0
 grow_horizontal = 2
 grow_vertical = 0
+mouse_filter = 2
 
 [node name="BottomCenter" type="Control" parent="."]
 anchors_preset = 7

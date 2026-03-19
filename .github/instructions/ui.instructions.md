@@ -50,6 +50,36 @@ Below the HP/Shield bars in TopLeft, a VBoxContainer holds:
 - Respects `show_damage_numbers` persistence setting.
 - Soft cap: same `DAMAGE_NUMBER_MAX_COUNT` group limit as combat numbers (shared `"damage_numbers"` group).
 
+### HUD Weapon & Module Icon Grids
+
+Two 1×4 icon grids flank the ability ring at bottom-center:
+
+- **BottomLeftWeapons** — `HBoxContainer` left of the ability ring, showing equipped weapons (L→R fill)
+- **BottomRightModules** — `HBoxContainer` right of the ability ring, `layout_direction = 1` (RTL) so modules fill R→L toward the ring
+
+Each slot is a `Panel` (not `PanelContainer` — PanelContainer forces child layout and breaks anchor-based positioning) containing:
+
+1. **TextureRect** — weapon/module icon loaded from `data.get("image")`
+2. **Badge background** — small `PanelContainer` anchored bottom-right with dark semi-transparent `StyleBoxFlat`
+3. **Badge label** — rarity-colored level number (e.g. "2"), Orbitron-Bold 10px
+
+Slots use `Panel.set_meta("item_name", ...)` to store display names for the tooltip system. Weapons use `display_name` from JSON; modules use `name`.
+
+- Rarity colors from `UiColors.get_rarity_color(rarity)` (defined in `scripts/ui/ui_colors.gd`)
+- Empty slots show 50% transparent placeholder with no badge
+- Key variables: `_weapon_slots: Array[Dictionary]`, `_module_slots: Array[Dictionary]`
+- Grid built by `_build_slot_row()`, refreshed on `weapons_changed`/`modules_changed` signals
+
+### HUD Icon Tooltips
+
+Custom tooltip system (Godot's built-in `tooltip_text` doesn't work reliably on CanvasLayer children):
+
+- Shared `PanelContainer` (`_icon_tooltip`) with `TipLabel` child, `z_index = 200`
+- Styled with dark semi-transparent `StyleBoxFlat`, Orbitron-Bold 14px, neon cyan text
+- Positioned above the hovered slot via `mouse_entered`/`mouse_exited` signals connected per slot
+- Item names stored as `panel.set_meta("item_name", ...)` on each slot Panel
+- `BottomXP` Control has `mouse_filter = MOUSE_FILTER_IGNORE` to avoid intercepting hover events over the icon area
+
 ### Ship Avatar
 
 - Captain portrait is displayed inside the ability ring circle (bottom-center), not in the top-right.
@@ -114,9 +144,10 @@ Both level and bonus lines are separate `Label` nodes (`"LevelLine"`, `"BonusLin
 ### NEW Badge
 
 - Shown for brand-new weapons/modules (not upgrades of existing items)
-- Positioned top-right corner of card with margin
-- Red text (`Color.RED`), `FONT_HEADER`, 18px
-- `mouse_filter = MOUSE_FILTER_IGNORE`
+- Positioned top-right corner of card via a `Control` overlay named `"NewTag"` with `PRESET_FULL_RECT` anchors
+- Neon yellow text (`UiColors.NEON_YELLOW`), `FONT_HEADER`, 18px
+- `mouse_filter = MOUSE_FILTER_IGNORE` on both overlay and label
+- **Cleanup gotcha**: Since the overlay is dynamically created (`Control.new()` + `add_child()`), it has no `owner`. Cleanup in `_update_card` must use `find_child("NewTag", true, false)` — the third parameter `owned` defaults to `true`, which skips unowned nodes. Without `owned=false`, stale NewTag overlays accumulate across level-ups.
 
 ### Module Level Display
 

@@ -85,6 +85,21 @@ const RARITY_RARE: Color = Color(0.2, 0.5, 1.0, 1.0)
 const RARITY_EPIC: Color = Color(0.67, 0.2, 0.95, 1.0)
 const RARITY_LEGENDARY: Color = Color(1.0, 0.8, 0.0, 1.0)
 
+
+## Map a rarity string to its display color.
+static func get_rarity_color(rarity: String) -> Color:
+	match rarity:
+		"legendary":
+			return RARITY_LEGENDARY
+		"epic":
+			return RARITY_EPIC
+		"rare":
+			return RARITY_RARE
+		"uncommon":
+			return RARITY_UNCOMMON
+		_:
+			return RARITY_COMMON
+
 # --- Type Colors ---
 
 ## Red-ish for weapon-type upgrade cards.

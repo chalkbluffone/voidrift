@@ -68,7 +68,8 @@ func generate_level_up_options() -> Array[Dictionary]:
 		w_existing_weapon, w_new_weapon
 	))
 
-	return _select_from_candidates(candidates, int(GameConfig.LEVEL_UP_OPTION_COUNT), _rng)
+	var result: Array[Dictionary] = _select_from_candidates(candidates, int(GameConfig.LEVEL_UP_OPTION_COUNT), _rng)
+	return result
 
 
 func _build_module_candidates(

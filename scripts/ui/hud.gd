@@ -33,12 +33,9 @@ var xp_label: Label = null
 # Bottom center - ability ring indicator
 @onready var ability_ring: Control = $BottomCenter/AbilityRingIndicator
 
-# Left side - weapons list
-@onready var left_weapons: Control = $LeftWeapons
-@onready var weapons_title: Label = $LeftWeapons/VBox/Title
-@onready var weapons_list: VBoxContainer = $LeftWeapons/VBox/WeaponsList
-@onready var modules_title: Label = $LeftWeapons/VBox/ModulesTitle
-@onready var modules_list: VBoxContainer = $LeftWeapons/VBox/ModulesList
+# Bottom icon grids flanking the ability ring
+@onready var weapons_grid: HBoxContainer = $BottomLeftWeapons
+@onready var modules_grid: HBoxContainer = $BottomRightModules
 
 @onready var RunManager: Node = get_node("/root/RunManager")
 @onready var ProgressionManager: Node = get_node("/root/ProgressionManager")
@@ -52,6 +49,16 @@ var _player: Node = null
 var _level_tween: Tween = null
 var _level_base_scale: Vector2 = Vector2.ONE
 
+# Icon grid slot arrays (populated in _ready)
+var _weapon_slots: Array[Dictionary] = []  # [{panel, texture, badge}]
+var _module_slots: Array[Dictionary] = []  # [{panel, texture, badge}]
+var _icon_tooltip: PanelContainer = null
+const ICON_SLOT_SIZE: float = 64.0
+const ICON_BORDER_WIDTH: int = 2
+const ICON_CORNER_RADIUS: int = 4
+const COLOR_SLOT_BG: Color = Color(0.1, 0.1, 0.15, 0.6)
+const COLOR_SLOT_BORDER_EMPTY: Color = Color(0.3, 0.3, 0.3, 0.5)
+
 # Synthwave colors
 const COLOR_SHIELD: Color = Color(0.2, 0.6, 1.0, 1.0)  # Neon blue
 const COLOR_HP: Color = Color(1.0, 0.08, 0.4, 1.0)  # Hot pink/magenta
@@ -61,7 +68,6 @@ const COLOR_LEVEL: Color = Color(1.0, 0.95, 0.2, 1.0)  # Neon yellow
 const COLOR_LEVEL_GLOW: Color = Color(1.0, 0.4, 0.8, 1.0)  # Pink glow for level up
 const COLOR_CREDITS: Color = Color(1.0, 0.85, 0.1, 1.0)  # Gold for credits
 const COLOR_STARDUST: Color = Color(0.6, 0.85, 1.0, 1.0)  # Icy blue for stardust
-const COLOR_WEAPONS: Color = Color(0.2, 1.0, 0.9, 1.0)  # Cyan-ish
 const COLOR_OVERHEAL: Color = Color(1.0, 0.95, 0.2, 1.0)  # Synthwave yellow for overheal
 const COLOR_LIFESTEAL: Color = Color(0.2, 1.0, 0.4, 1.0)  # Green for lifesteal heal
 
@@ -97,6 +103,9 @@ func _ready() -> void:
 	
 	# Build stats panel for full map view (right side)
 	_build_map_stats_panel()
+	
+	# Build icon grids (weapons left, modules right of ability ring)
+	_build_icon_grids()
 	
 	# Build swarm warning label (centered at top)
 	_build_swarm_warning_label()
@@ -219,16 +228,6 @@ func _apply_synthwave_theme() -> void:
 	stardust_label.add_theme_color_override("font_outline_color", Color(0.1, 0.2, 0.4, 1.0))
 	stardust_label.add_theme_constant_override("outline_size", 2)
 
-	# Weapons panel
-	weapons_title.add_theme_font_override("font", FONT_HEADER)
-	weapons_title.add_theme_color_override("font_color", COLOR_WEAPONS)
-	weapons_title.add_theme_color_override("font_outline_color", Color(0, 0.25, 0.3, 1.0))
-	weapons_title.add_theme_constant_override("outline_size", 2)
-	modules_title.add_theme_font_override("font", FONT_HEADER)
-	modules_title.add_theme_color_override("font_color", COLOR_WEAPONS)
-	modules_title.add_theme_color_override("font_outline_color", Color(0, 0.25, 0.3, 1.0))
-	modules_title.add_theme_constant_override("outline_size", 2)
-
 
 ## Create debug stat labels programmatically in the bottom-left VBoxContainer.
 func _build_debug_labels() -> void:
@@ -301,7 +300,7 @@ func _find_player() -> void:
 			if weapon_comp.has_signal("weapon_removed") and not weapon_comp.weapon_removed.is_connected(_on_weapon_changed):
 				weapon_comp.weapon_removed.connect(_on_weapon_changed)
 			_refresh_weapon_list()
-		_refresh_modules_list()
+		_refresh_module_icons()
 		
 		# Initial HP + shield update
 		if _player.stats:
@@ -526,6 +525,122 @@ func _build_map_stats_panel() -> void:
 	_map_stats_panel.visible = false
 
 
+## Build the weapon and module icon grids flanking the ability ring.
+func _build_icon_grids() -> void:
+	_weapon_slots = _build_slot_row(weapons_grid, GameConfig.MAX_WEAPON_SLOTS)
+	_module_slots = _build_slot_row(modules_grid, GameConfig.MAX_MODULE_SLOTS)
+	_build_icon_tooltip()
+
+
+## Build the shared tooltip label shown above hovered icon slots.
+func _build_icon_tooltip() -> void:
+	_icon_tooltip = PanelContainer.new()
+	var tip_style: StyleBoxFlat = StyleBoxFlat.new()
+	tip_style.bg_color = Color(0.05, 0.05, 0.1, 0.9)
+	tip_style.border_color = Color(0.4, 0.4, 0.5, 0.8)
+	tip_style.set_border_width_all(1)
+	tip_style.set_corner_radius_all(4)
+	tip_style.content_margin_left = 8.0
+	tip_style.content_margin_right = 8.0
+	tip_style.content_margin_top = 4.0
+	tip_style.content_margin_bottom = 4.0
+	_icon_tooltip.add_theme_stylebox_override("panel", tip_style)
+	_icon_tooltip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_icon_tooltip.z_index = 200
+	_icon_tooltip.visible = false
+
+	var tip_label: Label = Label.new()
+	tip_label.name = "TipLabel"
+	tip_label.add_theme_font_override("font", FONT_HEADER)
+	tip_label.add_theme_font_size_override("font_size", 14)
+	tip_label.add_theme_color_override("font_color", Color.WHITE)
+	tip_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
+	tip_label.add_theme_constant_override("outline_size", 2)
+	tip_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	tip_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_icon_tooltip.add_child(tip_label)
+
+	add_child(_icon_tooltip)
+
+
+## Create N icon slots inside a container and return array of slot dictionaries.
+func _build_slot_row(container: HBoxContainer, count: int) -> Array[Dictionary]:
+	var slots: Array[Dictionary] = []
+	for i in range(count):
+		var slot: Dictionary = _create_icon_slot()
+		container.add_child(slot.panel as Panel)
+		slots.append(slot)
+	return slots
+
+
+## Create a single icon slot: Panel with TextureRect + level badge.
+func _create_icon_slot() -> Dictionary:
+	var panel: Panel = Panel.new()
+	panel.custom_minimum_size = Vector2(ICON_SLOT_SIZE, ICON_SLOT_SIZE)
+	panel.size = Vector2(ICON_SLOT_SIZE, ICON_SLOT_SIZE)
+	panel.mouse_filter = Control.MOUSE_FILTER_STOP
+
+	var style: StyleBoxFlat = StyleBoxFlat.new()
+	style.bg_color = COLOR_SLOT_BG
+	style.border_color = COLOR_SLOT_BORDER_EMPTY
+	style.border_width_left = ICON_BORDER_WIDTH
+	style.border_width_right = ICON_BORDER_WIDTH
+	style.border_width_top = ICON_BORDER_WIDTH
+	style.border_width_bottom = ICON_BORDER_WIDTH
+	style.corner_radius_top_left = ICON_CORNER_RADIUS
+	style.corner_radius_top_right = ICON_CORNER_RADIUS
+	style.corner_radius_bottom_left = ICON_CORNER_RADIUS
+	style.corner_radius_bottom_right = ICON_CORNER_RADIUS
+	panel.add_theme_stylebox_override("panel", style)
+
+	var tex_rect: TextureRect = TextureRect.new()
+	tex_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	tex_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	tex_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	tex_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tex_rect.visible = false
+	panel.add_child(tex_rect)
+
+	# Badge background — small dark pill behind the level number
+	var badge_bg: PanelContainer = PanelContainer.new()
+	var badge_style: StyleBoxFlat = StyleBoxFlat.new()
+	badge_style.bg_color = Color(0.0, 0.0, 0.0, 0.7)
+	badge_style.corner_radius_top_left = 3
+	badge_style.corner_radius_top_right = 3
+	badge_style.corner_radius_bottom_left = 3
+	badge_style.corner_radius_bottom_right = 3
+	badge_style.content_margin_left = 3.0
+	badge_style.content_margin_right = 3.0
+	badge_style.content_margin_top = 1.0
+	badge_style.content_margin_bottom = 1.0
+	badge_bg.add_theme_stylebox_override("panel", badge_style)
+	badge_bg.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	badge_bg.offset_right = -2.0
+	badge_bg.offset_bottom = -2.0
+	badge_bg.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	badge_bg.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	badge_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	badge_bg.visible = false
+	panel.add_child(badge_bg)
+
+	var badge: Label = Label.new()
+	badge.add_theme_font_override("font", FONT_HEADER)
+	badge.add_theme_font_size_override("font_size", 14)
+	badge.add_theme_color_override("font_color", Color.WHITE)
+	badge.add_theme_color_override("font_outline_color", Color(0, 0, 0, 1))
+	badge.add_theme_constant_override("outline_size", 4)
+	badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	badge.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	badge_bg.add_child(badge)
+
+	panel.mouse_entered.connect(_on_icon_slot_mouse_entered.bind(panel))
+	panel.mouse_exited.connect(_on_icon_slot_mouse_exited)
+
+	return {"panel": panel, "texture": tex_rect, "badge": badge, "badge_bg": badge_bg}
+
+
+
 ## Handle input for full map toggle.
 func _unhandled_input(event: InputEvent) -> void:
 	# Tab key or left trigger to show/hide full map
@@ -675,99 +790,162 @@ func _resolve_module_display_name(module_id: String) -> String:
 
 func _refresh_weapon_list() -> void:
 	if not _player or not _player.has_node("WeaponComponent"):
-		left_weapons.visible = false
 		return
-	left_weapons.visible = true
-
-	# Clear existing rows (keep title separate)
-	for child in weapons_list.get_children():
-		child.queue_free()
 
 	var weapon_comp: Node = _player.get_node("WeaponComponent")
 	if not weapon_comp.has_method("get_equipped_weapon_summaries"):
 		return
 
 	var summaries: Array = weapon_comp.get_equipped_weapon_summaries()
-	# Stable display order
 	summaries.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		return String(a.get("id", "")) < String(b.get("id", ""))
 	)
 
-	for s in summaries:
-		var id: String = String(s.get("id", ""))
-		var level: int = int(s.get("level", 1))
-		var weapon_name: String = _resolve_weapon_display_name(id)
-		var weapon_data: Dictionary = DataLoader.get_weapon(id)
-		var max_level_w: int = int(weapon_data.get("max_level", GameConfig.MAX_WEAPON_LEVEL))
-		var is_maxed: bool = level >= max_level_w
-		var label: Label = Label.new()
-		if is_maxed:
-			label.text = "%s  MAX" % [weapon_name.to_upper()]
-			label.add_theme_color_override("font_color", Color(1.0, 1.0, 0.0, 1.0))
+	for i in range(_weapon_slots.size()):
+		var slot: Dictionary = _weapon_slots[i]
+		var panel: Panel = slot.panel as Panel
+		var tex_rect: TextureRect = slot.texture as TextureRect
+		var badge: Label = slot.badge as Label
+		var badge_bg: PanelContainer = slot.badge_bg as PanelContainer
+		var style: StyleBoxFlat = panel.get_theme_stylebox("panel") as StyleBoxFlat
+
+		if i < summaries.size():
+			var s: Dictionary = summaries[i]
+			var id: String = String(s.get("id", ""))
+			var level: int = int(s.get("level", 1))
+			var rarity: String = String(s.get("rarity", "common"))
+			var weapon_data: Dictionary = DataLoader.get_weapon(id)
+			var max_level_w: int = int(weapon_data.get("max_level", GameConfig.MAX_WEAPON_LEVEL))
+			var is_maxed: bool = level >= max_level_w
+
+			# Load weapon image
+			var image_path: String = String(weapon_data.get("image", ""))
+			if image_path != "" and ResourceLoader.exists("res://" + image_path):
+				tex_rect.texture = load("res://" + image_path)
+			else:
+				tex_rect.texture = preload("res://icon.svg")
+			tex_rect.visible = true
+
+			# Rarity border
+			var rarity_color: Color = UiColors.get_rarity_color(rarity)
+			style.border_color = rarity_color
+
+			# Level badge
+			if is_maxed:
+				badge.text = "MAX"
+				badge.add_theme_color_override("font_color", UiColors.NEON_YELLOW)
+			else:
+				badge.text = str(level)
+				badge.add_theme_color_override("font_color", Color.WHITE)
+			badge_bg.visible = true
+
+			# Tooltip name stored on panel metadata
+			panel.set_meta("item_name", String(weapon_data.get("display_name", id)))
 		else:
-			label.text = "%s  LV %d" % [weapon_name.to_upper(), level]
-			label.add_theme_color_override("font_color", Color(1, 1, 1, 0.95))
-		label.clip_text = true
-		label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
-		label.add_theme_constant_override("outline_size", 2)
-		label.add_theme_font_override("font", FONT_HEADER)
-		label.add_theme_font_size_override("font_size", 14)
-		label.tooltip_text = "%s (LV %d)" % [weapon_name, level]
-		weapons_list.add_child(label)
+			# Empty slot
+			tex_rect.texture = null
+			tex_rect.visible = false
+			style.border_color = COLOR_SLOT_BORDER_EMPTY
+			badge_bg.visible = false
+			panel.set_meta("item_name", "")
 
 
 func _on_run_started() -> void:
-	_refresh_modules_list()
+	_refresh_module_icons()
 	_refresh_weapon_list()
 
 
 func _on_level_up_completed(_chosen_upgrade: Dictionary) -> void:
-	# Modules change on level up; refresh the list.
-	_refresh_modules_list()
+	_refresh_module_icons()
+	_refresh_weapon_list()
 
 
-func _refresh_modules_list() -> void:
+func _refresh_module_icons() -> void:
 	if not RunManager:
 		return
-	left_weapons.visible = true
 
-	for child in modules_list.get_children():
-		child.queue_free()
-
-	var upgrades: Array = []
+	var upgrades: Array[Dictionary] = []
 	var raw: Array = RunManager.run_data.get("ship_upgrades", [])
 	for item: Variant in raw:
 		if item is Dictionary:
-			upgrades.append(item)
+			upgrades.append(item as Dictionary)
 
-	# Normalize + sort
 	upgrades.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		return String(a.get("id", "")) < String(b.get("id", ""))
 	)
 
-	for u in upgrades:
-		var id: String = String(u.get("id", ""))
-		var level: int = int(u.get("stacks", 1))
-		var display_name: String = _resolve_module_display_name(id)
-		var module_data: Dictionary = DataLoader.get_ship_upgrade(id)
-		var max_level_m: int = int(module_data.get("max_level", 99))
-		var is_maxed: bool = level >= max_level_m
-		var label: Label = Label.new()
-		if is_maxed:
-			label.text = "%s  MAX" % [display_name.to_upper()]
-			label.add_theme_color_override("font_color", Color(1.0, 1.0, 0.0, 1.0))
+	for i in range(_module_slots.size()):
+		var slot: Dictionary = _module_slots[i]
+		var panel: Panel = slot.panel as Panel
+		var tex_rect: TextureRect = slot.texture as TextureRect
+		var badge: Label = slot.badge as Label
+		var badge_bg: PanelContainer = slot.badge_bg as PanelContainer
+		var style: StyleBoxFlat = panel.get_theme_stylebox("panel") as StyleBoxFlat
+
+		if i < upgrades.size():
+			var u: Dictionary = upgrades[i]
+			var id: String = String(u.get("id", ""))
+			var stacks: int = int(u.get("stacks", 1))
+			var rarity: String = String(u.get("rarity", "common"))
+			var module_data: Dictionary = DataLoader.get_ship_upgrade(id)
+			var max_level_m: int = int(module_data.get("max_level", 99))
+			var is_maxed: bool = stacks >= max_level_m
+
+			# Load module image
+			var image_path: String = String(module_data.get("image", ""))
+			if image_path != "" and ResourceLoader.exists("res://" + image_path):
+				tex_rect.texture = load("res://" + image_path)
+			else:
+				tex_rect.texture = preload("res://icon.svg")
+			tex_rect.visible = true
+
+			# Rarity border
+			var rarity_color: Color = UiColors.get_rarity_color(rarity)
+			style.border_color = rarity_color
+
+			# Level badge
+			if is_maxed:
+				badge.text = "MAX"
+				badge.add_theme_color_override("font_color", UiColors.NEON_YELLOW)
+			else:
+				badge.text = str(stacks)
+				badge.add_theme_color_override("font_color", Color.WHITE)
+			badge_bg.visible = true
+
+			# Tooltip name stored on panel metadata
+			panel.set_meta("item_name", String(module_data.get("name", id)))
 		else:
-			label.text = "%s  LV %d" % [display_name.to_upper(), level]
-			label.add_theme_color_override("font_color", Color(1, 1, 1, 0.90))
-		label.clip_text = true
-		label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
-		label.add_theme_constant_override("outline_size", 2)
-		label.add_theme_font_override("font", FONT_HEADER)
-		label.add_theme_font_size_override("font_size", 13)
-		label.tooltip_text = "%s (LV %d)" % [display_name, level]
-		modules_list.add_child(label)
+			# Empty slot
+			tex_rect.texture = null
+			tex_rect.visible = false
+			style.border_color = COLOR_SLOT_BORDER_EMPTY
+			badge_bg.visible = false
+			panel.set_meta("item_name", "")
+
+
+## Show tooltip above hovered icon slot.
+func _on_icon_slot_mouse_entered(panel: Panel) -> void:
+	var item_name: String = panel.get_meta("item_name", "") as String
+	if item_name == "" or not _icon_tooltip:
+		return
+	var tip_label: Label = _icon_tooltip.get_node("TipLabel") as Label
+	tip_label.text = item_name
+	# Position above the slot, centered horizontally
+	var panel_rect: Rect2 = panel.get_global_rect()
+	_icon_tooltip.reset_size()
+	await get_tree().process_frame
+	var tip_size: Vector2 = _icon_tooltip.size
+	_icon_tooltip.global_position = Vector2(
+		panel_rect.position.x + (panel_rect.size.x - tip_size.x) * 0.5,
+		panel_rect.position.y - tip_size.y - 4.0
+	)
+	_icon_tooltip.visible = true
+
+
+## Hide tooltip when mouse leaves an icon slot.
+func _on_icon_slot_mouse_exited() -> void:
+	if _icon_tooltip:
+		_icon_tooltip.visible = false
 
 
 # =============================================================================

@@ -4,7 +4,7 @@ extends RefCounted
 ## Tracks equipped weapons, their levels, and per-weapon stat bonuses.
 ## Owned by WeaponComponent as an internal helper — not a scene-tree node.
 
-## Equipped weapons keyed by id: {weapon_id: {data: Dictionary, timer: float, level: int}}
+## Equipped weapons keyed by id: {weapon_id: {data: Dictionary, timer: float, level: int, rarity: String}}
 var weapons: Dictionary = {}
 
 ## Per-weapon bonuses from level-ups: {weapon_id: {"flat": {stat: float}, "mult": {stat: float}}}
@@ -12,7 +12,7 @@ var _level_bonuses: Dictionary = {}
 
 
 ## Add or level-up a weapon. Returns true if newly equipped.
-func equip_weapon(weapon_id: String, weapon_data: Dictionary) -> bool:
+func equip_weapon(weapon_id: String, weapon_data: Dictionary, rarity: String = "common") -> bool:
 	if weapons.has(weapon_id):
 		weapons[weapon_id].level = int(weapons[weapon_id].get("level", 1)) + 1
 		if not _level_bonuses.has(weapon_id):
@@ -22,7 +22,8 @@ func equip_weapon(weapon_id: String, weapon_data: Dictionary) -> bool:
 	weapons[weapon_id] = {
 		"data": weapon_data,
 		"timer": 0.0,
-		"level": 1
+		"level": 1,
+		"rarity": rarity
 	}
 	_level_bonuses[weapon_id] = {"flat": {}, "mult": {}}
 	return true
@@ -55,16 +56,23 @@ func get_weapon_level(weapon_id: String) -> int:
 	return 0
 
 
-## Return [{id: String, level: int}] for all equipped weapons.
+## Return [{id: String, level: int, rarity: String}] for all equipped weapons.
 func get_equipped_weapon_summaries() -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
 	for weapon_id in weapons.keys():
 		var state: Dictionary = weapons[weapon_id]
 		out.append({
 			"id": weapon_id,
-			"level": int(state.get("level", 1))
+			"level": int(state.get("level", 1)),
+			"rarity": String(state.get("rarity", "common"))
 		})
 	return out
+
+
+## Update the rarity of an equipped weapon (e.g. after a level-up roll).
+func update_weapon_rarity(weapon_id: String, rarity: String) -> void:
+	if weapons.has(weapon_id):
+		weapons[weapon_id].rarity = rarity
 
 
 ## Apply stat bonuses from a weapon level-up.
