@@ -54,8 +54,8 @@ Below the HP/Shield bars in TopLeft, a VBoxContainer holds:
 
 Two 1×4 icon grids flank the ability ring at bottom-center:
 
-- **BottomLeftWeapons** — `HBoxContainer` left of the ability ring, showing equipped weapons (L→R fill)
-- **BottomRightModules** — `HBoxContainer` right of the ability ring, `layout_direction = 1` (RTL) so modules fill R→L toward the ring
+- **BottomLeftWeapons** — `HBoxContainer` left of the ability ring, showing equipped weapons (L→R fill). 10px bottom margin (offset_bottom = -30).
+- **BottomRightModules** — `HBoxContainer` right of the ability ring, `layout_direction = 1` (RTL) so modules fill R→L toward the ring. 10px bottom margin (offset_bottom = -30).
 
 Each slot is a `Panel` (not `PanelContainer` — PanelContainer forces child layout and breaks anchor-based positioning) containing:
 
@@ -110,7 +110,7 @@ Custom tooltip system (Godot's built-in `tooltip_text` doesn't work reliably on 
 - Synthwave-styled card selection (choose 1 of 3 upgrades)
 - `LEVEL_UP_OPTION_COUNT` controls number of options shown
 - Upgrade card hover shader: `shaders/ui_upgrade_card_hover.gdshader`
-- Card minimum width: 625px
+- Card minimum width: 575px
 
 ### Card Visual Layers (draw order, bottom to top)
 
@@ -133,13 +133,14 @@ Custom tooltip system (Godot's built-in `tooltip_text` doesn't work reliably on 
 
 Each upgrade card shows (top to bottom):
 
-1. **Weapon/module name** — header font, rarity-colored
+1. **Name row** — `HBoxContainer` ("NameRow") wrapping the name label + optional level suffix label inline. Name is header font 22px, white. Level suffix is `UiColors.CYAN`, 16px, with 10px left margin via `MarginContainer` wrapper. Hidden for brand-new items (NEW tag handles that). Format: `"Level X → Y"`.
 2. **Rarity subtitle** — rarity name in rarity color, 14px
 3. **Short description** — uses `description_short` field from JSON with fallback to `description`; gray text (`Color(0.8, 0.8, 0.8)`)
-4. **Level line** (if upgrading existing item) — cyan (`UiColors.CYAN`), format: `"Level X → Y"`; hidden for brand-new items (NEW tag handles that)
-5. **Bonus line** (weapons only) — white bold (`FONT_HEADER`), 13px, shows stat effects like `"+8% Damage / +1 Projectile"`
+4. **Bonus line** (weapons only) — white bold (`FONT_HEADER`), 13px, shows stat effects like `"+8% Damage / +1 Projectile"`
 
-Both level and bonus lines are separate `Label` nodes (`"LevelLine"`, `"BonusLine"`) dynamically created and cleaned up on card refresh.
+The NameRow HBoxContainer is created dynamically on first render and reused on subsequent card updates. The `"LevelSuffix"` and its `"LevelSuffixMargin"` wrapper are cleaned up and recreated each update. `"BonusLine"` labels are also dynamically created and cleaned up on card refresh.
+
+**`find_child` gotcha**: After `Name` labels are reparented into the NameRow, they lose their `owner`. All `find_child` calls for `Name` and `Desc` labels must use `owned=false`: `card.find_child("Name1", true, false)`.
 
 ### NEW Badge
 

@@ -318,8 +318,8 @@ func _update_card(index: int, option: Dictionary) -> void:
 		old_new_tag = card.find_child("NewTag", true, false)
 
 	var icon_rect: TextureRect = card.find_child("Icon%d" % (index + 1)) as TextureRect
-	var name_label: Label = card.find_child("Name%d" % (index + 1)) as Label
-	var desc_label: Label = card.find_child("Desc%d" % (index + 1)) as Label
+	var name_label: Label = card.find_child("Name%d" % (index + 1), true, false) as Label
+	var desc_label: Label = card.find_child("Desc%d" % (index + 1), true, false) as Label
 	
 	var data: Dictionary = option.get("data", {})
 	
@@ -332,7 +332,7 @@ func _update_card(index: int, option: Dictionary) -> void:
 			icon_rect.texture = preload("res://icon.svg")
 			if image_path != "":
 				FileLogger.warn("Card image not found: %s" % image_path)
-	var option_type: String = option.get("type", "upgrade")
+	var _option_type: String = option.get("type", "upgrade")
 	var option_id: String = option.get("id", "")
 	var rarity: String = option.get("rarity", "common")
 	var rarity_color: Color = _get_rarity_color(rarity)
@@ -340,19 +340,51 @@ func _update_card(index: int, option: Dictionary) -> void:
 	# Set name — upgrades use "name", weapons use "display_name"
 	var display_name: String = data.get("name", data.get("display_name", option_id))
 	name_label.text = display_name
+	# Level info as a smaller label right of the name (skip for brand-new items — NEW tag handles that)
+	var current_level: int = int(option.get("current_level", 0))
+	var is_new: bool = bool(option.get("is_new", false))
+	
+	# Remove old level suffix margin wrapper if present
+	var old_level_margin: Node = name_label.get_parent().find_child("LevelSuffixMargin", true, false)
+	if old_level_margin:
+		old_level_margin.get_parent().remove_child(old_level_margin)
+		old_level_margin.free()
+	
+	# Wrap name label in an HBox if not already wrapped
+	var name_row: HBoxContainer
+	if name_label.get_parent() is HBoxContainer and name_label.get_parent().name == &"NameRow":
+		name_row = name_label.get_parent() as HBoxContainer
+	else:
+		name_row = HBoxContainer.new()
+		name_row.name = "NameRow"
+		name_row.alignment = BoxContainer.ALIGNMENT_BEGIN
+		name_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var parent: Node = name_label.get_parent()
+		var idx: int = name_label.get_index()
+		parent.remove_child(name_label)
+		name_row.add_child(name_label)
+		parent.add_child(name_row)
+		parent.move_child(name_row, idx)
+	
+	if not is_new and current_level > 0:
+		var level_suffix: Label = Label.new()
+		level_suffix.name = "LevelSuffix"
+		level_suffix.text = "Level %d - %d" % [current_level, current_level + 1]
+		level_suffix.add_theme_color_override("font_color", UiColors.CYAN)
+		level_suffix.add_theme_font_size_override("font_size", 16)
+		level_suffix.add_theme_constant_override("margin_left", 10)
+		level_suffix.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		level_suffix.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
+		# Add 10px left margin via a MarginContainer wrapper
+		var margin_wrap: MarginContainer = MarginContainer.new()
+		margin_wrap.name = "LevelSuffixMargin"
+		margin_wrap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		margin_wrap.add_theme_constant_override("margin_left", 10)
+		margin_wrap.add_child(level_suffix)
+		name_row.add_child(margin_wrap)
 	
 	# Set description based on type — prefer short description for level-up cards
 	var description: String = data.get("description_short", data.get("description", "No description"))
-	
-	# Determine current level / stacks (unified for both types)
-	var current_level: int = 0
-	var is_new: bool = bool(option.get("is_new", false))
-	current_level = int(option.get("current_level", 0))
-	
-	# Build level line text (skip for brand-new items — NEW tag handles that)
-	var level_line: String = ""
-	if not is_new and current_level > 0:
-		level_line = "Level %d → %d" % [current_level, current_level + 1]
 	
 	# Build effects/bonus line text
 	var effects: Array = option.get("effects", [])
@@ -376,7 +408,7 @@ func _update_card(index: int, option: Dictionary) -> void:
 		# Remove ALL old dynamic labels immediately (queue_free defers, causing duplicates)
 		var to_remove: Array[Node] = []
 		for child: Node in info_box.get_children():
-			if child.name == &"RaritySubtitle" or child.name == &"LevelLine" or child.name == &"BonusLine":
+			if child.name == &"RaritySubtitle" or child.name == &"BonusLine":
 				to_remove.append(child)
 		for node: Node in to_remove:
 			node.get_parent().remove_child(node)
@@ -419,16 +451,6 @@ func _update_card(index: int, option: Dictionary) -> void:
 		new_tag.offset_bottom = 30.0
 
 	if info_box:
-		# Level line — cyan, appears after description
-		if level_line != "":
-			var level_label: Label = Label.new()
-			level_label.name = "LevelLine"
-			level_label.text = level_line
-			level_label.add_theme_color_override("font_color", UiColors.CYAN)
-			level_label.add_theme_font_size_override("font_size", 16)
-			level_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			info_box.add_child(level_label)
-
 		# Bonus line — white bold, appears last
 		if bonus_line != "":
 			var bonus_label: Label = Label.new()
