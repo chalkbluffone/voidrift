@@ -39,6 +39,8 @@ static func find_nearest_enemy(tree: SceneTree, origin: Vector2) -> Node2D:
 	for enemy in _get_enemies(tree):
 		if not enemy is Node2D or not is_instance_valid(enemy):
 			continue
+		if enemy is BaseEnemy and (enemy as BaseEnemy).is_subjugated:
+			continue
 		var dist: float = origin.distance_to((enemy as Node2D).global_position)
 		if dist < nearest_dist:
 			nearest_dist = dist
@@ -59,6 +61,8 @@ static func find_spread_target(tree: SceneTree, origin: Vector2) -> Node2D:
 	var penalty: float = GameConfig.WEAPON_TARGET_SPREAD_PENALTY
 	for enemy in _get_enemies(tree):
 		if not enemy is Node2D or not is_instance_valid(enemy):
+			continue
+		if enemy is BaseEnemy and (enemy as BaseEnemy).is_subjugated:
 			continue
 		var e: Node2D = enemy as Node2D
 		var dist: float = origin.distance_to(e.global_position)
@@ -84,6 +88,8 @@ static func register_weapon_target(tree: SceneTree, enemy: Node2D) -> void:
 static func has_enemy_in_range(tree: SceneTree, origin: Vector2, radius: float) -> bool:
 	for enemy in _get_enemies(tree):
 		if enemy is Node2D and is_instance_valid(enemy):
+			if enemy is BaseEnemy and (enemy as BaseEnemy).is_subjugated:
+				continue
 			if origin.distance_to((enemy as Node2D).global_position) < radius:
 				return true
 	return false
@@ -95,6 +101,8 @@ static func find_enemies_in_range(tree: SceneTree, center: Vector2, radius: floa
 	var out: Array[Node2D] = []
 	for enemy_any in _get_enemies(tree):
 		if not enemy_any is Node2D or not is_instance_valid(enemy_any):
+			continue
+		if enemy_any is BaseEnemy and (enemy_any as BaseEnemy).is_subjugated:
 			continue
 		var enemy: Node2D = enemy_any as Node2D
 		if center.distance_to(enemy.global_position) <= radius:

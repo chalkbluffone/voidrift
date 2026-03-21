@@ -246,9 +246,11 @@ func _teleport_near_player() -> void:
 func take_damage(amount: float, _source: Node = null, damage_info: Dictionary = {}) -> void:
 	if _is_dying:
 		return
-	# Subjugated enemies ignore damage from player weapons (only take damage from other enemies)
-	if is_subjugated and _source != null and not (_source is BaseEnemy):
-		return
+	# Subjugated enemies only take damage from non-subjugated enemies
+	if is_subjugated:
+		var source_enemy: BaseEnemy = _source as BaseEnemy if _source is BaseEnemy else null
+		if source_enemy == null or source_enemy.is_subjugated:
+			return
 	current_hp -= amount
 	
 	# Floating damage number

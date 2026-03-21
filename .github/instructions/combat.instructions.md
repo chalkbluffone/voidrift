@@ -115,6 +115,18 @@ Six projectile weapons use the [BlastBullets2D](https://github.com/nikoladevelop
 - Use `EffectUtils.source_edge_origin(source, direction, fallback_origin)` when a follow/source node is available.
 - Apply the edge-origin rule for initial shots and any burst re-aim/retarget shots.
 
+## Weapon Targeting & Subjugated Enemies
+
+All weapon targeting functions skip subjugated (player-allied) enemies:
+
+- `WeaponComponent._find_nearest_enemy()` — checks `enemy is BaseEnemy and enemy.is_subjugated`
+- `EffectUtils.find_nearest_enemy()` — same check
+- `EffectUtils.find_spread_target()` — same check
+- `EffectUtils.has_enemy_in_range()` — same check
+- `EffectUtils.find_enemies_in_range()` — same check
+
+This prevents weapons from wasting shots on friendly minions. The secondary guard in `BaseEnemy.take_damage()` blocks any residual damage from AoE/collision sources that bypass targeting.
+
 ## Weapon Tier Upgrade System
 
 Weapons level up through rarity tiers: Common → Uncommon → Rare → Epic → Legendary. Each tier applies stat multipliers defined in `weapon_upgrades.json`. Key constants in GameConfig:

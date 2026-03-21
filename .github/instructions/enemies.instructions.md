@@ -141,6 +141,42 @@ Projectiles pass `{"damage": float, "is_crit": bool, "is_overcrit": bool}`. Non-
 
 When overriding `take_damage()` in an enemy subclass (e.g., `LootFreighter`), call `_spawn_damage_number(amount, damage_info)` in the override body — it's defined in `BaseEnemy` and handles setting checks + soft cap.
 
+## Subjugation (Zoltan's Ability)
+
+Zoltan's active ability converts nearby enemies into player-allied minions. Subjugated enemies chase and deal contact damage to non-subjugated enemies.
+
+### Subjugation Flow
+
+1. `AreaEffectAbility._activate()` gathers enemies in radius, calls `enemy.subjugate(duration, damage_mult)` up to `SUBJUGATION_MAX_TARGETS`
+2. `BaseEnemy.subjugate()` sets `is_subjugated = true`, swaps collision layer/mask to player-aligned (layer 4, mask 8), applies green tint
+3. Subjugated enemies use `_find_nearest_enemy()` to chase non-subjugated enemies and deal contact damage via `_process_subjugated_contact_damage()`
+4. On expiry, `AreaEffectAbility._on_expire()` calls `enemy.unsubjugate()` to restore original collision and behavior
+
+### Subjugation Immunity
+
+Subjugated enemies are **immune to player damage** — both targeting and damage are blocked:
+
+- **Targeting exclusion**: `WeaponComponent._find_nearest_enemy()`, `EffectUtils.find_nearest_enemy()`, `find_spread_target()`, `has_enemy_in_range()`, and `find_enemies_in_range()` all skip enemies where `is_subjugated == true`. Weapons do not waste shots on minions.
+- **Damage guard**: `BaseEnemy.take_damage()` rejects all damage unless the source is a non-subjugated `BaseEnemy`. This covers edge cases where AoE or collision-based effects bypass targeting (e.g., null source, non-BaseEnemy source).
+
+```gdscript
+# In take_damage() — centralized guard
+if is_subjugated:
+    var source_enemy: BaseEnemy = _source as BaseEnemy if _source is BaseEnemy else null
+    if source_enemy == null or source_enemy.is_subjugated:
+        return
+```
+
+### Subjugation Constants (GameConfig)
+
+- `SUBJUGATION_MAX_TARGETS` (8) — max enemies converted per activation
+- `SUBJUGATION_DAMAGE_MULT` (1.0) — contact damage multiplier for minions vs enemies
+- `SUBJUGATION_TINT_COLOR` — green tint for visual feedback
+
+### Group Membership
+
+Subjugated enemies remain in the `"enemies"` group and in `FrameCache.enemies`. They are filtered out at the targeting layer, not the cache layer. This is intentional — other systems (e.g., enemy count checks, swarm logic) may still need to see them.
+
 ## Resolved Issues
 
 - **Raycast obstacle avoidance** caused spinning/clustering (surface normals inconsistent between frames/enemies). Potential field repulsion also caused jitter. BFS flow field was tried but made movement feel unnatural. All replaced with simple direct chase + asteroid phasing (enemies pass through asteroids at 50% speed with visual dim).

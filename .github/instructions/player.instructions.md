@@ -47,6 +47,16 @@ Dash mechanic with i-frames:
 - Signals: `ability_activated`, `ability_expired`, `ability_ready`, `cooldown_updated(remaining, total)`
 - Ship forwards these signals via `captain_ability_activated`, `captain_ability_expired`, `captain_ability_ready`
 
+### Zoltan — Subjugation
+
+- **Template**: `area_effect` → `AreaEffectAbility`
+- **Radius**: 600px, **Duration**: 15s, **Cooldown**: 60s
+- **Effect**: Converts up to `SUBJUGATION_MAX_TARGETS` (8) nearby enemies into minions that chase and deal full contact damage to other enemies
+- **Minion immunity**: Weapons skip subjugated enemies in targeting; `take_damage()` rejects non-enemy damage sources
+- **Visual**: Green tint (`SUBJUGATION_TINT_COLOR`)
+- **On expiry**: All converted enemies revert to hostile
+- See `enemies.instructions.md` for full subjugation mechanics
+
 ## Survivability
 
 - **I-Frames**: `DAMAGE_IFRAMES` duration after taking damage

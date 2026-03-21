@@ -607,6 +607,8 @@ func _find_nearest_enemy() -> Node2D:
 	for enemy in enemies:
 		if not enemy is Node2D:
 			continue
+		if enemy is BaseEnemy and (enemy as BaseEnemy).is_subjugated:
+			continue
 		var dist: float = global_position.distance_to(enemy.global_position)
 		if dist < nearest_dist:
 			nearest_dist = dist
