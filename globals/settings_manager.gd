@@ -47,6 +47,10 @@ var use_gpu_particles: bool = true  ## true=GPUParticles2D, false=CPUParticles2D
 var background_quality: int = 1  ## 0=Low, 1=High
 var show_damage_numbers: bool = true  ## Toggle floating damage/heal/XP numbers
 
+# ── Game ───────────────────────────────────────────────────────────────
+var auto_level_enabled: bool = false  ## Auto-pick highest-rarity upgrade
+var auto_level_start: int = 10  ## Level at which auto-level kicks in
+
 # ── Debug ──────────────────────────────────────────────────────────────
 var show_debug_overlay: bool = false
 
@@ -194,6 +198,20 @@ func get_particle_density_multiplier() -> float:
 	return 1.0
 
 
+# ── Game ───────────────────────────────────────────────────────────────
+
+func set_auto_level_enabled(enabled: bool) -> void:
+	auto_level_enabled = enabled
+	save_settings()
+	settings_changed.emit()
+
+
+func set_auto_level_start(value: int) -> void:
+	auto_level_start = clampi(value, 10, 200)
+	save_settings()
+	settings_changed.emit()
+
+
 # ── Debug ──────────────────────────────────────────────────────────────
 
 func set_show_debug_overlay(enabled: bool) -> void:
@@ -223,6 +241,9 @@ func save_settings() -> void:
 	config.set_value("graphics", "use_gpu_particles", use_gpu_particles)
 	config.set_value("graphics", "background_quality", background_quality)
 	config.set_value("graphics", "show_damage_numbers", show_damage_numbers)
+	# Game
+	config.set_value("game", "auto_level_enabled", auto_level_enabled)
+	config.set_value("game", "auto_level_start", auto_level_start)
 	# Debug
 	config.set_value("debug", "show_debug_overlay", show_debug_overlay)
 	config.save(SAVE_PATH)
@@ -260,6 +281,10 @@ func load_settings() -> void:
 	use_gpu_particles = bool(config.get_value("graphics", "use_gpu_particles", true))
 	background_quality = int(config.get_value("graphics", "background_quality", 1))
 	show_damage_numbers = bool(config.get_value("graphics", "show_damage_numbers", true))
+
+	# Game
+	auto_level_enabled = bool(config.get_value("game", "auto_level_enabled", false))
+	auto_level_start = int(config.get_value("game", "auto_level_start", 10))
 
 	# Debug
 	show_debug_overlay = bool(config.get_value("debug", "show_debug_overlay", false))

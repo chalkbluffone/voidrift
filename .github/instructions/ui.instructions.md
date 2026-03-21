@@ -194,6 +194,38 @@ Auto-detect keyboard vs controller via `InputMap` and `input_device_changed` sig
 - `phase_energy_changed(current, max)` is emitted with the updated max so `AbilityRingIndicator` redraws segment count right away.
 - On capacity increases, newly gained charge slots are filled immediately (current charges increase by the delta).
 
+## Options Panel
+
+Shared panel (`scripts/ui/options_panel.gd`, `scenes/ui/options_panel.tscn`) used by both main menu and pause menu. Builds all UI **programmatically** (no .tscn children). Tab system is custom (not TabContainer).
+
+### Tab Order
+
+`TAB_NAMES: Array[String] = ["Audio", "Display", "Graphics", "Game", "Debug"]`
+
+### Tab Contents
+
+| Tab      | Controls                                                                                                   |
+| -------- | ---------------------------------------------------------------------------------------------------------- |
+| Audio    | Master Volume, SFX Volume, Music Volume (all HSlider 0.0–1.0, step 0.05)                                   |
+| Display  | Window Mode, Monitor, Resolution, Max FPS (OptionButtons), V-Sync (CheckButton)                            |
+| Graphics | Background Quality, Particle Density (OptionButtons), Screen Shake (HSlider), Damage Numbers (CheckButton) |
+| Game     | Auto Level (CheckButton), Start Level (HSlider 10–200, step 1 with integer value label)                    |
+| Debug    | Debug Overlay (CheckButton)                                                                                |
+
+### Row Factories
+
+Three factory methods build all controls:
+
+- `_make_slider_row()` → Label (180px) + HSlider (200px, expand)
+- `_make_option_row()` → Label (180px) + OptionButton (200px, expand)
+- `_make_check_row()` → Label (180px) + CheckButton
+
+All labels use Orbitron-Bold, 16px, `UiColors.TEXT_DESC` color.
+
+### Settings Persistence
+
+All controls wire directly to `SettingsManager` setter methods. Settings persist to `user://settings.cfg` under sections: `[audio]`, `[display]`, `[graphics]`, `[game]`, `[debug]`.
+
 ## Station Buff Popup
 
 3-choice buff selection matching the level-up UI pattern. Triggered when station charge completes. Uses `GameState.STATION_BUFF` to pause gameplay during selection.

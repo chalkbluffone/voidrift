@@ -24,6 +24,7 @@ var _pending_level_ups: int = 0
 # Tuned in GameConfig: MAX_WEAPON_SLOTS, MAX_MODULE_SLOTS
 
 @onready var GameConfig: Node = get_node("/root/GameConfig")
+@onready var SettingsManager: Node = get_node("/root/SettingsManager")
 
 @onready var RunManager: Node = get_node("/root/RunManager")
 @onready var UpgradeService: Node = get_node("/root/UpgradeService")
@@ -94,11 +95,50 @@ func _level_up() -> void:
 	# Generate upgrade options via UpgradeService
 	var upgrades: Array = UpgradeService.generate_level_up_options()
 	
-	if upgrades.size() > 0:
-		RunManager.set_level_up_state()
-		level_up_triggered.emit(RunManager.run_data.level, upgrades)
-	else:
+	if upgrades.size() == 0:
 		push_warning("ProgressionManager: No upgrades available!")
+		return
+
+	# Auto-level: skip UI and pick the highest-rarity option automatically
+	if SettingsManager.auto_level_enabled and RunManager.run_data.level >= SettingsManager.auto_level_start:
+		var pick: Dictionary = _auto_pick(upgrades)
+		select_level_up_option(pick)
+		# Chain queued level-ups immediately (no UI delay)
+		if _pending_level_ups > 0:
+			_pending_level_ups -= 1
+			_level_up()
+		return
+
+	RunManager.set_level_up_state()
+	level_up_triggered.emit(RunManager.run_data.level, upgrades)
+
+
+## Pick the highest-rarity option from the generated upgrades.
+## Ties are broken randomly using a seeded RNG.
+func _auto_pick(upgrades: Array) -> Dictionary:
+	var rng: RandomNumberGenerator = GameSeed.rng("auto_level")
+	var rarity_order: Array = GameConfig.RARITY_ORDER
+
+	# Find the highest rarity index among the options
+	var best_rarity_idx: int = -1
+	for option: Variant in upgrades:
+		var r: String = String((option as Dictionary).get("rarity", "common"))
+		var idx: int = rarity_order.find(r)
+		if idx > best_rarity_idx:
+			best_rarity_idx = idx
+
+	# Collect all options at the best rarity
+	var candidates: Array[Dictionary] = []
+	for option: Variant in upgrades:
+		var d: Dictionary = option as Dictionary
+		var r: String = String(d.get("rarity", "common"))
+		if rarity_order.find(r) == best_rarity_idx:
+			candidates.append(d)
+
+	# Random among ties
+	if candidates.size() == 1:
+		return candidates[0]
+	return candidates[rng.randi_range(0, candidates.size() - 1)]
 
 
 ## Apply the selected level up option.

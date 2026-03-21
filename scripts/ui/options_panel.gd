@@ -11,7 +11,7 @@ const CARD_HOVER_FX_SCRIPT: Script = preload("res://scripts/ui/card_hover_fx.gd"
 const FONT_HEADER: Font = preload("res://assets/fonts/Orbitron-Bold.ttf")
 
 ## Tab names — order matches the _tab_containers array.
-const TAB_NAMES: Array[String] = ["Audio", "Display", "Graphics", "Debug"]
+const TAB_NAMES: Array[String] = ["Audio", "Display", "Graphics", "Game", "Debug"]
 
 @onready var _settings: SettingsManagerClass = get_node("/root/SettingsManager")
 
@@ -37,6 +37,10 @@ var _shake_slider: HSlider
 var _damage_numbers_check: CheckButton
 
 var _debug_overlay_check: CheckButton
+
+var _auto_level_check: CheckButton
+var _auto_level_slider: HSlider
+var _auto_level_value_label: Label
 
 var _back_button: Button
 
@@ -128,7 +132,8 @@ func _build_ui() -> void:
 	_build_audio_tab(_tab_containers[0])
 	_build_display_tab(_tab_containers[1])
 	_build_graphics_tab(_tab_containers[2])
-	_build_debug_tab(_tab_containers[3])
+	_build_game_tab(_tab_containers[3])
+	_build_debug_tab(_tab_containers[4])
 
 	# Back button
 	_back_button = Button.new()
@@ -191,6 +196,22 @@ func _build_graphics_tab(parent: VBoxContainer) -> void:
 func _build_debug_tab(parent: VBoxContainer) -> void:
 	_debug_overlay_check = _make_check_row(parent, "Debug Overlay")
 
+# ── Game tab ─────────────────────────────────────────────────────────────
+
+func _build_game_tab(parent: VBoxContainer) -> void:
+	_auto_level_check = _make_check_row(parent, "Auto Level")
+	_auto_level_slider = _make_slider_row(parent, "Start Level", 10.0, 200.0, 1.0)
+
+	# Add a value label next to the slider to show the current integer value
+	var slider_row: HBoxContainer = _auto_level_slider.get_parent() as HBoxContainer
+	_auto_level_value_label = Label.new()
+	_auto_level_value_label.text = str(int(_auto_level_slider.value))
+	_auto_level_value_label.custom_minimum_size = Vector2(40, 0)
+	_auto_level_value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_auto_level_value_label.add_theme_font_override("font", FONT_HEADER)
+	_auto_level_value_label.add_theme_font_size_override("font_size", 16)
+	_auto_level_value_label.add_theme_color_override("font_color", UiColors.CYAN)
+	slider_row.add_child(_auto_level_value_label)
 
 # ═══════════════════════════════════════════════════════════════════════
 # ROW FACTORIES
@@ -310,6 +331,11 @@ func sync_from_settings() -> void:
 	_shake_slider.value = _settings.screen_shake_intensity
 	_damage_numbers_check.button_pressed = _settings.show_damage_numbers
 
+	# Game
+	_auto_level_check.button_pressed = _settings.auto_level_enabled
+	_auto_level_slider.value = _settings.auto_level_start
+	_auto_level_value_label.text = str(_settings.auto_level_start)
+
 	# Debug
 	_debug_overlay_check.button_pressed = _settings.show_debug_overlay
 
@@ -363,6 +389,10 @@ func _connect_signals() -> void:
 	_shake_slider.value_changed.connect(_settings.set_screen_shake_intensity)
 	_damage_numbers_check.toggled.connect(_settings.set_show_damage_numbers)
 
+	# Game
+	_auto_level_check.toggled.connect(_settings.set_auto_level_enabled)
+	_auto_level_slider.value_changed.connect(_on_auto_level_start_changed)
+
 	# Debug
 	_debug_overlay_check.toggled.connect(_settings.set_show_debug_overlay)
 
@@ -375,6 +405,12 @@ func _on_resolution_selected(index: int) -> void:
 func _on_fps_selected(index: int) -> void:
 	if index >= 0 and index < _settings.FPS_PRESETS.size():
 		_settings.set_max_fps(_settings.FPS_PRESETS[index])
+
+
+func _on_auto_level_start_changed(value: float) -> void:
+	var int_val: int = int(value)
+	_auto_level_value_label.text = str(int_val)
+	_settings.set_auto_level_start(int_val)
 
 
 ## Focus the back button (useful when parent shows the panel).
@@ -396,5 +432,8 @@ func focus_first_control() -> void:
 			if _bg_quality_option:
 				_bg_quality_option.grab_focus()
 		3:
+			if _auto_level_check:
+				_auto_level_check.grab_focus()
+		4:
 			if _debug_overlay_check:
 				_debug_overlay_check.grab_focus()
