@@ -27,6 +27,15 @@ func register_factory(factory_node: Node) -> void:
 	FileLogger.info("BulletFactoryRef: factory registered")
 
 
+## Return the number of active BB2D bullets, or 0 if no factory is registered.
+func get_active_bullet_count() -> int:
+	if factory and is_instance_valid(factory):
+		var directional: int = int(factory.debug_get_active_bullets_amount(0))
+		var block: int = int(factory.debug_get_active_bullets_amount(1))
+		return directional + block
+	return 0
+
+
 ## Disconnect and clear the factory reference.
 func clear_factory() -> void:
 	if factory and is_instance_valid(factory):

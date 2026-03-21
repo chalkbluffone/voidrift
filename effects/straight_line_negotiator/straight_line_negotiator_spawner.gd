@@ -68,16 +68,17 @@ func spawn(
 
 	# Build bolt config
 	# Sniper needle: narrow and elongated. Base texture is 237×136 laser glow.
+	# Visual size is fixed — size_mult extends travel distance (lifetime) instead.
 	var bolt_config: Dictionary = {
 		"damage": damage_val,
 		"projectile_speed": projectile_speed,
-		"lifetime": lifetime,
+		"lifetime": lifetime * size_mult,
 		"size_mult": size_mult,
 		"crit_chance": crit_chance,
 		"crit_damage": crit_damage,
 		"piercing": piercing,
-		"texture_size": Vector2(40.0, 8.0) * size_mult,
-		"collision_shape_size": Vector2(16.0, 5.0) * size_mult,
+		"texture_size": Vector2(40.0, 8.0),
+		"collision_shape_size": Vector2(16.0, 5.0),
 	}
 
 	# Fire first shot immediately at nearest target

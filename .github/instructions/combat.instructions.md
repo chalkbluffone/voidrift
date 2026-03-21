@@ -59,9 +59,9 @@ Six projectile weapons use the [BlastBullets2D](https://github.com/nikoladevelop
 | ------------------------ | ------------------------ | -------------------------------------------------------------------- |
 | Personal Space Violator  | `Vector2(68.85, 53.865)` | No — size scales lifetime/falloff (travel distance), not visual size |
 | Space Lasers             | `Vector2(114.0, 16.7)`   | No — size only increases targeting range                             |
-| Timmy Gun                | `Vector2(33.75, 34.5)`   | Yes                                                                  |
-| Straight-Line Negotiator | `Vector2(40.0, 8.0)`     | Yes                                                                  |
-| Space Nukes              | `Vector2(36.0, 19.5)`    | Yes                                                                  |
+| Timmy Gun                | `Vector2(33.75, 34.5)`   | No — size extends bounce range, not visual size                      |
+| Straight-Line Negotiator | `Vector2(40.0, 8.0)`     | No — size extends lifetime (travel distance), not visual size        |
+| Space Nukes              | `Vector2(45.0, 24.375)`  | No — size scales explosion radius and targeting, not rocket visual   |
 
 **Bounce bullet edge spawning:** Bounce bullets (Space Lasers, Timmy Gun) spawn from the edge of the hit enemy facing the next target, not from the enemy center. Uses the enemy's `CollisionShape2D` `CircleShape2D` radius + 4px padding. Code in `BulletFactoryRef._spawn_bounce_bullet()`.
 
@@ -89,6 +89,25 @@ Six projectile weapons use the [BlastBullets2D](https://github.com/nikoladevelop
 - Keep PSV sprite scale and collision shape fixed; weapon `size` upgrades must **not** inflate them.
 - PSV weapon `size` upgrades scale `lifetime` (travel distance) and `falloff_end` (damage falloff range), not `texture_size` or `collision_shape_size`.
 - PSV supports knockback via `WeaponBulletData.knockback` — force is applied along each pellet's travel direction.
+
+### Straight-Line Negotiator Visual/Size Contract
+
+- SLN projectiles use `assets/lasers/laser_bullet_white.png` as a narrow sniper needle.
+- Keep SLN texture size and collision shape fixed (`Vector2(40.0, 8.0)` / `Vector2(16.0, 5.0)`); weapon `size` upgrades must **not** inflate them.
+- SLN weapon `size` upgrades scale `lifetime` (travel distance), matching the PSV pattern.
+
+### Timmy Gun Visual/Size Contract
+
+- Timmy Gun projectiles use `assets/lasers/laser_circle_magenta.png` as round burst pellets.
+- Keep Timmy Gun texture size and collision shape fixed (`Vector2(33.75, 34.5)` / `Vector2(6.0, 6.0)`); weapon `size` upgrades must **not** inflate them.
+- Timmy Gun weapon `size` upgrades scale `bounce_range` (extending the search radius for bounce targets).
+
+### Space Nukes Visual/Size Contract
+
+- Space Nukes rockets use animated purple missile sprites (`assets/missiles/missile_purple_sprite_sheet_*.png`).
+- Keep rocket texture size and collision shape fixed (`Vector2(45.0, 24.375)` / `Vector2(26.25, 15.0)`); weapon `size` upgrades must **not** inflate them.
+- Space Nukes weapon `size` upgrades scale `explosion_radius` (AoE blast area) and `targeting_radius` (enemy search range), not rocket visuals.
+- Rockets have a spark particle trail via BB2D's `BulletAttachment2D` system (`effects/space_nukes/nuke_trail.tscn`). The trail uses `EffectUtils.create_particles()` for GPU/CPU auto-detection and does **not** scale with any stat.
 
 ### Projectile Spawn Origin Rule
 

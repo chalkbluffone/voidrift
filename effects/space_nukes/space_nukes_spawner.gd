@@ -12,6 +12,7 @@ var _launch_arc_max_deg: float
 var _base_targeting_radius: float
 var _missile_speed_factor: float
 var _textures: Array = []
+var _trail_scene: PackedScene = null
 
 
 func _init(parent: Node) -> void:
@@ -37,6 +38,8 @@ func _init(parent: Node) -> void:
 		var fallback: Texture2D = ResourceLoader.load("res://assets/missiles/missile_purple.png") as Texture2D
 		if fallback:
 			_textures.append(fallback)
+
+	_trail_scene = ResourceLoader.load("res://effects/space_nukes/nuke_trail.tscn") as PackedScene
 
 
 func spawn(
@@ -122,8 +125,9 @@ func spawn(
 	data.textures = _textures
 	data.default_change_texture_time = 0.033  # 30fps animation
 	# Native texture size: 24×13 px — scaled up 87.5%
-	data.texture_size = Vector2(45.0, 24.375) * size_mult
-	data.collision_shape_size = Vector2(26.25, 15.0) * size_mult
+	# Visual size is fixed — size_mult affects explosion radius and targeting, not rocket visuals.
+	data.texture_size = Vector2(45.0, 24.375)
+	data.collision_shape_size = Vector2(26.25, 15.0)
 	data.set_collision_layer_from_array([3])
 	data.set_collision_mask_from_array([4])
 	data.monitorable = true
@@ -161,6 +165,10 @@ func spawn(
 		for i: int in range(target_refs.size()):
 			if is_instance_valid(target_refs[i]):
 				multimesh.bullet_homing_push_back_node2d_target(i, target_refs[i])
+
+		# Attach spark trail particles to each rocket
+		if _trail_scene:
+			multimesh.all_bullets_set_attachment(_trail_scene, 0, Vector2.ZERO)
 
 	return null
 

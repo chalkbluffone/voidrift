@@ -20,6 +20,7 @@ extends CanvasLayer
 
 # Bottom left - debug stats
 @onready var debug_container: VBoxContainer = $BottomLeftDebug
+var damage_numbers_label: Label = null
 var enemies_label: Label = null
 var xp_shards_label: Label = null
 var projectiles_label: Label = null
@@ -44,6 +45,7 @@ var xp_label: Label = null
 @onready var DataLoader: Node = get_node("/root/DataLoader")
 @onready var GameConfig: Node = get_node("/root/GameConfig")
 @onready var FrameCache: Node = get_node("/root/FrameCache")
+@onready var BulletFactoryRef: Node = get_node("/root/BulletFactoryRef")
 
 var _player: Node = null
 var _level_tween: Tween = null
@@ -116,6 +118,8 @@ func _ready() -> void:
 	ProgressionManager.credits_changed.connect(_on_credits_changed)
 	ProgressionManager.stardust_changed.connect(_on_stardust_changed)
 	ProgressionManager.level_up_completed.connect(_on_level_up_completed)
+	ProgressionManager.level_up_triggered.connect(_on_level_up_triggered)
+	StationService.station_buff_triggered.connect(_on_station_buff_triggered)
 	RunManager.run_started.connect(_on_run_started)
 	SettingsManager.settings_changed.connect(_on_settings_changed)
 	
@@ -231,6 +235,7 @@ func _apply_synthwave_theme() -> void:
 
 ## Create debug stat labels programmatically in the bottom-left VBoxContainer.
 func _build_debug_labels() -> void:
+	damage_numbers_label = _make_debug_label("DMG NUMBERS: 0")
 	enemies_label = _make_debug_label("ENEMIES: 0")
 	xp_shards_label = _make_debug_label("XP SHARDS: 0")
 	projectiles_label = _make_debug_label("PROJECTILES: 0")
@@ -257,12 +262,16 @@ func _make_debug_label(initial_text: String) -> Label:
 func _process(_delta: float) -> void:
 	# Update debug stats (only when visible)
 	if debug_container.visible:
+		if damage_numbers_label:
+			damage_numbers_label.text = "DMG NUMBERS: %d" % FrameCache.damage_numbers.size()
 		if enemies_label:
 			enemies_label.text = "ENEMIES: %d" % FrameCache.enemies.size()
 		if xp_shards_label:
 			xp_shards_label.text = "XP SHARDS: %d" % get_tree().get_nodes_in_group("xp_pickups").size()
 		if projectiles_label:
-			projectiles_label.text = "PROJECTILES: %d" % get_tree().get_nodes_in_group("projectiles").size()
+			var area2d_count: int = get_tree().get_nodes_in_group("projectiles").size()
+			var bb2d_count: int = BulletFactoryRef.get_active_bullet_count()
+			projectiles_label.text = "PROJECTILES: %d" % (area2d_count + bb2d_count)
 		if nodes_label:
 			nodes_label.text = "NODES: %d" % int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT))
 		if draw_calls_label:
@@ -689,9 +698,7 @@ func _on_shield_changed(current: float, maximum: float) -> void:
 
 func _on_lifesteal_healed(amount: float, world_pos: Vector2) -> void:
 	## Spawn a green "+N" floating number at the player position.
-	@warning_ignore("unsafe_property_access")
-	var show_numbers: bool = get_node("/root/PersistenceManager").persistent_data.settings.get("show_damage_numbers", true)
-	if not show_numbers:
+	if not SettingsManager.show_damage_numbers:
 		return
 
 	# Enforce soft cap — remove oldest if exceeded
@@ -713,9 +720,7 @@ func _on_xp_changed(current: float, required: float, level: int) -> void:
 
 func _on_xp_gained(actual_amount: float, _player_position: Vector2) -> void:
 	## Accumulate XP into a single persistent popup near the player ship.
-	@warning_ignore("unsafe_property_access")
-	var show_numbers: bool = get_node("/root/PersistenceManager").persistent_data.settings.get("show_damage_numbers", true)
-	if not show_numbers:
+	if not SettingsManager.show_damage_numbers:
 		return
 
 	# Lazy-init the single XP popup instance
@@ -858,6 +863,22 @@ func _on_run_started() -> void:
 func _on_level_up_completed(_chosen_upgrade: Dictionary) -> void:
 	_refresh_module_icons()
 	_refresh_weapon_list()
+
+
+func _on_level_up_triggered(_current_level: int, _available_upgrades: Array) -> void:
+	_dismiss_map()
+
+
+func _on_station_buff_triggered(_options: Array) -> void:
+	_dismiss_map()
+
+
+## Force-close the full map overlay (e.g. when an upgrade prompt pauses the game
+## and the TAB release event would be missed).
+func _dismiss_map() -> void:
+	if _full_map_overlay and _full_map_overlay.visible:
+		_full_map_overlay.hide_map()
+		_hide_map_stats_panel()
 
 
 func _refresh_module_icons() -> void:

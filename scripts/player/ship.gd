@@ -514,9 +514,7 @@ func _spawn_evade_popup() -> void:
 
 
 func _show_evade_popup() -> void:
-	@warning_ignore("unsafe_property_access")
-	var show_numbers: bool = get_node("/root/PersistenceManager").persistent_data.settings.get("show_damage_numbers", true)
-	if not show_numbers:
+	if not SettingsManager.show_damage_numbers:
 		return
 
 	if FrameCache:

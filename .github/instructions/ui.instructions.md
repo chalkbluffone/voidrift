@@ -47,7 +47,7 @@ Below the HP/Shield bars in TopLeft, a VBoxContainer holds:
 - Uses `is_heal: true` flag in `damage_info` dict passed to `DamageNumber.setup()`.
 - Scene: same `HEAL_NUMBER_SCENE` as combat damage numbers.
 - Connected via `StatsComponent.lifesteal_healed(amount, position)` signal.
-- Respects `show_damage_numbers` persistence setting.
+- Respects `SettingsManager.show_damage_numbers` setting.
 - Soft cap: same `DAMAGE_NUMBER_MAX_COUNT` group limit as combat numbers (shared `"damage_numbers"` group).
 
 ### HUD Weapon & Module Icon Grids
@@ -268,6 +268,14 @@ Persistent accumulated XP counter that appears near the player ship. Shows `+N` 
 - **Lazy-init**: Created on first XP gain event, added as child of HUD (`self.add_child()`)
 - **Gotcha**: Do NOT place the XP popup in world space or as a ship child — sub-pixel camera offsets and ship rotation cause visible text vibration. Screen-space with viewport-center offset eliminates jitter entirely.
 
+## Debug Overlay (Bottom-Left)
+
+Bottom-left `VBoxContainer` (`BottomLeftDebug`) with programmatically built labels. Visibility controlled by `SettingsManager.show_debug_overlay` (toggled in Options → Debug tab).
+
+Labels (top to bottom): DMG NUMBERS, ENEMIES, XP SHARDS, PROJECTILES, XP, NODES, DRAW. Updated every frame in `_process()` when visible.
+
+Key sources: `FrameCache.damage_numbers`, `FrameCache.enemies`, `Performance` monitors, `BulletFactoryRef`.
+
 ## Debug XP Graph
 
 Visual XP graph overlay in HUD for debugging progression curve during play.
@@ -286,11 +294,12 @@ Floating `RichTextLabel` nodes spawned in world space at enemy hit positions or 
 - **Evade popup**: During phase shift, blocked hits spawn cyan `Evaded!` popup text near the ship via `is_evade` flag in `DamageNumber.setup()`
 - **Z-index layering**: heal=99, normal=100, crit=101, overcrit=102 — ensures crits render above normal hits
 - Soft cap: 30 simultaneous labels (`"damage_numbers"` group), oldest removed when exceeded
-- Setting: `PersistenceManager.persistent_data.settings.show_damage_numbers` (default `true`)
+- Setting: `SettingsManager.show_damage_numbers` (default `true`) — toggled in Options → Graphics tab
 - Added to `get_tree().current_scene` (not enemy child) so labels survive enemy death
 
 ## Resolved Issues
 
+- **OptionsPanel type annotation**: `_settings` must be typed as `SettingsManagerClass` (not `Node`) to avoid null property access on newly added settings. Duck-typed `Node` references can return `Nil` for properties not on the base `Node` class when script cache is stale.
 - **Ship select hover on load**: First card appeared hovered because `grab_focus()` triggers `focus_entered` → hover tween. Fixed by calling `reset_hover()` immediately after `grab_focus()`.
 - **HUD shield bar invisible**: `get_stat("max_shield")` doesn't exist — the stat is `"shield"`. Fixed to `get_stat("shield")`.
 - **Minimap polygon triangulation spam (60K errors)**: Clamping asteroid vertices to circle edge creates degenerate shapes. Fixed by drawing `draw_circle()` dot when any vertex is clamped instead of attempting `draw_colored_polygon()`.

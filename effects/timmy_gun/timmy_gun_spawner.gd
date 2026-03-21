@@ -49,6 +49,7 @@ func spawn(
 
 	# Build bolt config dict for reuse across burst ticks and bounce spawns
 	# Native texture size: 180×184 px
+	# Visual size is fixed — size_mult extends bounce_range instead.
 	var bolt_config: Dictionary = {
 		"damage": damage_val,
 		"projectile_speed": projectile_speed,
@@ -57,10 +58,10 @@ func spawn(
 		"crit_chance": crit_chance,
 		"crit_damage": crit_damage,
 		"bounce_count": bounce_count,
-		"bounce_range": bounce_range,
+		"bounce_range": bounce_range * size_mult,
 		"spread_angle_deg": spread_angle_deg,
-		"texture_size": Vector2(33.75, 34.5) * size_mult,
-		"collision_shape_size": Vector2(6.0, 6.0) * size_mult,
+		"texture_size": Vector2(33.75, 34.5),
+		"collision_shape_size": Vector2(6.0, 6.0),
 	}
 
 	# Fire first bolt immediately

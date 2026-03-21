@@ -265,9 +265,7 @@ const _DAMAGE_NUMBER_SCENE: PackedScene = preload("res://scenes/ui/damage_number
 
 
 func _spawn_damage_number(amount: float, damage_info: Dictionary) -> void:
-	@warning_ignore("unsafe_property_access")
-	var show_numbers: bool = get_node("/root/PersistenceManager").persistent_data.settings.get("show_damage_numbers", true)
-	if not show_numbers:
+	if not SettingsManager.show_damage_numbers:
 		return
 	
 	# Enforce soft cap — remove oldest if exceeded

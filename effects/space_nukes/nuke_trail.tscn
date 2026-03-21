@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://effects/space_nukes/nuke_trail.gd" id="1_nuke_trail"]
+
+[node name="NukeTrail" type="BulletAttachment2D"]
+script = ExtResource("1_nuke_trail")

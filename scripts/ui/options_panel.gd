@@ -13,7 +13,7 @@ const FONT_HEADER: Font = preload("res://assets/fonts/Orbitron-Bold.ttf")
 ## Tab names — order matches the _tab_containers array.
 const TAB_NAMES: Array[String] = ["Audio", "Display", "Graphics", "Debug"]
 
-@onready var _settings: Node = get_node("/root/SettingsManager")
+@onready var _settings: SettingsManagerClass = get_node("/root/SettingsManager")
 
 var _tab_buttons: Array[Button] = []
 var _tab_containers: Array[VBoxContainer] = []
@@ -34,6 +34,7 @@ var _vsync_check: CheckButton
 var _bg_quality_option: OptionButton
 var _particle_density_option: OptionButton
 var _shake_slider: HSlider
+var _damage_numbers_check: CheckButton
 
 var _debug_overlay_check: CheckButton
 
@@ -182,6 +183,7 @@ func _build_graphics_tab(parent: VBoxContainer) -> void:
 	_particle_density_option = _make_option_row(parent, "Particle Density",
 		["Off", "Low", "Medium", "High"])
 	_shake_slider = _make_slider_row(parent, "Screen Shake", 0.0, 1.0, 0.05)
+	_damage_numbers_check = _make_check_row(parent, "Damage Numbers")
 
 
 # ── Debug tab ──────────────────────────────────────────────────────────
@@ -306,6 +308,7 @@ func sync_from_settings() -> void:
 	_bg_quality_option.selected = _settings.background_quality
 	_particle_density_option.selected = _settings.particle_density
 	_shake_slider.value = _settings.screen_shake_intensity
+	_damage_numbers_check.button_pressed = _settings.show_damage_numbers
 
 	# Debug
 	_debug_overlay_check.button_pressed = _settings.show_debug_overlay
@@ -358,6 +361,7 @@ func _connect_signals() -> void:
 	_bg_quality_option.item_selected.connect(_settings.set_background_quality)
 	_particle_density_option.item_selected.connect(_settings.set_particle_density)
 	_shake_slider.value_changed.connect(_settings.set_screen_shake_intensity)
+	_damage_numbers_check.toggled.connect(_settings.set_show_damage_numbers)
 
 	# Debug
 	_debug_overlay_check.toggled.connect(_settings.set_show_debug_overlay)

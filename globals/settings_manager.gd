@@ -45,6 +45,7 @@ var screen_shake_intensity: float = 1.0
 var particle_density: int = 2  ## 0=Off, 1=Low, 2=Medium, 3=High
 var use_gpu_particles: bool = true  ## true=GPUParticles2D, false=CPUParticles2D fallback
 var background_quality: int = 1  ## 0=Low, 1=High
+var show_damage_numbers: bool = true  ## Toggle floating damage/heal/XP numbers
 
 # ── Debug ──────────────────────────────────────────────────────────────
 var show_debug_overlay: bool = false
@@ -177,6 +178,12 @@ func set_background_quality(value: int) -> void:
 	settings_changed.emit()
 
 
+func set_show_damage_numbers(enabled: bool) -> void:
+	show_damage_numbers = enabled
+	save_settings()
+	settings_changed.emit()
+
+
 ## Returns a multiplier (0.0–1.0) for particle amount scaling.
 func get_particle_density_multiplier() -> float:
 	match particle_density:
@@ -215,6 +222,7 @@ func save_settings() -> void:
 	config.set_value("graphics", "particle_density", particle_density)
 	config.set_value("graphics", "use_gpu_particles", use_gpu_particles)
 	config.set_value("graphics", "background_quality", background_quality)
+	config.set_value("graphics", "show_damage_numbers", show_damage_numbers)
 	# Debug
 	config.set_value("debug", "show_debug_overlay", show_debug_overlay)
 	config.save(SAVE_PATH)
@@ -251,6 +259,7 @@ func load_settings() -> void:
 	particle_density = int(config.get_value("graphics", "particle_density", 2))
 	use_gpu_particles = bool(config.get_value("graphics", "use_gpu_particles", true))
 	background_quality = int(config.get_value("graphics", "background_quality", 1))
+	show_damage_numbers = bool(config.get_value("graphics", "show_damage_numbers", true))
 
 	# Debug
 	show_debug_overlay = bool(config.get_value("debug", "show_debug_overlay", false))
