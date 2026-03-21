@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dbq7ljhfvuwqy"
-path="res://.godot/imported/hull_plating.PNG-97f8407a4ac42ed259c22e59a7bf8a0a.ctex"
+uid="uid://drh0g0q43snko"
+path="res://.godot/imported/hull_plating.png-bf1f04d4555a6319979d30e2cdb7c1c6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ship_modules/hull_plating.PNG"
-dest_files=["res://.godot/imported/hull_plating.PNG-97f8407a4ac42ed259c22e59a7bf8a0a.ctex"]
+source_file="res://assets/ship_modules/hull_plating.png"
+dest_files=["res://.godot/imported/hull_plating.png-bf1f04d4555a6319979d30e2cdb7c1c6.ctex"]
 
 [params]
 
